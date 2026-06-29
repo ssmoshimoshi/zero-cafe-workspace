@@ -269,24 +269,25 @@ function submitFullReport(payloadStr) {
       year = dateParts[0];
       monthName = getIndonesianMonth(dateFormatted);
       supervisor = data.supervisor;
-      outlet = data.outlet || "Perintis";
-      fileName = dateFormatted + "_Laporan_Harian_" + outlet.replace(/\\s+/g, "_") + ".pdf";
+      outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
+      fileName = dateFormatted + "_Laporan_Harian_" + outlet + ".pdf";
     } else if (data.type === "weekly") {
       // Periode might be "1-7 Juni" or "22-28 Juni 2026"
-      var parts = data.periode.split(" ");
+      var periodeStr = data.periode || (data.periodeStart + " - " + data.periodeEnd) || "Mingguan";
+      var parts = periodeStr.split(" ");
       year = parts.length >= 3 ? parts[parts.length - 1] : new Date().getFullYear().toString();
       monthName = parts.length >= 2 ? parts[parts.length - (parts.length >= 3 ? 2 : 1)] : getIndonesianMonth(new Date());
       supervisor = data.supervisor;
-      outlet = data.outlet || "Perintis";
-      fileName = data.periode + "_Laporan_Mingguan_" + outlet.replace(/\\s+/g, "_") + ".pdf";
+      outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
+      fileName = periodeStr.replace(/\s+/g, "_") + "_Laporan_Mingguan_" + outlet + ".pdf";
     } else if (data.type === "monthly") {
       // bulan is "YYYY-MM"
-      var parts = data.bulan.split("-");
-      year = parts[0];
-      monthName = getIndonesianMonth(data.bulan + "-01");
+      var parts = (data.bulan || "").split("-");
+      year = parts[0] || new Date().getFullYear().toString();
+      monthName = getIndonesianMonth((data.bulan || "") + "-01");
       supervisor = data.supervisor;
-      outlet = data.outlet || "Perintis";
-      fileName = monthName + "_" + year + "_Laporan_Bulanan_" + outlet.replace(/\\s+/g, "_") + ".pdf";
+      outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
+      fileName = monthName + "_" + year + "_Laporan_Bulanan_" + outlet + ".pdf";
     }
     
     // 1. Generate PDF blob

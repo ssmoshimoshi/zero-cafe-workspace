@@ -11,7 +11,7 @@ function getWeeklyFormTemplate() {
       <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
         <div>
           <h2 class="text-sm font-extrabold text-zero-black">LAPORAN MINGGUAN</h2>
-          <p class="text-[10px] font-bold text-gray-400">${form.periode || 'Periode Baru'}</p>
+          <p class="text-[10px] font-bold text-gray-400">${window.form.periode || 'Periode Baru'}</p>
         </div>
         <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
           KEMBALI
@@ -48,32 +48,32 @@ function getWeeklyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
-              <input type="text" value="${form.supervisor}" oninput="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="text" value="${window.form.supervisor}" oninput="window.form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3 mb-4">
             <div>
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">DARI TANGGAL</label>
-              <input type="date" value="${form.periodeStart || ''}" onchange="form.periodeStart = this.value; if(form.periodeEnd) form.periode = this.value + ' s/d ' + form.periodeEnd; renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="date" value="${window.form.periodeStart || ''}" onchange="window.form.periodeStart = this.value; if(window.form.periodeEnd) window.form.periode = this.value + ' s/d ' + window.form.periodeEnd; renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
             <div>
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SAMPAI TANGGAL</label>
-              <input type="date" value="${form.periodeEnd || ''}" onchange="form.periodeEnd = this.value; if(form.periodeStart) form.periode = form.periodeStart + ' s/d ' + this.value; renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="date" value="${window.form.periodeEnd || ''}" onchange="window.form.periodeEnd = this.value; if(window.form.periodeStart) window.form.periode = window.form.periodeStart + ' s/d ' + this.value; renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERIODE (OTOMATIS)</label>
-            <input type="text" value="${form.periode}" readonly placeholder="Contoh: 2026-06-22 s/d 2026-06-28" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 focus:outline-none cursor-not-allowed">
+            <input type="text" value="${window.form.periode}" readonly placeholder="Contoh: 2026-06-22 s/d 2026-06-28" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 focus:outline-none cursor-not-allowed">
           </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">REKAP OMSET 7 HARI</h3>
           <div class="space-y-2">
-            ${form.weekly.salesHarian.map((s, idx) => `
+            ${window.form.weekly.salesHarian.map((s, idx) => `
               <div class="flex items-center gap-3 border-b border-gray-100 pb-2">
                 <span class="text-xs font-bold text-gray-500 w-16">${s.hari}</span>
                 <div class="flex-1">
-                   <input type="text" value="${s.real ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.real) : ''}" onchange="form.weekly.salesHarian[${idx}].real = parseRupiah(this.value); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" placeholder="Omset Aktual (Rp)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black text-right">
+                   <input type="text" value="${s.real ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.real) : ''}" onchange="window.form.weekly.salesHarian[${idx}].real = parseRupiah(this.value); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" placeholder="Omset Aktual (Rp)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black text-right">
                 </div>
               </div>
             `).join('')}
@@ -87,15 +87,15 @@ function getWeeklyTabContent() {
               <div class="space-y-2">
                 <div class="flex items-center gap-3">
                   <span class="text-xs font-bold text-gray-400">1</span>
-                  <input type="text" value="${form.weekly.produk.topMinuman[0]}" onchange="form.weekly.produk.topMinuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  <input type="text" value="${window.form.weekly.produk.topMinuman[0]}" onchange="window.form.weekly.produk.topMinuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="text-xs font-bold text-gray-400">2</span>
-                  <input type="text" value="${form.weekly.produk.topMinuman[1]}" onchange="form.weekly.produk.topMinuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  <input type="text" value="${window.form.weekly.produk.topMinuman[1]}" onchange="window.form.weekly.produk.topMinuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="text-xs font-bold text-gray-400">3</span>
-                  <input type="text" value="${form.weekly.produk.topMinuman[2]}" onchange="form.weekly.produk.topMinuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  <input type="text" value="${window.form.weekly.produk.topMinuman[2]}" onchange="window.form.weekly.produk.topMinuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 </div>
               </div>
             </div>
@@ -104,15 +104,15 @@ function getWeeklyTabContent() {
               <div class="space-y-2">
                 <div class="flex items-center gap-3">
                   <span class="text-xs font-bold text-gray-400">1</span>
-                  <input type="text" value="${form.weekly.produk.topMakanan[0]}" onchange="form.weekly.produk.topMakanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  <input type="text" value="${window.form.weekly.produk.topMakanan[0]}" onchange="window.form.weekly.produk.topMakanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="text-xs font-bold text-gray-400">2</span>
-                  <input type="text" value="${form.weekly.produk.topMakanan[1]}" onchange="form.weekly.produk.topMakanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  <input type="text" value="${window.form.weekly.produk.topMakanan[1]}" onchange="window.form.weekly.produk.topMakanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="text-xs font-bold text-gray-400">3</span>
-                  <input type="text" value="${form.weekly.produk.topMakanan[2]}" onchange="form.weekly.produk.topMakanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  <input type="text" value="${window.form.weekly.produk.topMakanan[2]}" onchange="window.form.weekly.produk.topMakanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 </div>
               </div>
             </div>
@@ -124,10 +124,10 @@ function getWeeklyTabContent() {
             <div>
               <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">KATEGORI MINUMAN</span>
               <div class="space-y-2">
-                ${form.weekly.produk.bottomMinuman.map((item, idx) => `
+                ${window.form.weekly.produk.bottomMinuman.map((item, idx) => `
                   <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <input type="text" value="${item.nama}" onchange="form.weekly.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk Minuman" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
-                    <input type="text" value="${item.tindakan}" onchange="form.weekly.produk.bottomMinuman[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk Minuman" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
+                    <input type="text" value="${item.tindakan}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
                   </div>
                 `).join('')}
               </div>
@@ -135,10 +135,10 @@ function getWeeklyTabContent() {
             <div>
               <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">KATEGORI MAKANAN</span>
               <div class="space-y-2">
-                ${form.weekly.produk.bottomMakanan.map((item, idx) => `
+                ${window.form.weekly.produk.bottomMakanan.map((item, idx) => `
                   <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <input type="text" value="${item.nama}" onchange="form.weekly.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk Makanan" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
-                    <input type="text" value="${item.tindakan}" onchange="form.weekly.produk.bottomMakanan[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk Makanan" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
+                    <input type="text" value="${item.tindakan}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
                   </div>
                 `).join('')}
               </div>
@@ -153,26 +153,26 @@ function getWeeklyTabContent() {
           <div class="flex gap-3 mb-4">
              <div class="flex-1">
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL KASUS KOMPLAIN</label>
-               <input type="number" value="${form.weekly.komplain.total}" onchange="form.weekly.komplain.total = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
+               <input type="number" value="${window.form.weekly.komplain.total}" onchange="window.form.weekly.komplain.total = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
              </div>
              <div class="flex-1">
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL REMAKE</label>
-               <input type="number" value="${form.weekly.komplain.remake}" onchange="form.weekly.komplain.remake = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
+               <input type="number" value="${window.form.weekly.komplain.remake}" onchange="window.form.weekly.komplain.remake = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
              </div>
           </div>
           <div class="mb-4">
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENYEBAB UTAMA KOMPLAIN</label>
-            <input type="text" value="${form.weekly.komplain.penyebab}" onchange="form.weekly.komplain.penyebab = this.value" placeholder="Misal: Pelayanan lambat" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none">
+            <input type="text" value="${window.form.weekly.komplain.penyebab}" onchange="window.form.weekly.komplain.penyebab = this.value" placeholder="Misal: Pelayanan lambat" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none">
           </div>
           <div>
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KENDALA UTAMA BERULANG</label>
-            <textarea onchange="form.weekly.kendalaUtama = this.value" placeholder="Tuliskan kendala berulang yang dialami tim selama seminggu ini..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${form.weekly.kendalaUtama}</textarea>
+            <textarea onchange="window.form.weekly.kendalaUtama = this.value" placeholder="Tuliskan kendala berulang yang dialami tim selama seminggu ini..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${window.form.weekly.kendalaUtama}</textarea>
           </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PERFORMA STAFF</h3>
           <div class="space-y-3">
-            ${form.weekly.staff.map((s, idx) => `
+            ${window.form.weekly.staff.map((s, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
                 <div class="flex justify-between items-center mb-2">
                   <span class="text-xs font-bold text-zero-black">${s.nama} <span class="text-[10px] text-gray-500 font-normal">(${s.posisi})</span></span>
@@ -198,14 +198,14 @@ function getWeeklyTabContent() {
           <div>
             <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
               <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">RENCANA PERBAIKAN TIM</h3>
-              ${form.weekly.rencana.length < 3 ? '<button type="button" onclick="addWeeklyArrayItem(\'rencana\')" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>' : ''}
+              ${window.form.weekly.rencana.length < 3 ? '<button type="button" onclick="addWeeklyArrayItem(\'rencana\')" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>' : ''}
             </div>
             <div class="space-y-2">
-              ${form.weekly.rencana.map((r, idx) => `
+              ${window.form.weekly.rencana.map((r, idx) => `
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-bold text-gray-400 w-4">${idx + 1}.</span>
-                  <input type="text" value="${r}" onchange="form.weekly.rencana[${idx}] = this.value" placeholder="Tindakan perbaikan..." class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
-                  ${form.weekly.rencana.length > 1 ? '<button type="button" onclick="removeWeeklyArrayItem(\'rencana\', ' + idx + ')" class="text-[10px] font-bold text-red-500 px-2">X</button>' : ''}
+                  <input type="text" value="${r}" onchange="window.form.weekly.rencana[${idx}] = this.value" placeholder="Tindakan perbaikan..." class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+                  ${window.form.weekly.rencana.length > 1 ? '<button type="button" onclick="removeWeeklyArrayItem(\'rencana\', ' + idx + ')" class="text-[10px] font-bold text-red-500 px-2">X</button>' : ''}
                 </div>
               `).join('')}
             </div>
@@ -216,11 +216,11 @@ function getWeeklyTabContent() {
               <button type="button" onclick="addWeeklyArrayItem('kebutuhan')" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>
             </div>
             <div class="space-y-2">
-              ${form.weekly.kebutuhan.map((k, idx) => `
+              ${window.form.weekly.kebutuhan.map((k, idx) => `
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-bold text-gray-400 w-4">${idx + 1}.</span>
-                  <input type="text" value="${k}" onchange="form.weekly.kebutuhan[${idx}] = this.value" placeholder="Kebutuhan (alat, training, dll)..." class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
-                  ${form.weekly.kebutuhan.length > 1 ? '<button type="button" onclick="removeWeeklyArrayItem(\'kebutuhan\', ' + idx + ')" class="text-[10px] font-bold text-red-500 px-2">X</button>' : ''}
+                  <input type="text" value="${k}" onchange="window.form.weekly.kebutuhan[${idx}] = this.value" placeholder="Kebutuhan (alat, training, dll)..." class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+                  ${window.form.weekly.kebutuhan.length > 1 ? '<button type="button" onclick="removeWeeklyArrayItem(\'kebutuhan\', ' + idx + ')" class="text-[10px] font-bold text-red-500 px-2">X</button>' : ''}
                 </div>
               `).join('')}
             </div>
@@ -230,9 +230,9 @@ function getWeeklyTabContent() {
   }
 }
 
-function updateWeeklyStaff(idx, field, value) { form.weekly.staff[idx][field] = value; }
-function addWeeklyArrayItem(arrName) { form.weekly[arrName].push(""); renderApp(); }
-function removeWeeklyArrayItem(arrName, idx) { form.weekly[arrName].splice(idx, 1); renderApp(); }
+function updateWeeklyStaff(idx, field, value) { window.form.weekly.staff[idx][field] = value; }
+function addWeeklyArrayItem(arrName) { window.form.weekly[arrName].push(""); renderApp(); }
+function removeWeeklyArrayItem(arrName, idx) { window.form.weekly[arrName].splice(idx, 1); renderApp(); }
 
 function getMonthlyFormTemplate() {
   const tabs = [
@@ -246,7 +246,7 @@ function getMonthlyFormTemplate() {
       <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
         <div>
           <h2 class="text-sm font-extrabold text-zero-black">LAPORAN BULANAN</h2>
-          <p class="text-[10px] font-bold text-gray-400">${form.bulan || 'Bulan Baru'}</p>
+          <p class="text-[10px] font-bold text-gray-400">${window.form.bulan || 'Bulan Baru'}</p>
         </div>
         <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
           KEMBALI
@@ -283,34 +283,34 @@ function getMonthlyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
-              <input type="text" value="${form.supervisor}" onchange="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="text" value="${window.form.supervisor}" onchange="window.form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET</label>
-              <select onchange="form.outlet = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
-                <option value="Perintis" ${form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
-                <option value="Dg Tata" ${form.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
+              <select onchange="window.form.outlet = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                <option value="Perintis" ${window.form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
+                <option value="Dg Tata" ${window.form.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
               </select>
             </div>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">BULAN LAPORAN</label>
-            <input type="month" value="${form.bulan}" onchange="form.bulan = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            <input type="month" value="${window.form.bulan}" onchange="window.form.bulan = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
           </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">RINGKASAN EKSEKUTIF</h3>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENCAPAIAN UTAMA BULAN INI</label>
-            <input type="text" value="${form.monthly.ringkasan.pencapaian}" onchange="form.monthly.ringkasan.pencapaian = this.value" placeholder="Misal: Mencapai 110% dari target sales" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+            <input type="text" value="${window.form.monthly.ringkasan.pencapaian}" onchange="window.form.monthly.ringkasan.pencapaian = this.value" placeholder="Misal: Mencapai 110% dari target sales" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">MASALAH / ISU UTAMA</label>
-            <input type="text" value="${form.monthly.ringkasan.masalah}" onchange="form.monthly.ringkasan.masalah = this.value" placeholder="Misal: Sering mati lampu" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+            <input type="text" value="${window.form.monthly.ringkasan.masalah}" onchange="window.form.monthly.ringkasan.masalah = this.value" placeholder="Misal: Sering mati lampu" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">KESIMPULAN KESELURUHAN</label>
-            <input type="text" value="${form.monthly.ringkasan.kesimpulan}" onchange="form.monthly.ringkasan.kesimpulan = this.value" placeholder="Status operasional bulan ini..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+            <input type="text" value="${window.form.monthly.ringkasan.kesimpulan}" onchange="window.form.monthly.ringkasan.kesimpulan = this.value" placeholder="Status operasional bulan ini..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
           </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
@@ -318,17 +318,17 @@ function getMonthlyTabContent() {
           <div class="grid grid-cols-2 gap-3 mb-3">
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL SALES REAL (RP)</label>
-               <input type="number" value="${form.monthly.sales.total}" onchange="updateMonthlySalesField('total', Number(this.value))" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+               <input type="number" value="${window.form.monthly.sales.total}" onchange="updateMonthlySalesField('total', Number(this.value))" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
              </div>
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET SALES (RP)</label>
-               <input type="number" value="${form.monthly.sales.target}" onchange="updateMonthlySalesField('target', Number(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+               <input type="number" value="${window.form.monthly.sales.target}" onchange="updateMonthlySalesField('target', Number(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
              </div>
           </div>
           <div>
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERSENTASE PENCAPAIAN</label>
             <div class="flex items-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl">
-              <span class="text-sm font-bold text-zero-black">${form.monthly.sales.persen}%</span>
+              <span class="text-sm font-bold text-zero-black">${window.form.monthly.sales.persen}%</span>
             </div>
           </div>
         </div>
@@ -340,28 +340,28 @@ function getMonthlyTabContent() {
           <div class="grid grid-cols-3 gap-2 mb-4 border-b border-gray-100 pb-4">
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">% KEPATUHAN SOP</label>
-               <input type="number" value="${form.monthly.operasional.kepatuhanSop}" onchange="form.monthly.operasional.kepatuhanSop = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center font-bold border border-gray-200 rounded-lg focus:outline-none">
+               <input type="number" value="${window.form.monthly.operasional.kepatuhanSop}" onchange="window.form.monthly.operasional.kepatuhanSop = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center font-bold border border-gray-200 rounded-lg focus:outline-none">
              </div>
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL TELAT (KALI)</label>
-               <input type="number" value="${form.monthly.operasional.telat}" onchange="form.monthly.operasional.telat = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+               <input type="number" value="${window.form.monthly.operasional.telat}" onchange="window.form.monthly.operasional.telat = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
              </div>
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">SP / TEGURAN KELUAR</label>
-               <input type="number" value="${form.monthly.operasional.teguran}" onchange="form.monthly.operasional.teguran = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none text-red-500 font-bold">
+               <input type="number" value="${window.form.monthly.operasional.teguran}" onchange="window.form.monthly.operasional.teguran = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none text-red-500 font-bold">
              </div>
           </div>
           <div class="mb-4">
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENYEBAB KENDALA STAFF UTAMA</label>
-            <input type="text" value="${form.monthly.operasional.penyebab}" onchange="form.monthly.operasional.penyebab = this.value" placeholder="Misal: Kurang koordinasi antar shift" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none">
+            <input type="text" value="${window.form.monthly.operasional.penyebab}" onchange="window.form.monthly.operasional.penyebab = this.value" placeholder="Misal: Kurang koordinasi antar shift" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none">
           </div>
           <div class="flex justify-between items-center mb-2 mt-6 border-b border-gray-100 pb-2">
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">EVALUASI PERFORMA STAFF (CUSTOM)</label>
             <button type="button" onclick="addMonthlyStaffRow()" class="px-3 py-1 bg-zero-black text-white text-[10px] font-bold rounded-full hover:bg-gray-800 transition-all">TAMBAH</button>
           </div>
           <div class="space-y-3">
-            ${form.monthly.staff.length === 0 ? '<p class="text-xs text-center text-gray-400 py-4">Belum ada evaluasi staff. Tekan tambah.</p>' : ''}
-            ${form.monthly.staff.map((s, idx) => `
+            ${window.form.monthly.staff.length === 0 ? '<p class="text-xs text-center text-gray-400 py-4">Belum ada evaluasi staff. Tekan tambah.</p>' : ''}
+            ${window.form.monthly.staff.map((s, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
                 <div class="flex justify-between items-center mb-2">
                   <select onchange="updateMonthlyStaff(${idx}, 'nama', this.value)" class="w-2/3 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg bg-white focus:outline-none">
@@ -399,25 +399,25 @@ function getMonthlyTabContent() {
           <div class="flex gap-3 mb-4">
              <div class="flex-1">
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL KASUS KOMPLAIN</label>
-               <input type="number" value="${form.monthly.qc.komplain}" onchange="form.monthly.qc.komplain = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
+               <input type="number" value="${window.form.monthly.qc.komplain}" onchange="window.form.monthly.qc.komplain = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
              </div>
              <div class="flex-1">
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL REMAKE PRODUK</label>
-               <input type="number" value="${form.monthly.qc.remake}" onchange="form.monthly.qc.remake = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
+               <input type="number" value="${window.form.monthly.qc.remake}" onchange="window.form.monthly.qc.remake = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
              </div>
           </div>
           <div class="space-y-4">
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">EVALUASI QC ESPRESSO BULANAN</label>
-              <textarea onchange="form.monthly.qc.espresso = this.value" placeholder="Konsistensi rasa sebulan terakhir..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-16">${form.monthly.qc.espresso}</textarea>
+              <textarea onchange="window.form.monthly.qc.espresso = this.value" placeholder="Konsistensi rasa sebulan terakhir..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-16">${window.form.monthly.qc.espresso}</textarea>
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENYEBAB DOMINAN KOMPLAIN</label>
-              <input type="text" value="${form.monthly.qc.penyebab}" onchange="form.monthly.qc.penyebab = this.value" placeholder="Misal: Kalibrasi grinder sering meleset" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <input type="text" value="${window.form.monthly.qc.penyebab}" onchange="window.form.monthly.qc.penyebab = this.value" placeholder="Misal: Kalibrasi grinder sering meleset" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">REKOMENDASI PERBAIKAN QC BULAN DEPAN</label>
-              <input type="text" value="${form.monthly.qc.rekomendasi}" onchange="form.monthly.qc.rekomendasi = this.value" placeholder="Wajib cek kalibrasi rutin..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <input type="text" value="${window.form.monthly.qc.rekomendasi}" onchange="window.form.monthly.qc.rekomendasi = this.value" placeholder="Wajib cek kalibrasi rutin..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
             </div>
           </div>
         </div>
@@ -429,11 +429,11 @@ function getMonthlyTabContent() {
           <div class="space-y-4">
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL PENGELUARAN PERBAIKAN (RP)</label>
-              <input type="number" value="${form.monthly.fasilitas.pengeluaran}" onchange="form.monthly.fasilitas.pengeluaran = Number(this.value)" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none text-red-500">
+              <input type="number" value="${window.form.monthly.fasilitas.pengeluaran}" onchange="window.form.monthly.fasilitas.pengeluaran = Number(this.value)" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none text-red-500">
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KERUSAKAN FASILITAS BELUM SELESAI (ESKALASI)</label>
-              <textarea onchange="form.monthly.fasilitas.eskalasi = this.value" placeholder="Misal: Mesin espresso bocor dari minggu 2..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-16">${form.monthly.fasilitas.eskalasi}</textarea>
+              <textarea onchange="window.form.monthly.fasilitas.eskalasi = this.value" placeholder="Misal: Mesin espresso bocor dari minggu 2..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-16">${window.form.monthly.fasilitas.eskalasi}</textarea>
             </div>
           </div>
         </div>
@@ -442,11 +442,11 @@ function getMonthlyTabContent() {
           <div class="space-y-4">
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">FOKUS & STRATEGI UTAMA</label>
-              <textarea onchange="form.monthly.rencana.strategi = this.value" placeholder="Tuliskan program perbaikan bulan depan..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${form.monthly.rencana.strategi}</textarea>
+              <textarea onchange="window.form.monthly.rencana.strategi = this.value" placeholder="Tuliskan program perbaikan bulan depan..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${window.form.monthly.rencana.strategi}</textarea>
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KEBUTUHAN SUPERVISOR (UNTUK GM)</label>
-              <textarea onchange="form.monthly.rencana.gm = this.value" placeholder="Pengadaan alat baru, training eksternal..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${form.monthly.rencana.gm}</textarea>
+              <textarea onchange="window.form.monthly.rencana.gm = this.value" placeholder="Pengadaan alat baru, training eksternal..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${window.form.monthly.rencana.gm}</textarea>
             </div>
           </div>
         </div>
@@ -455,21 +455,21 @@ function getMonthlyTabContent() {
           <div class="space-y-4">
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENCAPAIAN TERBAIK ANDA SECARA PRIBADI?</label>
-              <input type="text" value="${form.monthly.evaluasi.berhasil}" onchange="form.monthly.evaluasi.berhasil = this.value" placeholder="Berhasil menekan angka telat..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <input type="text" value="${window.form.monthly.evaluasi.berhasil}" onchange="window.form.monthly.evaluasi.berhasil = this.value" placeholder="Berhasil menekan angka telat..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANTANGAN TERSULIT YANG DIHADAPI?</label>
-              <input type="text" value="${form.monthly.evaluasi.sulit}" onchange="form.monthly.evaluasi.sulit = this.value" placeholder="Mengatur jadwal saat chaos..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <input type="text" value="${window.form.monthly.evaluasi.sulit}" onchange="window.form.monthly.evaluasi.sulit = this.value" placeholder="Mengatur jadwal saat chaos..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">SKILL YANG INGIN DITINGKATKAN?</label>
-              <input type="text" value="${form.monthly.evaluasi.skill}" onchange="form.monthly.evaluasi.skill = this.value" placeholder="Komunikasi & problem solving..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <input type="text" value="${window.form.monthly.evaluasi.skill}" onchange="window.form.monthly.evaluasi.skill = this.value" placeholder="Komunikasi & problem solving..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
             </div>
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4 text-center">
               <label class="block text-[10px] font-bold text-zero-black uppercase tracking-widest mb-3">RATING KINERJA ANDA SENDIRI (1-10)</label>
               <div class="flex items-center justify-center gap-4">
-                <input type="range" min="1" max="10" value="${form.monthly.evaluasi.ratingKerja}" onchange="updateMonthlyRating(this.value)" class="w-3/4 cursor-pointer accent-zero-black">
-                <span id="monthlyRatingDisplay" class="text-2xl font-black text-zero-black">${form.monthly.evaluasi.ratingKerja}</span>
+                <input type="range" min="1" max="10" value="${window.form.monthly.evaluasi.ratingKerja}" onchange="updateMonthlyRating(this.value)" class="w-3/4 cursor-pointer accent-zero-black">
+                <span id="monthlyRatingDisplay" class="text-2xl font-black text-zero-black">${window.form.monthly.evaluasi.ratingKerja}</span>
               </div>
             </div>
           </div>
@@ -479,24 +479,24 @@ function getMonthlyTabContent() {
 }
 
 function updateMonthlySalesField(field, value) {
-  form.monthly.sales[field] = value;
+  window.form.monthly.sales[field] = value;
   if (field === 'total' || field === 'target') {
-    if (form.monthly.sales.target > 0) {
-      form.monthly.sales.persen = Math.round(form.monthly.sales.total / form.monthly.sales.target * 100);
+    if (window.form.monthly.sales.target > 0) {
+      window.form.monthly.sales.persen = Math.round(window.form.monthly.sales.total / window.form.monthly.sales.target * 100);
     } else {
-      form.monthly.sales.persen = 0;
+      window.form.monthly.sales.persen = 0;
     }
   }
   setTimeout(() => { if (AppState.currentTab === 1) renderApp(); }, 300);
 }
 function updateMonthlyRating(value) {
-  form.monthly.evaluasi.ratingKerja = Number(value);
+  window.form.monthly.evaluasi.ratingKerja = Number(value);
   const display = document.getElementById('monthlyRatingDisplay');
   if (display) display.innerText = value;
 }
-function updateMonthlyStaff(idx, field, value) { form.monthly.staff[idx][field] = value; }
-function addMonthlyStaffRow() { form.monthly.staff.push({ nama: "", kriteria: "Inisiatif", nilai: "Baik", alasan: "" }); renderApp(); }
-function removeMonthlyStaffRow(idx) { form.monthly.staff.splice(idx, 1); renderApp(); }
+function updateMonthlyStaff(idx, field, value) { window.form.monthly.staff[idx][field] = value; }
+function addMonthlyStaffRow() { window.form.monthly.staff.push({ nama: "", kriteria: "Inisiatif", nilai: "Baik", alasan: "" }); renderApp(); }
+function removeMonthlyStaffRow(idx) { window.form.monthly.staff.splice(idx, 1); renderApp(); }
 
 function getDashboardGMTemplate() {
   const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -589,36 +589,36 @@ async function fetchGMAnalytics() {
 }
 
 function openPreviewModal() {
-  if (!form.supervisor) { showToast("Nama Supervisor wajib diisi!", "error"); return; }
+  if (!window.form.supervisor) { showToast("Nama Supervisor wajib diisi!", "error"); return; }
   const body = document.getElementById('previewModalBody');
   const modal = document.getElementById('previewModal');
   if (!body || !modal) return;
   
   let previewHtml = "";
-  if (form.type === 'daily') {
-    const totalSales = Number(form.penjualan.shift1 || 0) + Number(form.penjualan.shift2 || 0);
+  if (window.form.type === 'daily') {
+    const totalSales = Number(window.form.penjualan.shift1 || 0) + Number(window.form.penjualan.shift2 || 0);
     previewHtml = `<div class="space-y-4">
-      <p><strong>Laporan Harian:</strong> ${form.tanggal} | SPV: ${form.supervisor}</p>
-      <p><strong>Target Harian:</strong> Rp ${Number(form.penjualan.target || 0).toLocaleString()}</p>
+      <p><strong>Laporan Harian:</strong> ${window.form.tanggal} | SPV: ${window.form.supervisor}</p>
+      <p><strong>Target Harian:</strong> Rp ${Number(window.form.penjualan.target || 0).toLocaleString()}</p>
       <p><strong>Total Omset Real:</strong> Rp ${totalSales.toLocaleString()}</p>
-      <p><strong>Total Transaksi:</strong> ${form.penjualan.transaksi} struk</p>
-      <p><strong>Total Komplain / Remake:</strong> ${form.feedback.totalKomplain} / ${form.feedback.totalRemake}</p>
-      <p><strong>Kendala Utama:</strong> ${form.penutup.kendala || 'Tidak ada'}</p>
+      <p><strong>Total Transaksi:</strong> ${window.form.penjualan.transaksi} struk</p>
+      <p><strong>Total Komplain / Remake:</strong> ${window.form.feedback.totalKomplain} / ${window.form.feedback.totalRemake}</p>
+      <p><strong>Kendala Utama:</strong> ${window.form.penutup.kendala || 'Tidak ada'}</p>
     </div>`;
-  } else if (form.type === 'weekly') {
-    let totalReal = 0; form.weekly.salesHarian.forEach(s => totalReal += Number(s.real || 0));
+  } else if (window.form.type === 'weekly') {
+    let totalReal = 0; window.form.weekly.salesHarian.forEach(s => totalReal += Number(s.real || 0));
     previewHtml = `<div class="space-y-4">
-      <p><strong>Laporan Mingguan:</strong> Periode ${form.periode} | SPV: ${form.supervisor}</p>
+      <p><strong>Laporan Mingguan:</strong> Periode ${window.form.periode} | SPV: ${window.form.supervisor}</p>
       <p><strong>Total Sales 7 Hari:</strong> Rp ${totalReal.toLocaleString()}</p>
-      <p><strong>Komplain / Remake:</strong> ${form.weekly.komplain.total} / ${form.weekly.komplain.remake}</p>
-      <p><strong>Kendala Utama Berulang:</strong> ${form.weekly.kendalaUtama || 'Tidak ada'}</p>
+      <p><strong>Komplain / Remake:</strong> ${window.form.weekly.komplain.total} / ${window.form.weekly.komplain.remake}</p>
+      <p><strong>Kendala Utama Berulang:</strong> ${window.form.weekly.kendalaUtama || 'Tidak ada'}</p>
     </div>`;
-  } else if (form.type === 'monthly') {
+  } else if (window.form.type === 'monthly') {
     previewHtml = `<div class="space-y-4">
-      <p><strong>Laporan Bulanan:</strong> Bulan ${form.bulan} | SPV: ${form.supervisor}</p>
-      <p><strong>Total Sales Bulanan:</strong> Rp ${Number(form.monthly.sales.total || 0).toLocaleString()}</p>
-      <p><strong>Pencapaian:</strong> ${form.monthly.sales.persen}%</p>
-      <p><strong>Kepatuhan SOP:</strong> ${form.monthly.operasional.kepatuhanSop}% | Rating Kinerja: ${form.monthly.evaluasi.ratingKerja}/10</p>
+      <p><strong>Laporan Bulanan:</strong> Bulan ${window.form.bulan} | SPV: ${window.form.supervisor}</p>
+      <p><strong>Total Sales Bulanan:</strong> Rp ${Number(window.form.monthly.sales.total || 0).toLocaleString()}</p>
+      <p><strong>Pencapaian:</strong> ${window.form.monthly.sales.persen}%</p>
+      <p><strong>Kepatuhan SOP:</strong> ${window.form.monthly.operasional.kepatuhanSop}% | Rating Kinerja: ${window.form.monthly.evaluasi.ratingKerja}/10</p>
     </div>`;
   }
   body.innerHTML = previewHtml;
@@ -699,14 +699,14 @@ async function addStaffSubmit() {
     if (res.success) {
       showToast(res.message);
       await fetchMasterStaff();
-      if (form.type === 'daily') {
-        form.staff = AppState.masterStaff.map(s => {
-          const existing = form.staff.find(fs => fs.nama === s.nama);
+      if (window.form.type === 'daily') {
+        window.form.staff = AppState.masterStaff.map(s => {
+          const existing = window.form.staff.find(fs => fs.nama === s.nama);
           return existing || { nama: s.nama, posisi: s.posisi, status: "Hadir", keramahan: false, keterangan: "" };
         });
-      } else if (form.type === 'weekly') {
-        form.weekly.staff = AppState.masterStaff.map(s => {
-          const existing = form.weekly.staff.find(fs => fs.nama === s.nama);
+      } else if (window.form.type === 'weekly') {
+        window.form.weekly.staff = AppState.masterStaff.map(s => {
+          const existing = window.form.weekly.staff.find(fs => fs.nama === s.nama);
           return existing || { nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: "" };
         });
       }

@@ -40,6 +40,11 @@ const AppState = {
 
 /*  Default structures for forms */
 let form = {};
+Object.defineProperty(window, 'form', {
+  get: function() { return form; },
+  set: function(val) { form = val; },
+  configurable: true
+});
 
 function resetFormData(type) {
   form = {
@@ -242,7 +247,7 @@ function renderApp() {
     if (err.name === "ReferenceError" || (err.message && err.message.includes("not a function"))) {
       showToast("Error Sistem: Komponen form tidak ditemukan.", "error");
     } else {
-      showToast("Sistem mendeteksi data rusak. Mereset draft form.", "error");
+      showToast("Sistem mendeteksi data rusak. Mereset draft window.form.", "error");
       StorageHelper.remove('zc_draft_daily');
       StorageHelper.remove('zc_draft_weekly');
       StorageHelper.remove('zc_draft_monthly');
@@ -372,7 +377,7 @@ function startNewForm(type) {
   
   /*  Setup staff fields in daily/weekly/monthly form dynamically */
   if (type === 'daily') {
-    form.staff = AppState.masterStaff.map(s => ({
+    window.form.staff = AppState.masterStaff.map(s => ({
       nama: s.nama,
       posisi: s.posisi,
       status: "Hadir",
@@ -380,14 +385,14 @@ function startNewForm(type) {
       keterangan: ""
     }));
   } else if (type === 'weekly') {
-    form.weekly.staff = AppState.masterStaff.map(s => ({
+    window.form.weekly.staff = AppState.masterStaff.map(s => ({
       nama: s.nama,
       posisi: s.posisi,
       status: "Berkembang",
       alasan: ""
     }));
   } else if (type === 'monthly') {
-    form.monthly.staff = AppState.masterStaff.map(s => ({
+    window.form.monthly.staff = AppState.masterStaff.map(s => ({
       nama: s.nama,
       posisi: s.posisi,
       status: "Berkembang",
@@ -414,11 +419,11 @@ function addSelectedStaff() {
   const nama = select.value;
   if (!nama) return;
   
-  if (form.staff.some(s => s.nama === nama)) return;
+  if (window.form.staff.some(s => s.nama === nama)) return;
   
   const master = AppState.masterStaff.find(s => s.nama === nama);
   if (master) {
-    form.staff.push({
+    window.form.staff.push({
       nama: master.nama,
       posisi: master.posisi,
       status: "Hadir",
@@ -430,13 +435,13 @@ function addSelectedStaff() {
 }
 
 function removeStaffRow(idx) {
-  form.staff.splice(idx, 1);
+  window.form.staff.splice(idx, 1);
   renderApp();
 }
 
 function saveDraft(quiet = false) {
-  if (form.type === 'daily' || form.type === 'weekly' || form.type === 'monthly') {
-    StorageHelper.set(`zc_draft_${form.type}`, JSON.stringify(form));
+  if (window.form.type === 'daily' || window.form.type === 'weekly' || window.form.type === 'monthly') {
+    StorageHelper.set(`zc_draft_${window.form.type}`, JSON.stringify(form));
     if (!quiet) showToast("Draft berhasil disimpan!");
   }
 }
@@ -518,7 +523,7 @@ function getDailyFormTemplate() {
       <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
         <div>
           <h2 class="text-sm font-extrabold text-zero-black">LAPORAN HARIAN</h2>
-          <p class="text-[10px] font-bold text-gray-400">${form.tanggal || ''}</p>
+          <p class="text-[10px] font-bold text-gray-400">${window.form.tanggal || ''}</p>
         </div>
         <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
           KEMBALI
@@ -565,16 +570,16 @@ function getDailyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
-              <input type="text" value="${form.supervisor}" oninput="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="text" value="${window.form.supervisor}" oninput="window.form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
-              <select onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <select onchange="window.form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
                 ${Array.from({length: 35}, (_, i) => {
                   let h = Math.floor(i/2) + 6;
                   let m = i % 2 === 0 ? '00' : '30';
                   let val = h.toString().padStart(2, '0') + ':' + m;
-                  return '<option value="' + val + '" ' + (form.shift === val ? 'selected' : '') + '>' + val + '</option>';
+                  return '<option value="' + val + '" ' + (window.form.shift === val ? 'selected' : '') + '>' + val + '</option>';
                 }).join('')}
               </select>
             </div>
@@ -582,7 +587,7 @@ function getDailyTabContent() {
           
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANGGAL LAPORAN</label>
-            <input type="date" value="${form.tanggal}" onchange="form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            <input type="date" value="${window.form.tanggal}" onchange="window.form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
           </div>
         </div>
 
@@ -591,7 +596,7 @@ function getDailyTabContent() {
           <h3 class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-4">TARGET HARI INI</h3>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET OMSET (Rp)</label>
-            <input type="text" value="${form.penjualan.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.penjualan.target) : ''}" onchange="form.penjualan.target = parseRupiah(this.value); formatRupiah(this); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-white transition-colors" placeholder="Rp 0">
+            <input type="text" value="${window.form.penjualan.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(window.form.penjualan.target) : ''}" onchange="window.form.penjualan.target = parseRupiah(this.value); formatRupiah(this); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-white transition-colors" placeholder="Rp 0">
           </div>
         </div>
 
@@ -602,22 +607,22 @@ function getDailyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 08:00 - 17:00 (Rp)</label>
-              <input type="number" value="${form.penjualan.shift1 || ''}" onchange="form.penjualan.shift1 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input type="number" value="${window.form.penjualan.shift1 || ''}" onchange="window.form.penjualan.shift1 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 17:00 - 20:30 (Rp)</label>
-              <input type="number" value="${form.penjualan.shift2 || ''}" onchange="form.penjualan.shift2 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input type="number" value="${window.form.penjualan.shift2 || ''}" onchange="window.form.penjualan.shift2 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
             </div>
           </div>
           
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Struk Transaksi</label>
-            <input type="number" value="${form.penjualan.transaksi || ''}" onchange="form.penjualan.transaksi = Number(this.value)" placeholder="Contoh: 50" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            <input type="number" value="${window.form.penjualan.transaksi || ''}" onchange="window.form.penjualan.transaksi = Number(this.value)" placeholder="Contoh: 50" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
           </div>
 
           ${(function(){
-            let total = (form.penjualan.shift1 || 0) + (form.penjualan.shift2 || 0);
-            let target = form.penjualan.target || 0;
+            let total = (window.form.penjualan.shift1 || 0) + (window.form.penjualan.shift2 || 0);
+            let target = window.form.penjualan.target || 0;
             let pct = target > 0 ? Math.round((total / target) * 100) : 0;
             let displayPct = pct > 100 ? 100 : pct;
             return target > 0 ? `
@@ -640,15 +645,15 @@ function getDailyTabContent() {
           <div class="space-y-3">
             <div class="flex items-center gap-3">
               <span class="text-xs font-bold text-gray-400">1</span>
-              <input type="text" value="${form.produk.minuman[0]}" onchange="form.produk.minuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+              <input type="text" value="${window.form.produk.minuman[0]}" onchange="window.form.produk.minuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
             </div>
             <div class="flex items-center gap-3">
               <span class="text-xs font-bold text-gray-400">2</span>
-              <input type="text" value="${form.produk.minuman[1]}" onchange="form.produk.minuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+              <input type="text" value="${window.form.produk.minuman[1]}" onchange="window.form.produk.minuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
             </div>
             <div class="flex items-center gap-3">
               <span class="text-xs font-bold text-gray-400">3</span>
-              <input type="text" value="${form.produk.minuman[2]}" onchange="form.produk.minuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+              <input type="text" value="${window.form.produk.minuman[2]}" onchange="window.form.produk.minuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
             </div>
           </div>
         </div>
@@ -659,15 +664,15 @@ function getDailyTabContent() {
           <div class="space-y-3">
             <div class="flex items-center gap-3">
               <span class="text-xs font-bold text-gray-400">1</span>
-              <input type="text" value="${form.produk.makanan[0]}" onchange="form.produk.makanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+              <input type="text" value="${window.form.produk.makanan[0]}" onchange="window.form.produk.makanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
             </div>
             <div class="flex items-center gap-3">
               <span class="text-xs font-bold text-gray-400">2</span>
-              <input type="text" value="${form.produk.makanan[1]}" onchange="form.produk.makanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+              <input type="text" value="${window.form.produk.makanan[1]}" onchange="window.form.produk.makanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
             </div>
             <div class="flex items-center gap-3">
               <span class="text-xs font-bold text-gray-400">3</span>
-              <input type="text" value="${form.produk.makanan[2]}" onchange="form.produk.makanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+              <input type="text" value="${window.form.produk.makanan[2]}" onchange="window.form.produk.makanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
             </div>
           </div>
         </div>
@@ -682,12 +687,12 @@ function getDailyTabContent() {
           
           <div class="mb-4 pb-4 border-b border-gray-100">
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Modal Awal Kasir (Rp)</label>
-            <input type="text" value="${form.kas.modalAwal ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.kas.modalAwal) : ''}" onchange="form.kas.modalAwal = parseRupiah(this.value); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="Rp 0">
+            <input type="text" value="${window.form.kas.modalAwal ? 'Rp ' + new Intl.NumberFormat('id-ID').format(window.form.kas.modalAwal) : ''}" onchange="window.form.kas.modalAwal = parseRupiah(this.value); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="Rp 0">
           </div>
 
           <div class="space-y-4">
-            ${form.kas.audit.length === 0 ? `<p class="text-xs text-center text-gray-400 py-4">Belum ada baris audit kas. Tekan tambah.</p>` : ''}
-            ${form.kas.audit.map((row, idx) => `
+            ${window.form.kas.audit.length === 0 ? `<p class="text-xs text-center text-gray-400 py-4">Belum ada baris audit kas. Tekan tambah.</p>` : ''}
+            ${window.form.kas.audit.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50">
                 <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-2">
                   <select onchange="updateAuditField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border-none bg-transparent focus:outline-none">
@@ -740,8 +745,8 @@ function getDailyTabContent() {
           </div>
 
           <div class="space-y-3">
-            ${form.staff.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Belum ada staff yang ditambahkan.</p>` : ''}
-            ${form.staff.map((s, idx) => `
+            ${window.form.staff.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Belum ada staff yang ditambahkan.</p>` : ''}
+            ${window.form.staff.map((s, idx) => `
               <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/30">
                 <div class="flex justify-between items-center mb-3">
                   <div>
@@ -787,19 +792,19 @@ function getDailyTabContent() {
           
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET HARI INI</label>
-            <textarea onchange="form.briefing.target = this.value" placeholder="Target omset, jumlah transaksi, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.target}</textarea>
+            <textarea onchange="window.form.briefing.target = this.value" placeholder="Target omset, jumlah transaksi, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${window.form.briefing.target}</textarea>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">FOKUS PERILAKU</label>
-            <textarea onchange="form.briefing.fokus = this.value" placeholder="Fokus pada senyum sapa, kecepatan, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.fokus}</textarea>
+            <textarea onchange="window.form.briefing.fokus = this.value" placeholder="Fokus pada senyum sapa, kecepatan, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${window.form.briefing.fokus}</textarea>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">MASALAH DARI SHIFT KEMARIN</label>
-            <textarea onchange="form.briefing.masalah = this.value" placeholder="Kendala bahan habis, kerusakan, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.masalah}</textarea>
+            <textarea onchange="window.form.briefing.masalah = this.value" placeholder="Kendala bahan habis, kerusakan, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${window.form.briefing.masalah}</textarea>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SOLUSI YANG DISEPAKATI</label>
-            <textarea onchange="form.briefing.solusi = this.value" placeholder="Tindakan yang akan dilakukan tim" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.solusi}</textarea>
+            <textarea onchange="window.form.briefing.solusi = this.value" placeholder="Tindakan yang akan dilakukan tim" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${window.form.briefing.solusi}</textarea>
           </div>
         </div>
       `;
@@ -811,22 +816,22 @@ function getDailyTabContent() {
           <div class="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM KALIBRASI</label>
-              <input type="time" value="${form.qc.espresso.jam}" onchange="form.qc.espresso.jam = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
+              <input type="time" value="${window.form.qc.espresso.jam}" onchange="window.form.qc.espresso.jam = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KONDISI</label>
-              <select onchange="form.qc.espresso.status = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
-                <option value="Baik" ${form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Pilih Status</option>
-                <option value="Baik" ${form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Baik / Standar</option>
-                <option value="Pahit" ${form.qc.espresso.status === 'Pahit' ? 'selected' : ''}>Pahit / Bitter</option>
-                <option value="Asam" ${form.qc.espresso.status === 'Asam' ? 'selected' : ''}>Asam / Sour</option>
-                <option value="Watery" ${form.qc.espresso.status === 'Watery' ? 'selected' : ''}>Watery</option>
+              <select onchange="window.form.qc.espresso.status = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
+                <option value="Baik" ${window.form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Pilih Status</option>
+                <option value="Baik" ${window.form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Baik / Standar</option>
+                <option value="Pahit" ${window.form.qc.espresso.status === 'Pahit' ? 'selected' : ''}>Pahit / Bitter</option>
+                <option value="Asam" ${window.form.qc.espresso.status === 'Asam' ? 'selected' : ''}>Asam / Sour</option>
+                <option value="Watery" ${window.form.qc.espresso.status === 'Watery' ? 'selected' : ''}>Watery</option>
               </select>
             </div>
           </div>
           <div>
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KETERANGAN ADJUST</label>
-            <input type="text" value="${form.qc.espresso.keterangan || ''}" onchange="form.qc.espresso.keterangan = this.value" placeholder="Contoh: Ubah grind size karena..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+            <input type="text" value="${window.form.qc.espresso.keterangan || ''}" onchange="window.form.qc.espresso.keterangan = this.value" placeholder="Contoh: Ubah grind size karena..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
           </div>
         </div>
 
@@ -837,8 +842,8 @@ function getDailyTabContent() {
           </div>
           
           <div class="space-y-3">
-            ${form.qc.items.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Tekan tambah untuk mendata QC menu lain.</p>` : ''}
-            ${form.qc.items.map((row, idx) => `
+            ${window.form.qc.items.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Tekan tambah untuk mendata QC menu lain.</p>` : ''}
+            ${window.form.qc.items.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
                 <div class="flex justify-between items-center mb-2">
                   <input type="time" value="${row.jam}" onchange="updateQcField(${idx}, 'jam', this.value)" class="w-20 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none">
@@ -867,18 +872,18 @@ function getDailyTabContent() {
            <div class="flex gap-3">
              <div class="flex-1">
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL KASUS HARI INI</label>
-               <input type="number" value="${form.feedback.totalKomplain}" onchange="form.feedback.totalKomplain = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
+               <input type="number" value="${window.form.feedback.totalKomplain}" onchange="window.form.feedback.totalKomplain = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
              </div>
              <div class="flex-1">
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL REMAKE PRODUK</label>
-               <input type="number" value="${form.feedback.totalRemake}" onchange="updateTotalRemake(Number(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
+               <input type="number" value="${window.form.feedback.totalRemake}" onchange="updateTotalRemake(Number(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
              </div>
            </div>
            
-           ${form.feedback.totalRemake >= 3 ? `
+           ${window.form.feedback.totalRemake >= 3 ? `
              <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl">
                <label class="block text-[10px] font-bold text-red-600 uppercase tracking-widest mb-2">ANALISIS PENYEBAB REMAKE >= 3 KALI</label>
-               <textarea onchange="form.feedback.analisisRemake = this.value" placeholder="Wajib diisi..." class="w-full px-3 py-2 text-xs border border-red-200 rounded focus:outline-none bg-white h-20">${form.feedback.analisisRemake || ''}</textarea>
+               <textarea onchange="window.form.feedback.analisisRemake = this.value" placeholder="Wajib diisi..." class="w-full px-3 py-2 text-xs border border-red-200 rounded focus:outline-none bg-white h-20">${window.form.feedback.analisisRemake || ''}</textarea>
              </div>
            ` : ''}
         </div>
@@ -890,8 +895,8 @@ function getDailyTabContent() {
           </div>
           
           <div class="space-y-4">
-            ${form.feedback.items.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Aman, tidak ada komplain dicatat.</p>` : ''}
-            ${form.feedback.items.map((row, idx) => `
+            ${window.form.feedback.items.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Aman, tidak ada komplain dicatat.</p>` : ''}
+            ${window.form.feedback.items.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
                 <div class="flex justify-between items-center mb-2">
                   <input type="time" value="${row.jam}" onchange="updateFeedbackField(${idx}, 'jam', this.value)" class="w-20 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none">
@@ -926,8 +931,8 @@ function getDailyTabContent() {
           </div>
           
           <div class="space-y-4">
-            ${form.fasilitas.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Fasilitas aman. Tekan tambah jika ada kendala.</p>` : ''}
-            ${form.fasilitas.map((row, idx) => `
+            ${window.form.fasilitas.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Fasilitas aman. Tekan tambah jika ada kendala.</p>` : ''}
+            ${window.form.fasilitas.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
                 <div class="flex justify-between items-center mb-2">
                   <input type="text" value="${row.item}" onchange="updateFasilitasField(${idx}, 'item', this.value)" placeholder="Nama Alat / Fasilitas" class="flex-1 px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
@@ -969,8 +974,8 @@ function getDailyTabContent() {
           </div>
           
           <div class="space-y-4">
-            ${form.bahan.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Bahan terpantau cukup.</p>` : ''}
-            ${form.bahan.map((row, idx) => `
+            ${window.form.bahan.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Bahan terpantau cukup.</p>` : ''}
+            ${window.form.bahan.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
                 <div class="flex justify-between items-center mb-2">
                   <input type="text" value="${row.nama}" onchange="updateBahanField(${idx}, 'nama', this.value)" placeholder="Nama Bahan (Cth: Sabun)" class="flex-1 px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
@@ -1003,11 +1008,11 @@ function getDailyTabContent() {
           
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">KENDALA UTAMA HARI INI</label>
-            <textarea onchange="form.penutup.kendala = this.value" placeholder="Tuliskan jika ada kendala besar..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${form.penutup.kendala}</textarea>
+            <textarea onchange="window.form.penutup.kendala = this.value" placeholder="Tuliskan jika ada kendala besar..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${window.form.penutup.kendala}</textarea>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">REKOMENDASI / SARAN</label>
-            <textarea onchange="form.penutup.rekomendasi = this.value" placeholder="Saran perbaikan operasional..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${form.penutup.rekomendasi}</textarea>
+            <textarea onchange="window.form.penutup.rekomendasi = this.value" placeholder="Saran perbaikan operasional..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${window.form.penutup.rekomendasi}</textarea>
           </div>
         </div>
 
@@ -1022,29 +1027,29 @@ function getDailyTabContent() {
   }
 }
 
-function addAuditRow() { form.kas.audit.push({ jam: "12:00", aktual: 0, qris: 0, tunai: 0, keterangan: "" }); renderApp(); }
-function removeAuditRow(idx) { form.kas.audit.splice(idx, 1); renderApp(); }
-function updateAuditField(idx, field, value) { form.kas.audit[idx][field] = value; }
-function updateStaffField(idx, field, value) { form.staff[idx][field] = value; }
-function addQcRow() { form.qc.items.push({ jam: "12:00", nama: "", status: "Baik", keterangan: "" }); renderApp(); }
-function removeQcRow(idx) { form.qc.items.splice(idx, 1); renderApp(); }
-function updateQcField(idx, field, value) { form.qc.items[idx][field] = value; }
-function addFeedbackRow() { form.feedback.items.push({ jam: "12:00", inisial: "", isi: "", remake: false, eskalasi: false, respon: "" }); renderApp(); }
-function removeFeedbackRow(idx) { form.feedback.items.splice(idx, 1); renderApp(); }
-function updateFeedbackField(idx, field, value) { form.feedback.items[idx][field] = value; }
-function updateTotalRemake(value) { form.feedback.totalRemake = value; renderApp(); }
-function addFasilitasRow() { form.fasilitas.push({ item: "", status: "Rusak Ringan", eskalasi: false, keterangan: "", photoUrl: "" }); renderApp(); }
-function removeFasilitasRow(idx) { form.fasilitas.splice(idx, 1); renderApp(); }
-function updateFasilitasField(idx, field, value) { form.fasilitas[idx][field] = value; }
+function addAuditRow() { window.form.kas.audit.push({ jam: "12:00", aktual: 0, qris: 0, tunai: 0, keterangan: "" }); renderApp(); }
+function removeAuditRow(idx) { window.form.kas.audit.splice(idx, 1); renderApp(); }
+function updateAuditField(idx, field, value) { window.form.kas.audit[idx][field] = value; }
+function updateStaffField(idx, field, value) { window.form.staff[idx][field] = value; }
+function addQcRow() { window.form.qc.items.push({ jam: "12:00", nama: "", status: "Baik", keterangan: "" }); renderApp(); }
+function removeQcRow(idx) { window.form.qc.items.splice(idx, 1); renderApp(); }
+function updateQcField(idx, field, value) { window.form.qc.items[idx][field] = value; }
+function addFeedbackRow() { window.form.feedback.items.push({ jam: "12:00", inisial: "", isi: "", remake: false, eskalasi: false, respon: "" }); renderApp(); }
+function removeFeedbackRow(idx) { window.form.feedback.items.splice(idx, 1); renderApp(); }
+function updateFeedbackField(idx, field, value) { window.form.feedback.items[idx][field] = value; }
+function updateTotalRemake(value) { window.form.feedback.totalRemake = value; renderApp(); }
+function addFasilitasRow() { window.form.fasilitas.push({ item: "", status: "Rusak Ringan", eskalasi: false, keterangan: "", photoUrl: "" }); renderApp(); }
+function removeFasilitasRow(idx) { window.form.fasilitas.splice(idx, 1); renderApp(); }
+function updateFasilitasField(idx, field, value) { window.form.fasilitas[idx][field] = value; }
 async function handleFasilitasPhoto(input, idx) {
   try {
     const url = await uploadPhoto(input, 'Fasilitas');
     if (url) { updateFasilitasField(idx, 'photoUrl', url); renderApp(); }
   } catch (e) { console.error(e); }
 }
-function addBahanRow() { form.bahan.push({ nama: "", ketersediaan: "Habis", harga: 0, photoUrl: "" }); renderApp(); }
-function removeBahanRow(idx) { form.bahan.splice(idx, 1); renderApp(); }
-function updateBahanField(idx, field, value) { form.bahan[idx][field] = value; }
+function addBahanRow() { window.form.bahan.push({ nama: "", ketersediaan: "Habis", harga: 0, photoUrl: "" }); renderApp(); }
+function removeBahanRow(idx) { window.form.bahan.splice(idx, 1); renderApp(); }
+function updateBahanField(idx, field, value) { window.form.bahan[idx][field] = value; }
 async function handleBahanPhoto(input, idx) {
   try {
     const url = await uploadPhoto(input, 'Bahan');

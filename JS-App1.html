@@ -545,10 +545,7 @@ function getDailyFormTemplate() {
         </div>
       </div>
 
-      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
-        ${AppState.currentTab > 1 ? '<button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>' : '<div class="flex-1"></div>'}
-        ${AppState.currentTab < 8 ? '<button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>' : ''}
-      </div>
+      ${renderBottomNav(AppState.currentTab, 8)}
     </div>
   `;
 }
@@ -562,9 +559,50 @@ function switchTab(tabNum) {
     if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, 50);
 }
-function nextTab() { if (AppState.currentTab < 8) switchTab(AppState.currentTab + 1); }
-function prevTab() { if (AppState.currentTab > 1) switchTab(AppState.currentTab - 1); }
+function nextTab() {
+  const formObj = window.form;
+  const totalTabs = formObj.type === 'daily' ? 8 : 3;
+  if (AppState.currentTab < totalTabs) {
+    switchTab(AppState.currentTab + 1);
+  }
+}
 
+function prevTab() {
+  if (AppState.currentTab > 1) {
+    switchTab(AppState.currentTab - 1);
+  }
+}
+
+function renderBottomNav(currentTab, totalTabs) {
+  let dotsHtml = '';
+  for (let i = 1; i <= totalTabs; i++) {
+    if (i === currentTab) {
+      dotsHtml += `<div class="w-2.5 h-2.5 bg-zero-black rounded-full mx-1 transition-all"></div>`;
+    } else {
+      dotsHtml += `<div class="w-1.5 h-1.5 bg-gray-300 rounded-full mx-1 transition-all"></div>`;
+    }
+  }
+
+  return `
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 p-3 px-6 flex justify-between items-center z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+      ${currentTab > 1 ? `
+        <button type="button" onclick="prevTab()" class="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-full text-gray-500 hover:bg-gray-50 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+      ` : `<div class="w-10 h-10"></div>`}
+      
+      <div class="flex items-center justify-center flex-1">
+        ${dotsHtml}
+      </div>
+
+      ${currentTab < totalTabs ? `
+        <button type="button" onclick="nextTab()" class="w-10 h-10 flex items-center justify-center bg-zero-black text-white rounded-full hover:bg-gray-800 transition-all shadow-md shadow-gray-400/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      ` : `<div class="w-10 h-10"></div>`}
+    </div>
+  `;
+}
 function getDailyTabContent() {
   switch (AppState.currentTab) {
     case 1:

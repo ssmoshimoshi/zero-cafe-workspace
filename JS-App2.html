@@ -13,9 +13,14 @@ function getWeeklyFormTemplate() {
           <h2 class="text-sm font-extrabold text-zero-black">LAPORAN MINGGUAN</h2>
           <p class="text-[10px] font-bold text-gray-400">${window.form.periode || 'Periode Baru'}</p>
         </div>
-        <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
-          KEMBALI
-        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="confirmResetForm()" class="p-2 border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all" title="Reset Laporan">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button type="button" onclick="goBackMenu()" class="px-3 py-1.5 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+            KEMBALI
+          </button>
+        </div>
       </div>
       <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
         <div class="flex overflow-x-auto space-x-2 scrollbar-hide py-1">
@@ -31,10 +36,7 @@ function getWeeklyFormTemplate() {
           ${getWeeklyTabContent()}
         </form>
       </div>
-      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
-        ${AppState.currentTab > 1 ? '<button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>' : '<div class="flex-1"></div>'}
-        ${AppState.currentTab === 3 ? '<button type="button" onclick="openPreviewModal()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">TINJAU & KIRIM</button>' : '<button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>'}
-      </div>
+      ${renderBottomNav(AppState.currentTab, 3)}
     </div>
   `;
 }
@@ -238,6 +240,13 @@ function getWeeklyTabContent() {
             </div>
           </div>
         </div>
+        <div class="flex flex-col gap-3 mt-8 mb-8">
+          <div class="flex gap-3">
+            <button type="button" onclick="saveDraft()" class="flex-1 py-3 border border-zero-black rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SIMPAN DRAFT</button>
+            <button type="button" onclick="exportPDF()" class="flex-1 py-3 border border-zero-black rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">EXPORT PDF</button>
+          </div>
+          <button type="button" onclick="openPreviewModal()" class="w-full py-4 bg-zero-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800 transition-all shadow-md">TINJAU & KIRIM LAPORAN</button>
+        </div>
       `;
   }
 }
@@ -260,9 +269,14 @@ function getMonthlyFormTemplate() {
           <h2 class="text-sm font-extrabold text-zero-black">LAPORAN BULANAN</h2>
           <p class="text-[10px] font-bold text-gray-400">${window.form.bulan || 'Bulan Baru'}</p>
         </div>
-        <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
-          KEMBALI
-        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="confirmResetForm()" class="p-2 border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all" title="Reset Laporan">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button type="button" onclick="goBackMenu()" class="px-3 py-1.5 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+            KEMBALI
+          </button>
+        </div>
       </div>
       <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
         <div class="flex overflow-x-auto space-x-2 scrollbar-hide py-1">
@@ -278,10 +292,7 @@ function getMonthlyFormTemplate() {
           ${getMonthlyTabContent()}
         </form>
       </div>
-      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
-        ${AppState.currentTab > 1 ? '<button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>' : '<div class="flex-1"></div>'}
-        ${AppState.currentTab === 3 ? '<button type="button" onclick="openPreviewModal()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">TINJAU & KIRIM</button>' : '<button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>'}
-      </div>
+      ${renderBottomNav(AppState.currentTab, 3)}
     </div>
   `;
 }
@@ -529,6 +540,13 @@ function getMonthlyTabContent() {
               </div>
             </div>
           </div>
+        </div>
+        <div class="flex flex-col gap-3 mt-8 mb-8">
+          <div class="flex gap-3">
+            <button type="button" onclick="saveDraft()" class="flex-1 py-3 border border-zero-black rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SIMPAN DRAFT</button>
+            <button type="button" onclick="exportPDF()" class="flex-1 py-3 border border-zero-black rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">EXPORT PDF</button>
+          </div>
+          <button type="button" onclick="openPreviewModal()" class="w-full py-4 bg-zero-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800 transition-all shadow-md">TINJAU & KIRIM LAPORAN</button>
         </div>
       `;
   }

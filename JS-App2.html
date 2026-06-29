@@ -709,6 +709,8 @@ async function submitReport() {
       StorageHelper.remove('zc_draft_daily');
       StorageHelper.remove('zc_draft_weekly');
       StorageHelper.remove('zc_draft_monthly');
+      const currentType = window.form.type;
+      resetFormData(currentType);
       const body = document.getElementById('previewModalBody');
       const modalFooter = document.getElementById('previewModalFooter');
       if (body) {
@@ -737,6 +739,39 @@ function closeSuccessModal() {
   closePreviewModal();
   AppState.menu = 'select_report';
   renderApp();
+}
+
+/* === FORM RESET LOGIC === */
+function confirmResetForm() {
+  const modal = document.getElementById('confirmResetModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeResetModal() {
+  const modal = document.getElementById('confirmResetModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function executeResetForm() {
+  closeResetModal();
+  const currentType = window.form.type;
+  if (!currentType) return;
+  
+  StorageHelper.remove('zc_draft_' + currentType);
+  resetFormData(currentType);
+  
+  // Re-initialize dynamic staff if it was daily
+  if (currentType === 'daily') {
+    window.form.staff = [];
+  } else if (currentType === 'weekly') {
+    // leave as is, handled by resetFormData usually, but can remap if needed
+    window.form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, kpi: "", kendala: "" }));
+  } else if (currentType === 'monthly') {
+    window.form.monthly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
+  }
+  
+  renderApp();
+  showToast("Laporan telah direset", "success");
 }
 
 function openAddStaffModal() {

@@ -584,22 +584,18 @@ function renderBottomNav(currentTab, totalTabs) {
   }
 
   return `
-    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 p-3 px-6 flex justify-between items-center z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
-      ${currentTab > 1 ? `
-        <button type="button" onclick="prevTab()" class="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-full text-gray-500 hover:bg-gray-50 transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-      ` : `<div class="w-10 h-10"></div>`}
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-100 p-3 px-6 flex justify-between items-center z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.03)] h-16">
+      <button type="button" onclick="prevTab()" class="p-2 flex items-center justify-center text-gray-400 hover:text-zero-black transition-all text-xl font-light ${currentTab > 1 ? '' : 'invisible pointer-events-none'}">
+        ←
+      </button>
       
       <div class="flex items-center justify-center flex-1">
         ${dotsHtml}
       </div>
 
-      ${currentTab < totalTabs ? `
-        <button type="button" onclick="nextTab()" class="w-10 h-10 flex items-center justify-center bg-zero-black text-white rounded-full hover:bg-gray-800 transition-all shadow-md shadow-gray-400/20">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-      ` : `<div class="w-10 h-10"></div>`}
+      <button type="button" onclick="nextTab()" class="p-2 flex items-center justify-center text-zero-black hover:text-gray-500 transition-all text-xl font-light ${currentTab < totalTabs ? '' : 'invisible pointer-events-none'}">
+        →
+      </button>
     </div>
   `;
 }

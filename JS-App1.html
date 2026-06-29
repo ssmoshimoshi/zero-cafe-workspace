@@ -608,11 +608,11 @@ function getDailyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 08:00 - 17:00 (Rp)</label>
-              <input type="number" value="${window.form.penjualan.shift1 || ''}" onchange="window.form.penjualan.shift1 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input type="text" value="${window.form.penjualan.shift1 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(window.form.penjualan.shift1) : ''}" onchange="window.form.penjualan.shift1 = parseRupiah(this.value); formatRupiah(this); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="Rp 0">
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 17:00 - 20:30 (Rp)</label>
-              <input type="number" value="${window.form.penjualan.shift2 || ''}" onchange="window.form.penjualan.shift2 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input type="text" value="${window.form.penjualan.shift2 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(window.form.penjualan.shift2) : ''}" onchange="window.form.penjualan.shift2 = parseRupiah(this.value); formatRupiah(this); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="Rp 0">
             </div>
           </div>
           

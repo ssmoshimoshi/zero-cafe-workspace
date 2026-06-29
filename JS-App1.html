@@ -377,13 +377,7 @@ function startNewForm(type) {
   
   /*  Setup staff fields in daily/weekly/monthly form dynamically */
   if (type === 'daily') {
-    window.form.staff = AppState.masterStaff.map(s => ({
-      nama: s.nama,
-      posisi: s.posisi,
-      status: "Hadir",
-      keramahan: false,
-      keterangan: ""
-    }));
+    window.form.staff = [];
   } else if (type === 'weekly') {
     window.form.weekly.staff = AppState.masterStaff.map(s => ({
       nama: s.nama,

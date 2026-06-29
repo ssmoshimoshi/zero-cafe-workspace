@@ -1,0 +1,245 @@
+<!-- Partial-Form-Weekly.html -->
+<script>
+window.getWeeklyFormTemplate = function() {
+  const tabs = [
+    { num: 1, label: "SALES & PRODUK" },
+    { num: 2, label: "STAFF & KENDALA" },
+    { num: 3, label: "RENCANA" }
+  ];
+
+  return `
+    <div class="w-full min-h-screen pb-24 bg-[#f3f4f6]">
+      <!-- Header -->
+      <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
+        <div>
+          <h2 class="text-sm font-extrabold text-zero-black">LAPORAN MINGGUAN</h2>
+          <p class="text-[10px] font-bold text-gray-400">${form.periode || 'Periode Baru'}</p>
+        </div>
+        <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+          KEMBALI
+        </button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
+        <div class="flex overflow-x-auto space-x-2 scrollbar-hide">
+          ${tabs.map(t => `
+            <button type="button" onclick="switchTab(${t.num})" class="px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-200 ${AppState.currentTab === t.num ? 'bg-zero-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
+              ${t.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Form Content -->
+      <div class="px-4">
+        <form id="weeklyFormElement" onsubmit="event.preventDefault();">
+          ${getWeeklyTabContent()}
+        </form>
+      </div>
+
+      <!-- Footer Navigation -->
+      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
+        ${AppState.currentTab > 1 ? `
+          <button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>
+        ` : `<div class="flex-1"></div>`}
+        
+        ${AppState.currentTab === 3 ? `
+          <button type="button" onclick="openPreviewModal()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">TINJAU & KIRIM</button>
+        ` : `
+          <button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function getWeeklyTabContent() {
+  switch (AppState.currentTab) {
+    case 1:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">IDENTITAS & PERIODE</h3>
+          
+          <div class="flex gap-3 mb-4">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
+              <input type="text" value="${form.supervisor}" onchange="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERIODE (CTH: 22-28 JUNI 2026)</label>
+            <input type="text" value="${form.periode}" onchange="form.periode = this.value" placeholder="Contoh: 22-28 Juni 2026" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">REKAP OMSET 7 HARI</h3>
+          
+          <div class="space-y-2">
+            ${form.weekly.salesHarian.map((s, idx) => `
+              <div class="flex items-center gap-3 border-b border-gray-100 pb-2">
+                <span class="text-xs font-bold text-gray-500 w-16">${s.hari}</span>
+                <div class="flex-1">
+                   <input type="number" value="${s.target}" onchange="form.weekly.salesHarian[${idx}].target = Number(this.value)" placeholder="Target Rp" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black">
+                </div>
+                <div class="flex-1">
+                   <input type="number" value="${s.real}" onchange="form.weekly.salesHarian[${idx}].real = Number(this.value)" placeholder="Real Rp" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black">
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK TOP</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOP 3 MINUMAN</label>
+              <input type="text" value="${form.weekly.produk.topMinuman.join(', ')}" onchange="form.weekly.produk.topMinuman = this.value.split(',').map(s=>s.trim())" placeholder="Pisahkan dengan koma" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOP 3 MAKANAN</label>
+              <input type="text" value="${form.weekly.produk.topMakanan.join(', ')}" onchange="form.weekly.produk.topMakanan = this.value.split(',').map(s=>s.trim())" placeholder="Pisahkan dengan koma" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK BOTTOM</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">KATEGORI MINUMAN</span>
+              <div class="space-y-2">
+                ${form.weekly.produk.bottomMinuman.map((item, idx) => `
+                  <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <input type="text" value="${item.nama}" onchange="form.weekly.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk Minuman" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
+                    <input type="text" value="${item.tindakan}" onchange="form.weekly.produk.bottomMinuman[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">KATEGORI MAKANAN</span>
+              <div class="space-y-2">
+                ${form.weekly.produk.bottomMakanan.map((item, idx) => `
+                  <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <input type="text" value="${item.nama}" onchange="form.weekly.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk Makanan" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
+                    <input type="text" value="${item.tindakan}" onchange="form.weekly.produk.bottomMakanan[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    case 2:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">KOMPLAIN & KENDALA MINGGUAN</h3>
+          
+          <div class="flex gap-3 mb-4">
+             <div class="flex-1">
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL KASUS KOMPLAIN</label>
+               <input type="number" value="${form.weekly.komplain.total}" onchange="form.weekly.komplain.total = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
+             </div>
+             <div class="flex-1">
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL REMAKE</label>
+               <input type="number" value="${form.weekly.komplain.remake}" onchange="form.weekly.komplain.remake = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
+             </div>
+          </div>
+          <div class="mb-4">
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENYEBAB UTAMA KOMPLAIN</label>
+            <input type="text" value="${form.weekly.komplain.penyebab}" onchange="form.weekly.komplain.penyebab = this.value" placeholder="Misal: Pelayanan lambat" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KENDALA UTAMA BERULANG</label>
+            <textarea onchange="form.weekly.kendalaUtama = this.value" placeholder="Tuliskan kendala berulang yang dialami tim selama seminggu ini..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${form.weekly.kendalaUtama}</textarea>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PERFORMA STAFF</h3>
+          
+          <div class="space-y-3">
+            ${form.weekly.staff.map((s, idx) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-xs font-bold text-zero-black">${s.nama} <span class="text-[10px] text-gray-500 font-normal">(${s.posisi})</span></span>
+                </div>
+                <div class="mb-2">
+                  <select onchange="updateWeeklyStaff(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <option value="Berkembang" ${s.status === 'Berkembang' ? 'selected' : ''}>Berprogress Baik</option>
+                    <option value="Stagnan" ${s.status === 'Stagnan' ? 'selected' : ''}>Stagnan / Standar</option>
+                    <option value="Menurun" ${s.status === 'Menurun' ? 'selected' : ''}>Menurun / Perlu Evaluasi</option>
+                  </select>
+                </div>
+                <div>
+                  <input type="text" value="${s.alasan || ''}" onchange="updateWeeklyStaff(${idx}, 'alasan', this.value)" placeholder="Catatan/Alasan Evaluasi" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    case 3:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-6">
+          <div>
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+              <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">RENCANA PERBAIKAN TIM</h3>
+              ${form.weekly.rencana.length < 3 ? `
+                <button type="button" onclick="addWeeklyArrayItem('rencana')" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>
+              ` : ''}
+            </div>
+            
+            <div class="space-y-2">
+              ${form.weekly.rencana.map((r, idx) => `
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-400 w-4">${idx + 1}.</span>
+                  <input type="text" value="${r}" onchange="form.weekly.rencana[${idx}] = this.value" placeholder="Tindakan perbaikan..." class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+                  ${form.weekly.rencana.length > 1 ? `
+                    <button type="button" onclick="removeWeeklyArrayItem('rencana', ${idx})" class="text-[10px] font-bold text-red-500 px-2">X</button>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2 mt-6">
+              <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">KEBUTUHAN SPV / TIM</h3>
+              <button type="button" onclick="addWeeklyArrayItem('kebutuhan')" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>
+            </div>
+            
+            <div class="space-y-2">
+              ${form.weekly.kebutuhan.map((k, idx) => `
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-400 w-4">${idx + 1}.</span>
+                  <input type="text" value="${k}" onchange="form.weekly.kebutuhan[${idx}] = this.value" placeholder="Kebutuhan (alat, training, dll)..." class="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+                  ${form.weekly.kebutuhan.length > 1 ? `
+                    <button type="button" onclick="removeWeeklyArrayItem('kebutuhan', ${idx})" class="text-[10px] font-bold text-red-500 px-2">X</button>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+  }
+}
+
+function updateWeeklyStaff(idx, field, value) {
+  form.weekly.staff[idx][field] = value;
+}
+function addWeeklyArrayItem(arrName) {
+  form.weekly[arrName].push("");
+  renderApp();
+}
+function removeWeeklyArrayItem(arrName, idx) {
+  form.weekly[arrName].splice(idx, 1);
+  renderApp();
+}
+</script>

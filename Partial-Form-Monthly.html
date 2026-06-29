@@ -1,0 +1,283 @@
+<!-- Partial-Form-Monthly.html -->
+<script>
+window.getMonthlyFormTemplate = function() {
+  const tabs = [
+    { num: 1, label: "RINGKASAN & SALES" },
+    { num: 2, label: "STAFF & QC" },
+    { num: 3, label: "EVALUASI" }
+  ];
+
+  return `
+    <div class="w-full min-h-screen pb-24 bg-[#f3f4f6]">
+      <!-- Header -->
+      <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
+        <div>
+          <h2 class="text-sm font-extrabold text-zero-black">LAPORAN BULANAN</h2>
+          <p class="text-[10px] font-bold text-gray-400">${form.bulan || 'Bulan Baru'}</p>
+        </div>
+        <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+          KEMBALI
+        </button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
+        <div class="flex overflow-x-auto space-x-2 scrollbar-hide">
+          ${tabs.map(t => `
+            <button type="button" onclick="switchTab(${t.num})" class="px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-200 ${AppState.currentTab === t.num ? 'bg-zero-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
+              ${t.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Form Content -->
+      <div class="px-4">
+        <form id="monthlyFormElement" onsubmit="event.preventDefault();">
+          ${getMonthlyTabContent()}
+        </form>
+      </div>
+
+      <!-- Footer Navigation -->
+      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
+        ${AppState.currentTab > 1 ? `
+          <button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>
+        ` : `<div class="flex-1"></div>`}
+        
+        ${AppState.currentTab === 3 ? `
+          <button type="button" onclick="openPreviewModal()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">TINJAU & KIRIM</button>
+        ` : `
+          <button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function getMonthlyTabContent() {
+  switch (AppState.currentTab) {
+    case 1:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">IDENTITAS & PERIODE</h3>
+          
+          <div class="flex gap-3 mb-4">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
+              <input type="text" value="${form.supervisor}" onchange="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            </div>
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET</label>
+              <select onchange="form.outlet = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                <option value="Perintis" ${form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">BULAN LAPORAN</label>
+            <input type="month" value="${form.bulan}" onchange="form.bulan = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">RINGKASAN EKSEKUTIF</h3>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENCAPAIAN UTAMA BULAN INI</label>
+            <input type="text" value="${form.monthly.ringkasan.pencapaian}" onchange="form.monthly.ringkasan.pencapaian = this.value" placeholder="Misal: Mencapai 110% dari target sales" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">MASALAH / ISU UTAMA</label>
+            <input type="text" value="${form.monthly.ringkasan.masalah}" onchange="form.monthly.ringkasan.masalah = this.value" placeholder="Misal: Sering mati lampu" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">KESIMPULAN KESELURUHAN</label>
+            <input type="text" value="${form.monthly.ringkasan.kesimpulan}" onchange="form.monthly.ringkasan.kesimpulan = this.value" placeholder="Status operasional bulan ini..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">METRIK PENJUALAN</h3>
+          
+          <div class="grid grid-cols-2 gap-3 mb-3">
+             <div>
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL SALES REAL (RP)</label>
+               <input type="number" value="${form.monthly.sales.total}" onchange="updateMonthlySalesField('total', Number(this.value))" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+             </div>
+             <div>
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET SALES (RP)</label>
+               <input type="number" value="${form.monthly.sales.target}" onchange="updateMonthlySalesField('target', Number(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+             </div>
+          </div>
+          <div>
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERSENTASE PENCAPAIAN</label>
+            <div class="flex items-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl">
+              <span class="text-sm font-bold text-zero-black">${form.monthly.sales.persen}%</span>
+            </div>
+          </div>
+        </div>
+      `;
+    case 2:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI OPERASIONAL STAFF</h3>
+          
+          <div class="grid grid-cols-3 gap-2 mb-4 border-b border-gray-100 pb-4">
+             <div>
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">% KEPATUHAN SOP</label>
+               <input type="number" value="${form.monthly.operasional.kepatuhanSop}" onchange="form.monthly.operasional.kepatuhanSop = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center font-bold border border-gray-200 rounded-lg focus:outline-none">
+             </div>
+             <div>
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL TELAT (KALI)</label>
+               <input type="number" value="${form.monthly.operasional.telat}" onchange="form.monthly.operasional.telat = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+             </div>
+             <div>
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">SP / TEGURAN KELUAR</label>
+               <input type="number" value="${form.monthly.operasional.teguran}" onchange="form.monthly.operasional.teguran = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none text-red-500 font-bold">
+             </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENYEBAB KENDALA STAFF UTAMA</label>
+            <input type="text" value="${form.monthly.operasional.penyebab}" onchange="form.monthly.operasional.penyebab = this.value" placeholder="Misal: Kurang koordinasi antar shift" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none">
+          </div>
+
+          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-6">EVALUASI PERFORMA INDIVIDU</label>
+          <div class="space-y-3">
+            ${form.monthly.staff.map((s, idx) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-xs font-bold text-zero-black">${s.nama} <span class="text-[10px] text-gray-500 font-normal">(${s.posisi})</span></span>
+                </div>
+                <div class="mb-2">
+                  <select onchange="updateMonthlyStaff(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <option value="Berkembang" ${s.status === 'Berkembang' ? 'selected' : ''}>Berprogress Baik</option>
+                    <option value="Stagnan" ${s.status === 'Stagnan' ? 'selected' : ''}>Stagnan / Standar</option>
+                    <option value="Menurun" ${s.status === 'Menurun' ? 'selected' : ''}>Menurun / Perlu Evaluasi</option>
+                  </select>
+                </div>
+                <div>
+                  <input type="text" value="${s.alasan || ''}" onchange="updateMonthlyStaff(${idx}, 'alasan', this.value)" placeholder="Catatan/Alasan Evaluasi" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">REKAP QUALITY CONTROL & KOMPLAIN</h3>
+          
+          <div class="flex gap-3 mb-4">
+             <div class="flex-1">
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL KASUS KOMPLAIN</label>
+               <input type="number" value="${form.monthly.qc.komplain}" onchange="form.monthly.qc.komplain = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
+             </div>
+             <div class="flex-1">
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL REMAKE PRODUK</label>
+               <input type="number" value="${form.monthly.qc.remake}" onchange="form.monthly.qc.remake = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
+             </div>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">EVALUASI QC ESPRESSO BULANAN</label>
+              <textarea onchange="form.monthly.qc.espresso = this.value" placeholder="Konsistensi rasa sebulan terakhir..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-16">${form.monthly.qc.espresso}</textarea>
+            </div>
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENYEBAB DOMINAN KOMPLAIN</label>
+              <input type="text" value="${form.monthly.qc.penyebab}" onchange="form.monthly.qc.penyebab = this.value" placeholder="Misal: Kalibrasi grinder sering meleset" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">REKOMENDASI PERBAIKAN QC BULAN DEPAN</label>
+              <input type="text" value="${form.monthly.qc.rekomendasi}" onchange="form.monthly.qc.rekomendasi = this.value" placeholder="Wajib cek kalibrasi rutin..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+            </div>
+          </div>
+        </div>
+      `;
+    case 3:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">FASILITAS & INVENTARIS</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL PENGELUARAN PERBAIKAN (RP)</label>
+              <input type="number" value="${form.monthly.fasilitas.pengeluaran}" onchange="form.monthly.fasilitas.pengeluaran = Number(this.value)" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none text-red-500">
+            </div>
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KERUSAKAN FASILITAS BELUM SELESAI (ESKALASI)</label>
+              <textarea onchange="form.monthly.fasilitas.eskalasi = this.value" placeholder="Misal: Mesin espresso bocor dari minggu 2..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-16">${form.monthly.fasilitas.eskalasi}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">STRATEGI BULAN DEPAN</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">FOKUS & STRATEGI UTAMA</label>
+              <textarea onchange="form.monthly.rencana.strategi = this.value" placeholder="Tuliskan program perbaikan bulan depan..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${form.monthly.rencana.strategi}</textarea>
+            </div>
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KEBUTUHAN SUPERVISOR (UNTUK GM)</label>
+              <textarea onchange="form.monthly.rencana.gm = this.value" placeholder="Pengadaan alat baru, training eksternal..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${form.monthly.rencana.gm}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI MANDIRI SUPERVISOR</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENCAPAIAN TERBAIK ANDA SECARA PRIBADI?</label>
+              <input type="text" value="${form.monthly.evaluasi.berhasil}" onchange="form.monthly.evaluasi.berhasil = this.value" placeholder="Berhasil menekan angka telat..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANTANGAN TERSULIT YANG DIHADAPI?</label>
+              <input type="text" value="${form.monthly.evaluasi.sulit}" onchange="form.monthly.evaluasi.sulit = this.value" placeholder="Mengatur jadwal saat chaos..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">SKILL YANG INGIN DITINGKATKAN?</label>
+              <input type="text" value="${form.monthly.evaluasi.skill}" onchange="form.monthly.evaluasi.skill = this.value" placeholder="Komunikasi & problem solving..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+            </div>
+            
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4 text-center">
+              <label class="block text-[10px] font-bold text-zero-black uppercase tracking-widest mb-3">RATING KINERJA ANDA SENDIRI (1-10)</label>
+              <div class="flex items-center justify-center gap-4">
+                <input type="range" min="1" max="10" value="${form.monthly.evaluasi.ratingKerja}" onchange="updateMonthlyRating(this.value)" class="w-3/4 cursor-pointer accent-zero-black">
+                <span id="monthlyRatingDisplay" class="text-2xl font-black text-zero-black">${form.monthly.evaluasi.ratingKerja}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+  }
+}
+
+function updateMonthlySalesField(field, value) {
+  form.monthly.sales[field] = value;
+  if (field === 'total' || field === 'target') {
+    if (form.monthly.sales.target > 0) {
+      form.monthly.sales.persen = Math.round(form.monthly.sales.total / form.monthly.sales.target * 100);
+    } else {
+      form.monthly.sales.persen = 0;
+    }
+  }
+  
+  setTimeout(() => {
+    if (AppState.currentTab === 1) renderApp();
+  }, 300);
+}
+
+function updateMonthlyRating(value) {
+  form.monthly.evaluasi.ratingKerja = Number(value);
+  const display = document.getElementById('monthlyRatingDisplay');
+  if (display) display.innerText = value;
+}
+
+function updateMonthlyStaff(idx, field, value) {
+  form.monthly.staff[idx][field] = value;
+}
+</script>

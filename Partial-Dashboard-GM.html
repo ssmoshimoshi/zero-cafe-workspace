@@ -1,0 +1,149 @@
+<!-- Partial-Dashboard-GM.html -->
+<script>
+window.getDashboardGMTemplate = function() {
+  const months = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+  
+  const years = ["2026", "2027", "2028"];
+  
+  let reportsHtml = "";
+  let statsHtml = "";
+  
+  if (AppState.dashboardData) {
+    const data = AppState.dashboardData;
+    statsHtml = `
+      <div class="space-y-4 mb-6">
+        <!-- Sales Card -->
+        <div class="bg-zero-black p-5 rounded-2xl text-white flex justify-between items-center shadow-md">
+          <div>
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset Outlet</span>
+            <span class="text-xl font-extrabold">Rp ${data.omsetTotal.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <!-- Transactions Card -->
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 flex justify-between items-center">
+          <div>
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Transaksi</span>
+            <span class="text-xl font-extrabold text-zero-black">${data.transaksiTotal} Struk</span>
+          </div>
+        </div>
+
+        <!-- Complaint Card -->
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 flex justify-between items-center">
+          <div>
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Insiden Komplain</span>
+            <span class="text-xl font-extrabold ${data.komplainTotal > 0 ? 'text-red-500' : 'text-zero-black'}">${data.komplainTotal} Kasus</span>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    if (data.listLaporan.length === 0) {
+      reportsHtml = `
+        <div class="py-12 text-center text-gray-400">
+          <p class="text-[10px] uppercase font-bold tracking-widest">Tidak ada arsip laporan.</p>
+        </div>
+      `;
+    } else {
+      reportsHtml = `
+        <div class="space-y-3">
+          ${data.listLaporan.map(item => `
+            <div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl">
+              <div>
+                <h4 class="font-bold text-zero-black text-xs">${item.name}</h4>
+                <p class="text-[10px] text-gray-400 font-bold mt-1">Upload: ${item.dateCreated}</p>
+              </div>
+              <a href="${item.url}" target="_blank" class="px-4 py-2 border border-gray-200 bg-white hover:bg-gray-100 text-zero-black rounded-full text-[10px] font-bold transition-all">
+                PDF
+              </a>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  } else {
+    statsHtml = `
+      <div class="py-12 text-center text-gray-400">
+        <p class="text-[10px] font-bold tracking-widest uppercase">Pilih filter dan tarik data</p>
+      </div>
+    `;
+    reportsHtml = "";
+  }
+
+  return `
+    <div class="w-full min-h-screen pb-24 bg-[#f3f4f6]">
+      <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
+        <div>
+          <h2 class="text-sm font-extrabold text-zero-black">DASHBOARD GM</h2>
+          <p class="text-[10px] font-bold text-gray-400">Zero Cafe Analytics</p>
+        </div>
+        <button type="button" onclick="handleLogin('')" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+          KELUAR
+        </button>
+      </div>
+
+      <div class="px-4 mt-6">
+        <!-- Welcome Header -->
+        <div class="mb-6">
+          
+          <!-- Filter Controls -->
+          <div class="flex flex-col gap-3 bg-white p-4 rounded-2xl border border-gray-200">
+            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-2">Filter Data</h3>
+            <div class="flex gap-2">
+              <select id="filterMonth" class="flex-1 px-3 py-2 text-xs font-bold text-zero-black bg-gray-50 border border-gray-200 rounded-xl focus:outline-none">
+                ${months.map(m => `<option value="${m}" ${AppState.activeFilters.month === m ? 'selected' : ''}>${m}</option>`).join('')}
+              </select>
+              <select id="filterYear" class="flex-1 px-3 py-2 text-xs font-bold text-zero-black bg-gray-50 border border-gray-200 rounded-xl focus:outline-none">
+                ${years.map(y => `<option value="${y}" ${AppState.activeFilters.year === y ? 'selected' : ''}>${y}</option>`).join('')}
+              </select>
+            </div>
+            <button onclick="fetchGMAnalytics()" class="w-full mt-2 py-3 bg-zero-black hover:bg-gray-800 text-white rounded-xl text-[10px] font-bold tracking-widest transition-all uppercase">
+              Tarik Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        ${statsHtml}
+
+        <!-- PDF Archives -->
+        ${AppState.dashboardData ? `
+          <div class="bg-white p-5 rounded-2xl border border-gray-200">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">
+              Arsip PDF (${AppState.activeFilters.month} ${AppState.activeFilters.year})
+            </h3>
+            ${reportsHtml}
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+async function fetchGMAnalytics() {
+  const month = document.getElementById('filterMonth').value;
+  const year = document.getElementById('filterYear').value;
+  
+  AppState.activeFilters.month = month;
+  AppState.activeFilters.year = year;
+  
+  showLoading(true);
+  try {
+    const res = await Server.call('api_gm_fetchReports', month, year);
+    if (res.status === 'success') {
+      AppState.dashboardData = res.data;
+      showToast("Data analitik berhasil diperbarui.");
+    } else {
+      showToast("Gagal menarik data: " + res.error, "error");
+    }
+  } catch (err) {
+    showToast("Kesalahan sistem: " + err.toString(), "error");
+  } finally {
+    showLoading(false);
+    renderApp();
+  }
+}
+</script>

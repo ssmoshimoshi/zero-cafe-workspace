@@ -1,0 +1,619 @@
+<!-- Partial-Form-Daily.html -->
+<script>
+window.getDailyFormTemplate = function() {
+  const tabs = [
+    { num: 1, label: "PENJUALAN" },
+    { num: 2, label: "KAS" },
+    { num: 3, label: "STAFF" },
+    { num: 4, label: "BRIEFING" },
+    { num: 5, label: "QC" },
+    { num: 6, label: "FEEDBACK" },
+    { num: 7, label: "FASILITAS" },
+    { num: 8, label: "PENUTUP" }
+  ];
+
+  return `
+    <div class="w-full min-h-screen pb-24 bg-[#f3f4f6]">
+      <!-- Header -->
+      <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
+        <div>
+          <h2 class="text-sm font-extrabold text-zero-black">LAPORAN HARIAN</h2>
+          <p class="text-[10px] font-bold text-gray-400">${form.tanggal || ''}</p>
+        </div>
+        <button type="button" onclick="goBackMenu()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+          KEMBALI
+        </button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
+        <div class="flex overflow-x-auto space-x-2 scrollbar-hide">
+          ${tabs.map(t => `
+            <button type="button" onclick="switchTab(${t.num})" class="px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-200 ${AppState.currentTab === t.num ? 'bg-zero-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
+              ${t.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Form Content -->
+      <div class="px-4">
+        <form id="dailyFormElement" onsubmit="event.preventDefault();">
+          ${getDailyTabContent()}
+        </form>
+      </div>
+
+      <!-- Footer Navigation -->
+      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
+        ${AppState.currentTab > 1 ? `
+          <button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>
+        ` : `<div class="flex-1"></div>`}
+        
+        ${AppState.currentTab === 8 ? `
+          <button type="button" onclick="openPreviewModal()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">TINJAU & KIRIM</button>
+        ` : `
+          <button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+window.switchTab = function(tabNum) {
+  AppState.currentTab = tabNum;
+  renderApp();
+}
+window.nextTab = function() {
+  if (AppState.currentTab < 8) switchTab(AppState.currentTab + 1);
+}
+window.prevTab = function() {
+  if (AppState.currentTab > 1) switchTab(AppState.currentTab - 1);
+}
+
+function getDailyTabContent() {
+  switch (AppState.currentTab) {
+    case 1:
+      return `
+        <!-- Identitas & Shift -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">IDENTITAS & SHIFT</h3>
+          
+          <div class="flex gap-3 mb-4">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
+              <input type="text" value="${form.supervisor}" oninput="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            </div>
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
+              <select onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+                ${Array.from({length: 35}, (_, i) => {
+                  let h = Math.floor(i/2) + 6;
+                  let m = i % 2 === 0 ? '00' : '30';
+                  let val = h.toString().padStart(2, '0') + ':' + m;
+                  return '<option value="' + val + '" ' + (form.shift === val ? 'selected' : '') + '>' + val + '</option>';
+                }).join('')}
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANGGAL LAPORAN</label>
+            <input type="date" value="${form.tanggal}" onchange="form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+          </div>
+        </div>
+
+        <!-- Target Hari Ini -->
+        <div class="bg-zero-black rounded-2xl p-5 mb-4 text-white shadow-md">
+          <h3 class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-4">TARGET HARI INI</h3>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET OMSET (Rp)</label>
+            <input type="text" value="${form.penjualan.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.penjualan.target) : ''}" onchange="form.penjualan.target = parseRupiah(this.value); formatRupiah(this); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-white transition-colors" placeholder="Rp 0">
+          </div>
+        </div>
+
+        <!-- Ringkasan Penjualan -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">RINGKASAN PENJUALAN</h3>
+          
+          <div class="flex gap-3 mb-4">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 08:00 - 17:00 (Rp)</label>
+              <input type="number" value="${form.penjualan.shift1 || ''}" onchange="form.penjualan.shift1 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+            </div>
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 17:00 - 20:30 (Rp)</label>
+              <input type="number" value="${form.penjualan.shift2 || ''}" onchange="form.penjualan.shift2 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Struk Transaksi</label>
+            <input type="number" value="${form.penjualan.transaksi || ''}" onchange="form.penjualan.transaksi = Number(this.value)" placeholder="Contoh: 50" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+          </div>
+
+          ${(function(){
+            let total = (form.penjualan.shift1 || 0) + (form.penjualan.shift2 || 0);
+            let target = form.penjualan.target || 0;
+            let pct = target > 0 ? Math.round((total / target) * 100) : 0;
+            let displayPct = pct > 100 ? 100 : pct;
+            return target > 0 ? \`
+              <div class="mt-5 pt-5 border-t border-gray-100">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Pencapaian Target</span>
+                  <span class="text-xs font-extrabold text-zero-black">\${pct}%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="bg-zero-black h-2 rounded-full transition-all duration-500" style="width: \${displayPct}%"></div>
+                </div>
+              </div>
+            \` : '';
+          })()}
+        </div>
+
+        <!-- Top 3 Minuman -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">TOP 3 MINUMAN</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-gray-400">1</span>
+              <input type="text" value="${form.produk.minuman[0]}" onchange="form.produk.minuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-gray-400">2</span>
+              <input type="text" value="${form.produk.minuman[1]}" onchange="form.produk.minuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-gray-400">3</span>
+              <input type="text" value="${form.produk.minuman[2]}" onchange="form.produk.minuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 3 Makanan -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">TOP 3 MAKANAN</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-gray-400">1</span>
+              <input type="text" value="${form.produk.makanan[0]}" onchange="form.produk.makanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-gray-400">2</span>
+              <input type="text" value="${form.produk.makanan[1]}" onchange="form.produk.makanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-bold text-gray-400">3</span>
+              <input type="text" value="${form.produk.makanan[2]}" onchange="form.produk.makanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            </div>
+          </div>
+        </div>
+      `;
+    case 2:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">AUDIT KASIR</h3>
+            <button type="button" onclick="addAuditRow()" class="px-3 py-1 bg-zero-black text-white text-[10px] font-bold rounded-full hover:bg-gray-800 transition-all">TAMBAH</button>
+          </div>
+          
+          <div class="mb-4 pb-4 border-b border-gray-100">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Modal Awal Kasir (Rp)</label>
+            <input type="text" value="${form.kas.modalAwal ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.kas.modalAwal) : ''}" onchange="form.kas.modalAwal = parseRupiah(this.value); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="Rp 0">
+          </div>
+
+          <div class="space-y-4">
+            ${form.kas.audit.length === 0 ? `<p class="text-xs text-center text-gray-400 py-4">Belum ada baris audit kas. Tekan tambah.</p>` : ''}
+            ${form.kas.audit.map((row, idx) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50">
+                <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-2">
+                  <select onchange="updateAuditField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border-none bg-transparent focus:outline-none">
+                    ${Array.from({length: 35}, (_, i) => {
+                      let h = Math.floor(i/2) + 6;
+                      let m = i % 2 === 0 ? '00' : '30';
+                      let val = h.toString().padStart(2, '0') + ':' + m;
+                      return '<option value="' + val + '" ' + (row.jam === val ? 'selected' : '') + '>' + val + '</option>';
+                    }).join('')}
+                  </select>
+                  <button type="button" onclick="removeAuditRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total QRIS</label>
+                    <input type="text" value="${row.qris ? 'Rp ' + new Intl.NumberFormat('id-ID').format(row.qris) : ''}" onchange="updateAuditField(${idx}, 'qris', parseRupiah(this.value)); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none" placeholder="Rp 0">
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Tunai</label>
+                    <input type="text" value="${row.tunai ? 'Rp ' + new Intl.NumberFormat('id-ID').format(row.tunai) : ''}" onchange="updateAuditField(${idx}, 'tunai', parseRupiah(this.value)); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none" placeholder="Rp 0">
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Aktual Tunai + QRIS (Sistem)</label>
+                  <input type="text" value="${row.aktual ? 'Rp ' + new Intl.NumberFormat('id-ID').format(row.aktual) : ''}" onchange="updateAuditField(${idx}, 'aktual', parseRupiah(this.value)); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none bg-white" placeholder="Rp 0">
+                </div>
+                <div class="mb-2">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Selisih (Rp) - Wajib</label>
+                  <input type="text" value="${row.selisih !== undefined ? 'Rp ' + new Intl.NumberFormat('id-ID').format(row.selisih) : ''}" onchange="updateAuditField(${idx}, 'selisih', parseRupiah(this.value)); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-2 py-1 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none ${(row.selisih || 0) < 0 ? 'text-red-600' : ((row.selisih || 0) > 0 ? 'text-green-600' : 'text-gray-900')}" placeholder="Rp 0" required>
+                </div>
+                <div>
+                  <input type="text" value="${row.keterangan || ''}" onchange="updateAuditField(${idx}, 'keterangan', this.value)" placeholder="Catatan selisih (Opsional)" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    case 3:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">ABSENSI & KEPATUHAN STAFF</h3>
+          
+          <div class="flex gap-2 mb-6 border-b border-gray-100 pb-5">
+            <select id="staffSelectDropdown" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black bg-white">
+              <option value="">PILIH STAFF</option>
+              ${AppState.masterStaff.map(s => `<option value="${s.nama}">${s.nama}</option>`).join('')}
+            </select>
+            <button type="button" onclick="addSelectedStaff()" class="px-4 py-2 bg-zero-black text-white rounded-xl text-[10px] font-bold hover:bg-gray-800 transition-all">TAMBAH</button>
+          </div>
+
+          <div class="space-y-3">
+            ${form.staff.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Belum ada staff yang ditambahkan.</p>` : ''}
+            ${form.staff.map((s, idx) => `
+              <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-3">
+                  <div>
+                    <span class="text-sm font-bold text-zero-black">${s.nama}</span>
+                    <span class="text-[10px] text-gray-500 ml-1">(${s.posisi})</span>
+                  </div>
+                  <button type="button" onclick="removeStaffRow(${idx})" class="text-[10px] font-bold text-red-400 hover:text-red-600">HAPUS</button>
+                </div>
+                
+                <div class="${s.posisi !== 'Kitchen' ? 'grid grid-cols-2 gap-3' : ''} mb-3">
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">STATUS KEHADIRAN</label>
+                    <select onchange="updateStaffField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none text-green-600 font-bold bg-white h-[34px]">
+                      <option value="Hadir" ${s.status === 'Hadir' ? 'selected' : ''}>Hadir</option>
+                      <option value="Izin" ${s.status === 'Izin' ? 'selected' : ''}>Izin</option>
+                      <option value="Sakit" ${s.status === 'Sakit' ? 'selected' : ''}>Sakit</option>
+                      <option value="Alpha" ${s.status === 'Alpha' ? 'selected' : ''}>Alpha</option>
+                    </select>
+                  </div>
+                  ${s.posisi !== 'Kitchen' ? `
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KERAMAHAN TERLEWAT?</label>
+                    <select onchange="updateStaffField(${idx}, 'keramahan', this.value === 'true')" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-[34px]">
+                      <option value="false" ${!s.keramahan ? 'selected' : ''}>Tidak</option>
+                      <option value="true" ${s.keramahan ? 'selected' : ''}>Ya (Miss)</option>
+                    </select>
+                  </div>
+                  ` : ''}
+                </div>
+                
+                <div>
+                  <input type="text" value="${s.keterangan || ''}" onchange="updateStaffField(${idx}, 'keterangan', this.value)" placeholder="Catatan khusus (Opsional)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-gray-300">
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    case 4:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI SHIFT & BRIEFING</h3>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET HARI INI</label>
+            <textarea onchange="form.briefing.target = this.value" placeholder="Target omset, jumlah transaksi, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.target}</textarea>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">FOKUS PERILAKU</label>
+            <textarea onchange="form.briefing.fokus = this.value" placeholder="Fokus pada senyum sapa, kecepatan, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.fokus}</textarea>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">MASALAH DARI SHIFT KEMARIN</label>
+            <textarea onchange="form.briefing.masalah = this.value" placeholder="Kendala bahan habis, kerusakan, dll" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.masalah}</textarea>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SOLUSI YANG DISEPAKATI</label>
+            <textarea onchange="form.briefing.solusi = this.value" placeholder="Tindakan yang akan dilakukan tim" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-20">${form.briefing.solusi}</textarea>
+          </div>
+        </div>
+      `;
+    case 5:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">QC ESPRESSO (WAJIB)</h3>
+          
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM KALIBRASI</label>
+              <input type="time" value="${form.qc.espresso.jam}" onchange="form.qc.espresso.jam = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
+            </div>
+            <div>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KONDISI</label>
+              <select onchange="form.qc.espresso.status = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
+                <option value="Baik" ${form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Pilih Status</option>
+                <option value="Baik" ${form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Baik / Standar</option>
+                <option value="Pahit" ${form.qc.espresso.status === 'Pahit' ? 'selected' : ''}>Pahit / Bitter</option>
+                <option value="Asam" ${form.qc.espresso.status === 'Asam' ? 'selected' : ''}>Asam / Sour</option>
+                <option value="Watery" ${form.qc.espresso.status === 'Watery' ? 'selected' : ''}>Watery</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KETERANGAN ADJUST</label>
+            <input type="text" value="${form.qc.espresso.keterangan || ''}" onchange="form.qc.espresso.keterangan = this.value" placeholder="Contoh: Ubah grind size karena..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">QC MAKANAN / MINUMAN</h3>
+            <button type="button" onclick="addQcRow()" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH ITEM</button>
+          </div>
+          
+          <div class="space-y-3">
+            ${form.qc.items.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Tekan tambah untuk mendata QC menu lain.</p>` : ''}
+            ${form.qc.items.map((row, idx) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-2">
+                  <input type="time" value="${row.jam}" onchange="updateQcField(${idx}, 'jam', this.value)" class="w-20 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none">
+                  <button type="button" onclick="removeQcRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
+                </div>
+                <div class="mb-2">
+                  <input type="text" value="${row.nama}" onchange="updateQcField(${idx}, 'nama', this.value)" placeholder="Nama Menu (Cth: Nasi Goreng)" class="w-full px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                   <select onchange="updateQcField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <option value="Baik" ${row.status === 'Baik' ? 'selected' : ''}>Status: Baik</option>
+                      <option value="Revisi" ${row.status === 'Revisi' ? 'selected' : ''}>Revisi Rasa/Suhu</option>
+                      <option value="BS" ${row.status === 'BS' ? 'selected' : ''}>BS / Rusak</option>
+                   </select>
+                </div>
+                <input type="text" value="${row.keterangan}" onchange="updateQcField(${idx}, 'keterangan', this.value)" placeholder="Catatan tindakan (opsional)" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none">
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    case 6:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">STATISTIK KOMPLAIN</h3>
+           <div class="flex gap-3">
+             <div class="flex-1">
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL KASUS HARI INI</label>
+               <input type="number" value="${form.feedback.totalKomplain}" onchange="form.feedback.totalKomplain = Number(this.value)" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold">
+             </div>
+             <div class="flex-1">
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL REMAKE PRODUK</label>
+               <input type="number" value="${form.feedback.totalRemake}" onchange="updateTotalRemake(Number(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none text-center font-bold text-red-500">
+             </div>
+           </div>
+           
+           ${form.feedback.totalRemake >= 3 ? `
+             <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl">
+               <label class="block text-[10px] font-bold text-red-600 uppercase tracking-widest mb-2">ANALISIS PENYEBAB REMAKE >= 3 KALI</label>
+               <textarea onchange="form.feedback.analisisRemake = this.value" placeholder="Wajib diisi..." class="w-full px-3 py-2 text-xs border border-red-200 rounded focus:outline-none bg-white h-20">${form.feedback.analisisRemake || ''}</textarea>
+             </div>
+           ` : ''}
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">DATA KOMPLAIN</h3>
+            <button type="button" onclick="addFeedbackRow()" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>
+          </div>
+          
+          <div class="space-y-4">
+            ${form.feedback.items.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Aman, tidak ada komplain dicatat.</p>` : ''}
+            ${form.feedback.items.map((row, idx) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-2">
+                  <input type="time" value="${row.jam}" onchange="updateFeedbackField(${idx}, 'jam', this.value)" class="w-20 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none">
+                  <input type="text" value="${row.inisial}" onchange="updateFeedbackField(${idx}, 'inisial', this.value)" placeholder="Inisial PLG" class="w-24 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none font-bold">
+                  <button type="button" onclick="removeFeedbackRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
+                </div>
+                <div class="mb-2">
+                  <input type="text" value="${row.isi}" onchange="updateFeedbackField(${idx}, 'isi', this.value)" placeholder="Isi komplain/keluhan" class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none">
+                </div>
+                <div class="mb-2">
+                  <input type="text" value="${row.respon}" onchange="updateFeedbackField(${idx}, 'respon', this.value)" placeholder="Tindakan penyelesaian tim" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-yellow-50/50">
+                </div>
+                <div class="flex items-center gap-4 px-1">
+                  <label class="flex items-center gap-2 text-[10px] font-bold text-gray-500">
+                    <input type="checkbox" ${row.remake ? 'checked' : ''} onchange="updateFeedbackField(${idx}, 'remake', this.checked)"> Remake
+                  </label>
+                  <label class="flex items-center gap-2 text-[10px] font-bold text-red-500">
+                    <input type="checkbox" ${row.eskalasi ? 'checked' : ''} onchange="updateFeedbackField(${idx}, 'eskalasi', this.checked)"> Eskalasi GM
+                  </label>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    case 7:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">FASILITAS & ALAT</h3>
+            <button type="button" onclick="addFasilitasRow()" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>
+          </div>
+          
+          <div class="space-y-4">
+            ${form.fasilitas.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Fasilitas aman. Tekan tambah jika ada kendala.</p>` : ''}
+            ${form.fasilitas.map((row, idx) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-2">
+                  <input type="text" value="${row.item}" onchange="updateFasilitasField(${idx}, 'item', this.value)" placeholder="Nama Alat / Fasilitas" class="flex-1 px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
+                  <button type="button" onclick="removeFasilitasRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700 ml-3">HAPUS</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                   <select onchange="updateFasilitasField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <option value="Rusak Ringan" ${row.status === 'Rusak Ringan' ? 'selected' : ''}>Rusak Ringan</option>
+                      <option value="Rusak Sedang" ${row.status === 'Rusak Sedang' ? 'selected' : ''}>Rusak Sedang</option>
+                      <option value="Rusak Berat" ${row.status === 'Rusak Berat' ? 'selected' : ''}>Rusak Berat (Mati)</option>
+                   </select>
+                   <label class="flex items-center justify-center gap-2 text-[10px] font-bold text-red-500 border border-gray-200 rounded-lg bg-white">
+                    <input type="checkbox" ${row.eskalasi ? 'checked' : ''} onchange="updateFasilitasField(${idx}, 'eskalasi', this.checked)"> Eskalasi
+                  </label>
+                </div>
+                <div class="mb-2">
+                  <input type="text" value="${row.keterangan || ''}" onchange="updateFasilitasField(${idx}, 'keterangan', this.value)" placeholder="Keterangan singkat..." class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                </div>
+                <div class="text-right">
+                  ${row.photoUrl ? `
+                    <a href="${row.photoUrl}" target="_blank" class="text-[10px] font-bold text-blue-500 underline mr-2">Lihat Foto</a>
+                    <button type="button" onclick="updateFasilitasField(${idx}, 'photoUrl', '')" class="text-[10px] font-bold text-red-500">Hapus Foto</button>
+                  ` : `
+                    <label class="cursor-pointer text-[10px] font-bold text-gray-500 hover:text-zero-black">
+                      + Unggah Foto
+                      <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleFasilitasPhoto(this, ${idx})">
+                    </label>
+                  `}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+          <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">BAHAN & ATK HABIS</h3>
+            <button type="button" onclick="addBahanRow()" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">TAMBAH</button>
+          </div>
+          
+          <div class="space-y-4">
+            ${form.bahan.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Bahan terpantau cukup.</p>` : ''}
+            ${form.bahan.map((row, idx) => `
+              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-2">
+                  <input type="text" value="${row.nama}" onchange="updateBahanField(${idx}, 'nama', this.value)" placeholder="Nama Bahan (Cth: Sabun)" class="flex-1 px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
+                  <button type="button" onclick="removeBahanRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700 ml-3">HAPUS</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                   <input type="text" value="${row.ketersediaan}" onchange="updateBahanField(${idx}, 'ketersediaan', this.value)" placeholder="Status Cth: Habis/Sisa 1" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                   <input type="number" value="${row.harga}" onchange="updateBahanField(${idx}, 'harga', Number(this.value))" placeholder="Estimasi Rp" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                </div>
+                <div class="text-right">
+                  ${row.photoUrl ? `
+                    <a href="${row.photoUrl}" target="_blank" class="text-[10px] font-bold text-blue-500 underline mr-2">Lihat Foto</a>
+                    <button type="button" onclick="updateBahanField(${idx}, 'photoUrl', '')" class="text-[10px] font-bold text-red-500">Hapus Foto</button>
+                  ` : `
+                    <label class="cursor-pointer text-[10px] font-bold text-gray-500 hover:text-zero-black">
+                      + Unggah Bukti
+                      <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleBahanPhoto(this, ${idx})">
+                    </label>
+                  `}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    case 8:
+      return `
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">PENUTUP & KESIMPULAN</h3>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">KENDALA UTAMA HARI INI</label>
+            <textarea onchange="form.penutup.kendala = this.value" placeholder="Tuliskan jika ada kendala besar..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${form.penutup.kendala}</textarea>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">REKOMENDASI / SARAN</label>
+            <textarea onchange="form.penutup.rekomendasi = this.value" placeholder="Saran perbaikan operasional..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${form.penutup.rekomendasi}</textarea>
+          </div>
+        </div>
+      `;
+  }
+}
+
+// === INTERACTIVE FORM MUTATORS ===
+
+function addAuditRow() {
+  form.kas.audit.push({ jam: "12:00", aktual: 0, qris: 0, tunai: 0, keterangan: "" });
+  renderApp();
+}
+function removeAuditRow(idx) {
+  form.kas.audit.splice(idx, 1);
+  renderApp();
+}
+function updateAuditField(idx, field, value) {
+  form.kas.audit[idx][field] = value;
+}
+function updateStaffField(idx, field, value) {
+  form.staff[idx][field] = value;
+}
+function addQcRow() {
+  form.qc.items.push({ jam: "12:00", nama: "", status: "Baik", keterangan: "" });
+  renderApp();
+}
+function removeQcRow(idx) {
+  form.qc.items.splice(idx, 1);
+  renderApp();
+}
+function updateQcField(idx, field, value) {
+  form.qc.items[idx][field] = value;
+}
+function addFeedbackRow() {
+  form.feedback.items.push({ jam: "12:00", inisial: "", isi: "", remake: false, eskalasi: false, respon: "" });
+  renderApp();
+}
+function removeFeedbackRow(idx) {
+  form.feedback.items.splice(idx, 1);
+  renderApp();
+}
+function updateFeedbackField(idx, field, value) {
+  form.feedback.items[idx][field] = value;
+}
+function updateTotalRemake(value) {
+  form.feedback.totalRemake = value;
+  renderApp();
+}
+function addFasilitasRow() {
+  form.fasilitas.push({ item: "", status: "Rusak Ringan", eskalasi: false, keterangan: "", photoUrl: "" });
+  renderApp();
+}
+function removeFasilitasRow(idx) {
+  form.fasilitas.splice(idx, 1);
+  renderApp();
+}
+function updateFasilitasField(idx, field, value) {
+  form.fasilitas[idx][field] = value;
+}
+async function handleFasilitasPhoto(input, idx) {
+  try {
+    const url = await uploadPhoto(input, 'Fasilitas');
+    if (url) {
+      updateFasilitasField(idx, 'photoUrl', url);
+      renderApp();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+function addBahanRow() {
+  form.bahan.push({ nama: "", ketersediaan: "Habis", harga: 0, photoUrl: "" });
+  renderApp();
+}
+function removeBahanRow(idx) {
+  form.bahan.splice(idx, 1);
+  renderApp();
+}
+function updateBahanField(idx, field, value) {
+  form.bahan[idx][field] = value;
+}
+async function handleBahanPhoto(input, idx) {
+  try {
+    const url = await uploadPhoto(input, 'Bahan');
+    if (url) {
+      updateBahanField(idx, 'photoUrl', url);
+      renderApp();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+</script>

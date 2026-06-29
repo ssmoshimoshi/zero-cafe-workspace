@@ -192,6 +192,46 @@ function getStructuredFolder(year, monthName, category) {
   return categoryFolder;
 }
 
+/**
+ * Creates dynamic folder hierarchy based on report type.
+ */
+function getDynamicFolder(year, monthName, data) {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
+  var rootFolder;
+  
+  if (rootFolderId) {
+    try {
+      rootFolder = DriveApp.getFolderById(rootFolderId);
+    } catch(e) {
+      rootFolder = null;
+    }
+  }
+  
+  if (!rootFolder) {
+    var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
+    if (folders.hasNext()) {
+      rootFolder = folders.next();
+    } else {
+      rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
+    }
+    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
+  }
+  
+  var yearFolder = getOrCreateSubFolder(rootFolder, year);
+  var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
+  
+  if (data.type === "daily") {
+    return monthFolder; // Daily report goes directly into month folder
+  } else if (data.type === "weekly") {
+    return getOrCreateSubFolder(monthFolder, data.periode); // Creates folder like "1-7 Juni"
+  } else if (data.type === "monthly") {
+    return getOrCreateSubFolder(monthFolder, "Laporan Bulanan");
+  }
+  
+  return monthFolder;
+}
+
 function getOrCreateSubFolder(parentFolder, folderName) {
   var folders = parentFolder.getFoldersByName(folderName);
   if (folders.hasNext()) {
@@ -230,17 +270,15 @@ function submitFullReport(payloadStr) {
       monthName = getIndonesianMonth(dateFormatted);
       supervisor = data.supervisor;
       outlet = data.outlet || "Perintis";
-      pdfCategory = "Daily Report";
-      fileName = "DailyReport_" + dateFormatted + "_" + supervisor + ".pdf";
+      fileName = dateFormatted + "_Laporan_Harian_" + outlet.replace(/\\s+/g, "_") + ".pdf";
     } else if (data.type === "weekly") {
-      // Periode might be "22-28 Juni 2026"
+      // Periode might be "1-7 Juni" or "22-28 Juni 2026"
       var parts = data.periode.split(" ");
-      year = parts[parts.length - 1] || new Date().getFullYear().toString();
-      monthName = parts[parts.length - 2] || getIndonesianMonth(new Date());
+      year = parts.length >= 3 ? parts[parts.length - 1] : new Date().getFullYear().toString();
+      monthName = parts.length >= 2 ? parts[parts.length - (parts.length >= 3 ? 2 : 1)] : getIndonesianMonth(new Date());
       supervisor = data.supervisor;
       outlet = data.outlet || "Perintis";
-      pdfCategory = "Weekly Report";
-      fileName = "WeeklyReport_" + data.periode.replace(/\s+/g, "") + "_" + supervisor + ".pdf";
+      fileName = data.periode + "_Laporan_Mingguan_" + outlet.replace(/\\s+/g, "_") + ".pdf";
     } else if (data.type === "monthly") {
       // bulan is "YYYY-MM"
       var parts = data.bulan.split("-");
@@ -248,8 +286,7 @@ function submitFullReport(payloadStr) {
       monthName = getIndonesianMonth(data.bulan + "-01");
       supervisor = data.supervisor;
       outlet = data.outlet || "Perintis";
-      pdfCategory = "Monthly Report";
-      fileName = "MonthlyReport_" + data.bulan + "_" + supervisor + ".pdf";
+      fileName = monthName + "_" + year + "_Laporan_Bulanan_" + outlet.replace(/\\s+/g, "_") + ".pdf";
     }
     
     // 1. Generate HTML Content for PDF
@@ -260,7 +297,7 @@ function submitFullReport(payloadStr) {
     var pdfBlob = htmlOutput.getAs("application/pdf").setName(fileName);
     
     // 3. Save to Google Drive folder
-    var folder = getStructuredFolder(year, monthName, pdfCategory);
+    var folder = getDynamicFolder(year, monthName, data);
     var file = folder.createFile(pdfBlob);
     var fileUrl = file.getUrl();
     

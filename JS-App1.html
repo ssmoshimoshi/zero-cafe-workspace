@@ -756,9 +756,9 @@ function getDailyTabContent() {
                   <button type="button" onclick="removeStaffRow(${idx})" class="text-[10px] font-bold text-red-400 hover:text-red-600">HAPUS</button>
                 </div>
                 
-                <div class="${s.posisi !== 'Kitchen' ? 'grid grid-cols-2 gap-3' : ''} mb-3">
-                  <div>
-                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">STATUS KEHADIRAN</label>
+                <div class="${s.posisi !== 'Kitchen' ? 'grid grid-cols-2 gap-3' : ''} mb-3 items-end">
+                  <div class="flex flex-col justify-end">
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1 truncate">STATUS KEHADIRAN</label>
                     <select onchange="updateStaffField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none text-green-600 font-bold bg-white h-[34px]">
                       <option value="Hadir" ${s.status === 'Hadir' ? 'selected' : ''}>Hadir</option>
                       <option value="Izin" ${s.status === 'Izin' ? 'selected' : ''}>Izin</option>
@@ -767,8 +767,8 @@ function getDailyTabContent() {
                     </select>
                   </div>
                   ${s.posisi !== 'Kitchen' ? 
-                  '<div>' +
-                    '<label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KERAMAHAN TERLEWAT?</label>' +
+                  '<div class="flex flex-col justify-end">' +
+                    '<label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1 truncate">KERAMAHAN (MISS)?</label>' +
                     '<select onchange="updateStaffField(' + idx + ', &apos;keramahan&apos;, this.value === &apos;true&apos;)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-[34px]">' +
                       '<option value="false" ' + (!s.keramahan ? 'selected' : '') + '>Tidak</option>' +
                       '<option value="true" ' + (s.keramahan ? 'selected' : '') + '>Ya (Miss)</option>' +

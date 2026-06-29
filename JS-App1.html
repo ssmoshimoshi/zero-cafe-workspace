@@ -535,21 +535,28 @@ function getDailyFormTemplate() {
       </div>
 
       <div class="px-4">
-        <form id="dailyFormElement" onsubmit="event.preventDefault();">
+        <div id="dailyFormContent">
           ${getDailyTabContent()}
-        </form>
+        </div>
       </div>
 
       <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
         ${AppState.currentTab > 1 ? '<button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>' : '<div class="flex-1"></div>'}
-        
-        ${AppState.currentTab === 8 ? '<div class="flex-1"></div>' : '<button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>'}
+        ${AppState.currentTab < 8 ? '<button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>' : ''}
       </div>
     </div>
   `;
 }
 
-function switchTab(tabNum) { AppState.currentTab = tabNum; renderApp(); }
+function switchTab(tabNum) { 
+  AppState.currentTab = tabNum; 
+  renderApp();
+  // Scroll the active tab button into view after render
+  setTimeout(() => {
+    const activeBtn = document.getElementById('activeTabBtn');
+    if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, 50);
+}
 function nextTab() { if (AppState.currentTab < 8) switchTab(AppState.currentTab + 1); }
 function prevTab() { if (AppState.currentTab > 1) switchTab(AppState.currentTab - 1); }
 
@@ -564,11 +571,11 @@ function getDailyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
-              <input type="text" value="${window.form.supervisor}" oninput="window.form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="text" value="${window.form.supervisor}" onchange="window.form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
-              <select onchange="window.form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <select onchange="window.form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 ${Array.from({length: 35}, (_, i) => {
                   let h = Math.floor(i/2) + 6;
                   let m = i % 2 === 0 ? '00' : '30';
@@ -581,7 +588,7 @@ function getDailyTabContent() {
           
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANGGAL LAPORAN</label>
-            <input type="date" value="${window.form.tanggal}" onchange="window.form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            <input type="date" value="${window.form.tanggal}" onchange="window.form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
           </div>
         </div>
 

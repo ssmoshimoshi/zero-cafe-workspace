@@ -66,18 +66,21 @@ function initializeSystem() {
   
   // Set up root folder in Drive
   var rootFolder;
-  var folderName = "Zero Cafe Workspace Drive";
-  var folders = DriveApp.getFoldersByName(folderName);
-  if (folders.hasNext()) {
-    rootFolder = folders.next();
-  } else {
-    rootFolder = DriveApp.createFolder(folderName);
+  try {
+    rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
+  } catch (e) {
+    var folderName = "Zero Cafe Workspace Drive";
+    var folders = DriveApp.getFoldersByName(folderName);
+    if (folders.hasNext()) {
+      rootFolder = folders.next();
+    } else {
+      rootFolder = DriveApp.createFolder(folderName);
+    }
   }
   
-  // Store spreadsheet ID and root folder ID in script properties for persistence
+  // Store spreadsheet ID in script properties for persistence
   var scriptProperties = PropertiesService.getScriptProperties();
   scriptProperties.setProperty("SPREADSHEET_ID", ssId);
-  scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   
   return {
     status: "success",
@@ -169,20 +172,16 @@ function api_addStaff(nama, posisi) {
  * Helper to get or create folder structure in Drive: Root -> Year -> Month -> Category
  */
 function getStructuredFolder(year, monthName, category) {
-  var scriptProperties = PropertiesService.getScriptProperties();
-  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
   var rootFolder;
-  
-  if (rootFolderId) {
-    rootFolder = DriveApp.getFolderById(rootFolderId);
-  } else {
+  try {
+    rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
+  } catch(e) {
     var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
     if (folders.hasNext()) {
       rootFolder = folders.next();
     } else {
       rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
     }
-    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
   
   var yearFolder = getOrCreateSubFolder(rootFolder, year);
@@ -196,26 +195,16 @@ function getStructuredFolder(year, monthName, category) {
  * Creates dynamic folder hierarchy based on report type.
  */
 function getDynamicFolder(year, monthName, data) {
-  var scriptProperties = PropertiesService.getScriptProperties();
-  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
   var rootFolder;
-  
-  if (rootFolderId) {
-    try {
-      rootFolder = DriveApp.getFolderById(rootFolderId);
-    } catch(e) {
-      rootFolder = null;
-    }
-  }
-  
-  if (!rootFolder) {
+  try {
+    rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
+  } catch(e) {
     var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
     if (folders.hasNext()) {
       rootFolder = folders.next();
     } else {
       rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
     }
-    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
   
   var yearFolder = getOrCreateSubFolder(rootFolder, year);
@@ -820,24 +809,16 @@ function api_uploadImage(base64Data, filename, category) {
     var monthName = getIndonesianMonth(date.toISOString().split('T')[0]);
     
     // Get or create category folder inside month folder
-    var scriptProperties = PropertiesService.getScriptProperties();
-    var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
     var rootFolder;
-    if (rootFolderId) {
-      try {
-        rootFolder = DriveApp.getFolderById(rootFolderId);
-      } catch (e) {
-        rootFolderId = null;
-      }
-    }
-    if (!rootFolderId) {
+    try {
+      rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
+    } catch(e) {
       var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
       if (folders.hasNext()) {
         rootFolder = folders.next();
       } else {
         rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
       }
-      scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
     }
     
     var yearFolder = getOrCreateSubFolder(rootFolder, year);

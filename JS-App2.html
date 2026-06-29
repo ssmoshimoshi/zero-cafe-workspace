@@ -770,10 +770,7 @@ async function addStaffSubmit() {
       showToast(res.message);
       await fetchMasterStaff();
       if (window.form.type === 'daily') {
-        window.form.staff = AppState.masterStaff.map(s => {
-          const existing = window.form.staff.find(fs => fs.nama === s.nama);
-          return existing || { nama: s.nama, posisi: s.posisi, status: "Hadir", keramahan: false, keterangan: "" };
-        });
+        window.form.staff.push({ nama: name, posisi: pos, status: "Hadir", keramahan: false, keterangan: "" });
       } else if (window.form.type === 'weekly') {
         window.form.weekly.staff = AppState.masterStaff.map(s => {
           const existing = window.form.weekly.staff.find(fs => fs.nama === s.nama);

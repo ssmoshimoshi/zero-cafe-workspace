@@ -728,7 +728,10 @@ function getDailyTabContent() {
     case 3:
       return `
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">ABSENSI & KEPATUHAN STAFF</h3>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">ABSENSI & KEPATUHAN STAFF</h3>
+            <button type="button" onclick="openAddStaffModal()" class="text-[10px] font-bold text-zero-black underline decoration-2 underline-offset-4 hover:text-gray-600">+ STAFF BARU</button>
+          </div>
           
           <div class="flex gap-2 mb-6 border-b border-gray-100 pb-5">
             <select id="staffSelectDropdown" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black bg-white">

@@ -735,14 +735,16 @@ async function submitReport() {
     const opt = {
       margin: 0,
       filename: 'temp.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
+      image: { type: 'jpeg', quality: 0.8 }, // Reduced for smaller base64 size
+      html2canvas: { scale: 1.2, useCORS: true, logging: false }, // Reduced scale for faster generation & smaller size
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
     try {
-      const base64String = await html2pdf().set(opt).from(tempDiv).outputPdf('datauristring');
-      f.pdfBase64 = base64String.split(',')[1];
+      const base64String = await html2pdf().set(opt).from(tempDiv).output('datauristring');
+      if (base64String && base64String.includes(',')) {
+        f.pdfBase64 = base64String.split(',')[1];
+      }
     } catch (e) {
       console.warn("Gagal membuat base64 PDF, mengirim tanpa PDF base64", e);
     } finally {
@@ -762,8 +764,12 @@ async function submitReport() {
       if (body) {
         body.innerHTML = `<div class="text-center py-6">
           <h4 class="text-xl font-bold text-gray-900 mb-2">Laporan Berhasil Dikirim!</h4>
-          <p class="text-gray-600 mb-6">Laporan Anda telah disimpan ke database dan PDF telah dibuat.</p>
-          <a href="${res.url}" target="_blank" class="inline-block px-6 py-3 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all">Buka PDF</a>
+          <p class="text-gray-600 mb-4">Laporan Anda telah disimpan ke database dan file PDF telah dibuat.</p>
+          <div class="bg-gray-100 p-3 rounded-lg mb-6 text-sm text-left">
+            <span class="font-bold text-gray-700">Lokasi Google Drive:</span><br/>
+            <span class="text-gray-600 text-xs">${res.folderPath || 'Zero Cafe Workspace Drive'}</span>
+          </div>
+          <a href="${res.url}" target="_blank" class="inline-block px-6 py-3 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all">Buka File PDF</a>
         </div>`;
       }
       if (modalFooter) {

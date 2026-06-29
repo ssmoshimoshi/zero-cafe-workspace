@@ -64,6 +64,18 @@ function getWeeklyTabContent() {
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERIODE (OTOMATIS)</label>
             <input type="text" value="${window.form.periode}" readonly placeholder="Contoh: 2026-06-22 s/d 2026-06-28" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 focus:outline-none cursor-not-allowed">
+            ${(function(){
+              if (window.form.periodeStart && window.form.periodeEnd) {
+                const start = new Date(window.form.periodeStart);
+                const end = new Date(window.form.periodeEnd);
+                const diffTime = end - start;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                if (diffDays > 7) {
+                  return '<p class="text-red-500 text-[10px] font-bold mt-2 uppercase tracking-wide">⚠️ Periode tidak boleh melebihi 7 hari.</p>';
+                }
+              }
+              return '';
+            })()}
           </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
@@ -419,6 +431,50 @@ function getMonthlyTabContent() {
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">REKOMENDASI PERBAIKAN QC BULAN DEPAN</label>
               <input type="text" value="${window.form.monthly.qc.rekomendasi}" onchange="window.form.monthly.qc.rekomendasi = this.value" placeholder="Wajib cek kalibrasi rutin..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
             </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <div class="flex justify-between items-center mb-4">
+                <span class="text-[8px] font-bold text-zero-black uppercase tracking-widest">QC Menu Lainnya</span>
+                <button type="button" onclick="addMonthlyQCItem()" class="px-3 py-1 bg-zero-black text-white text-[8px] font-bold rounded-lg hover:bg-gray-800 transition-all">
+                  + TAMBAH ITEM QC
+                </button>
+              </div>
+              
+              <div class="space-y-4">
+                ${(window.form.monthly.qc.items || []).map((item, idx) => `
+                  <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30 relative">
+                    <div class="flex justify-between items-center mb-2">
+                      <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Item #${idx+1}</span>
+                      <button type="button" onclick="removeMonthlyQCItem(${idx})" class="text-[8px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
+                    </div>
+                    <div class="space-y-2">
+                      <div>
+                        <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nama Menu</label>
+                        <input type="text" value="${item.menu || ''}" onchange="updateMonthlyQCItem(${idx}, 'menu', this.value)" placeholder="Nama minuman / makanan" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      </div>
+                      <div class="grid grid-cols-2 gap-2">
+                        <div>
+                          <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status Rasa/Sajian</label>
+                          <select onchange="updateMonthlyQCItem(${idx}, 'status', this.value)" class="w-full px-2 py-1 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                            <option value="Baik" ${item.status === 'Baik' ? 'selected' : ''}>Baik / Standar</option>
+                            <option value="Revisi" ${item.status === 'Revisi' ? 'selected' : ''}>Revisi</option>
+                            <option value="BS" ${item.status === 'BS' ? 'selected' : ''}>BS (Bahan Rusak)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Penyebab Dominan Komplain</label>
+                        <textarea onchange="updateMonthlyQCItem(${idx}, 'komplain', this.value)" placeholder="Keluhan customer / alasan dominan..." class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-12">${item.komplain || ''}</textarea>
+                      </div>
+                      <div>
+                        <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Rekomendasi Perbaikan QC Bulan Depan</label>
+                        <textarea onchange="updateMonthlyQCItem(${idx}, 'rekomendasi', this.value)" placeholder="Langkah korektif bulan depan..." class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-12">${item.rekomendasi || ''}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -497,6 +553,20 @@ function updateMonthlyRating(value) {
 function updateMonthlyStaff(idx, field, value) { window.form.monthly.staff[idx][field] = value; }
 function addMonthlyStaffRow() { window.form.monthly.staff.push({ nama: "", kriteria: "Inisiatif", nilai: "Baik", alasan: "" }); renderApp(); }
 function removeMonthlyStaffRow(idx) { window.form.monthly.staff.splice(idx, 1); renderApp(); }
+
+function addMonthlyQCItem() {
+  if (!window.form.monthly.qc.items) window.form.monthly.qc.items = [];
+  window.form.monthly.qc.items.push({ menu: "", status: "Baik", komplain: "", rekomendasi: "" });
+  renderApp();
+}
+function removeMonthlyQCItem(idx) {
+  window.form.monthly.qc.items.splice(idx, 1);
+  renderApp();
+}
+function updateMonthlyQCItem(idx, field, value) {
+  window.form.monthly.qc.items[idx][field] = value;
+}
+
 
 function getDashboardGMTemplate() {
   const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];

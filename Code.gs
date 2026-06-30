@@ -13,6 +13,10 @@ function doGet(e) {
     .evaluate()
     .setTitle('Zero Cafe Workspace')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui')
+    .addMetaTag('apple-mobile-web-app-capable', 'yes')
+    .addMetaTag('apple-mobile-web-app-status-bar-style', 'black-translucent')
+    .addMetaTag('mobile-web-app-capable', 'yes')
+    .addMetaTag('theme-color', '#1a1a1a')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 

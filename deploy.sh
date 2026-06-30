@@ -24,6 +24,9 @@ fi
 # 3. Push ke Google Apps Script via clasp
 echo "3. Melakukan push dan deploy ke Google Apps Script..."
 clasp push
+# Deploy ke ID utama (@52)
 clasp deploy -i AKfycbz7mSoOmKpOtZnACm0LwFnmOGtZL-KlUOekGzylA8b20_j9mMsom1dgaSNExQ2OJTUp -d "Pembaruan otomatis dari deploy.sh"
+# Deploy ke ID versi lama (@50) agar tersinkronisasi
+clasp deploy -i AKfycbzmjpOPY34k7AQ4YTieRxRwnkGKsWsPH6-Xcl4bZK4nvNLRIAbOOKONRnMVFCE3ZjWf -d "Sinkronisasi versi lama"
 
 echo "=== Selesai! Aplikasi Anda telah diperbarui di GAS dan GitHub ==="

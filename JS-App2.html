@@ -900,12 +900,7 @@ async function submitReport() {
     
     // Generate Base64 PDF to send to GDrive so the format perfectly matches the client
     const htmlContent = buildPDFHtml(f);
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.width = '794px';
-    document.body.appendChild(tempDiv);
+    const tempDiv = await createPdfContainer(htmlContent);
     
     const opt = {
       margin: 0,

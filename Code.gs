@@ -396,13 +396,12 @@ function submitFullReport(payloadStr) {
         fileUrl
       ]);
     }
-    
-    var folderPath = "Zero Cafe Workspace Drive / " + year + " / " + monthName;
-    if (data.type === "weekly") {
-      var periodeStr = data.periode || (data.periodeStart + " - " + data.periodeEnd) || "Mingguan";
-      folderPath += " / " + periodeStr;
-    } else if (data.type === "monthly") {
-      folderPath += " / Laporan Bulanan";
+    // We can just construct a more accurate path string or just use the folder's name.
+    var folderPath = "";
+    try {
+      folderPath = folder.getName();
+    } catch(e) {
+      folderPath = year + " / " + monthName;
     }
 
     return { 

@@ -873,19 +873,19 @@ function api_uploadImage(base64Data, filename, category) {
       }
     }
     
-    if (!rootFolderId) {
-      var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
-      if (folders.hasNext()) {
-        rootFolder = folders.next();
-      } else {
-        rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
+      if (!rootFolderId) {
+        var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
+        if (folders.hasNext()) {
+          rootFolder = folders.next();
+        } else {
+          rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
+        }
+        scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
       }
-      scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
-    }
-    
-    var yearFolder = getOrCreateSubFolder(rootFolder, year);
-    var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
-    var categoryFolder = getOrCreateSubFolder(monthFolder, category || "Lain-lain");
+      
+      var bulanTahun = monthName + " " + year;
+      var monthFolder = getOrCreateSubFolder(rootFolder, bulanTahun);
+      var categoryFolder = getOrCreateSubFolder(monthFolder, category || "Lain-lain");
     
     // Remove base64 prefix if exists (e.g., "data:image/jpeg;base64,")
     var cleanBase64 = base64Data;

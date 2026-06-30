@@ -481,7 +481,7 @@ setInterval(() => {
 }, 30000);
 
 /*  === UTILS: PHOTO UPLOAD & COMPRESSION === */
-async function uploadPhoto(fileInput, category) {
+async function uploadPhoto(fileInput, category, customFilename) {
   const file = fileInput.files[0];
   if (!file) return null;
   
@@ -500,7 +500,7 @@ async function uploadPhoto(fileInput, category) {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        const filename = `${category}_${Date.now()}.jpg`;
+        const filename = customFilename ? `${customFilename}.jpeg` : `${category}_${Date.now()}.jpg`;
         
         try {
           showLoading(true);
@@ -1106,7 +1106,15 @@ function removeFasilitasRow(idx) { window.form.fasilitas.splice(idx, 1); renderA
 function updateFasilitasField(idx, field, value) { window.form.fasilitas[idx][field] = value; }
 async function handleFasilitasPhoto(input, idx) {
   try {
-    const url = await uploadPhoto(input, 'Fasilitas');
+    const row = window.form.fasilitas[idx];
+    const dateStr = window.form.tanggal || new Date().toISOString().split('T')[0];
+    const [year, month, day] = dateStr.split("-");
+    const ddmmyy = day && month ? `${day}-${month}` : "UnknownDate";
+    const itemName = row.item ? row.item.replace(/\s+/g, '') : "Fasilitas";
+    const statusName = row.status ? row.status.replace(/\s+/g, '') : "Rusak";
+    const customFilename = `${ddmmyy}-${itemName}-${statusName}`;
+    
+    const url = await uploadPhoto(input, 'Trouble', customFilename);
     if (url) { updateFasilitasField(idx, 'photoUrl', url); renderApp(); }
   } catch (e) { console.error(e); }
 }
@@ -1115,7 +1123,15 @@ function removeBahanRow(idx) { window.form.bahan.splice(idx, 1); renderApp(); }
 function updateBahanField(idx, field, value) { window.form.bahan[idx][field] = value; }
 async function handleBahanPhoto(input, idx) {
   try {
-    const url = await uploadPhoto(input, 'Bahan');
+    const row = window.form.bahan[idx];
+    const dateStr = window.form.tanggal || new Date().toISOString().split('T')[0];
+    const [year, month, day] = dateStr.split("-");
+    const ddmmyy = day && month ? `${day}-${month}` : "UnknownDate";
+    const itemName = row.nama ? row.nama.replace(/\s+/g, '') : "Bahan";
+    const statusName = row.ketersediaan ? row.ketersediaan.replace(/\s+/g, '') : "Habis";
+    const customFilename = `${ddmmyy}-${itemName}-${statusName}`;
+    
+    const url = await uploadPhoto(input, 'Nota Pengeluaran', customFilename);
     if (url) { updateBahanField(idx, 'photoUrl', url); renderApp(); }
   } catch (e) { console.error(e); }
 }

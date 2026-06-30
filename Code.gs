@@ -407,6 +407,7 @@ function api_gm_fetchReports(monthName, year) {
     var omsetTotal = 0;
     var komplainTotal = 0;
     var listLaporan = [];
+    var chartData = [];
     
     // Map month names to 2-digit format
     var monthsIndo = [
@@ -432,12 +433,17 @@ function api_gm_fetchReports(monthName, year) {
       }
       
       if (rowDate.startsWith(monthPrefix)) {
-        omsetTotal += Number(data[i][4] || 0);
+        var rowOmset = Number(data[i][4] || 0);
+        omsetTotal += rowOmset;
         komplainTotal += Number(data[i][5] || 0);
         listLaporan.push({
           name: "Daily Report - " + rowDate + " (" + data[i][1] + ")",
           url: data[i][7],
           dateCreated: rowDate
+        });
+        chartData.push({
+          date: rowDate,
+          omset: rowOmset
         });
       }
     }
@@ -479,6 +485,10 @@ function api_gm_fetchReports(monthName, year) {
     
     var currentFolderId = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_ID") || "";
     
+    // Get target omset for the selected month
+    var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
+    var targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
+    
     return {
       status: "success",
       data: {
@@ -486,7 +496,9 @@ function api_gm_fetchReports(monthName, year) {
         transaksiTotal: transaksiTotal,
         komplainTotal: komplainTotal,
         listLaporan: listLaporan,
-        currentFolderId: currentFolderId
+        currentFolderId: currentFolderId,
+        targetOmset: Number(targetOmset),
+        chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); })
       }
     };
   } catch (err) {
@@ -944,60 +956,21 @@ function JALANKAN_INI_UNTUK_UBAH_FOLDER() {
     Logger.log("SUKSES: Target folder penyimpanan PDF berhasil diubah ke: " + folder.getName());
   } catch (e) {
     Logger.log("GAGAL: Error: " + e.toString());
-  }
 }
 
 /**
  * =========================================================================
- * SIMULASI DATA JULI 2026 (SEMENTARA)
+ * KONFIGURASI TARGET OMSET GM
  * =========================================================================
- * Fungsi ini digunakan untuk mengisi 30 baris data dummy di bulan Juli 2026
- * agar Dashboard GM bisa diuji coba secara komprehensif.
  */
-function simulateJulyData() {
-  var ss = getSpreadsheet();
-  
-  // 1. Simulasi Data Harian
-  var dailySheet = ss.getSheetByName("Daily");
-  var supervisors = ["Budi Santoso", "Andi Permana", "Siti Aminah"];
-  var shifts = ["Shift 1", "Shift 2", "Full Shift"];
-  var kendalas = ["Mesin espresso sempat ngadat 10 menit", "Bahan baku susu hampir habis", "Listrik padam sebentar", "Aman terkendali", "Kasir lambat karena sistem error"];
-  
-  for (var i = 1; i <= 30; i++) {
-    var dateStr = "2026-07-" + (i < 10 ? "0" + i : i);
-    var spv = supervisors[Math.floor(Math.random() * supervisors.length)];
-    var shift = shifts[Math.floor(Math.random() * shifts.length)];
-    var omset = Math.floor(Math.random() * 4000000) + 1000000; // 1jt - 5jt
-    var komplain = Math.random() > 0.7 ? Math.floor(Math.random() * 3) + 1 : 0; // 30% chance of 1-3 complaints
-    var kendala = komplain > 0 ? kendalas[Math.floor(Math.random() * (kendalas.length - 1))] : kendalas[3];
-    var pdfUrl = "https://drive.google.com/file/d/dummy_daily_" + i + "/view";
-    
-    dailySheet.appendRow([
-      dateStr, spv, "Perintis", shift, omset, komplain, kendala, pdfUrl
-    ]);
+function api_gm_setTargetOmset(monthName, year, targetValue) {
+  try {
+    var key = "TARGET_OMSET_" + monthName + "_" + year;
+    var props = PropertiesService.getScriptProperties();
+    props.setProperty(key, targetValue.toString());
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.toString() };
   }
-  
-  // 2. Simulasi Data Mingguan
-  var weeklySheet = ss.getSheetByName("Weekly");
-  var weeks = [
-    { period: "1-7 Juli 2026", omset: 21500000, komplain: 2 },
-    { period: "8-14 Juli 2026", omset: 23200000, komplain: 1 },
-    { period: "15-21 Juli 2026", omset: 19800000, komplain: 4 },
-    { period: "22-28 Juli 2026", omset: 25400000, komplain: 0 }
-  ];
-  
-  weeks.forEach(function(w, index) {
-    weeklySheet.appendRow([
-      w.period, "Budi Santoso", "Perintis", w.omset, 0, w.komplain, "Evaluasi mingguan berjalan baik", "https://drive.google.com/file/d/dummy_weekly_" + index + "/view"
-    ]);
-  });
-  
-  // 3. Simulasi Data Bulanan
-  var monthlySheet = ss.getSheetByName("Monthly");
-  monthlySheet.appendRow([
-    "2026-07", "Andi Permana", "Perintis", 89900000, 0, 7, "Performa outlet sangat baik bulan ini", "https://drive.google.com/file/d/dummy_monthly_july/view"
-  ]);
-  
-  Logger.log("Simulasi data berhasil dijalankan!");
 }
 

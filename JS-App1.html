@@ -33,6 +33,20 @@ function formatDateIndo(dateStr) {
   }
   return dateStr;
 }
+
+/*  === PILL BUTTON UI HELPER === */
+function renderPillGroup(options, currentValue, onChangeStr) {
+  return '<div class="flex flex-wrap gap-2">' + options.map(function(opt) {
+    const isSelected = currentValue === opt.value;
+    const baseClass = "px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all whitespace-nowrap cursor-pointer select-none ";
+    const selectedClass = isSelected ? "bg-zero-black text-white shadow-md" : "bg-white text-gray-400 hover:bg-gray-100 border border-gray-200";
+    return '<label class="' + baseClass + selectedClass + '">' +
+             '<input type="radio" value="' + opt.value + '" onchange="' + onChangeStr + '; renderApp();" class="hidden" ' + (isSelected ? 'checked' : '') + '>' +
+             opt.label +
+           '</label>';
+  }).join('') + '</div>';
+}
+
 /*  === GLOBAL APPLICATION STATE === */
 const AppState = {
   role: null,             /*  "SPV" | "GM" | null */
@@ -623,14 +637,7 @@ function getDailyTabContent() {
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
-              <select onchange="window.form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
-                ${Array.from({length: 35}, (_, i) => {
-                  let h = Math.floor(i/2) + 6;
-                  let m = i % 2 === 0 ? '00' : '30';
-                  let val = h.toString().padStart(2, '0') + ':' + m;
-                  return '<option value="' + val + '" ' + (window.form.shift === val ? 'selected' : '') + '>' + val + '</option>';
-                }).join('')}
-              </select>
+              <input type="time" value="${window.form.shift}" onchange="window.form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors bg-transparent">
             </div>
           </div>
           
@@ -744,14 +751,7 @@ function getDailyTabContent() {
             ${window.form.kas.audit.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50">
                 <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-2">
-                  <select onchange="updateAuditField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border-none bg-transparent focus:outline-none">
-                    ${Array.from({length: 35}, (_, i) => {
-                      let h = Math.floor(i/2) + 6;
-                      let m = i % 2 === 0 ? '00' : '30';
-                      let val = h.toString().padStart(2, '0') + ':' + m;
-                      return '<option value="' + val + '" ' + (row.jam === val ? 'selected' : '') + '>' + val + '</option>';
-                    }).join('')}
-                  </select>
+                  <input type="time" onchange="updateAuditField(${idx}, 'jam', this.value)" value="${row.jam}" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border border-gray-200 rounded-lg bg-transparent focus:outline-none">
                   <button type="button" onclick="removeAuditRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mb-2">
@@ -808,25 +808,25 @@ function getDailyTabContent() {
                   <button type="button" onclick="removeStaffRow(${idx})" class="text-[10px] font-bold text-red-400 hover:text-red-600">HAPUS</button>
                 </div>
                 
-                <div class="${s.posisi !== 'Kitchen' ? 'grid grid-cols-2 gap-3' : ''} mb-3 items-end">
-                  <div class="flex flex-col justify-end">
-                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1 truncate">STATUS KEHADIRAN</label>
-                    <select onchange="updateStaffField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none text-green-600 font-bold bg-white h-[34px]">
-                      <option value="Hadir" ${s.status === 'Hadir' ? 'selected' : ''}>Hadir</option>
-                      <option value="Izin" ${s.status === 'Izin' ? 'selected' : ''}>Izin</option>
-                      <option value="Sakit" ${s.status === 'Sakit' ? 'selected' : ''}>Sakit</option>
-                      <option value="Alpha" ${s.status === 'Alpha' ? 'selected' : ''}>Alpha</option>
-                    </select>
+                <div class="mb-3 space-y-3">
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">STATUS KEHADIRAN</label>
+                    ${renderPillGroup([
+                      {label: 'Hadir', value: 'Hadir'},
+                      {label: 'Izin', value: 'Izin'},
+                      {label: 'Sakit', value: 'Sakit'},
+                      {label: 'Alpha', value: 'Alpha'}
+                    ], s.status, `updateStaffField(${idx}, 'status', this.value)`)}
                   </div>
-                  ${s.posisi !== 'Kitchen' ? 
-                  '<div class="flex flex-col justify-end">' +
-                    '<label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1 truncate">KERAMAHAN (MISS)?</label>' +
-                    '<select onchange="updateStaffField(' + idx + ', &apos;keramahan&apos;, this.value === &apos;true&apos;)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-[34px]">' +
-                      '<option value="false" ' + (!s.keramahan ? 'selected' : '') + '>Tidak</option>' +
-                      '<option value="true" ' + (s.keramahan ? 'selected' : '') + '>Ya (Miss)</option>' +
-                    '</select>' +
-                  '</div>'
-                  : ''}
+                  ${s.posisi !== 'Kitchen' ? `
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KERAMAHAN (MISS)?</label>
+                    ${renderPillGroup([
+                      {label: 'Tidak', value: 'false'},
+                      {label: 'Ya (Miss)', value: 'true'}
+                    ], s.keramahan.toString(), `updateStaffField(${idx}, 'keramahan', this.value === 'true')`)}
+                  </div>
+                  ` : ''}
                 </div>
                 
                 <div>
@@ -865,21 +865,18 @@ function getDailyTabContent() {
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">QC ESPRESSO (WAJIB)</h3>
           
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM KALIBRASI</label>
-              <input type="time" value="${window.form.qc.espresso.jam}" onchange="window.form.qc.espresso.jam = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
-            </div>
-            <div>
-              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KONDISI</label>
-              <select onchange="window.form.qc.espresso.status = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
-                <option value="Baik" ${window.form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Pilih Status</option>
-                <option value="Baik" ${window.form.qc.espresso.status === 'Baik' ? 'selected' : ''}>Baik / Standar</option>
-                <option value="Pahit" ${window.form.qc.espresso.status === 'Pahit' ? 'selected' : ''}>Pahit / Bitter</option>
-                <option value="Asam" ${window.form.qc.espresso.status === 'Asam' ? 'selected' : ''}>Asam / Sour</option>
-                <option value="Watery" ${window.form.qc.espresso.status === 'Watery' ? 'selected' : ''}>Watery</option>
-              </select>
-            </div>
+          <div class="mb-4">
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-2">JAM KALIBRASI</label>
+            <input type="time" value="${window.form.qc.espresso.jam}" onchange="window.form.qc.espresso.jam = this.value" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none bg-white">
+          </div>
+          <div class="mb-4">
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-2">KONDISI ESPRESSO</label>
+            ${renderPillGroup([
+              {label: 'Baik', value: 'Baik'},
+              {label: 'Pahit / Bitter', value: 'Pahit'},
+              {label: 'Asam / Sour', value: 'Asam'},
+              {label: 'Watery', value: 'Watery'}
+            ], window.form.qc.espresso.status, `window.form.qc.espresso.status = this.value`)}
           </div>
           <div>
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KETERANGAN ADJUST</label>
@@ -896,22 +893,24 @@ function getDailyTabContent() {
           <div class="space-y-3">
             ${window.form.qc.items.length === 0 ? `<p class="text-[10px] text-center text-gray-400 py-4">Tekan tambah untuk mendata QC menu lain.</p>` : ''}
             ${window.form.qc.items.map((row, idx) => `
-              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
-                <div class="flex justify-between items-center mb-2">
-                  <input type="time" value="${row.jam}" onchange="updateQcField(${idx}, 'jam', this.value)" class="w-20 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none">
+              <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/30">
+                <div class="flex justify-between items-center mb-3">
+                  <input type="time" value="${row.jam}" onchange="updateQcField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1.5 text-xs font-bold text-zero-black border border-gray-200 rounded-lg focus:outline-none bg-transparent">
                   <button type="button" onclick="removeQcRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
                 </div>
-                <div class="mb-2">
-                  <input type="text" value="${row.nama}" onchange="updateQcField(${idx}, 'nama', this.value)" placeholder="Nama Menu (Cth: Nasi Goreng)" class="w-full px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
+                <div class="mb-3">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA MENU</label>
+                  <input type="text" value="${row.nama}" onchange="updateQcField(${idx}, 'nama', this.value)" placeholder="Cth: Nasi Goreng" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none">
                 </div>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                   <select onchange="updateQcField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                      <option value="Baik" ${row.status === 'Baik' ? 'selected' : ''}>Status: Baik</option>
-                      <option value="Revisi" ${row.status === 'Revisi' ? 'selected' : ''}>Revisi Rasa/Suhu</option>
-                      <option value="BS" ${row.status === 'BS' ? 'selected' : ''}>BS / Rusak</option>
-                   </select>
+                <div class="mb-3">
+                   <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-2">STATUS QC</label>
+                   ${renderPillGroup([
+                      {label: 'Baik', value: 'Baik'},
+                      {label: 'Revisi Rasa', value: 'Revisi'},
+                      {label: 'BS / Rusak', value: 'BS'}
+                   ], row.status, `updateQcField(${idx}, 'status', this.value)`)}
                 </div>
-                <input type="text" value="${row.keterangan}" onchange="updateQcField(${idx}, 'keterangan', this.value)" placeholder="Catatan tindakan (opsional)" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                <input type="text" value="${row.keterangan}" onchange="updateQcField(${idx}, 'keterangan', this.value)" placeholder="Catatan tindakan (opsional)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
               </div>
             `).join('')}
           </div>
@@ -990,15 +989,20 @@ function getDailyTabContent() {
                   <input type="text" value="${row.item}" onchange="updateFasilitasField(${idx}, 'item', this.value)" placeholder="Nama Alat / Fasilitas" class="flex-1 px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
                   <button type="button" onclick="removeFasilitasRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700 ml-3">HAPUS</button>
                 </div>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                   <select onchange="updateFasilitasField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                      <option value="Rusak Ringan" ${row.status === 'Rusak Ringan' ? 'selected' : ''}>Rusak Ringan</option>
-                      <option value="Rusak Sedang" ${row.status === 'Rusak Sedang' ? 'selected' : ''}>Rusak Sedang</option>
-                      <option value="Rusak Berat" ${row.status === 'Rusak Berat' ? 'selected' : ''}>Rusak Berat (Mati)</option>
-                   </select>
-                   <label class="flex items-center justify-center gap-2 text-[10px] font-bold text-red-500 border border-gray-200 rounded-lg bg-white">
-                    <input type="checkbox" ${row.eskalasi ? 'checked' : ''} onchange="updateFasilitasField(${idx}, 'eskalasi', this.checked)"> Eskalasi
-                  </label>
+                <div class="mb-3">
+                   <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-2">STATUS KERUSAKAN</label>
+                   ${renderPillGroup([
+                      {label: 'Ringan', value: 'Rusak Ringan'},
+                      {label: 'Sedang', value: 'Rusak Sedang'},
+                      {label: 'Berat', value: 'Rusak Berat'}
+                   ], row.status || 'Rusak Ringan', `updateFasilitasField(${idx}, 'status', this.value)`)}
+                </div>
+                <div class="mb-3">
+                   <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-2">ESKALASI KE GM?</label>
+                   ${renderPillGroup([
+                      {label: 'Tidak', value: 'false'},
+                      {label: 'Ya, Urgent', value: 'true'}
+                   ], row.eskalasi ? 'true' : 'false', `updateFasilitasField(${idx}, 'eskalasi', this.value === 'true')`)}
                 </div>
                 <div class="mb-2">
                   <input type="text" value="${row.keterangan || ''}" onchange="updateFasilitasField(${idx}, 'keterangan', this.value)" placeholder="Keterangan singkat..." class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none">
@@ -1033,9 +1037,16 @@ function getDailyTabContent() {
                   <input type="text" value="${row.nama}" onchange="updateBahanField(${idx}, 'nama', this.value)" placeholder="Nama Bahan (Cth: Sabun)" class="flex-1 px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
                   <button type="button" onclick="removeBahanRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700 ml-3">HAPUS</button>
                 </div>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                   <input type="text" value="${row.ketersediaan}" onchange="updateBahanField(${idx}, 'ketersediaan', this.value)" placeholder="Status Cth: Habis/Sisa 1" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
-                   <input type="number" value="${row.harga}" onchange="updateBahanField(${idx}, 'harga', Number(this.value))" placeholder="Estimasi Rp" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                <div class="mb-3">
+                   <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-2">STATUS PERSEDIAAN</label>
+                   ${renderPillGroup([
+                      {label: 'Habis', value: 'Habis'},
+                      {label: 'Menipis', value: 'Menipis'},
+                      {label: 'Stok Baru', value: 'Persediaan Baru'}
+                   ], row.ketersediaan || 'Habis', `updateBahanField(${idx}, 'ketersediaan', this.value)`)}
+                </div>
+                <div class="mb-2">
+                   <input type="number" value="${row.harga}" onchange="updateBahanField(${idx}, 'harga', Number(this.value))" placeholder="Estimasi Harga Belanja (Rp)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
                 </div>
                 <div class="text-right">
                   ${row.photoUrl ? 

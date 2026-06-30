@@ -489,20 +489,21 @@ function api_gm_fetchReports(monthName, year) {
     var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
     var targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
     
-    return {
+    var resultObj = {
       status: "success",
       data: {
-        omsetTotal: omsetTotal,
-        transaksiTotal: transaksiTotal,
-        komplainTotal: komplainTotal,
-        listLaporan: listLaporan,
-        currentFolderId: currentFolderId,
-        targetOmset: Number(targetOmset),
-        chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); })
+        omsetTotal: omsetTotal || 0,
+        transaksiTotal: transaksiTotal || 0,
+        komplainTotal: komplainTotal || 0,
+        listLaporan: listLaporan || [],
+        currentFolderId: currentFolderId || "",
+        targetOmset: Number(targetOmset) || 0,
+        chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); }) || []
       }
     };
+    return JSON.stringify(resultObj);
   } catch (err) {
-    return { status: "error", error: err.toString() };
+    return JSON.stringify({ status: "error", error: err.toString() });
   }
 }
 

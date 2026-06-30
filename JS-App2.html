@@ -706,12 +706,14 @@ async function fetchGMAnalytics() {
   
   showLoading(true);
   try {
-    const res = await Server.call('api_gm_fetchReports', AppState.activeFilters.month, AppState.activeFilters.year);
-    if (res.status === 'success') {
+    const rawRes = await Server.call('api_gm_fetchReports', AppState.activeFilters.month, AppState.activeFilters.year);
+    const res = typeof rawRes === 'string' ? JSON.parse(rawRes) : rawRes;
+    
+    if (res && res.status === 'success') {
       AppState.dashboardData = res.data;
       showToast("Data analitik berhasil diperbarui.");
     } else {
-      showToast("Gagal menarik data: " + res.error, "error");
+      showToast("Gagal menarik data: " + (res ? res.error : "Unknown error"), "error");
     }
   } catch (err) {
     showToast("Kesalahan sistem: " + err.toString(), "error");

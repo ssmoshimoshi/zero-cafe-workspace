@@ -468,13 +468,16 @@ function api_gm_fetchReports(monthName, year) {
     // Calculate simulated transaction total
     var transaksiTotal = listLaporan.length * 45; // arbitrary placeholder simulation
     
+    var currentFolderId = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_ID") || "";
+    
     return {
       status: "success",
       data: {
         omsetTotal: omsetTotal,
         transaksiTotal: transaksiTotal,
         komplainTotal: komplainTotal,
-        listLaporan: listLaporan
+        listLaporan: listLaporan,
+        currentFolderId: currentFolderId
       }
     };
   } catch (err) {
@@ -882,6 +885,27 @@ function api_uploadImage(base64Data, filename, category) {
       success: false,
       error: error.toString()
     };
+  }
+}
+
+/**
+ * Updates the ROOT_FOLDER_ID dynamically via the UI
+ */
+function api_gm_updateFolderId(newId) {
+  if (!newId || newId.trim() === "") {
+    return { success: false, error: "ID Folder tidak boleh kosong." };
+  }
+  
+  try {
+    var folder = DriveApp.getFolderById(newId.trim());
+    var folderName = folder.getName(); // test access
+    
+    var scriptProperties = PropertiesService.getScriptProperties();
+    scriptProperties.setProperty("ROOT_FOLDER_ID", newId.trim());
+    
+    return { success: true, folderName: folderName };
+  } catch (err) {
+    return { success: false, error: "ID Folder tidak valid atau Anda tidak memiliki akses ke folder tersebut." };
   }
 }
 

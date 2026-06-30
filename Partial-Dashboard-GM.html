@@ -111,16 +111,59 @@ window.getDashboardGMTemplate = function() {
 
         <!-- PDF Archives -->
         ${AppState.dashboardData ? `
-          <div class="bg-white p-5 rounded-2xl border border-gray-200">
+          <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
             <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">
               Arsip PDF (${AppState.activeFilters.month} ${AppState.activeFilters.year})
             </h3>
             ${reportsHtml}
           </div>
         ` : ''}
+
+        <!-- Pengaturan Sistem -->
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">Pengaturan Sistem</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Target Folder GDrive ID</label>
+              <p class="text-[10px] text-gray-500 mb-2">Semua file PDF laporan akan disimpan di dalam folder ini.</p>
+              <div class="flex gap-2">
+                <input type="text" id="targetFolderId" value="${(AppState.dashboardData && AppState.dashboardData.currentFolderId) ? AppState.dashboardData.currentFolderId : ''}" class="flex-1 px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black transition-colors" placeholder="Masukkan ID Folder GDrive baru">
+                <button type="button" onclick="updateFolderId()" class="px-4 py-2 bg-zero-black text-white font-bold rounded-xl text-xs hover:bg-gray-800 transition-colors">Simpan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   `;
+}
+
+async function updateFolderId() {
+  const input = document.getElementById('targetFolderId');
+  const newId = input.value.trim();
+  
+  if (!newId) {
+    showToast("ID Folder tidak boleh kosong", "error");
+    return;
+  }
+  
+  showLoading(true);
+  try {
+    const res = await Server.call('api_gm_updateFolderId', newId);
+    if (res.success) {
+      showToast("Berhasil! Folder: " + res.folderName);
+      if (AppState.dashboardData) {
+        AppState.dashboardData.currentFolderId = newId;
+      }
+    } else {
+      showToast("Gagal: " + res.error, "error");
+    }
+  } catch (err) {
+    showToast("Kesalahan sistem: " + err.toString(), "error");
+  } finally {
+    showLoading(false);
+  }
 }
 
 async function fetchGMAnalytics() {

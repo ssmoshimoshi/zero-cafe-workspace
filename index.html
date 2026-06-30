@@ -8,6 +8,30 @@
     window.addEventListener('error', function(e) {
       console.error("Global Error:", e.message, "at", e.filename, ":", e.lineno);
     });
+    
+    // PWA Manifest Generation
+    try {
+      const scriptUrl = <?= JSON.stringify(scriptUrl || "") ?>;
+      if (scriptUrl) {
+        const manifest = {
+          "name": "Zero Cafe",
+          "short_name": "ZeroCafe",
+          "start_url": scriptUrl,
+          "display": "standalone",
+          "background_color": "#ffffff",
+          "theme_color": "#1a1a1a",
+          "icons": [{
+            "src": "https://cdn-icons-png.flaticon.com/512/3124/3124092.png",
+            "sizes": "192x192",
+            "type": "image/png"
+          }]
+        };
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+        document.head.appendChild(link);
+      }
+    } catch(e) { console.warn("PWA Manifest failed", e); }
   </script>
   <?!= include('CSS'); ?>
 </head>

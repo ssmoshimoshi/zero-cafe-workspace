@@ -7,10 +7,15 @@
  * Serves the HTML frontend interface.
  */
 function doGet(e) {
-  return HtmlService.createTemplateFromFile('index')
+  var template = HtmlService.createTemplateFromFile('index');
+  template.scriptUrl = ScriptApp.getService().getUrl();
+  return template
     .evaluate()
     .setTitle('Zero Cafe Workspace')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui')
+    .addMetaTag('theme-color', '#1a1a1a')
+    .addMetaTag('apple-mobile-web-app-capable', 'yes')
+    .addMetaTag('apple-mobile-web-app-status-bar-style', 'black-translucent')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 

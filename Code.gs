@@ -64,11 +64,21 @@ function initializeSystem() {
     staffSheet.getRange(2, 1, defaultStaff.length, 4).setValues(defaultStaff);
   }
   
+  var scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperty("SPREADSHEET_ID", ssId);
+  
   // Set up root folder in Drive
+  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
   var rootFolder;
-  try {
-    rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
-  } catch (e) {
+  if (rootFolderId) {
+    try {
+      rootFolder = DriveApp.getFolderById(rootFolderId);
+    } catch(e) {
+      rootFolderId = null;
+    }
+  }
+  
+  if (!rootFolderId) {
     var folderName = "Zero Cafe Workspace Drive";
     var folders = DriveApp.getFoldersByName(folderName);
     if (folders.hasNext()) {
@@ -76,11 +86,8 @@ function initializeSystem() {
     } else {
       rootFolder = DriveApp.createFolder(folderName);
     }
+    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
-  
-  // Store spreadsheet ID in script properties for persistence
-  var scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty("SPREADSHEET_ID", ssId);
   
   return {
     status: "success",
@@ -172,16 +179,26 @@ function api_addStaff(nama, posisi) {
  * Helper to get or create folder structure in Drive: Root -> Year -> Month -> Category
  */
 function getStructuredFolder(year, monthName, category) {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
   var rootFolder;
-  try {
-    rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
-  } catch(e) {
+  
+  if (rootFolderId) {
+    try {
+      rootFolder = DriveApp.getFolderById(rootFolderId);
+    } catch(e) {
+      rootFolderId = null;
+    }
+  }
+  
+  if (!rootFolderId) {
     var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
     if (folders.hasNext()) {
       rootFolder = folders.next();
     } else {
       rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
     }
+    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
   
   var yearFolder = getOrCreateSubFolder(rootFolder, year);
@@ -195,16 +212,26 @@ function getStructuredFolder(year, monthName, category) {
  * Creates dynamic folder hierarchy based on report type.
  */
 function getDynamicFolder(year, monthName, data) {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
   var rootFolder;
-  try {
-    rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
-  } catch(e) {
+  
+  if (rootFolderId) {
+    try {
+      rootFolder = DriveApp.getFolderById(rootFolderId);
+    } catch(e) {
+      rootFolderId = null;
+    }
+  }
+  
+  if (!rootFolderId) {
     var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
     if (folders.hasNext()) {
       rootFolder = folders.next();
     } else {
       rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
     }
+    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
   
   var yearFolder = getOrCreateSubFolder(rootFolder, year);
@@ -809,16 +836,26 @@ function api_uploadImage(base64Data, filename, category) {
     var monthName = getIndonesianMonth(date.toISOString().split('T')[0]);
     
     // Get or create category folder inside month folder
+    var scriptProperties = PropertiesService.getScriptProperties();
+    var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
     var rootFolder;
-    try {
-      rootFolder = DriveApp.getFolderById("1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj");
-    } catch(e) {
+    
+    if (rootFolderId) {
+      try {
+        rootFolder = DriveApp.getFolderById(rootFolderId);
+      } catch (e) {
+        rootFolderId = null;
+      }
+    }
+    
+    if (!rootFolderId) {
       var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
       if (folders.hasNext()) {
         rootFolder = folders.next();
       } else {
         rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
       }
+      scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
     }
     
     var yearFolder = getOrCreateSubFolder(rootFolder, year);
@@ -845,5 +882,34 @@ function api_uploadImage(base64Data, filename, category) {
       success: false,
       error: error.toString()
     };
+  }
+}
+
+/**
+ * =========================================================================
+ * KONFIGURASI FOLDER GOOGLE DRIVE KHUSUS UNTUK GM
+ * =========================================================================
+ * 
+ * JALANKAN FUNGSI DI BAWAH INI JIKA ANDA INGIN MENGUBAH FOLDER PENYIMPANAN PDF.
+ * Cukup ganti "PASTE_ID_FOLDER_BARU_DISINI" dengan ID folder yang baru, lalu
+ * jalankan fungsi ini dengan menekan tombol "Run" (Jalankan) di atas.
+ */
+function JALANKAN_INI_UNTUK_UBAH_FOLDER() {
+  // Ganti teks di dalam tanda kutip dengan ID Folder Google Drive Anda yang baru.
+  // Pastikan ID-nya benar dan Anda memiliki akses ke folder tersebut.
+  // Contoh ID: "1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj"
+  var idFolderBaru = "1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj"; 
+  
+  try {
+    // Tes apakah folder bisa diakses
+    var folder = DriveApp.getFolderById(idFolderBaru);
+    
+    // Simpan ke Script Properties
+    var scriptProperties = PropertiesService.getScriptProperties();
+    scriptProperties.setProperty("ROOT_FOLDER_ID", idFolderBaru);
+    
+    Logger.log("SUKSES: Target folder penyimpanan PDF berhasil diubah ke: " + folder.getName());
+  } catch (e) {
+    Logger.log("GAGAL: ID Folder tidak ditemukan atau Anda tidak memiliki akses ke folder tersebut. Error: " + e.toString());
   }
 }

@@ -214,37 +214,30 @@ function getStructuredFolder(year, monthName, category) {
  * Creates dynamic folder hierarchy based on report type.
  */
 function getDynamicFolder(year, monthName, data) {
-  var scriptProperties = PropertiesService.getScriptProperties();
-  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
+  var rootFolderId = "1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj";
   var rootFolder;
   
-  if (rootFolderId) {
-    try {
-      rootFolder = DriveApp.getFolderById(rootFolderId);
-    } catch(e) {
-      rootFolderId = null;
-    }
+  try {
+    rootFolder = DriveApp.getFolderById(rootFolderId);
+  } catch(e) {
+    Logger.log("Folder root tidak ditemukan");
+    return null;
   }
   
-  if (!rootFolderId) {
-    var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
-    if (folders.hasNext()) {
-      rootFolder = folders.next();
-    } else {
-      rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
-    }
-    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
-  }
-  
-  var bulanTahun = monthName + " " + year;
-  var monthFolder = getOrCreateSubFolder(rootFolder, bulanTahun);
+  var yearFolder = getOrCreateSubFolder(rootFolder, year);
+  var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
   
   if (data.type === "daily") {
-    return monthFolder; // Daily report goes directly into month folder
+    // Daily report goes directly into month folder: Root > 2026 > Juli
+    return monthFolder;
   } else if (data.type === "weekly") {
-    var periodeStr = data.periode || (data.periodeStart + " - " + data.periodeEnd) || "Mingguan";
-    return getOrCreateSubFolder(monthFolder, periodeStr); // Creates folder like "1-7 Juni"
+    // Mingguan folder: "1-7 juli Laporan mingguan"
+    var periodeStr = data.periode || (data.periodeStart + "-" + data.periodeEnd) || "1-7";
+    var periodeClean = periodeStr.replace(/\s+/g, '');
+    var folderName = periodeClean + " " + monthName.toLowerCase() + " Laporan mingguan";
+    return getOrCreateSubFolder(monthFolder, folderName);
   } else if (data.type === "monthly") {
+    // Bulanan folder: "Laporan Bulanan"
     return getOrCreateSubFolder(monthFolder, "Laporan Bulanan");
   }
   
@@ -281,32 +274,54 @@ function submitFullReport(payloadStr) {
     
     var year, monthName, dateFormatted, supervisor, outlet, pdfCategory;
     var fileName = "";
+    var dd, mm, yyyy;
     
     if (data.type === "daily") {
       dateFormatted = data.tanggal; // YYYY-MM-DD
       var dateParts = dateFormatted.split("-");
-      year = dateParts[0];
+      yyyy = dateParts[0];
+      mm = dateParts[1];
+      dd = dateParts[2];
+      year = yyyy;
       monthName = getIndonesianMonth(dateFormatted);
       supervisor = data.supervisor;
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
-      fileName = dateFormatted + "_Laporan_Harian_" + outlet + ".pdf";
+      
+      // Filename: 01-juli-laporan harian.PDF
+      fileName = dd + "-" + monthName.toLowerCase() + "-laporan harian.pdf";
+      
+      // Update spreadsheet format to DD-MM-YYYY
+      data.tanggal = dd + "-" + mm + "-" + yyyy;
+      
     } else if (data.type === "weekly") {
-      // Periode might be "1-7 Juni" or "22-28 Juni 2026"
-      var periodeStr = data.periode || (data.periodeStart + " - " + data.periodeEnd) || "Mingguan";
-      var parts = periodeStr.split(" ");
-      year = parts.length >= 3 ? parts[parts.length - 1] : new Date().getFullYear().toString();
-      monthName = parts.length >= 2 ? parts[parts.length - (parts.length >= 3 ? 2 : 1)] : getIndonesianMonth(new Date());
+      var periodeStr = data.periode || (data.periodeStart + "-" + data.periodeEnd) || "1-7";
+      // Ensure no spaces in periode for filename
+      var periodeClean = periodeStr.replace(/\s+/g, '');
+      
+      // Extract year and month from the end date if possible, else current
+      var parts = (data.periodeEnd || data.periode || "").split("-");
+      if (parts.length >= 3) {
+        year = parts[0];
+        monthName = getIndonesianMonth(data.periodeEnd);
+      } else {
+        year = new Date().getFullYear().toString();
+        monthName = getIndonesianMonth(new Date());
+      }
       supervisor = data.supervisor;
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
-      fileName = periodeStr.replace(/\s+/g, "_") + "_Laporan_Mingguan_" + outlet + ".pdf";
+      
+      // Filename: 1-7-juli-laporan-mingguan.PDF
+      fileName = periodeClean + "-" + monthName.toLowerCase() + "-laporan-mingguan.pdf";
+      
     } else if (data.type === "monthly") {
-      // bulan is "YYYY-MM"
       var parts = (data.bulan || "").split("-");
       year = parts[0] || new Date().getFullYear().toString();
       monthName = getIndonesianMonth((data.bulan || "") + "-01");
       supervisor = data.supervisor;
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
-      fileName = monthName + "_" + year + "_Laporan_Bulanan_" + outlet + ".pdf";
+      
+      // Filename: Juli-laporan-bulanan.PDF
+      fileName = monthName + "-laporan-bulanan.pdf";
     }
     
     // 1. Generate PDF blob
@@ -365,8 +380,13 @@ function submitFullReport(payloadStr) {
       ]);
     } else if (data.type === "monthly") {
       var sheet = ss.getSheetByName("Monthly");
+      var bulanFormatted = data.bulan;
+      if (bulanFormatted && bulanFormatted.indexOf("-") !== -1) {
+        var p = bulanFormatted.split("-");
+        bulanFormatted = p[1] + "-" + p[0]; // MM-YYYY
+      }
       sheet.appendRow([
-        data.bulan,
+        bulanFormatted,
         data.supervisor,
         data.outlet,
         Number(data.monthly.sales.total || 0),
@@ -863,31 +883,19 @@ function api_uploadImage(base64Data, filename, category) {
     var monthName = getIndonesianMonth(date.toISOString().split('T')[0]);
     
     // Get or create category folder inside month folder
-    var scriptProperties = PropertiesService.getScriptProperties();
-    var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
+    var rootFolderId = "1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj";
     var rootFolder;
     
-    if (rootFolderId) {
-      try {
-        rootFolder = DriveApp.getFolderById(rootFolderId);
-      } catch (e) {
-        rootFolderId = null;
-      }
+    try {
+      rootFolder = DriveApp.getFolderById(rootFolderId);
+    } catch (e) {
+      Logger.log("Folder root tidak ditemukan");
+      return { success: false, error: "Root folder not found" };
     }
     
-      if (!rootFolderId) {
-        var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
-        if (folders.hasNext()) {
-          rootFolder = folders.next();
-        } else {
-          rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
-        }
-        scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
-      }
-      
-      var bulanTahun = monthName + " " + year;
-      var monthFolder = getOrCreateSubFolder(rootFolder, bulanTahun);
-      var categoryFolder = getOrCreateSubFolder(monthFolder, category || "Lain-lain");
+    var yearFolder = getOrCreateSubFolder(rootFolder, year);
+    var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
+    var categoryFolder = getOrCreateSubFolder(monthFolder, category || "Lain-lain");
     
     // Remove base64 prefix if exists (e.g., "data:image/jpeg;base64,")
     var cleanBase64 = base64Data;

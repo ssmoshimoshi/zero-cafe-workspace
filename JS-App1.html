@@ -1479,10 +1479,34 @@ function closePDFPreview() {
 
 function getPDFFilename() {
   const f = window.form;
-  const jenis = f.type === 'daily' ? 'Harian' : f.type === 'weekly' ? 'Mingguan' : 'Bulanan';
-  const periode = f.type === 'daily' ? f.tanggal : f.type === 'weekly' ? (f.periodeStart || f.periode || '') : (f.bulan || '');
-  const outlet = (f.outlet || 'Perintis').replace(/\s+/g, '_');
-  return `${periode}_Laporan_${jenis}_${outlet}.pdf`;
+  const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  
+  if (f.type === 'daily') {
+    const parts = (f.tanggal || "").split("-");
+    if (parts.length === 3) {
+      const monthName = months[parseInt(parts[1], 10) - 1].toLowerCase();
+      return `${parts[2]}-${monthName}-laporan harian.pdf`;
+    }
+  } else if (f.type === 'weekly') {
+    const periodeStr = f.periode || (f.periodeStart + "-" + f.periodeEnd) || "1-7";
+    const periodeClean = periodeStr.replace(/\s+/g, '');
+    const parts = (f.periodeEnd || f.periode || "").split("-");
+    let monthName = "juli"; // Default
+    if (parts.length >= 3) {
+      monthName = months[parseInt(parts[1], 10) - 1].toLowerCase();
+    } else {
+      monthName = months[new Date().getMonth()].toLowerCase();
+    }
+    return `${periodeClean}-${monthName}-laporan-mingguan.pdf`;
+  } else if (f.type === 'monthly') {
+    const parts = (f.bulan || "").split("-");
+    let monthName = "juli";
+    if (parts.length >= 2) {
+      monthName = months[parseInt(parts[1], 10) - 1].toLowerCase();
+    }
+    return `${monthName}-laporan-bulanan.pdf`;
+  }
+  return "laporan.pdf";
 }
 
 async function createPdfContainer(htmlContent) {

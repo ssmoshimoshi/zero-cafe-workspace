@@ -236,8 +236,8 @@ function getDynamicFolder(year, monthName, data) {
     scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
   
-  var yearFolder = getOrCreateSubFolder(rootFolder, year);
-  var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
+  var bulanTahun = monthName + " " + year;
+  var monthFolder = getOrCreateSubFolder(rootFolder, bulanTahun);
   
   if (data.type === "daily") {
     return monthFolder; // Daily report goes directly into month folder

@@ -1155,33 +1155,32 @@ function buildPDFHtml(f) {
   const base = `
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Inter', sans-serif; font-size: 11px; color: #1a1a1a; background: #fff; }
-      .pdf-page { padding: 28px 32px; }
-      .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 14px; margin-bottom: 20px; }
-      .header-title { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
-      .header-sub { font-size: 10px; color: #666; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-      .header-meta { text-align: right; font-size: 10px; color: #666; }
-      .header-meta strong { display: block; font-size: 13px; font-weight: 700; color: #111; }
-      .section { margin-bottom: 18px; }
-      .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #888; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
-      table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
-      th { background: #111; color: #fff; padding: 6px 8px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-      td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-      tr:nth-child(even) td { background: #fafafa; }
-      .badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: 9px; font-weight: 700; }
-      .badge-green { background: #dcfce7; color: #15803d; }
-      .badge-yellow { background: #fef9c3; color: #a16207; }
-      .badge-red { background: #fee2e2; color: #b91c1c; }
-      .badge-gray { background: #f3f4f6; color: #374151; }
-      .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-      .stat-box { background: #f8f8f8; border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; }
-      .stat-label { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 3px; }
-      .stat-value { font-size: 16px; font-weight: 900; color: #111; }
-      .stat-value.green { color: #16a34a; }
-      .stat-value.red { color: #dc2626; }
-      p.note { font-size: 10.5px; color: #444; line-height: 1.6; padding: 8px 10px; background: #f9f9f9; border-left: 3px solid #ddd; border-radius: 0 6px 6px 0; }
-      .footer { margin-top: 30px; padding-top: 14px; border-top: 1px solid #eee; display: flex; justify-content: space-between; font-size: 9px; color: #aaa; }
+      .pdf-page * { margin: 0; padding: 0; box-sizing: border-box; }
+      .pdf-page { font-family: 'Inter', sans-serif; font-size: 11px; color: #1a1a1a; background: #fff; padding: 28px 32px; min-height: 1122px; }
+      .pdf-page .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 14px; margin-bottom: 20px; }
+      .pdf-page .header-title { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+      .pdf-page .header-sub { font-size: 10px; color: #666; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+      .pdf-page .header-meta { text-align: right; font-size: 10px; color: #666; }
+      .pdf-page .header-meta strong { display: block; font-size: 13px; font-weight: 700; color: #111; }
+      .pdf-page .section { margin-bottom: 18px; }
+      .pdf-page .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #888; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+      .pdf-page table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+      .pdf-page th { background: #111; color: #fff; padding: 6px 8px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .pdf-page td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+      .pdf-page tr:nth-child(even) td { background: #fafafa; }
+      .pdf-page .badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: 9px; font-weight: 700; }
+      .pdf-page .badge-green { background: #dcfce7; color: #15803d; }
+      .pdf-page .badge-yellow { background: #fef9c3; color: #a16207; }
+      .pdf-page .badge-red { background: #fee2e2; color: #b91c1c; }
+      .pdf-page .badge-gray { background: #f3f4f6; color: #374151; }
+      .pdf-page .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .pdf-page .stat-box { background: #f8f8f8; border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; }
+      .pdf-page .stat-label { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 3px; }
+      .pdf-page .stat-value { font-size: 16px; font-weight: 900; color: #111; }
+      .pdf-page .stat-value.green { color: #16a34a; }
+      .pdf-page .stat-value.red { color: #dc2626; }
+      .pdf-page p.note { font-size: 10.5px; color: #444; line-height: 1.6; padding: 8px 10px; background: #f9f9f9; border-left: 3px solid #ddd; border-radius: 0 6px 6px 0; }
+      .pdf-page .footer { margin-top: 30px; padding-top: 14px; border-top: 1px solid #eee; display: flex; justify-content: space-between; font-size: 9px; color: #aaa; }
     </style>
     <div class="pdf-page">
       <div class="header">
@@ -1512,8 +1511,6 @@ async function downloadPDF() {
   const htmlContent = buildPDFHtml(f);
   const filename = getPDFFilename();
 
-  const tempDiv = await createPdfContainer(htmlContent);
-
   const opt = {
     margin: 0,
     filename: filename,
@@ -1522,12 +1519,10 @@ async function downloadPDF() {
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(tempDiv).save().then(() => {
-    document.body.removeChild(tempDiv);
+  html2pdf().set(opt).from(htmlContent).save().then(() => {
     showLoading(false);
     showToast('PDF berhasil disimpan!', 'success');
   }).catch(err => {
-    document.body.removeChild(tempDiv);
     showLoading(false);
     console.error(err);
     showToast('Gagal membuat PDF. Coba lagi.', 'error');
@@ -1542,8 +1537,6 @@ async function sharePDF() {
   const htmlContent = buildPDFHtml(f);
   const filename = getPDFFilename();
 
-  const tempDiv = await createPdfContainer(htmlContent);
-
   const opt = {
     margin: 0,
     filename: filename,
@@ -1553,8 +1546,7 @@ async function sharePDF() {
   };
 
   try {
-    const pdfBlob = await html2pdf().set(opt).from(tempDiv).outputPdf('blob');
-    document.body.removeChild(tempDiv);
+    const pdfBlob = await html2pdf().set(opt).from(htmlContent).outputPdf('blob');
     showLoading(false);
 
     const file = new File([pdfBlob], filename, { type: 'application/pdf' });

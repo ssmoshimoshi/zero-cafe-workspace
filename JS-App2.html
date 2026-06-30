@@ -857,33 +857,8 @@ function openPreviewModal() {
   const modal = document.getElementById('previewModal');
   if (!body || !modal) return;
   
-  let previewHtml = "";
-  if (window.form.type === 'daily') {
-    const totalSales = Number(window.form.penjualan.shift1 || 0) + Number(window.form.penjualan.shift2 || 0);
-    previewHtml = `<div class="space-y-4">
-      <p><strong>Laporan Harian:</strong> ${window.form.tanggal} | SPV: ${window.form.supervisor}</p>
-      <p><strong>Target Harian:</strong> Rp ${Number(window.form.penjualan.target || 0).toLocaleString()}</p>
-      <p><strong>Total Omset Real:</strong> Rp ${totalSales.toLocaleString()}</p>
-      <p><strong>Total Transaksi:</strong> ${window.form.penjualan.transaksi} struk</p>
-      <p><strong>Total Komplain / Remake:</strong> ${window.form.feedback.totalKomplain} / ${window.form.feedback.totalRemake}</p>
-      <p><strong>Kendala Utama:</strong> ${window.form.penutup.kendala || 'Tidak ada'}</p>
-    </div>`;
-  } else if (window.form.type === 'weekly') {
-    let totalReal = 0; window.form.weekly.salesHarian.forEach(s => totalReal += Number(s.real || 0));
-    previewHtml = `<div class="space-y-4">
-      <p><strong>Laporan Mingguan:</strong> Periode ${window.form.periode} | SPV: ${window.form.supervisor}</p>
-      <p><strong>Total Sales 7 Hari:</strong> Rp ${totalReal.toLocaleString()}</p>
-      <p><strong>Komplain / Remake:</strong> ${window.form.weekly.komplain.total} / ${window.form.weekly.komplain.remake}</p>
-      <p><strong>Kendala Utama Berulang:</strong> ${window.form.weekly.kendalaUtama || 'Tidak ada'}</p>
-    </div>`;
-  } else if (window.form.type === 'monthly') {
-    previewHtml = `<div class="space-y-4">
-      <p><strong>Laporan Bulanan:</strong> Bulan ${window.form.bulan} | SPV: ${window.form.supervisor}</p>
-      <p><strong>Total Sales Bulanan:</strong> Rp ${Number(window.form.monthly.sales.total || 0).toLocaleString()}</p>
-      <p><strong>Pencapaian:</strong> ${window.form.monthly.sales.persen}%</p>
-      <p><strong>Kepatuhan SOP:</strong> ${window.form.monthly.operasional.kepatuhanSop}% | Rating Kinerja: ${window.form.monthly.evaluasi.ratingKerja}/10</p>
-    </div>`;
-  }
+  // Ensure all data in form is updated before building HTML
+  const previewHtml = buildPDFHtml(window.form);
   body.innerHTML = previewHtml;
   modal.classList.remove('hidden');
 }
@@ -900,7 +875,6 @@ async function submitReport() {
     
     // Generate Base64 PDF to send to GDrive so the format perfectly matches the client
     const htmlContent = buildPDFHtml(f);
-    const tempDiv = await createPdfContainer(htmlContent);
     
     const opt = {
       margin: 0,
@@ -911,14 +885,12 @@ async function submitReport() {
     };
     
     try {
-      const base64String = await html2pdf().set(opt).from(tempDiv).output('datauristring');
+      const base64String = await html2pdf().set(opt).from(htmlContent).outputPdf('datauristring');
       if (base64String && base64String.includes(',')) {
         f.pdfBase64 = base64String.split(',')[1];
       }
     } catch (e) {
       console.warn("Gagal membuat base64 PDF, mengirim tanpa PDF base64", e);
-    } finally {
-      if (tempDiv.parentNode) document.body.removeChild(tempDiv);
     }
     
     const payloadStr = JSON.stringify(f);

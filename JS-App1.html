@@ -336,6 +336,14 @@ function getLoginTemplate() {
           <span class="text-gray-400 group-active:text-white">→</span>
         </button>
       </div>
+      
+      <!-- PWA Install Button & Guide (Login Screen) -->
+      <div class="mt-12 text-center w-full">
+        <button onclick="showInstallGuide()" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-zero-black rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Install App di HP
+        </button>
+      </div>
     </div>
   `;
 }
@@ -384,9 +392,73 @@ function getMenuSPVTemplate() {
           <span class="text-gray-300 group-active:text-white">→</span>
         </div>
       </div>
+      
+      <!-- PWA Install Button & Guide -->
+      <div class="mt-12 text-center">
+        <button onclick="showInstallGuide()" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-zero-black rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Install App di HP
+        </button>
+      </div>
+      
+      <!-- Install Guide Modal (Hidden by default) -->
+      <div id="installGuideModal" class="fixed inset-0 bg-black/60 z-50 hidden flex-col items-center justify-end pb-10 px-4 transition-opacity duration-300 opacity-0">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 transform translate-y-10 transition-transform duration-300 shadow-2xl" id="installGuideContent">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-extrabold text-zero-black">CARA INSTALL APLIKASI</h3>
+            <button onclick="hideInstallGuide()" class="text-gray-400 hover:text-zero-black font-bold text-lg leading-none">&times;</button>
+          </div>
+          
+          <div class="space-y-4 text-xs text-gray-600 mb-6">
+            <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+              <p class="font-bold text-blue-900 mb-1">📱 Android (Chrome)</p>
+              <p>1. Ketuk ikon <strong>Titik Tiga (⋮)</strong> di pojok kanan atas browser.</p>
+              <p>2. Pilih <strong>"Tambahkan ke Layar Utama"</strong> (Add to Home screen).</p>
+              <p>3. Ketuk "Tambahkan".</p>
+            </div>
+            
+            <div class="p-3 bg-gray-50/50 rounded-xl border border-gray-200">
+              <p class="font-bold text-gray-900 mb-1">🍎 iOS (Safari/iPhone)</p>
+              <p>1. Ketuk ikon <strong>Bagikan (Share)</strong> di menu bawah.</p>
+              <p>2. Scroll ke bawah dan pilih <strong>"Tambah ke Layar Utama"</strong>.</p>
+              <p>3. Ketuk "Tambah" di pojok kanan atas.</p>
+            </div>
+            
+            <p class="text-[10px] text-gray-400 text-center italic mt-2">Aplikasi akan muncul di layar utama HP Anda tanpa perlu mendownload dari App Store / Play Store.</p>
+          </div>
+          
+          <button onclick="hideInstallGuide()" class="w-full py-3 bg-zero-black text-white font-bold rounded-2xl text-xs uppercase tracking-widest hover:bg-gray-800 transition-colors">Saya Mengerti</button>
+        </div>
+      </div>
     </div>
   `;
 }
+
+// Global functions for Install Guide
+window.showInstallGuide = function() {
+  const modal = document.getElementById('installGuideModal');
+  const content = document.getElementById('installGuideContent');
+  if (modal && content) {
+    modal.classList.remove('hidden');
+    // Allow display block to apply before animating opacity
+    setTimeout(() => {
+      modal.classList.remove('opacity-0');
+      content.classList.remove('translate-y-10');
+    }, 10);
+  }
+};
+
+window.hideInstallGuide = function() {
+  const modal = document.getElementById('installGuideModal');
+  const content = document.getElementById('installGuideContent');
+  if (modal && content) {
+    modal.classList.add('opacity-0');
+    content.classList.add('translate-y-10');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300); // Wait for transition
+  }
+};
 
 function startNewForm(type) {
   if (loadDraft(type)) {

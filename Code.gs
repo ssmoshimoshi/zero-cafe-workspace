@@ -956,6 +956,7 @@ function JALANKAN_INI_UNTUK_UBAH_FOLDER() {
     Logger.log("SUKSES: Target folder penyimpanan PDF berhasil diubah ke: " + folder.getName());
   } catch (e) {
     Logger.log("GAGAL: Error: " + e.toString());
+  }
 }
 
 /**

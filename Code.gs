@@ -541,10 +541,10 @@ function generateHtmlReport(data) {
     html += `<table>
       <tr><th>Shift 1</th><th>Shift 2</th><th>Total Realisasi</th><th>Target Harian</th><th>Total Transaksi</th></tr>
       <tr>
-        <td>Rp ${Number(data.penjualan.shift1 || 0).toLocaleString()}</td>
-        <td>Rp ${Number(data.penjualan.shift2 || 0).toLocaleString()}</td>
-        <td class="highlight">Rp ${totalReal.toLocaleString()}</td>
-        <td>Rp ${Number(data.penjualan.target || 0).toLocaleString()}</td>
+        <td>Rp ${Number(data.penjualan.shift1 || 0).toLocaleString('id-ID')}</td>
+        <td>Rp ${Number(data.penjualan.shift2 || 0).toLocaleString('id-ID')}</td>
+        <td class="highlight">Rp ${totalReal.toLocaleString('id-ID')}</td>
+        <td>Rp ${Number(data.penjualan.target || 0).toLocaleString('id-ID')}</td>
         <td>${data.penjualan.transaksi || 0}</td>
       </tr>
     </table>`;
@@ -557,16 +557,16 @@ function generateHtmlReport(data) {
     </table>`;
     
     html += `<h2>C. Audit Kas Kasir</h2>`;
-    html += `<p>Modal Awal: <strong>Rp ${Number(data.kas.modalAwal || 0).toLocaleString()}</strong></p>`;
+    html += `<p>Modal Awal: <strong>Rp ${Number(data.kas.modalAwal || 0).toLocaleString('id-ID')}</strong></p>`;
     html += `<table>
       <tr><th>Jam</th><th>Aktual</th><th>QRIS</th><th>Tunai</th><th>Keterangan</th></tr>`;
     if (data.kas.audit && data.kas.audit.length > 0) {
       data.kas.audit.forEach(function(row) {
         html += `<tr>
           <td>${row.jam || '-'}</td>
-          <td>Rp ${Number(row.aktual || 0).toLocaleString()}</td>
-          <td>Rp ${Number(row.qris || 0).toLocaleString()}</td>
-          <td>Rp ${Number(row.tunai || 0).toLocaleString()}</td>
+          <td>Rp ${Number(row.aktual || 0).toLocaleString('id-ID')}</td>
+          <td>Rp ${Number(row.qris || 0).toLocaleString('id-ID')}</td>
+          <td>Rp ${Number(row.tunai || 0).toLocaleString('id-ID')}</td>
           <td>${row.keterangan || '-'}</td>
         </tr>`;
       });
@@ -664,7 +664,7 @@ function generateHtmlReport(data) {
         html += `<tr>
           <td>${row.nama || '-'}</td>
           <td>${row.ketersediaan || '-'}</td>
-          <td>Rp ${Number(row.harga || 0).toLocaleString()}</td>
+          <td>Rp ${Number(row.harga || 0).toLocaleString('id-ID')}</td>
         </tr>`;
       });
     } else {
@@ -690,8 +690,8 @@ function generateHtmlReport(data) {
       data.weekly.salesHarian.forEach(function(s) {
         html += `<tr>
           <td>${s.hari || '-'}</td>
-          <td>Rp ${Number(s.target || 0).toLocaleString()}</td>
-          <td>Rp ${Number(s.real || 0).toLocaleString()}</td>
+          <td>Rp ${Number(s.target || 0).toLocaleString('id-ID')}</td>
+          <td>Rp ${Number(s.real || 0).toLocaleString('id-ID')}</td>
         </tr>`;
       });
     }
@@ -768,8 +768,8 @@ function generateHtmlReport(data) {
     html += `<table>
       <tr><th>Total Sales</th><th>Target Sales</th><th>Pencapaian %</th></tr>
       <tr>
-        <td class="highlight">Rp ${Number(data.monthly.sales.total || 0).toLocaleString()}</td>
-        <td>Rp ${Number(data.monthly.sales.target || 0).toLocaleString()}</td>
+        <td class="highlight">Rp ${Number(data.monthly.sales.total || 0).toLocaleString('id-ID')}</td>
+        <td>Rp ${Number(data.monthly.sales.target || 0).toLocaleString('id-ID')}</td>
         <td>${data.monthly.sales.persen || 0}%</td>
       </tr>
     </table>`;
@@ -835,7 +835,7 @@ function generateHtmlReport(data) {
     html += `<p><strong>Rekomendasi QC:</strong> ${data.monthly.qc.rekomendasi || '-'}</p>`;
     
     html += `<h2>F. Fasilitas & Rencana Strategis</h2>`;
-    html += `<p><strong>Pengeluaran Perbaikan Fasilitas:</strong> Rp ${Number(data.monthly.fasilitas.pengeluaran || 0).toLocaleString()}</p>`;
+    html += `<p><strong>Pengeluaran Perbaikan Fasilitas:</strong> Rp ${Number(data.monthly.fasilitas.pengeluaran || 0).toLocaleString('id-ID')}</p>`;
     html += `<p><strong>Eskalasi Kerusakan Utama:</strong> ${data.monthly.fasilitas.eskalasi || '-'}</p>`;
     html += `<p><strong>Strategi Bulan Depan:</strong><br/>${data.monthly.rencana.strategi || '-'}</p>`;
     html += `<p><strong>Kebutuhan Supervisor:</strong><br/>${data.monthly.rencana.gm || '-'}</p>`;

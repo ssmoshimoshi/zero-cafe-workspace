@@ -616,7 +616,7 @@ function getDashboardGMTemplate() {
           </div>
         </div>
         <div class="bg-zero-black p-5 rounded-2xl text-white flex justify-between items-center shadow-md">
-          <div><span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset Outlet</span><span class="text-xl font-extrabold">Rp ${data.omsetTotal.toLocaleString()}</span></div>
+          <div><span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset Outlet</span><span class="text-xl font-extrabold">Rp ${data.omsetTotal.toLocaleString('id-ID')}</span></div>
         </div>
         <div class="bg-white p-5 rounded-2xl border border-gray-200 flex justify-between items-center">
           <div><span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Transaksi</span><span class="text-xl font-extrabold text-zero-black">${data.transaksiTotal} Struk</span></div>
@@ -801,7 +801,7 @@ function renderGMChart() {
           bodyFont: { size: 12, weight: 'bold' },
           callbacks: {
             label: function(context) {
-              return 'Rp ' + context.parsed.y.toLocaleString();
+              return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
             }
           }
         }

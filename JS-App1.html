@@ -24,6 +24,15 @@ const StorageHelper = {
   }
 };
 
+/*  === FORMAT DATE HELPER === */
+function formatDateIndo(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    return parts[2] + "-" + parts[1] + "-" + parts[0];
+  }
+  return dateStr;
+}
 /*  === GLOBAL APPLICATION STATE === */
 const AppState = {
   role: null,             /*  "SPV" | "GM" | null */
@@ -516,8 +525,8 @@ function getDailyFormTemplate() {
     <div class="w-full min-h-screen pb-24 bg-[#f3f4f6]">
       <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
         <div>
-          <h2 class="text-sm font-extrabold text-zero-black">LAPORAN HARIAN</h2>
-          <p class="text-[10px] font-bold text-gray-400">${window.form.tanggal || ''}</p>
+          <div><h2 class="text-xl font-extrabold text-zero-black">Laporan Harian</h2>
+          <p class="text-[10px] font-bold text-gray-400">${formatDateIndo(window.form.tanggal)}</p></div>
         </div>
         <div class="flex items-center gap-2">
           <button type="button" onclick="confirmResetForm()" class="p-2 border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all" title="Reset Laporan">

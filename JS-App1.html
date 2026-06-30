@@ -459,7 +459,18 @@ function removeStaffRow(idx) {
 function saveDraft(quiet = false) {
   if (window.form.type === 'daily' || window.form.type === 'weekly' || window.form.type === 'monthly') {
     StorageHelper.set(`zc_draft_${window.form.type}`, JSON.stringify(form));
+    
     if (!quiet) showToast("Draft berhasil disimpan!");
+    
+    // Tampilkan indikator visual (Auto-Save)
+    const indicator = document.getElementById('draftIndicator');
+    if (indicator) {
+      indicator.classList.remove('opacity-0');
+      clearTimeout(window.draftIndicatorTimeout);
+      window.draftIndicatorTimeout = setTimeout(() => {
+        indicator.classList.add('opacity-0');
+      }, 2000);
+    }
   }
 }
 
@@ -472,6 +483,21 @@ function loadDraft(type) {
   }
   return false;
 }
+
+// Auto-save global listener untuk setiap input/change
+function bindAutoSave() {
+  const root = document.getElementById('app-root');
+  if (!root) return;
+  root.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+      clearTimeout(window.autoSaveDebounce);
+      window.autoSaveDebounce = setTimeout(() => saveDraft(true), 800);
+    }
+  });
+}
+
+// Pasang listener sekali saat load
+document.addEventListener('DOMContentLoaded', bindAutoSave);
 
 /*  Auto-save aman dengan Wrapper (tidak crash saat quota storage error) */
 setInterval(() => {

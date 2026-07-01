@@ -1,5 +1,15 @@
 # Zero Cafe Workspace - CHANGELOG
 
+## [v124] - 2026-07-02
+### STABLE CHECKPOINT - Halaman Laporan Mingguan (Weekly Report)
+- **Finalized Weekly Report**: Semua perbaikan UI dan logika data pada halaman Laporan Mingguan telah distabilkan. Fitur berfungsi 100% seperti yang diharapkan.
+  - **Validasi Ketat**: Menerapkan validasi wajib pengisian periode tepat 7 hari dan validasi seluruh input (termasuk Supervisor) sebelum Export PDF atau Tinjau & Kirim dilakukan.
+  - **Auto-Pull Database**: Laporan Mingguan kini otomatis menarik data Omset Harian (Realisasi) dari Google Sheets saat rentang tanggal dipilih.
+  - **Target Omset Harian Backend**: (PENTING) Menambahkan fungsi backend di `submitFullReport` agar nilai Target Omset yang diinput pada Laporan Harian ikut disimpan ke dalam database. Ini memastikan Laporan Mingguan bisa otomatis menarik nilai target tersebut di masa depan.
+  - **Weekly Sales Summary**: Menambahkan rekapitulasi Total Target dan Total Omset Aktual beserta *Progress Bar* interaktif (berubah warna otomatis berdasarkan persentase) tepat di bawah input omset 7 hari.
+  - **UI/UX & PDF**: Dropdown evaluasi staff kini memiliki placeholder "Status" yang wajib dipilih, warnanya otomatis menyesuaikan (Hijau/Kuning/Merah). Format penamaan PDF Laporan Mingguan juga telah diperbaiki menjadi `DD-DD-bulan-laporan mingguan.pdf`.
+- **Catatan Penting**: Versi ini (GAS `v124`) adalah **titik aman (stable checkpoint) KEDUA**. Jika terjadi masalah pada Laporan Mingguan di masa depan, kita bisa rollback ke titik ini.
+
 ## [v118] - 2026-07-02
 ### STABLE CHECKPOINT - Halaman Laporan Harian (Daily Report)
 - **Finalized Daily Report**: Semua bug kritis pada halaman Laporan Harian telah diperbaiki dan distabilkan. Fitur ini 100% berfungsi seperti yang diharapkan.

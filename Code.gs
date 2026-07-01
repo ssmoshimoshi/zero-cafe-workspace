@@ -431,8 +431,10 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
     if (!sheet) return { success: false, error: "Tab Daily tidak ditemukan" };
     
     var data = sheet.getDataRange().getValues();
-    var start = new Date(startDateStr).getTime();
-    var end = new Date(endDateStr).getTime();
+    var startD = new Date(startDateStr);
+    var endD = new Date(endDateStr);
+    var start = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate()).getTime();
+    var end = new Date(endD.getFullYear(), endD.getMonth(), endD.getDate()).getTime();
     
     var dailyTotals = {
       "Senin": { target: 0, real: 0 },
@@ -449,14 +451,26 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
     
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      // row[0] is date string like DD-MM-YYYY
-      var dateParts = String(row[0]).split("-");
-      if (dateParts.length === 3) {
-        var d = parseInt(dateParts[0], 10);
-        var m = parseInt(dateParts[1], 10) - 1;
-        var y = parseInt(dateParts[2], 10);
-        var rowDate = new Date(y, m, d);
-        var t = rowDate.getTime();
+      var rowDate = null;
+      if (row[0] instanceof Date) {
+        rowDate = row[0];
+      } else {
+        var dateParts = String(row[0]).split("-");
+        if (dateParts.length === 3) {
+          var d = parseInt(dateParts[0], 10);
+          var m = parseInt(dateParts[1], 10) - 1;
+          var y = parseInt(dateParts[2], 10);
+          if (y < 2000) { // Format is likely YYYY-MM-DD
+            y = parseInt(dateParts[0], 10);
+            d = parseInt(dateParts[2], 10);
+          }
+          rowDate = new Date(y, m, d);
+        }
+      }
+      
+      if (rowDate) {
+        // Normalize the time to midnight for accurate comparison
+        var t = new Date(rowDate.getFullYear(), rowDate.getMonth(), rowDate.getDate()).getTime();
         
         if (t >= start && t <= end && String(row[2]).toLowerCase() === String(outlet).toLowerCase()) {
           var dayName = daysMap[rowDate.getDay()];

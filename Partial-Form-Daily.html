@@ -7,8 +7,8 @@ window.updateDailyProgress = function() {
   if (!targetEl || !s1El || !s2El) return;
 
   let target = parseRupiah(targetEl.value) || 0;
-  let s1 = Number(s1El.value) || 0;
-  let s2 = Number(s2El.value) || 0;
+  let s1 = parseRupiah(s1El.value) || 0;
+  let s2 = parseRupiah(s2El.value) || 0;
   
   form.penjualan.target = target;
   form.penjualan.shift1 = s1;
@@ -168,11 +168,11 @@ function getDailyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">06:00 – 16:59 (Rp)</label>
-              <input id="inputShift1" type="number" value="${form.penjualan.shift1 || ''}" oninput="updateDailyProgress()" onchange="updateDailyProgress()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input id="inputShift1" type="text" value="${form.penjualan.shift1 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.penjualan.shift1) : ''}" oninput="updateDailyProgress()" onchange="form.penjualan.shift1 = parseRupiah(this.value); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="Rp 0">
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">17:00 – 04:00 (Rp)</label>
-              <input id="inputShift2" type="number" value="${form.penjualan.shift2 || ''}" oninput="updateDailyProgress()" onchange="updateDailyProgress()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input id="inputShift2" type="text" value="${form.penjualan.shift2 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.penjualan.shift2) : ''}" oninput="updateDailyProgress()" onchange="form.penjualan.shift2 = parseRupiah(this.value); formatRupiah(this);" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="Rp 0">
             </div>
           </div>
           
@@ -335,7 +335,7 @@ function getDailyTabContent() {
                 </div>
                 
                 <div>
-                  <input type="text" value="${s.keterangan || ''}" onchange="updateStaffField(${idx}, 'keterangan', this.value)" placeholder="Catatan khusus (Opsional)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-gray-300">
+                  <textarea onchange="updateStaffField(${idx}, 'keterangan', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Catatan khusus (Opsional)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-gray-300 resize-none overflow-hidden" style="min-height:36px">${s.keterangan || ''}</textarea>
                 </div>
               </div>
             `).join('')}
@@ -388,7 +388,7 @@ function getDailyTabContent() {
           </div>
           <div>
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KETERANGAN ADJUST</label>
-            <input type="text" value="${form.qc.espresso.keterangan || ''}" onchange="form.qc.espresso.keterangan = this.value" placeholder="Contoh: Ubah grind size karena..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+            <textarea onchange="form.qc.espresso.keterangan = this.value" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Contoh: Ubah grind size karena..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none resize-none overflow-hidden" style="min-height:36px">${form.qc.espresso.keterangan || ''}</textarea>
           </div>
         </div>
 
@@ -416,7 +416,7 @@ function getDailyTabContent() {
                       <option value="BS" ${row.status === 'BS' ? 'selected' : ''}>BS / Rusak</option>
                    </select>
                 </div>
-                <input type="text" value="${row.keterangan}" onchange="updateQcField(${idx}, 'keterangan', this.value)" placeholder="Catatan tindakan (opsional)" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                <textarea onchange="updateQcField(${idx}, 'keterangan', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Catatan tindakan (opsional)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none resize-none overflow-hidden" style="min-height:36px">${row.keterangan || ''}</textarea>
               </div>
             `).join('')}
           </div>
@@ -461,10 +461,10 @@ function getDailyTabContent() {
                   <button type="button" onclick="removeFeedbackRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
                 </div>
                 <div class="mb-2">
-                  <input type="text" value="${row.isi}" onchange="updateFeedbackField(${idx}, 'isi', this.value)" placeholder="Isi komplain/keluhan" class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none">
+                  <textarea onchange="updateFeedbackField(${idx}, 'isi', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Isi komplain/keluhan" class="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none resize-none overflow-hidden" style="min-height:36px">${row.isi || ''}</textarea>
                 </div>
                 <div class="mb-2">
-                  <input type="text" value="${row.respon}" onchange="updateFeedbackField(${idx}, 'respon', this.value)" placeholder="Tindakan penyelesaian tim" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-yellow-50/50">
+                  <textarea onchange="updateFeedbackField(${idx}, 'respon', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Tindakan penyelesaian tim" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-yellow-50/50 resize-none overflow-hidden" style="min-height:36px">${row.respon || ''}</textarea>
                 </div>
                 <div class="flex items-center gap-4 px-1">
                   <label class="flex items-center gap-2 text-[10px] font-bold text-gray-500">
@@ -570,6 +570,12 @@ function getDailyTabContent() {
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">REKOMENDASI / SARAN</label>
             <textarea onchange="form.penutup.rekomendasi = this.value" placeholder="Saran perbaikan operasional..." class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none h-24">${form.penutup.rekomendasi}</textarea>
+          </div>
+          
+          <div class="space-y-3 mt-6">
+            <button type="button" onclick="saveDraft()" class="w-full py-3 border-2 border-zero-black rounded-xl text-sm font-bold text-zero-black hover:bg-gray-50 transition-all">SIMPAN DRAFT</button>
+            <button type="button" onclick="exportToPDF()" class="w-full py-3 bg-red-600 rounded-xl text-sm font-bold text-white hover:bg-red-700 transition-all">EXPORT PDF</button>
+            <button type="button" onclick="submitFullReport()" class="w-full py-4 bg-zero-black rounded-xl text-sm font-bold text-white shadow-lg hover:bg-gray-800 transition-all">TINJAU & KIRIM LAPORAN</button>
           </div>
         </div>
       `;

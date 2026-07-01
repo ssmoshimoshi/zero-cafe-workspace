@@ -1,5 +1,38 @@
 <!-- Partial-Form-Daily.html -->
 <script>
+window.updateDailyProgress = function() {
+  let targetEl = document.getElementById('inputTarget');
+  let s1El = document.getElementById('inputShift1');
+  let s2El = document.getElementById('inputShift2');
+  if (!targetEl || !s1El || !s2El) return;
+
+  let target = parseRupiah(targetEl.value) || 0;
+  let s1 = Number(s1El.value) || 0;
+  let s2 = Number(s2El.value) || 0;
+  
+  form.penjualan.target = target;
+  form.penjualan.shift1 = s1;
+  form.penjualan.shift2 = s2;
+  
+  let total = s1 + s2;
+  let pct = target > 0 ? Math.round((total / target) * 100) : 0;
+  let barPct = Math.min(pct, 100);
+  let barColor = pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-zero-black' : 'bg-gray-500';
+  
+  let fill = document.getElementById('progressBarFill');
+  let pctText = document.getElementById('progressTextPct');
+  let detailText = document.getElementById('progressTextDetail');
+  
+  if (fill) {
+    fill.style.width = barPct + '%';
+    fill.className = barColor + ' h-2 rounded-full transition-all duration-500';
+  }
+  if (pctText) pctText.innerText = pct + '%';
+  if (detailText) {
+    detailText.innerText = target > 0 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(total) + ' dari Rp ' + new Intl.NumberFormat('id-ID').format(target) : 'Isi target omset untuk melihat progress';
+  }
+}
+
 window.getDailyFormTemplate = function() {
   const tabs = [
     { num: 1, label: "PENJUALAN" },
@@ -33,26 +66,14 @@ window.getDailyFormTemplate = function() {
         </div>
       </div>
 
-      <!-- Tab Navigation: minimalist dots + arrows -->
+      <!-- Tab Navigation -->
       <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
-        <div class="flex items-center justify-between">
-          <!-- Prev arrow -->
-          <button type="button" onclick="prevTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 1 ? 'disabled' : ''}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          <!-- Dots + label -->
-          <div class="flex flex-col items-center gap-1">
-            <span class="text-[10px] font-bold text-zero-black uppercase tracking-widest">${tabs[AppState.currentTab - 1].label}</span>
-            <div class="flex items-center gap-1.5">
-              ${tabs.map(t => `
-                <button type="button" onclick="switchTab(${t.num})" class="transition-all duration-200 rounded-full ${AppState.currentTab === t.num ? 'w-4 h-2 bg-zero-black' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}"></button>
-              `).join('')}
-            </div>
-          </div>
-          <!-- Next arrow -->
-          <button type="button" onclick="nextTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 8 ? 'disabled' : ''}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
+        <div class="flex overflow-x-auto space-x-2 scrollbar-hide">
+          ${tabs.map(t => `
+            <button type="button" onclick="switchTab(${t.num})" class="px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-200 ${AppState.currentTab === t.num ? 'bg-zero-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
+              ${t.label}
+            </button>
+          `).join('')}
         </div>
       </div>
 
@@ -63,17 +84,22 @@ window.getDailyFormTemplate = function() {
         </form>
       </div>
 
-      <!-- Footer Navigation -->
-      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
-        ${AppState.currentTab > 1 ? `
-          <button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>
-        ` : `<div class="flex-1"></div>`}
-        
-        ${AppState.currentTab === 8 ? `
-          <div class="flex-1"></div>
-        ` : `
-          <button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>
-        `}
+      <!-- Footer Navigation: minimalist dots + arrows -->
+      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between z-30">
+        <!-- Prev arrow -->
+        <button type="button" onclick="prevTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 1 ? 'disabled' : ''}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <!-- Dots -->
+        <div class="flex items-center gap-1.5">
+          ${tabs.map(t => `
+            <button type="button" onclick="switchTab(${t.num})" class="transition-all duration-300 rounded-full ${AppState.currentTab === t.num ? 'w-6 h-2 bg-zero-black' : 'w-2 h-2 bg-gray-200 hover:bg-gray-300'}"></button>
+          `).join('')}
+        </div>
+        <!-- Next arrow -->
+        <button type="button" onclick="nextTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 8 ? 'disabled' : ''}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
       </div>
     </div>
   `;
@@ -113,7 +139,7 @@ function getDailyTabContent() {
             </div>
           </div>
 
-          <!-- Row 2: Tanggal | Jam Masuk (dual dropdown) -->
+          <!-- Row 2: Tanggal | Jam Masuk (single dropdown 15m) -->
           <div class="flex gap-3">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANGGAL LAPORAN</label>
@@ -121,18 +147,15 @@ function getDailyTabContent() {
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
-              <div class="flex gap-1">
-                <select onchange="form.shift = this.value.split(':')[0] + ':' + document.getElementById('shiftMenit').value; " class="flex-1 px-2 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
-                  ${Array.from({length: 18}, (_, i) => {
-                    let h = (i + 6).toString().padStart(2, '0');
-                    let cur = (form.shift || '06:00').split(':')[0];
-                    return '<option value="' + h + ':00" ' + (cur === h ? 'selected' : '') + '>' + h + '</option>';
-                  }).join('')}
-                </select>
-                <select id="shiftMenit" onchange="form.shift = (form.shift || '06:00').split(':')[0] + ':' + this.value" class="w-16 px-2 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
-                  ${['00','15','30','45'].map(m => `<option value="${m}" ${(form.shift || '06:00').split(':')[1] === m ? 'selected' : ''}>${m}</option>`).join('')}
-                </select>
-              </div>
+              <select onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+                ${Array.from({length: 69}, (_, i) => { // 6:00 to 23:00 every 15 min -> 68 items
+                  let totalMins = i * 15;
+                  let h = Math.floor(totalMins / 60) + 6;
+                  let m = (totalMins % 60).toString().padStart(2, '0');
+                  let val = h.toString().padStart(2, '0') + ':' + m;
+                  return '<option value="' + val + '" ' + (form.shift === val ? 'selected' : '') + '>' + val + '</option>';
+                }).join('')}
+              </select>
             </div>
           </div>
         </div>
@@ -142,7 +165,7 @@ function getDailyTabContent() {
           <h3 class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-4">TARGET HARI INI</h3>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET OMSET (Rp)</label>
-            <input type="text" value="${form.penjualan.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.penjualan.target) : ''}" onchange="form.penjualan.target = parseRupiah(this.value); formatRupiah(this); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-white transition-colors" placeholder="Rp 0">
+            <input id="inputTarget" type="text" value="${form.penjualan.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.penjualan.target) : ''}" oninput="updateDailyProgress()" onchange="formatRupiah(this)" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-white transition-colors" placeholder="Rp 0">
           </div>
         </div>
 
@@ -153,11 +176,11 @@ function getDailyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">06:00 – 16:59 (Rp)</label>
-              <input type="number" value="${form.penjualan.shift1 || ''}" onchange="form.penjualan.shift1 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input id="inputShift1" type="number" value="${form.penjualan.shift1 || ''}" oninput="updateDailyProgress()" onchange="updateDailyProgress()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">17:00 – 04:00 (Rp)</label>
-              <input type="number" value="${form.penjualan.shift2 || ''}" onchange="form.penjualan.shift2 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
+              <input id="inputShift2" type="number" value="${form.penjualan.shift2 || ''}" oninput="updateDailyProgress()" onchange="updateDailyProgress()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
             </div>
           </div>
           
@@ -176,11 +199,11 @@ function getDailyTabContent() {
               <div class="pt-4 border-t border-gray-100">
                 <div class="flex items-center gap-2">
                   <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                    <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${barPct}%"></div>
+                    <div id="progressBarFill" class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${barPct}%"></div>
                   </div>
-                  <span class="text-xs font-extrabold text-zero-black w-10 text-right">${pct}%</span>
+                  <span id="progressTextPct" class="text-xs font-extrabold text-zero-black w-10 text-right">${pct}%</span>
                 </div>
-                <p class="text-[9px] text-gray-400 mt-1">${target > 0 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(total) + ' dari Rp ' + new Intl.NumberFormat('id-ID').format(target) : 'Isi target omset untuk melihat progress'}</p>
+                <p id="progressTextDetail" class="text-[9px] text-gray-400 mt-1">${target > 0 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(total) + ' dari Rp ' + new Intl.NumberFormat('id-ID').format(target) : 'Isi target omset untuk melihat progress'}</p>
               </div>
             `;
           })()}
@@ -242,20 +265,16 @@ function getDailyTabContent() {
             ${form.kas.audit.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50">
                 <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-2">
-                  <!-- Jam audit: dual dropdown Jam + Menit -->
-                  <div class="flex items-center gap-1">
-                    <select onchange="updateAuditField(${idx}, 'jam', this.value + ':' + (row.jam || '00:00').split(':')[1])" class="px-2 py-1 text-xs font-bold text-zero-black border border-gray-200 rounded-lg bg-white focus:outline-none">
-                      ${Array.from({length: 18}, (_, i) => {
-                        let h = (i + 6).toString().padStart(2, '0');
-                        let cur = (row.jam || '12:00').split(':')[0];
-                        return '<option value="' + h + '" ' + (cur === h ? 'selected' : '') + '>' + h + '</option>';
-                      }).join('')}
-                    </select>
-                    <span class="text-xs font-bold text-gray-400">:</span>
-                    <select onchange="updateAuditField(${idx}, 'jam', (row.jam || '12:00').split(':')[0] + ':' + this.value)" class="px-2 py-1 text-xs font-bold text-zero-black border border-gray-200 rounded-lg bg-white focus:outline-none">
-                      ${['00','15','30','45'].map(m => `<option value="${m}" ${(row.jam || '12:00').split(':')[1] === m ? 'selected' : ''}>${m}</option>`).join('')}
-                    </select>
-                  </div>
+                  <!-- Jam audit: single dropdown Jam (15 min intervals) -->
+                  <select onchange="updateAuditField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border-none bg-transparent focus:outline-none">
+                    ${Array.from({length: 69}, (_, i) => {
+                      let totalMins = i * 15;
+                      let h = Math.floor(totalMins / 60) + 6;
+                      let m = (totalMins % 60).toString().padStart(2, '0');
+                      let val = h.toString().padStart(2, '0') + ':' + m;
+                      return '<option value="' + val + '" ' + ((row.jam || '12:00') === val ? 'selected' : '') + '>' + val + '</option>';
+                    }).join('')}
+                  </select>
                   <button type="button" onclick="removeAuditRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mb-2">

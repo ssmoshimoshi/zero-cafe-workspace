@@ -147,15 +147,7 @@ function getDailyTabContent() {
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
-              <select onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
-                ${Array.from({length: 69}, (_, i) => { // 6:00 to 23:00 every 15 min -> 68 items
-                  let totalMins = i * 15;
-                  let h = Math.floor(totalMins / 60) + 6;
-                  let m = (totalMins % 60).toString().padStart(2, '0');
-                  let val = h.toString().padStart(2, '0') + ':' + m;
-                  return '<option value="' + val + '" ' + (form.shift === val ? 'selected' : '') + '>' + val + '</option>';
-                }).join('')}
-              </select>
+              <input type="time" value="${form.shift}" onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors bg-white" required>
             </div>
           </div>
         </div>
@@ -266,15 +258,7 @@ function getDailyTabContent() {
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50">
                 <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-2">
                   <!-- Jam audit: single dropdown Jam (15 min intervals) -->
-                  <select onchange="updateAuditField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border-none bg-transparent focus:outline-none">
-                    ${Array.from({length: 69}, (_, i) => {
-                      let totalMins = i * 15;
-                      let h = Math.floor(totalMins / 60) + 6;
-                      let m = (totalMins % 60).toString().padStart(2, '0');
-                      let val = h.toString().padStart(2, '0') + ':' + m;
-                      return '<option value="' + val + '" ' + ((row.jam || '12:00') === val ? 'selected' : '') + '>' + val + '</option>';
-                    }).join('')}
-                  </select>
+                  <input type="time" value="${row.jam || '12:00'}" onchange="updateAuditField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border-none bg-transparent focus:outline-none">
                   <button type="button" onclick="removeAuditRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mb-2">

@@ -228,8 +228,11 @@ function getDynamicFolder(year, monthName, data) {
   var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
   
   if (data.type === "daily") {
-    // Daily report goes directly into month folder: Root > 2026 > Juli
-    return monthFolder;
+    // Format folder struktur (Bulan/Hari)
+    var dateParts = (data.tanggal || "").split("-");
+    var day = dateParts[0] || new Date().getDate(); 
+    var dayFolderName = day + " " + monthName;
+    return getOrCreateSubFolder(monthFolder, dayFolderName);
   } else if (data.type === "weekly") {
     // Mingguan folder: "1-7 juli Laporan mingguan"
     var periodeStr = data.periode || (data.periodeStart + "-" + data.periodeEnd) || "1-7";

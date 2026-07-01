@@ -1,5 +1,12 @@
 # Zero Cafe Workspace - CHANGELOG
 
+## [v107] - 2026-07-02
+### Fixed
+- **Daily Form Render Bug**: Fixed a `SyntaxError: Invalid or unexpected token` that prevented `Partial-Form-Daily.html` from loading correctly in Apps Script. This was caused by escaped backticks (`\``) being used incorrectly inside nested template literals (`${...}`). Changed `\`` to normal unescaped backticks.
+
+## [v106] - 2026-07-01
+### Refactor
+- **Cleaned Duplicate Templates**: Removed 656 lines of duplicate template functions from `JS-App2.html` (`getWeeklyFormTemplate`, `getMonthlyFormTemplate`, `getDashboardGMTemplate`). This ensures the app uses the `Partial-` files while safely preserving all global helper functions in `JS-App2.html`.
 ## [v105] - 2026-07-01
 ### Fixed
 - **Critical Crash Fix**: Fixed a fatal ReferenceError that caused the Daily, Weekly, and Monthly pages to become unresponsive (blank screen). This was caused by missing `include` directives for the newly created partials in `index.html`. Added `Partial-Form-Daily`, `Partial-Form-Weekly`, `Partial-Form-Monthly`, and `Partial-Dashboard-GM` to `index.html` to restore application functionality.

@@ -297,15 +297,16 @@ function submitFullReport(payloadStr) {
       data.tanggal = dd + "-" + mm + "-" + yyyy;
       
     } else if (data.type === "weekly") {
-      var periodeStr = data.periode || (data.periodeStart + "-" + data.periodeEnd) || "1-7";
-      // Ensure no spaces in periode for filename
-      var periodeClean = periodeStr.replace(/\s+/g, '');
-      
-      // Extract year and month from the end date if possible, else current
-      var parts = (data.periodeEnd || data.periode || "").split("-");
-      if (parts.length >= 3) {
-        year = parts[0];
-        monthName = getIndonesianMonth(data.periodeEnd);
+      var startDD = "1", endDD = "7";
+      if (data.periodeStart && data.periodeEnd) {
+        var pStart = data.periodeStart.split("-");
+        var pEnd = data.periodeEnd.split("-");
+        if (pStart.length === 3 && pEnd.length === 3) {
+          startDD = parseInt(pStart[2], 10);
+          endDD = parseInt(pEnd[2], 10);
+          year = pStart[0];
+          monthName = getIndonesianMonth(data.periodeStart);
+        }
       } else {
         year = new Date().getFullYear().toString();
         monthName = getIndonesianMonth(new Date());
@@ -313,8 +314,8 @@ function submitFullReport(payloadStr) {
       supervisor = data.supervisor;
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
       
-      // Filename: 1-7-juli-laporan-mingguan.PDF
-      fileName = periodeClean + "-" + monthName.toLowerCase() + "-laporan-mingguan.pdf";
+      // Filename: 1-7-juli-laporan mingguan.pdf
+      fileName = startDD + "-" + endDD + "-" + monthName.toLowerCase() + "-laporan mingguan.pdf";
       
     } else if (data.type === "monthly") {
       var parts = (data.bulan || "").split("-");
@@ -361,7 +362,8 @@ function submitFullReport(payloadStr) {
         Number(data.penjualan.shift1 || 0) + Number(data.penjualan.shift2 || 0),
         Number(data.feedback.totalKomplain || 0),
         data.penutup.kendala || "",
-        fileUrl
+        fileUrl,
+        Number(data.penjualan.target || 0)
       ]);
     } else if (data.type === "weekly") {
       var sheet = ss.getSheetByName("Weekly");
@@ -414,6 +416,68 @@ function submitFullReport(payloadStr) {
     };
   } catch (err) {
     Logger.log("Error in submitFullReport: " + err.toString());
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * Fetches daily sales data (Realisasi & Target) for a given week period.
+ * startDateStr and endDateStr should be YYYY-MM-DD.
+ */
+function api_getWeeklyData(startDateStr, endDateStr, outlet) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("Daily");
+    if (!sheet) return { success: false, error: "Tab Daily tidak ditemukan" };
+    
+    var data = sheet.getDataRange().getValues();
+    var start = new Date(startDateStr).getTime();
+    var end = new Date(endDateStr).getTime();
+    
+    var dailyTotals = {
+      "Senin": { target: 0, real: 0 },
+      "Selasa": { target: 0, real: 0 },
+      "Rabu": { target: 0, real: 0 },
+      "Kamis": { target: 0, real: 0 },
+      "Jumat": { target: 0, real: 0 },
+      "Sabtu": { target: 0, real: 0 },
+      "Minggu": { target: 0, real: 0 }
+    };
+    
+    // Convert JS day 0-6 (Sun-Sat) to our day names
+    var daysMap = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      // row[0] is date string like DD-MM-YYYY
+      var dateParts = String(row[0]).split("-");
+      if (dateParts.length === 3) {
+        var d = parseInt(dateParts[0], 10);
+        var m = parseInt(dateParts[1], 10) - 1;
+        var y = parseInt(dateParts[2], 10);
+        var rowDate = new Date(y, m, d);
+        var t = rowDate.getTime();
+        
+        if (t >= start && t <= end && String(row[2]).toLowerCase() === String(outlet).toLowerCase()) {
+          var dayName = daysMap[rowDate.getDay()];
+          dailyTotals[dayName].real += Number(row[4] || 0);
+          dailyTotals[dayName].target += Number(row[8] || 0); // target is column 9 (index 8)
+        }
+      }
+    }
+    
+    var result = [
+      { hari: "Senin", target: dailyTotals["Senin"].target, real: dailyTotals["Senin"].real },
+      { hari: "Selasa", target: dailyTotals["Selasa"].target, real: dailyTotals["Selasa"].real },
+      { hari: "Rabu", target: dailyTotals["Rabu"].target, real: dailyTotals["Rabu"].real },
+      { hari: "Kamis", target: dailyTotals["Kamis"].target, real: dailyTotals["Kamis"].real },
+      { hari: "Jumat", target: dailyTotals["Jumat"].target, real: dailyTotals["Jumat"].real },
+      { hari: "Sabtu", target: dailyTotals["Sabtu"].target, real: dailyTotals["Sabtu"].real },
+      { hari: "Minggu", target: dailyTotals["Minggu"].target, real: dailyTotals["Minggu"].real }
+    ];
+    
+    return { success: true, data: result };
+  } catch (err) {
     return { success: false, error: err.toString() };
   }
 }

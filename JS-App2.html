@@ -14,7 +14,26 @@ function validateWeeklyPeriode() {
       warningEl.classList.remove('hidden');
     } else {
       warningEl.classList.add('hidden');
+      fetchWeeklyData();
     }
+  }
+}
+
+async function fetchWeeklyData() {
+  const f = window.form;
+  if (!f.periodeStart || !f.periodeEnd) return;
+  showToast("Mengambil data omset dari database...", "info");
+  try {
+    const res = await Server.call('api_getWeeklyData', f.periodeStart, f.periodeEnd, f.outlet || 'Perintis');
+    if (res.success && res.data) {
+      // res.data is an array of 7 days
+      f.weekly.salesHarian = res.data;
+      showToast("Data omset dan target harian berhasil ditarik!", "success");
+      renderApp();
+    }
+  } catch (err) {
+    console.error("Error fetchWeeklyData", err);
+    showToast("Gagal menarik data omset otomatis", "error");
   }
 }
 

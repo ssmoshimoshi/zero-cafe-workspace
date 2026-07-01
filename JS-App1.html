@@ -96,13 +96,13 @@ function resetFormData(type) {
     /*  Weekly Specific */
     weekly: {
       salesHarian: [
-        { hari: "Senin", real: 0 },
-        { hari: "Selasa", real: 0 },
-        { hari: "Rabu", real: 0 },
-        { hari: "Kamis", real: 0 },
-        { hari: "Jumat", real: 0 },
-        { hari: "Sabtu", real: 0 },
-        { hari: "Minggu", real: 0 }
+        { hari: "Senin", target: 0, real: 0 },
+        { hari: "Selasa", target: 0, real: 0 },
+        { hari: "Rabu", target: 0, real: 0 },
+        { hari: "Kamis", target: 0, real: 0 },
+        { hari: "Jumat", target: 0, real: 0 },
+        { hari: "Sabtu", target: 0, real: 0 },
+        { hari: "Minggu", target: 0, real: 0 }
       ],
       produk: {
         topMinuman: ["", "", ""],
@@ -1040,16 +1040,17 @@ function getPDFFilename() {
       return `${parts[2]}-${monthName}-laporan harian.pdf`;
     }
   } else if (f.type === 'weekly') {
-    const periodeStr = f.periode || (f.periodeStart + "-" + f.periodeEnd) || "1-7";
-    const periodeClean = periodeStr.replace(/\s+/g, '');
-    const parts = (f.periodeEnd || f.periode || "").split("-");
-    let monthName = "juli"; // Default
-    if (parts.length >= 3) {
-      monthName = months[parseInt(parts[1], 10) - 1].toLowerCase();
-    } else {
-      monthName = months[new Date().getMonth()].toLowerCase();
+    let startDD = "1", endDD = "7", monthName = "juli";
+    if (f.periodeStart && f.periodeEnd) {
+      const pStart = f.periodeStart.split("-");
+      const pEnd = f.periodeEnd.split("-");
+      if (pStart.length === 3 && pEnd.length === 3) {
+        startDD = parseInt(pStart[2], 10);
+        endDD = parseInt(pEnd[2], 10);
+        monthName = months[parseInt(pStart[1], 10) - 1].toLowerCase();
+      }
     }
-    return `${periodeClean}-${monthName}-laporan-mingguan.pdf`;
+    return `${startDD}-${endDD}-${monthName}-laporan mingguan.pdf`;
   } else if (f.type === 'monthly') {
     const parts = (f.bulan || "").split("-");
     let monthName = "juli";

@@ -107,10 +107,11 @@ function getWeeklyTabContent() {
           
           <div class="space-y-2">
             ${form.weekly.salesHarian.map((s, idx) => `
-              <div class="flex items-center gap-3 border-b border-gray-100 pb-2">
+              <div class="flex items-center gap-2 border-b border-gray-100 pb-2">
                 <span class="text-xs font-bold text-gray-500 w-16">${s.hari}</span>
-                <div class="flex-1">
-                   <input type="text" value="${s.real ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.real) : ''}" onchange="formatRupiah(this); window.form.weekly.salesHarian[${idx}].real = parseRupiah(this.value)" placeholder="Rp 0" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black font-bold text-right">
+                <div class="flex-1 flex gap-2">
+                   <input type="text" value="${s.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.target) : ''}" onchange="formatRupiah(this); window.form.weekly.salesHarian[${idx}].target = parseRupiah(this.value)" placeholder="Target" class="w-1/2 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black font-bold text-right text-gray-500 bg-gray-50">
+                   <input type="text" value="${s.real ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.real) : ''}" onchange="formatRupiah(this); window.form.weekly.salesHarian[${idx}].real = parseRupiah(this.value)" placeholder="Omset" class="w-1/2 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black font-bold text-right">
                 </div>
               </div>
             `).join('')}

@@ -100,7 +100,7 @@
   <div id="confirmResetModal" class="fixed inset-0 bg-[#0f0f0f]/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-zero-white dark:bg-zero-black max-w-sm w-full rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 p-6 text-center transform scale-95 transition-all duration-300">
       <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
       </div>
       <h3 class="font-bold text-xl text-gray-900 mb-2">Reset Laporan?</h3>
       <p class="text-gray-500 text-sm mb-6">Anda yakin ingin mereset formulir ini? Semua isian yang belum terkirim akan hilang selamanya.</p>
@@ -119,7 +119,7 @@
         <p id="pdfPreviewSubtitle" class="text-[10px] text-gray-400 font-bold"></p>
       </div>
       <button onclick="closePDFPreview()" class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
       </button>
     </div>
     <div class="flex-1 overflow-y-auto bg-gray-100 p-3">
@@ -129,11 +129,11 @@
       <p class="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest mb-3">Simpan atau Bagikan</p>
       <div class="flex gap-3">
         <button onclick="downloadPDF()" class="flex-1 py-3 border border-zero-black rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
           SIMPAN PDF
         </button>
         <button onclick="sharePDF()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all flex items-center justify-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" x2="12" y1="2" y2="15"></line></svg>
           KIRIM / BAGIKAN
         </button>
       </div>
@@ -142,6 +142,10 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <?!= include('Partial-Form-Daily'); ?>
+  <?!= include('Partial-Form-Weekly'); ?>
+  <?!= include('Partial-Form-Monthly'); ?>
+  <?!= include('Partial-Dashboard-GM'); ?>
   <?!= include('JS-API'); ?>
   <?!= include('JS-App1'); ?>
   <?!= include('JS-App2'); ?>

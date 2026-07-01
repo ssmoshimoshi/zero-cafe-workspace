@@ -37,6 +37,11 @@ async function fetchWeeklyData() {
   }
 }
 
+function updateWeeklySalesField(idx, field, value) {
+  window.form.weekly.salesHarian[idx][field] = parseRupiah(value);
+  setTimeout(() => { if (AppState.currentTab === 2) renderApp(); }, 100);
+}
+
 function updateMonthlySalesField(field, value) {
   window.form.monthly.sales[field] = value;
   if (field === 'total' || field === 'target') {

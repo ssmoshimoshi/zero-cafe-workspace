@@ -110,12 +110,48 @@ function getWeeklyTabContent() {
               <div class="flex items-center gap-2 border-b border-gray-100 pb-2">
                 <span class="text-xs font-bold text-gray-500 w-16">${s.hari}</span>
                 <div class="flex-1 flex gap-2">
-                   <input type="text" value="${s.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.target) : ''}" onchange="formatRupiah(this); window.form.weekly.salesHarian[${idx}].target = parseRupiah(this.value)" placeholder="Target" class="w-1/2 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black font-bold text-right text-gray-500 bg-gray-50">
-                   <input type="text" value="${s.real ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.real) : ''}" onchange="formatRupiah(this); window.form.weekly.salesHarian[${idx}].real = parseRupiah(this.value)" placeholder="Omset" class="w-1/2 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black font-bold text-right">
+                   <input type="text" value="${s.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.target) : ''}" onchange="formatRupiah(this); updateWeeklySalesField(${idx}, 'target', this.value)" placeholder="Target" class="w-1/2 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black font-bold text-right text-gray-500 bg-gray-50">
+                   <input type="text" value="${s.real ? 'Rp ' + new Intl.NumberFormat('id-ID').format(s.real) : ''}" onchange="formatRupiah(this); updateWeeklySalesField(${idx}, 'real', this.value)" placeholder="Omset" class="w-1/2 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black font-bold text-right">
                 </div>
               </div>
             `).join('')}
           </div>
+          
+          ${(function() {
+            let totalTarget = 0, totalReal = 0;
+            form.weekly.salesHarian.forEach(s => {
+              totalTarget += Number(s.target || 0);
+              totalReal += Number(s.real || 0);
+            });
+            let pct = totalTarget > 0 ? Math.round((totalReal / totalTarget) * 100) : 0;
+            let barColor = pct >= 100 ? '#16a34a' : (pct >= 80 ? '#d97706' : '#dc2626');
+            let textColor = pct >= 100 ? '#16a34a' : (pct >= 80 ? '#d97706' : '#dc2626');
+            
+            return `
+              <div class="mt-4 pt-4 border-t border-gray-100 space-y-4">
+                <div class="flex gap-4">
+                  <div class="flex-1">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Target Omset</div>
+                    <div class="text-sm font-bold text-zero-black">Rp ${new Intl.NumberFormat('id-ID').format(totalTarget)}</div>
+                  </div>
+                  <div class="flex-1 text-right">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Omset Aktual</div>
+                    <div class="text-sm font-bold text-zero-black">Rp ${new Intl.NumberFormat('id-ID').format(totalReal)}</div>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                  <div class="flex-1 bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500" style="width: ${Math.min(pct, 100)}%; background-color: ${totalTarget > 0 ? barColor : 'transparent'}"></div>
+                  </div>
+                  <div class="text-base font-black w-12 text-right" style="color: ${totalTarget > 0 ? textColor : '#111827'}">${pct}%</div>
+                </div>
+                <div class="text-[10px] text-gray-400 font-medium">
+                  ${totalTarget === 0 ? 'Isi target omset untuk melihat progress' : (pct >= 100 ? 'Target Mingguan Tercapai!' : 'Omset Aktual Masih di Bawah Target')}
+                </div>
+              </div>
+            `;
+          })()}
         </div>
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">

@@ -1000,6 +1000,7 @@ function exportPDF() {
   const subtitle = document.getElementById('pdfPreviewSubtitle');
 
   if (!f || !f.type) { showToast('Tidak ada data laporan.', 'error'); return; }
+  if (!f.supervisor) { showToast('Nama Supervisor wajib diisi!', 'error'); return; }
 
   const jenis = f.type === 'daily' ? 'Harian' : f.type === 'weekly' ? 'Mingguan' : 'Bulanan';
   const periode = f.type === 'daily' ? f.tanggal : f.type === 'weekly' ? (f.periode || f.periodeStart) : f.bulan;

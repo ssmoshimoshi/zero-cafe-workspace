@@ -2,11 +2,11 @@
 <script>
 window.getWeeklyFormTemplate = function() {
   if (!form.weekly.staff || form.weekly.staff.length === 0) {
-    form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: "" }));
+    form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" }));
   } else {
     AppState.masterStaff.forEach(s => {
       if (!form.weekly.staff.find(fs => fs.nama === s.nama)) {
-        form.weekly.staff.push({ nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: "" });
+        form.weekly.staff.push({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" });
       }
     });
   }
@@ -222,10 +222,11 @@ function getWeeklyTabContent() {
                   <span class="text-xs font-bold text-zero-black">${s.nama} <span class="text-[10px] text-gray-500 font-normal">(${s.posisi || 'Staff'})</span></span>
                 </div>
                 <div class="mb-2">
-                  <select onchange="updateWeeklyStaff(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    <option value="Berkembang" ${s.status === 'Berkembang' ? 'selected' : ''}>Berprogress Baik</option>
-                    <option value="Stagnan" ${s.status === 'Stagnan' ? 'selected' : ''}>Stagnan / Standar</option>
-                    <option value="Menurun" ${s.status === 'Menurun' ? 'selected' : ''}>Menurun / Perlu Evaluasi</option>
+                  <select onchange="updateWeeklyStaff(${idx}, 'status', this.value); this.style.color = this.options[this.selectedIndex].style.color;" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white" style="color: ${!s.status ? '#9ca3af' : (s.status === 'Berkembang' ? '#16a34a' : (s.status === 'Stagnan' ? '#d97706' : '#dc2626'))}">
+                    <option value="" disabled hidden ${!s.status ? 'selected' : ''} style="color: #9ca3af">Status</option>
+                    <option value="Berkembang" ${s.status === 'Berkembang' ? 'selected' : ''} style="color: #16a34a">Berprogress Baik</option>
+                    <option value="Stagnan" ${s.status === 'Stagnan' ? 'selected' : ''} style="color: #d97706">Stagnan / Standar</option>
+                    <option value="Menurun" ${s.status === 'Menurun' ? 'selected' : ''} style="color: #dc2626">Menurun / Perlu Evaluasi</option>
                   </select>
                 </div>
                 <div>

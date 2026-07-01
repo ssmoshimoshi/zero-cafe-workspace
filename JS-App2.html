@@ -6,13 +6,11 @@ function removeWeeklyArrayItem(arrName, idx) { window.form.weekly[arrName].splic
 
 function validateWeeklyPeriode() {
   if (!window.form.periodeStart || !window.form.periodeEnd) return;
-  const start = new Date(window.form.periodeStart);
-  const end = new Date(window.form.periodeEnd);
-  const diffTime = Math.abs(end - start);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.ceil(Math.abs(new Date(window.form.periodeEnd) - new Date(window.form.periodeStart)) / (1000 * 60 * 60 * 24));
   const warningEl = document.getElementById('periodeWarning');
   if (warningEl) {
-    if (diffDays >= 7) { 
+    if (diffDays !== 6) { 
+      warningEl.textContent = 'Peringatan: Periode harus tepat 7 hari (misal: Senin-Minggu)!';
       warningEl.classList.remove('hidden');
     } else {
       warningEl.classList.add('hidden');
@@ -211,7 +209,8 @@ async function updateFolderId() {
 }
 
 function openPreviewModal() {
-  if (!window.form.supervisor) { showToast("Nama Supervisor wajib diisi!", "error"); return; }
+  const err = window.validateFormCompletion(window.form);
+  if (err) { showToast(err, "error"); return; }
   const body = document.getElementById('previewModalBody');
   const modal = document.getElementById('previewModal');
   if (!body || !modal) return;

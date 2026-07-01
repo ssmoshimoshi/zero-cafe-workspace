@@ -477,7 +477,7 @@ function startNewForm(type) {
     window.form.weekly.staff = AppState.masterStaff.map(s => ({
       nama: s.nama,
       posisi: s.posisi,
-      status: "Berkembang",
+      status: "",
       alasan: ""
     }));
   } else if (type === 'monthly') {
@@ -992,6 +992,19 @@ function buildMonthlyPDF(f) {
     </div>`;
 }
 
+window.validateFormCompletion = function(f) {
+  if (!f.supervisor) return 'Nama Supervisor wajib diisi!';
+  if (f.type === 'weekly') {
+    if (!f.periodeStart || !f.periodeEnd) return 'Periode laporan wajib diisi!';
+    const diff = Math.ceil(Math.abs(new Date(f.periodeEnd) - new Date(f.periodeStart)) / (1000 * 60 * 60 * 24));
+    if (diff !== 6) return 'Periode laporan harus tepat 7 hari!';
+    if (f.weekly.staff.some(s => !s.status)) return 'Semua status evaluasi staff wajib diisi!';
+    if (f.weekly.staff.some(s => !s.alasan)) return 'Alasan evaluasi staff wajib diisi!';
+    if (!f.weekly.kendalaUtama) return 'Kendala Utama wajib diisi!';
+  }
+  return null;
+};
+
 /* ----- Modal Controllers ----- */
 function exportPDF() {
   const f = window.form;
@@ -1000,7 +1013,9 @@ function exportPDF() {
   const subtitle = document.getElementById('pdfPreviewSubtitle');
 
   if (!f || !f.type) { showToast('Tidak ada data laporan.', 'error'); return; }
-  if (!f.supervisor) { showToast('Nama Supervisor wajib diisi!', 'error'); return; }
+  
+  const err = window.validateFormCompletion(f);
+  if (err) { showToast(err, 'error'); return; }
 
   const jenis = f.type === 'daily' ? 'Harian' : f.type === 'weekly' ? 'Mingguan' : 'Bulanan';
   const periode = f.type === 'daily' ? f.tanggal : f.type === 'weekly' ? (f.periode || f.periodeStart) : f.bulan;

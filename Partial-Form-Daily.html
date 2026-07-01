@@ -58,7 +58,7 @@ window.getDailyFormTemplate = function() {
         ` : `<div class="flex-1"></div>`}
         
         ${AppState.currentTab === 8 ? `
-          <button type="button" onclick="openPreviewModal()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">TINJAU & KIRIM</button>
+          <div class="flex-1"></div>
         ` : `
           <button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>
         `}
@@ -92,21 +92,21 @@ function getDailyTabContent() {
               <input type="text" value="${form.supervisor}" oninput="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
             <div class="flex-1">
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
-              <select onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
-                ${Array.from({length: 35}, (_, i) => {
-                  let h = Math.floor(i/2) + 6;
-                  let m = i % 2 === 0 ? '00' : '30';
-                  let val = h.toString().padStart(2, '0') + ':' + m;
-                  return '<option value="' + val + '" ' + (form.shift === val ? 'selected' : '') + '>' + val + '</option>';
-                }).join('')}
-              </select>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANGGAL LAPORAN</label>
+              <input type="date" value="${form.tanggal}" onchange="form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
           </div>
           
           <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANGGAL LAPORAN</label>
-            <input type="date" value="${form.tanggal}" onchange="form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
+            <select onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              ${Array.from({length: 35}, (_, i) => {
+                let h = Math.floor(i/2) + 6;
+                let m = i % 2 === 0 ? '00' : '30';
+                let val = h.toString().padStart(2, '0') + ':' + m;
+                return '<option value="' + val + '" ' + (form.shift === val ? 'selected' : '') + '>' + val + '</option>';
+              }).join('')}
+            </select>
           </div>
         </div>
 

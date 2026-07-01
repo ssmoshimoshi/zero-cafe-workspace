@@ -78,6 +78,7 @@ function getMonthlyTabContent() {
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET</label>
               <select onchange="form.outlet = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 <option value="Perintis" ${form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
+                <option value="Dg Tata" ${form.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
               </select>
             </div>
           </div>
@@ -228,7 +229,7 @@ function getMonthlyTabContent() {
               <textarea onchange="form.monthly.rencana.strategi = this.value" placeholder="Tuliskan program perbaikan bulan depan..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${form.monthly.rencana.strategi}</textarea>
             </div>
             <div>
-              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KEBUTUHAN SUPERVISOR (UNTUK GM)</label>
+              <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KEBUTUHAN SUPERVISOR</label>
               <textarea onchange="form.monthly.rencana.gm = this.value" placeholder="Pengadaan alat baru, training eksternal..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none h-20">${form.monthly.rencana.gm}</textarea>
             </div>
           </div>

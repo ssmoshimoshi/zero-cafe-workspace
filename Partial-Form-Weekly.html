@@ -75,10 +75,17 @@ function getWeeklyTabContent() {
               <input type="text" value="${form.supervisor}" onchange="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
           </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERIODE (CTH: 22-28 JUNI 2026)</label>
-            <input type="text" value="${form.periode}" onchange="form.periode = this.value" placeholder="Contoh: 22-28 Juni 2026" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">DARI TANGGAL</label>
+              <input type="date" value="${form.periodeStart || ''}" onchange="form.periodeStart = this.value; validateWeeklyPeriode(); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            </div>
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SAMPAI TANGGAL</label>
+              <input type="date" value="${form.periodeEnd || ''}" onchange="form.periodeEnd = this.value; validateWeeklyPeriode(); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            </div>
           </div>
+          <div id="periodeWarning" class="mt-2 text-[10px] font-bold text-red-500 hidden">Peringatan: Periode lebih dari 7 hari!</div>
         </div>
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
@@ -89,10 +96,7 @@ function getWeeklyTabContent() {
               <div class="flex items-center gap-3 border-b border-gray-100 pb-2">
                 <span class="text-xs font-bold text-gray-500 w-16">${s.hari}</span>
                 <div class="flex-1">
-                   <input type="number" value="${s.target}" onchange="form.weekly.salesHarian[${idx}].target = Number(this.value)" placeholder="Target Rp" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black">
-                </div>
-                <div class="flex-1">
-                   <input type="number" value="${s.real}" onchange="form.weekly.salesHarian[${idx}].real = Number(this.value)" placeholder="Real Rp" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black">
+                   <input type="number" value="${s.real}" onchange="form.weekly.salesHarian[${idx}].real = Number(this.value)" placeholder="Omset Manual (Rp)" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black">
                 </div>
               </div>
             `).join('')}
@@ -104,12 +108,38 @@ function getWeeklyTabContent() {
           
           <div class="space-y-4">
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOP 3 MINUMAN</label>
-              <input type="text" value="${form.weekly.produk.topMinuman.join(', ')}" onchange="form.weekly.produk.topMinuman = this.value.split(',').map(s=>s.trim())" placeholder="Pisahkan dengan koma" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MINUMAN</label>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-gray-400">1</span>
+                  <input type="text" value="${form.weekly.produk.topMinuman[0] || ''}" onchange="form.weekly.produk.topMinuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-gray-400">2</span>
+                  <input type="text" value="${form.weekly.produk.topMinuman[1] || ''}" onchange="form.weekly.produk.topMinuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-gray-400">3</span>
+                  <input type="text" value="${form.weekly.produk.topMinuman[2] || ''}" onchange="form.weekly.produk.topMinuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
+                </div>
+              </div>
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOP 3 MAKANAN</label>
-              <input type="text" value="${form.weekly.produk.topMakanan.join(', ')}" onchange="form.weekly.produk.topMakanan = this.value.split(',').map(s=>s.trim())" placeholder="Pisahkan dengan koma" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">TOP 3 MAKANAN</label>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-gray-400">1</span>
+                  <input type="text" value="${form.weekly.produk.topMakanan[0] || ''}" onchange="form.weekly.produk.topMakanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-gray-400">2</span>
+                  <input type="text" value="${form.weekly.produk.topMakanan[1] || ''}" onchange="form.weekly.produk.topMakanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-gray-400">3</span>
+                  <input type="text" value="${form.weekly.produk.topMakanan[2] || ''}" onchange="form.weekly.produk.topMakanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
+                </div>
+              </div>
             </div>
           </div>
         </div>

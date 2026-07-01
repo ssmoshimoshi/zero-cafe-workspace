@@ -4,6 +4,21 @@ function updateWeeklyStaff(idx, field, value) { window.form.weekly.staff[idx][fi
 function addWeeklyArrayItem(arrName) { window.form.weekly[arrName].push(""); renderApp(); }
 function removeWeeklyArrayItem(arrName, idx) { window.form.weekly[arrName].splice(idx, 1); renderApp(); }
 
+function validateWeeklyPeriode() {
+  if (!window.form.periodeStart || !window.form.periodeEnd) return;
+  const start = new Date(window.form.periodeStart);
+  const end = new Date(window.form.periodeEnd);
+  const diffTime = Math.abs(end - start);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const warningEl = document.getElementById('periodeWarning');
+  if (warningEl) {
+    if (diffDays >= 7) { 
+      warningEl.classList.remove('hidden');
+    } else {
+      warningEl.classList.add('hidden');
+    }
+  }
+}
 
 function updateMonthlySalesField(field, value) {
   window.form.monthly.sales[field] = value;

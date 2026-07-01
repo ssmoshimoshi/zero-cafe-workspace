@@ -144,17 +144,17 @@ function getDailyTabContent() {
             let target = form.penjualan.target || 0;
             let pct = target > 0 ? Math.round((total / target) * 100) : 0;
             let displayPct = pct > 100 ? 100 : pct;
-            return target > 0 ? \`
+            return target > 0 ? `
               <div class="mt-5 pt-5 border-t border-gray-100">
                 <div class="flex justify-between items-center mb-2">
                   <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Pencapaian Target</span>
-                  <span class="text-xs font-extrabold text-zero-black">\${pct}%</span>
+                  <span class="text-xs font-extrabold text-zero-black">${pct}%</span>
                 </div>
                 <div class="w-full bg-gray-100 rounded-full h-2">
-                  <div class="bg-zero-black h-2 rounded-full transition-all duration-500" style="width: \${displayPct}%"></div>
+                  <div class="bg-zero-black h-2 rounded-full transition-all duration-500" style="width: ${displayPct}%"></div>
                 </div>
               </div>
-            \` : '';
+            ` : '';
           })()}
         </div>
 

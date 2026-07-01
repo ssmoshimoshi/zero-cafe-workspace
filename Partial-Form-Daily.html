@@ -33,14 +33,26 @@ window.getDailyFormTemplate = function() {
         </div>
       </div>
 
-      <!-- Tab Navigation -->
+      <!-- Tab Navigation: minimalist dots + arrows -->
       <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
-        <div class="flex overflow-x-auto space-x-2 scrollbar-hide">
-          ${tabs.map(t => `
-            <button type="button" onclick="switchTab(${t.num})" class="px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-200 ${AppState.currentTab === t.num ? 'bg-zero-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
-              ${t.label}
-            </button>
-          `).join('')}
+        <div class="flex items-center justify-between">
+          <!-- Prev arrow -->
+          <button type="button" onclick="prevTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 1 ? 'disabled' : ''}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <!-- Dots + label -->
+          <div class="flex flex-col items-center gap-1">
+            <span class="text-[10px] font-bold text-zero-black uppercase tracking-widest">${tabs[AppState.currentTab - 1].label}</span>
+            <div class="flex items-center gap-1.5">
+              ${tabs.map(t => `
+                <button type="button" onclick="switchTab(${t.num})" class="transition-all duration-200 rounded-full ${AppState.currentTab === t.num ? 'w-4 h-2 bg-zero-black' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}"></button>
+              `).join('')}
+            </div>
+          </div>
+          <!-- Next arrow -->
+          <button type="button" onclick="nextTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 8 ? 'disabled' : ''}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
         </div>
       </div>
 
@@ -86,27 +98,42 @@ function getDailyTabContent() {
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">IDENTITAS & SHIFT</h3>
           
+          <!-- Row 1: Supervisor | Outlet -->
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
               <input type="text" value="${form.supervisor}" oninput="form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
             <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET</label>
+              <select onchange="form.outlet = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                <option value="Perintis" ${form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
+                <option value="Dg Tata" ${form.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 2: Tanggal | Jam Masuk (dual dropdown) -->
+          <div class="flex gap-3">
+            <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANGGAL LAPORAN</label>
               <input type="date" value="${form.tanggal}" onchange="form.tanggal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
-          </div>
-          
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
-            <select onchange="form.shift = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
-              ${Array.from({length: 35}, (_, i) => {
-                let h = Math.floor(i/2) + 6;
-                let m = i % 2 === 0 ? '00' : '30';
-                let val = h.toString().padStart(2, '0') + ':' + m;
-                return '<option value="' + val + '" ' + (form.shift === val ? 'selected' : '') + '>' + val + '</option>';
-              }).join('')}
-            </select>
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">JAM MASUK</label>
+              <div class="flex gap-1">
+                <select onchange="form.shift = this.value.split(':')[0] + ':' + document.getElementById('shiftMenit').value; " class="flex-1 px-2 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  ${Array.from({length: 18}, (_, i) => {
+                    let h = (i + 6).toString().padStart(2, '0');
+                    let cur = (form.shift || '06:00').split(':')[0];
+                    return '<option value="' + h + ':00" ' + (cur === h ? 'selected' : '') + '>' + h + '</option>';
+                  }).join('')}
+                </select>
+                <select id="shiftMenit" onchange="form.shift = (form.shift || '06:00').split(':')[0] + ':' + this.value" class="w-16 px-2 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+                  ${['00','15','30','45'].map(m => `<option value="${m}" ${(form.shift || '06:00').split(':')[1] === m ? 'selected' : ''}>${m}</option>`).join('')}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -125,16 +152,16 @@ function getDailyTabContent() {
           
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 08:00 - 17:00 (Rp)</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">06:00 – 16:59 (Rp)</label>
               <input type="number" value="${form.penjualan.shift1 || ''}" onchange="form.penjualan.shift1 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
             </div>
             <div class="flex-1">
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Omset 17:00 - 20:30 (Rp)</label>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">17:00 – 04:00 (Rp)</label>
               <input type="number" value="${form.penjualan.shift2 || ''}" onchange="form.penjualan.shift2 = Number(this.value); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" placeholder="0">
             </div>
           </div>
           
-          <div>
+          <div class="mb-4">
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Struk Transaksi</label>
             <input type="number" value="${form.penjualan.transaksi || ''}" onchange="form.penjualan.transaksi = Number(this.value)" placeholder="Contoh: 50" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
           </div>
@@ -143,18 +170,19 @@ function getDailyTabContent() {
             let total = (form.penjualan.shift1 || 0) + (form.penjualan.shift2 || 0);
             let target = form.penjualan.target || 0;
             let pct = target > 0 ? Math.round((total / target) * 100) : 0;
-            let displayPct = pct > 100 ? 100 : pct;
-            return target > 0 ? `
-              <div class="mt-5 pt-5 border-t border-gray-100">
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Pencapaian Target</span>
-                  <span class="text-xs font-extrabold text-zero-black">${pct}%</span>
+            let barPct = Math.min(pct, 100);
+            let barColor = pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-zero-black' : 'bg-gray-500';
+            return `
+              <div class="pt-4 border-t border-gray-100">
+                <div class="flex items-center gap-2">
+                  <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${barPct}%"></div>
+                  </div>
+                  <span class="text-xs font-extrabold text-zero-black w-10 text-right">${pct}%</span>
                 </div>
-                <div class="w-full bg-gray-100 rounded-full h-2">
-                  <div class="bg-zero-black h-2 rounded-full transition-all duration-500" style="width: ${displayPct}%"></div>
-                </div>
+                <p class="text-[9px] text-gray-400 mt-1">${target > 0 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(total) + ' dari Rp ' + new Intl.NumberFormat('id-ID').format(target) : 'Isi target omset untuk melihat progress'}</p>
               </div>
-            ` : '';
+            `;
           })()}
         </div>
 
@@ -214,14 +242,20 @@ function getDailyTabContent() {
             ${form.kas.audit.map((row, idx) => `
               <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50">
                 <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-2">
-                  <select onchange="updateAuditField(${idx}, 'jam', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-zero-black border-none bg-transparent focus:outline-none">
-                    ${Array.from({length: 35}, (_, i) => {
-                      let h = Math.floor(i/2) + 6;
-                      let m = i % 2 === 0 ? '00' : '30';
-                      let val = h.toString().padStart(2, '0') + ':' + m;
-                      return '<option value="' + val + '" ' + (row.jam === val ? 'selected' : '') + '>' + val + '</option>';
-                    }).join('')}
-                  </select>
+                  <!-- Jam audit: dual dropdown Jam + Menit -->
+                  <div class="flex items-center gap-1">
+                    <select onchange="updateAuditField(${idx}, 'jam', this.value + ':' + (row.jam || '00:00').split(':')[1])" class="px-2 py-1 text-xs font-bold text-zero-black border border-gray-200 rounded-lg bg-white focus:outline-none">
+                      ${Array.from({length: 18}, (_, i) => {
+                        let h = (i + 6).toString().padStart(2, '0');
+                        let cur = (row.jam || '12:00').split(':')[0];
+                        return '<option value="' + h + '" ' + (cur === h ? 'selected' : '') + '>' + h + '</option>';
+                      }).join('')}
+                    </select>
+                    <span class="text-xs font-bold text-gray-400">:</span>
+                    <select onchange="updateAuditField(${idx}, 'jam', (row.jam || '12:00').split(':')[0] + ':' + this.value)" class="px-2 py-1 text-xs font-bold text-zero-black border border-gray-200 rounded-lg bg-white focus:outline-none">
+                      ${['00','15','30','45'].map(m => `<option value="${m}" ${(row.jam || '12:00').split(':')[1] === m ? 'selected' : ''}>${m}</option>`).join('')}
+                    </select>
+                  </div>
                   <button type="button" onclick="removeAuditRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mb-2">
@@ -243,7 +277,8 @@ function getDailyTabContent() {
                   <input type="text" value="${row.selisih !== undefined ? 'Rp ' + new Intl.NumberFormat('id-ID').format(row.selisih) : ''}" onchange="updateAuditField(${idx}, 'selisih', parseRupiah(this.value)); renderApp();" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full px-2 py-1 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none ${(row.selisih || 0) < 0 ? 'text-red-600' : ((row.selisih || 0) > 0 ? 'text-green-600' : 'text-gray-900')}" placeholder="Rp 0" required>
                 </div>
                 <div>
-                  <input type="text" value="${row.keterangan || ''}" onchange="updateAuditField(${idx}, 'keterangan', this.value)" placeholder="Catatan selisih (Opsional)" class="w-full px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Catatan Selisih (Opsional)</label>
+                  <textarea onchange="updateAuditField(${idx}, 'keterangan', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Tulis keterangan selisih di sini..." class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none resize-none overflow-hidden" style="min-height:36px">${row.keterangan || ''}</textarea>
                 </div>
               </div>
             `).join('')}

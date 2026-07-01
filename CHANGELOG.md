@@ -1,5 +1,14 @@
 # Zero Cafe Workspace - CHANGELOG
 
+## [v118] - 2026-07-02
+### STABLE CHECKPOINT - Halaman Laporan Harian (Daily Report)
+- **Finalized Daily Report**: Semua bug kritis pada halaman Laporan Harian telah diperbaiki dan distabilkan. Fitur ini 100% berfungsi seperti yang diharapkan.
+  - **Bug Tab Scroll**: Mengatasi tab navigasi yang selalu bergeser kembali ke awal saat diklik.
+  - **Bug Scope Chain (Data Hilang)**: Mengganti tag `<form>` menjadi `<div>` dan menggunakan referensi eksplisit `window.form` pada seluruh atribut *inline* (onchange/oninput) di lebih dari 75+ kolom. Ini memperbaiki masalah fatal dimana nama Supervisor (dan data lain) selalu terhapus saat berpindah tab.
+  - **Tombol Penutup**: Memperbaiki fungsi tombol "Tinjau & Kirim" dan "Export PDF" agar kembali menggunakan fungsi yang benar (`openPreviewModal` dan `exportPDF`), serta menambahkan validasi wajib isi nama Supervisor pada kedua tombol tersebut.
+  - **UI/UX**: Mengembalikan tombol "+ STAFF BARU", menerapkan format Rupiah otomatis, dan merubah kolom keterangan/catatan menjadi `textarea` yang fleksibel.
+- **Catatan Penting**: Versi ini (commit `c4318c2` / GAS `v118`) adalah **titik aman (stable checkpoint)**. Jika di masa depan terjadi kerusakan kode pada Laporan Harian, kita dapat melakukan rollback ke titik ini.
+
 ## [v107] - 2026-07-02
 ### Fixed
 - **Daily Form Render Bug**: Fixed a `SyntaxError: Invalid or unexpected token` that prevented `Partial-Form-Daily.html` from loading correctly in Apps Script. This was caused by escaped backticks (`\``) being used incorrectly inside nested template literals (`${...}`). Changed `\`` to normal unescaped backticks.

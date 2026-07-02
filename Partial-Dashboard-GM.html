@@ -10,6 +10,7 @@ window.getDashboardGMTemplate = function() {
   
   let reportsHtml = "";
   let statsHtml = "";
+  let topProdukHtml = "";
   
   if (AppState.dashboardData) {
     const data = AppState.dashboardData;
@@ -64,6 +65,48 @@ window.getDashboardGMTemplate = function() {
         </div>
       `;
     }
+    
+    if (data.topProduk && data.topProduk.length > 0) {
+      topProdukHtml = `
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            Tren Produk Terlaris (Top 5)
+          </h3>
+          <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded-r-lg">
+            <p class="text-[9px] text-blue-800 leading-relaxed font-medium">
+              💡 <strong class="font-bold">Catatan Analisis:</strong> Tren ini murni ditarik dari sinkronisasi Laporan <strong>Mingguan POS Zero</strong> agar 100% akurat. Data Laporan Harian (yang hanya berupa cuplikan Top/Bottom 3) sengaja tidak dijumlahkan untuk mencegah selisih angka.
+            </p>
+          </div>
+          <div class="space-y-3">
+            ${data.topProduk.map((item, idx) => `
+              <div class="flex items-center gap-3">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-[10px] font-bold text-gray-500 flex items-center justify-center flex-shrink-0">${idx + 1}</span>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs font-bold text-zero-black">${item.nama}</span>
+                    <span class="text-xs font-extrabold text-zero-black">${item.terjual} <span class="text-[9px] font-normal text-gray-400">cup/porsi</span></span>
+                  </div>
+                  <div class="w-full bg-gray-100 rounded-full h-1.5">
+                    <!-- Progress bar is relative to the top 1 item, so idx 0 is 100% -->
+                    <div class="bg-zero-black h-1.5 rounded-full" style="width: ${idx === 0 ? '100' : Math.round((item.terjual / data.topProduk[0].terjual) * 100)}%"></div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      topProdukHtml = `
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            Tren Produk Terlaris
+          </h3>
+          <p class="text-[10px] text-center text-gray-400 py-4 font-bold">Belum ada Laporan Mingguan bulan ini.</p>
+        </div>
+      `;
+    }
+    
   } else {
     statsHtml = `
       <div class="py-12 text-center text-gray-400">
@@ -108,6 +151,9 @@ window.getDashboardGMTemplate = function() {
 
         <!-- Stats Grid -->
         ${statsHtml}
+        
+        <!-- Tren Produk (Hanya jika data ditarik) -->
+        ${topProdukHtml}
 
         <!-- PDF Archives -->
         ${AppState.dashboardData ? `

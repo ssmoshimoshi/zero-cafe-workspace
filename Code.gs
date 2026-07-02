@@ -463,6 +463,43 @@ function submitFullReport(payloadStr) {
         fileUrl
       ]);
     }
+    
+    // 5. Database Produk Terpusat
+    var produkSheet = setupSheet(ss, "Database_Produk", [
+      "Periode", "Tipe Laporan", "Outlet", "Kategori", "Peringkat", "Nama Produk", "Terjual", "Rencana/Action"
+    ]);
+    
+    var periodeValue = data.tanggal || data.periode || data.bulan || "";
+    if (data.type === "weekly" && !data.periode) {
+      periodeValue = (data.periodeStart || "") + " s/d " + (data.periodeEnd || "");
+    }
+    var produkObj = data.produk || (data.weekly && data.weekly.produk) || (data.monthly && data.monthly.produk);
+    
+    if (produkObj) {
+      var categories = [
+        { keyTop: "topMinuman", keyBottom: "bottomMinuman", label: "Minuman" },
+        { keyTop: "topMakanan", keyBottom: "bottomMakanan", label: "Makanan" },
+        { keyTop: "topSnack", keyBottom: "bottomSnack", label: "Snack" }
+      ];
+      
+      categories.forEach(function(cat) {
+        if (produkObj[cat.keyTop] && Array.isArray(produkObj[cat.keyTop])) {
+          produkObj[cat.keyTop].forEach(function(item) {
+            if (item && item.nama && item.nama.trim() !== "") {
+              produkSheet.appendRow([periodeValue, data.type, data.outlet || "Perintis", cat.label, "Top", item.nama, item.terjual || 0, ""]);
+            }
+          });
+        }
+        if (produkObj[cat.keyBottom] && Array.isArray(produkObj[cat.keyBottom])) {
+          produkObj[cat.keyBottom].forEach(function(item) {
+            if (item && item.nama && item.nama.trim() !== "") {
+              produkSheet.appendRow([periodeValue, data.type, data.outlet || "Perintis", cat.label, "Bottom", item.nama, item.terjual || 0, item.rencana || item.tindakan || ""]);
+            }
+          });
+        }
+      });
+    }
+
     // We can just construct a more accurate path string or just use the folder's name.
     var folderPath = "";
     try {
@@ -762,6 +799,35 @@ function api_gm_fetchReports(monthName, year) {
     var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
     var targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
     
+    var topProduk = [];
+    var dbSheet = ss.getSheetByName("Database_Produk");
+    if (dbSheet) {
+      var dbData = dbSheet.getDataRange().getValues();
+      var prodMap = {};
+      // Columns: 0:Periode, 1:Tipe Laporan, 2:Outlet, 3:Kategori, 4:Peringkat, 5:Nama Produk, 6:Terjual, 7:Rencana
+      for (var i = 1; i < dbData.length; i++) {
+        var tipe = dbData[i][1].toString();
+        var periode = dbData[i][0].toString();
+        
+        if (tipe === "weekly" && periode.indexOf(monthName) !== -1) {
+          var nama = dbData[i][5].toString();
+          var terjual = Number(dbData[i][6] || 0);
+          if (nama) {
+            if (!prodMap[nama]) prodMap[nama] = 0;
+            prodMap[nama] += terjual;
+          }
+        }
+      }
+      
+      var prodArray = [];
+      for (var key in prodMap) {
+        prodArray.push({ nama: key, terjual: prodMap[key] });
+      }
+      
+      prodArray.sort(function(a, b) { return b.terjual - a.terjual; });
+      topProduk = prodArray.slice(0, 5);
+    }
+    
     var resultObj = {
       status: "success",
       data: {
@@ -771,7 +837,8 @@ function api_gm_fetchReports(monthName, year) {
         listLaporan: listLaporan || [],
         currentFolderId: currentFolderId || "",
         targetOmset: Number(targetOmset) || 0,
-        chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); }) || []
+        chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); }) || [],
+        topProduk: topProduk || []
       }
     };
     return JSON.stringify(resultObj);

@@ -205,40 +205,113 @@ function getDailyTabContent() {
           })()}
         </div>
 
-        <!-- Top 3 Minuman -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">TOP 3 MINUMAN</h3>
-          <div class="space-y-3">
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-gray-400">1</span>
-              <input type="text" value="${form.produk.minuman[0]}" onchange="window.form.produk.minuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+        <!-- Card Minuman -->
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('dailyMinuman')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MINUMAN</h3>
+            <svg id="icon-dailyMinuman" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="dailyMinuman" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MINUMAN</span>
+              <div class="space-y-2">
+                ${form.produk.topMinuman.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" onchange="window.form.produk.topMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                  </div>
+                `).join('')}
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-gray-400">2</span>
-              <input type="text" value="${form.produk.minuman[1]}" onchange="window.form.produk.minuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-gray-400">3</span>
-              <input type="text" value="${form.produk.minuman[2]}" onchange="window.form.produk.minuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MINUMAN</span>
+              <div class="space-y-2">
+                ${form.produk.bottomMinuman.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
             </div>
           </div>
         </div>
-
-        <!-- Top 3 Makanan -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">TOP 3 MAKANAN</h3>
-          <div class="space-y-3">
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-gray-400">1</span>
-              <input type="text" value="${form.produk.makanan[0]}" onchange="window.form.produk.makanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+        
+        <!-- Card Makanan -->
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('dailyMakanan')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MAKANAN</h3>
+            <svg id="icon-dailyMakanan" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="dailyMakanan" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MAKANAN</span>
+              <div class="space-y-2">
+                ${form.produk.topMakanan.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" onchange="window.form.produk.topMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                  </div>
+                `).join('')}
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-gray-400">2</span>
-              <input type="text" value="${form.produk.makanan[1]}" onchange="window.form.produk.makanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MAKANAN</span>
+              <div class="space-y-2">
+                ${form.produk.bottomMakanan.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-bold text-gray-400">3</span>
-              <input type="text" value="${form.produk.makanan[2]}" onchange="window.form.produk.makanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+          </div>
+        </div>
+        
+        <!-- Card Snack -->
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('dailySnack')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK SNACK</h3>
+            <svg id="icon-dailySnack" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="dailySnack" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 SNACK</span>
+              <div class="space-y-2">
+                ${form.produk.topSnack.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" onchange="window.form.produk.topSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 SNACK</span>
+              <div class="space-y-2">
+                ${form.produk.bottomSnack.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.produk.bottomSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
             </div>
           </div>
         </div>

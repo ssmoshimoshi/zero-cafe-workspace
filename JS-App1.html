@@ -83,7 +83,14 @@ function resetFormData(type) {
     
     /*  Daily Specific */
     penjualan: { target: 0, shift1: 0, shift2: 0, transaksi: 0 },
-    produk: { makanan: ["", "", ""], minuman: ["", "", ""] },
+    produk: {
+      topMinuman: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+      bottomMinuman: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+      topMakanan: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+      bottomMakanan: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+      topSnack: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+      bottomSnack: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ]
+    },
     kas: { modalAwal: 200000, audit: [] },
     staff: [], /*  dynamically structured based on masterStaff */
     briefing: { target: "", fokus: "", masalah: "", solusi: "" },
@@ -105,18 +112,12 @@ function resetFormData(type) {
         { hari: "Minggu", target: 0, real: 0 }
       ],
       produk: {
-        topMinuman: ["", "", ""],
-        bottomMinuman: [
-          {nama: "", tindakan: ""},
-          {nama: "", tindakan: ""},
-          {nama: "", tindakan: ""}
-        ],
-        topMakanan: ["", "", ""],
-        bottomMakanan: [
-          {nama: "", tindakan: ""},
-          {nama: "", tindakan: ""},
-          {nama: "", tindakan: ""}
-        ]
+        topMinuman: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+        bottomMinuman: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+        topMakanan: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+        bottomMakanan: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+        topSnack: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+        bottomSnack: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ]
       },
       komplain: { total: 0, remake: 0, penyebab: "" },
       kendalaUtama: "",
@@ -559,9 +560,25 @@ function saveDraft(quiet = false) {
 function loadDraft(type) {
   const draft = StorageHelper.get(`zc_draft_${type}`);
   if (draft) {
-    showToast("Melanjutkan draft yang belum terkirim...", "success");
-    Object.assign(form, JSON.parse(draft));
-    return true;
+    try {
+      const parsed = JSON.parse(draft);
+      
+      let isOldSchema = false;
+      if (type === 'daily' && parsed.produk && !parsed.produk.topMinuman) isOldSchema = true;
+      if (type === 'weekly' && parsed.weekly && parsed.weekly.produk && !parsed.weekly.produk.topMinuman) isOldSchema = true;
+      
+      if (isOldSchema) {
+        console.warn("Old draft schema detected. Clearing to prevent crash.");
+        StorageHelper.remove(`zc_draft_${type}`);
+        return false;
+      }
+      
+      showToast("Melanjutkan draft yang belum terkirim...", "success");
+      Object.assign(form, parsed);
+      return true;
+    } catch(e) {
+      StorageHelper.remove(`zc_draft_${type}`);
+    }
   }
   return false;
 }
@@ -819,10 +836,27 @@ function buildDailyPDF(f) {
     </div>
 
     <div class="section">
-      <div class="section-title">Produk Terlaris</div>
+      <div class="section-title">Produk Terlaris (Top 3)</div>
       <table>
-        <tr><th>#</th><th>Top Minuman</th><th>Top Makanan</th></tr>
-        ${[0,1,2].map(i => `<tr><td>${i+1}</td><td>${(f.produk.minuman || [])[i] || '—'}</td><td>${(f.produk.makanan || [])[i] || '—'}</td></tr>`).join('')}
+        <tr><th>#</th><th>Minuman</th><th>Jml</th><th>Makanan</th><th>Jml</th><th>Snack</th><th>Jml</th></tr>
+        ${[0,1,2].map(i => `
+          <tr>
+            <td>${i+1}</td>
+            <td>${f.produk.topMinuman[i]?.nama || '—'}</td><td>${f.produk.topMinuman[i]?.terjual || 0}</td>
+            <td>${f.produk.topMakanan[i]?.nama || '—'}</td><td>${f.produk.topMakanan[i]?.terjual || 0}</td>
+            <td>${f.produk.topSnack[i]?.nama || '—'}</td><td>${f.produk.topSnack[i]?.terjual || 0}</td>
+          </tr>
+        `).join('')}
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Evaluasi Produk (Bottom 3)</div>
+      <table>
+        <tr><th>Kategori</th><th>Nama Produk</th><th>Terjual</th><th>Rencana / Catatan</th></tr>
+        ${f.produk.bottomMinuman.filter(x=>x.nama).map(i => `<tr><td>Minuman</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${f.produk.bottomMakanan.filter(x=>x.nama).map(i => `<tr><td>Makanan</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${f.produk.bottomSnack.filter(x=>x.nama).map(i => `<tr><td>Snack</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
       </table>
     </div>
 
@@ -899,10 +933,27 @@ function buildWeeklyPDF(f) {
     </div>
 
     <div class="section">
-      <div class="section-title">Produk</div>
+      <div class="section-title">Produk Terlaris (Top 3)</div>
       <table>
-        <tr><th>#</th><th>Top Minuman</th><th>Top Makanan</th></tr>
-        ${[0,1,2].map(i=>`<tr><td>${i+1}</td><td>${(w.produk.topMinuman||[])[i]||'—'}</td><td>${(w.produk.topMakanan||[])[i]||'—'}</td></tr>`).join('')}
+        <tr><th>#</th><th>Minuman</th><th>Jml</th><th>Makanan</th><th>Jml</th><th>Snack</th><th>Jml</th></tr>
+        ${[0,1,2].map(i => `
+          <tr>
+            <td>${i+1}</td>
+            <td>${w.produk.topMinuman[i]?.nama || '—'}</td><td>${w.produk.topMinuman[i]?.terjual || 0}</td>
+            <td>${w.produk.topMakanan[i]?.nama || '—'}</td><td>${w.produk.topMakanan[i]?.terjual || 0}</td>
+            <td>${w.produk.topSnack[i]?.nama || '—'}</td><td>${w.produk.topSnack[i]?.terjual || 0}</td>
+          </tr>
+        `).join('')}
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Evaluasi Produk (Bottom 3)</div>
+      <table>
+        <tr><th>Kategori</th><th>Nama Produk</th><th>Terjual</th><th>Rencana / Catatan</th></tr>
+        ${w.produk.bottomMinuman.filter(x=>x.nama).map(i => `<tr><td>Minuman</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${w.produk.bottomMakanan.filter(x=>x.nama).map(i => `<tr><td>Makanan</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${w.produk.bottomSnack.filter(x=>x.nama).map(i => `<tr><td>Snack</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
       </table>
     </div>
 

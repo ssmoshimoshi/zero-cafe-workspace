@@ -159,69 +159,110 @@ function getWeeklyTabContent() {
           })()}
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK TOP</h3>
-          
-          <div class="space-y-4">
+        <!-- Card Minuman -->
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('weeklyMinuman')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MINUMAN</h3>
+            <svg id="icon-weeklyMinuman" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="weeklyMinuman" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
             <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MINUMAN</label>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MINUMAN</span>
               <div class="space-y-2">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold text-gray-400">1</span>
-                  <input type="text" value="${form.weekly.produk.topMinuman[0] || ''}" onchange="window.form.weekly.produk.topMinuman[0] = this.value" placeholder="Minuman 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold text-gray-400">2</span>
-                  <input type="text" value="${form.weekly.produk.topMinuman[1] || ''}" onchange="window.form.weekly.produk.topMinuman[1] = this.value" placeholder="Minuman 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold text-gray-400">3</span>
-                  <input type="text" value="${form.weekly.produk.topMinuman[2] || ''}" onchange="window.form.weekly.produk.topMinuman[2] = this.value" placeholder="Minuman 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">TOP 3 MAKANAN</label>
-              <div class="space-y-2">
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold text-gray-400">1</span>
-                  <input type="text" value="${form.weekly.produk.topMakanan[0] || ''}" onchange="window.form.weekly.produk.topMakanan[0] = this.value" placeholder="Makanan 1" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold text-gray-400">2</span>
-                  <input type="text" value="${form.weekly.produk.topMakanan[1] || ''}" onchange="window.form.weekly.produk.topMakanan[1] = this.value" placeholder="Makanan 2" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-xs font-bold text-gray-400">3</span>
-                  <input type="text" value="${form.weekly.produk.topMakanan[2] || ''}" onchange="window.form.weekly.produk.topMakanan[2] = this.value" placeholder="Makanan 3" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK BOTTOM</h3>
-          
-          <div class="space-y-4">
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">KATEGORI MINUMAN</span>
-              <div class="space-y-2">
-                ${form.weekly.produk.bottomMinuman.map((item, idx) => `
-                  <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk Minuman" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
-                    <input type="text" value="${item.tindakan}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                ${form.weekly.produk.topMinuman.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.topMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
                   </div>
                 `).join('')}
               </div>
             </div>
             <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">KATEGORI MAKANAN</span>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MINUMAN</span>
+              <div class="space-y-2">
+                ${form.weekly.produk.bottomMinuman.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card Makanan -->
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('weeklyMakanan')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MAKANAN</h3>
+            <svg id="icon-weeklyMakanan" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="weeklyMakanan" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MAKANAN</span>
+              <div class="space-y-2">
+                ${form.weekly.produk.topMakanan.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.topMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MAKANAN</span>
               <div class="space-y-2">
                 ${form.weekly.produk.bottomMakanan.map((item, idx) => `
-                  <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk Makanan" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg mb-2 focus:outline-none bg-white">
-                    <input type="text" value="${item.tindakan}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].tindakan = this.value" placeholder="Tindakan (Promo dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card Snack -->
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('weeklySnack')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK SNACK</h3>
+            <svg id="icon-weeklySnack" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="weeklySnack" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 SNACK</span>
+              <div class="space-y-2">
+                ${form.weekly.produk.topSnack.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.topSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 SNACK</span>
+              <div class="space-y-2">
+                ${form.weekly.produk.bottomSnack.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.weekly.produk.bottomSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.weekly.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
                   </div>
                 `).join('')}
               </div>

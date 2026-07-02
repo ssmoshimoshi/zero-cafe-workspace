@@ -799,33 +799,92 @@ function api_gm_fetchReports(monthName, year) {
     var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
     var targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
     
-    var topProduk = [];
+    var productsData = {
+      minuman: { top: [], bottom: [] },
+      makanan: { top: [], bottom: [] },
+      snack: { top: [], bottom: [] }
+    };
+    
     var dbSheet = ss.getSheetByName("Database_Produk");
     if (dbSheet) {
       var dbData = dbSheet.getDataRange().getValues();
-      var prodMap = {};
-      // Columns: 0:Periode, 1:Tipe Laporan, 2:Outlet, 3:Kategori, 4:Peringkat, 5:Nama Produk, 6:Terjual, 7:Rencana
+      var hasMonthly = false;
+      var monthlyRows = [];
+      
       for (var i = 1; i < dbData.length; i++) {
         var tipe = dbData[i][1].toString();
         var periode = dbData[i][0].toString();
-        
-        if (tipe === "weekly" && periode.indexOf(monthName) !== -1) {
-          var nama = dbData[i][5].toString();
-          var terjual = Number(dbData[i][6] || 0);
-          if (nama) {
-            if (!prodMap[nama]) prodMap[nama] = 0;
-            prodMap[nama] += terjual;
+        if (tipe === "monthly" && periode === monthPrefix) {
+          hasMonthly = true;
+          monthlyRows.push(dbData[i]);
+        }
+      }
+      
+      var targetRows = [];
+      if (hasMonthly) {
+        targetRows = monthlyRows;
+      } else {
+        for (var i = 1; i < dbData.length; i++) {
+          var tipe = dbData[i][1].toString();
+          var periode = dbData[i][0].toString();
+          if (tipe === "weekly" && periode.indexOf(monthName) !== -1) {
+            targetRows.push(dbData[i]);
           }
         }
       }
       
-      var prodArray = [];
-      for (var key in prodMap) {
-        prodArray.push({ nama: key, terjual: prodMap[key] });
+      if (targetRows.length > 0) {
+        var categories = ["Minuman", "Makanan", "Snack"];
+        categories.forEach(function(cat) {
+          var catKey = cat.toLowerCase();
+          var topMap = {};
+          var bottomMap = {};
+          
+          targetRows.forEach(function(row) {
+            var rowCat = row[3].toString();
+            if (rowCat === cat) {
+              var peringkat = row[4].toString();
+              var nama = row[5].toString().trim();
+              var terjual = Number(row[6] || 0);
+              var rencana = row[7].toString().trim();
+              
+              if (nama) {
+                if (peringkat === "Top") {
+                  if (!topMap[nama]) topMap[nama] = 0;
+                  topMap[nama] += terjual;
+                } else if (peringkat === "Bottom") {
+                  if (!bottomMap[nama]) {
+                    bottomMap[nama] = { terjual: 0, rencanaList: [] };
+                  }
+                  bottomMap[nama].terjual += terjual;
+                  if (rencana && bottomMap[nama].rencanaList.indexOf(rencana) === -1) {
+                    bottomMap[nama].rencanaList.push(rencana);
+                  }
+                }
+              }
+            }
+          });
+          
+          var topArray = [];
+          for (var name in topMap) {
+            topArray.push({ nama: name, terjual: topMap[name] });
+          }
+          topArray.sort(function(a, b) { return b.terjual - a.terjual; });
+          
+          var bottomArray = [];
+          for (var name in bottomMap) {
+            bottomArray.push({ 
+              nama: name, 
+              terjual: bottomMap[name].terjual, 
+              rencana: bottomMap[name].rencanaList.join("; ") 
+            });
+          }
+          bottomArray.sort(function(a, b) { return b.terjual - a.terjual; });
+          
+          productsData[catKey].top = topArray.slice(0, 5);
+          productsData[catKey].bottom = bottomArray.slice(0, 3);
+        });
       }
-      
-      prodArray.sort(function(a, b) { return b.terjual - a.terjual; });
-      topProduk = prodArray.slice(0, 5);
     }
     
     var resultObj = {
@@ -838,7 +897,7 @@ function api_gm_fetchReports(monthName, year) {
         currentFolderId: currentFolderId || "",
         targetOmset: Number(targetOmset) || 0,
         chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); }) || [],
-        topProduk: topProduk || []
+        productsData: productsData
       }
     };
     return JSON.stringify(resultObj);

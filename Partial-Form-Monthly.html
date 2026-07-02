@@ -120,17 +120,17 @@ function getMonthlyTabContent() {
           <div class="grid grid-cols-2 gap-3 mb-3">
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL SALES REAL (RP)</label>
-               <input type="number" value="${form.monthly.sales.total}" onchange="updateMonthlySalesField('total', Number(this.value))" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+               <input type="text" value="${form.monthly.sales.total ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.monthly.sales.total) : ''}" onfocus="unformatRupiah(this)" onblur="formatRupiah(this); updateMonthlySalesField('total', parseRupiah(this.value))" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
              </div>
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET SALES (RP)</label>
-               <input type="number" value="${form.monthly.sales.target}" onchange="updateMonthlySalesField('target', Number(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+               <input type="text" value="${form.monthly.sales.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.monthly.sales.target) : ''}" onfocus="unformatRupiah(this)" onblur="formatRupiah(this); updateMonthlySalesField('target', parseRupiah(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
              </div>
           </div>
           <div>
             <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERSENTASE PENCAPAIAN</label>
             <div class="flex items-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl">
-              <span class="text-sm font-bold text-zero-black">${form.monthly.sales.persen}%</span>
+              <span id="monthlyPersenDisplay" class="text-sm font-bold text-zero-black">${form.monthly.sales.persen}%</span>
             </div>
           </div>
         </div>

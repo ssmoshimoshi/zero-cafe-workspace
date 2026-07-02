@@ -96,8 +96,11 @@ function updateMonthlySalesField(field, value) {
     } else {
       window.form.monthly.sales.persen = 0;
     }
+    
+    // Update DOM directly to prevent scrolling/losing focus
+    const persenEl = document.getElementById('monthlyPersenDisplay');
+    if (persenEl) persenEl.innerText = window.form.monthly.sales.persen + '%';
   }
-  setTimeout(() => { if (AppState.currentTab === 1) renderApp(); }, 300);
 }
 function updateMonthlyRating(value) {
   window.form.monthly.evaluasi.ratingKerja = Number(value);

@@ -1,5 +1,14 @@
 # Zero Cafe Workspace - CHANGELOG
 
+## [v125] - 2026-07-03
+### STABLE CHECKPOINT - Upgrade UI/UX, Bottom Sheets, and Steppers
+- **Meningkatkan Estetika Visual**: Mengubah warna dasar menjadi palet resmi Zero Cafe (Hitam `#171717`, background `#f0efef`, abu-abu `#919191`).
+- **Pembaruan Navigasi Form**: Seluruh navigasi tab di Harian, Mingguan, dan Bulanan kini menggunakan **Dot Stepper** yang elegan menggantikan tab horizontal konvensional.
+- **Implementasi Bottom Sheet**: Desain popup modal (Tinjau Laporan, Tambah Staff Baru, Reset Form, dan Preview PDF) kini menggunakan transisi gaya *Bottom Sheet* yang meluncur mulus dari bawah layar HP.
+- **Mikro-Interaksi**: Menerapkan efek umpan balik klik membal (`active-scale`) pada seluruh tombol di aplikasi secara global.
+- **Skeleton Shimmer Loading**: Menambahkan visualisasi shimmer loading pada area omset mingguan saat data ditarik dari server database.
+- **Catatan Penting**: Versi ini (GAS `v125`) adalah **titik aman (stable checkpoint) KETIGA** yang mencakup penyempurnaan UI/UX menyeluruh dan perbaikan Target Omset.
+
 ## [v124] - 2026-07-02
 ### STABLE CHECKPOINT - Halaman Laporan Mingguan (Weekly Report)
 - **Finalized Weekly Report**: Semua perbaikan UI dan logika data pada halaman Laporan Mingguan telah distabilkan. Fitur berfungsi 100% seperti yang diharapkan.

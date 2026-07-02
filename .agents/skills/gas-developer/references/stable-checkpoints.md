@@ -4,6 +4,27 @@ Daftar versi GAS dan commit Git yang telah dikonfirmasi stabil oleh user. Gunaka
 
 ---
 
+## Checkpoint 3 — Penyempurnaan UI/UX & Fungsional Target
+- **GAS Version**: v125
+- **Git Commit**: `9055fcf`
+- **Tanggal**: 2026-07-03
+- **Cakupan**: Implementasi design system Zero Cafe, Dot Stepper, Bottom Sheets, Skeleton Loading, dan tombol membal.
+- **Fitur yang tercakup**:
+  - Warna resmi brand (`#171717`, `#f0efef`, `#919191`)
+  - Stepper terintegrasi penuh di halaman Daily, Weekly, Monthly
+  - Popup modal meluncur dari bawah (Bottom Sheet) di layar mobile
+  - Transisi Shimmer skeleton untuk penarikan data mingguan
+  - Tombol dengan efek klik membal secara global
+
+### Cara Rollback ke Checkpoint 3
+```bash
+# Rollback semua file UI & CSS
+git checkout 9055fcf -- CSS.html index.html Partial-Form-Daily.html Partial-Form-Weekly.html Partial-Form-Monthly.html JS-App2.html
+clasp push -f
+```
+
+---
+
 ## Checkpoint 1 — Halaman Laporan Harian (Daily Report)
 - **GAS Version**: v118
 - **Git Commit**: `c4318c2`

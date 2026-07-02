@@ -84,6 +84,10 @@
   .hover-scale:hover {
     transform: translateY(-2px);
   }
+  
+  .active-scale:active, button:active {
+    transform: scale(0.97);
+  }
 
   /* Elegant custom scrollbar */
   ::-webkit-scrollbar {
@@ -106,6 +110,15 @@
   }
   .dark ::-webkit-scrollbar-thumb:hover {
     background: #919191;
+  }
+  
+  /* Bottom Sheet Slide Up Animation */
+  @keyframes slideUp {
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   /* Shimmer Loading Animation */

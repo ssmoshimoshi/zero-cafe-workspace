@@ -22,18 +22,25 @@ function validateWeeklyPeriode() {
 async function fetchWeeklyData() {
   const f = window.form;
   if (!f.periodeStart || !f.periodeEnd) return;
-  showToast("Mengambil data omset dari database...", "info");
+  
+  const container = document.getElementById('weeklySalesContainer');
+  if (container) {
+    container.classList.add('shimmer-loading', 'opacity-50', 'pointer-events-none');
+  } else {
+    showToast("Mengambil data omset dari database...", "info");
+  }
+  
   try {
     const res = await Server.call('api_getWeeklyData', f.periodeStart, f.periodeEnd, f.outlet || 'Perintis');
     if (res.success && res.data) {
-      // res.data is an array of 7 days
       f.weekly.salesHarian = res.data;
-      showToast("Data omset dan target harian berhasil ditarik!", "success");
-      renderApp();
+      if (!container) showToast("Data omset dan target harian berhasil ditarik!", "success");
+      renderApp(); // This will re-render and implicitly remove the shimmer class since it recreates the DOM element
     }
   } catch (err) {
     console.error("Error fetchWeeklyData", err);
     showToast("Gagal menarik data omset otomatis", "error");
+    if (container) container.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
   }
 }
 

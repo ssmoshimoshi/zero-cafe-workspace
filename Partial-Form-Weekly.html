@@ -38,12 +38,17 @@ window.getWeeklyFormTemplate = function() {
         </div>
       </div>
 
-      <!-- Tab Navigation -->
-      <div class="bg-white border-b border-gray-200 px-4 py-3 mb-4 sticky top-[65px] z-10">
-        <div class="flex overflow-x-auto space-x-2 scrollbar-hide">
+      <!-- Tab Navigation Stepper -->
+      <div class="bg-white border-b border-gray-200 px-6 py-4 mb-4 sticky top-[65px] z-10">
+        <div class="flex justify-between items-start relative max-w-sm mx-auto">
+          <!-- Connecting Line -->
+          <div class="absolute left-4 right-4 h-0.5 bg-gray-100 z-0 top-2.5"></div>
           ${tabs.map(t => `
-            <button type="button" ${AppState.currentTab === t.num ? 'id="activeTabBtn"' : ''} onclick="switchTab(${t.num})" class="px-4 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap transition-all duration-200 ${AppState.currentTab === t.num ? 'bg-zero-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
-              ${t.label}
+            <button type="button" ${AppState.currentTab === t.num ? 'id="activeTabBtn"' : ''} onclick="switchTab(${t.num})" class="relative z-10 flex flex-col items-center gap-1.5 outline-none focus:outline-none w-16 group hover-scale">
+              <div class="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 ${AppState.currentTab === t.num ? 'bg-zero-black shadow-md ring-4 ring-gray-100 scale-110' : AppState.currentTab > t.num ? 'bg-emerald-500 text-white' : 'bg-gray-200 group-hover:bg-gray-300'}">
+                ${AppState.currentTab > t.num ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+              </div>
+              <span class="text-[8px] font-bold tracking-widest text-center ${AppState.currentTab === t.num ? 'text-zero-black' : 'text-gray-400'}">${t.label}</span>
             </button>
           `).join('')}
         </div>
@@ -102,7 +107,7 @@ function getWeeklyTabContent() {
           <div id="periodeWarning" class="mt-2 text-[10px] font-bold text-red-500 hidden">Peringatan: Periode lebih dari 7 hari!</div>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+        <div id="weeklySalesContainer" class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 transition-all duration-300">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">REKAP OMSET 7 HARI</h3>
           
           <div class="space-y-2">

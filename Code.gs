@@ -363,7 +363,8 @@ function submitFullReport(payloadStr) {
         Number(data.feedback.totalKomplain || 0),
         data.penutup.kendala || "",
         fileUrl,
-        Number(data.penjualan.target || 0)
+        Number(data.penjualan.target || 0),
+        JSON.stringify(data.staff || [])
       ]);
     } else if (data.type === "weekly") {
       var sheet = ss.getSheetByName("Weekly");
@@ -381,7 +382,9 @@ function submitFullReport(payloadStr) {
         0, // Reserved
         Number(data.weekly.komplain.total || 0),
         data.weekly.kendalaUtama || "",
-        fileUrl
+        fileUrl,
+        JSON.stringify(data.weekly.staff || []),
+        data.periodeStart || ""
       ]);
     } else if (data.type === "monthly") {
       var sheet = ss.getSheetByName("Monthly");
@@ -515,6 +518,10 @@ function api_getMonthlyData(monthStr, outlet) {
     var totalTarget = 0;
     var totalKomplain = 0;
     
+    var totalTelat = 0;
+    var sopTotalStaff = 0;
+    var sopCompliantStaff = 0;
+    
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       var rowDate = null;
@@ -539,11 +546,73 @@ function api_getMonthlyData(monthStr, outlet) {
           totalReal += Number(row[4] || 0); // Col E: Total Omset (shift1+shift2)
           totalKomplain += Number(row[5] || 0); // Col F: Komplain
           totalTarget += Number(row[8] || 0); // Col I: Target
+          
+          if (row[9]) {
+            try {
+              var staffArr = JSON.parse(row[9]);
+              for (var s = 0; s < staffArr.length; s++) {
+                var st = staffArr[s];
+                if (st.status === 'Terlambat') {
+                  totalTelat++;
+                }
+                
+                if (st.posisi !== 'Kitchen' && (st.status === 'Hadir' || st.status === 'Terlambat')) {
+                  sopTotalStaff++;
+                  if (!st.keramahan) { // false means not missed = friendly
+                    sopCompliantStaff++;
+                  }
+                }
+              }
+            } catch(e) {}
+          }
         }
       }
     }
     
-    return { success: true, totalReal: totalReal, totalTarget: totalTarget, totalKomplain: totalKomplain };
+    var kepatuhanSop = 0;
+    if (sopTotalStaff > 0) {
+      kepatuhanSop = Math.round((sopCompliantStaff / sopTotalStaff) * 100);
+    }
+    
+    var totalTeguran = 0;
+    var weeklySheet = ss.getSheetByName("Weekly");
+    if (weeklySheet) {
+      var wData = weeklySheet.getDataRange().getValues();
+      for (var w = 1; w < wData.length; w++) {
+        var wRow = wData[w];
+        if (String(wRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
+          var wDate = null;
+          if (wRow[9]) {
+             var wp = String(wRow[9]).split("-");
+             if (wp.length === 3) {
+               wDate = new Date(parseInt(wp[0], 10), parseInt(wp[1], 10) - 1, parseInt(wp[2], 10));
+             }
+          }
+          if (wDate && wDate.getFullYear() === targetYear && wDate.getMonth() === targetMonth) {
+            if (wRow[8]) {
+              try {
+                var wStaffArr = JSON.parse(wRow[8]);
+                for (var ws = 0; ws < wStaffArr.length; ws++) {
+                  if (wStaffArr[ws].status === 'Menurun' || wStaffArr[ws].status === 'Menurun / Perlu Evaluasi') {
+                    totalTeguran++;
+                  }
+                }
+              } catch(e) {}
+            }
+          }
+        }
+      }
+    }
+    
+    return { 
+      success: true, 
+      totalReal: totalReal, 
+      totalTarget: totalTarget, 
+      totalKomplain: totalKomplain,
+      totalTelat: totalTelat,
+      kepatuhanSop: kepatuhanSop,
+      totalTeguran: totalTeguran
+    };
   } catch (err) {
     return { success: false, error: err.toString() };
   }

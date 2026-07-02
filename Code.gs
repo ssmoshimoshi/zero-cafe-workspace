@@ -49,6 +49,14 @@ function initializeSystem() {
     "Bulan", "Supervisor", "Outlet", "Total Sales", "Target Sales", "Persen Tercapai", "Rating Kerja", "URL PDF"
   ]);
   
+  setupSheet(activeSpreadsheet, "Staff_Daily", [
+    "Tanggal", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"
+  ]);
+
+  setupSheet(activeSpreadsheet, "Staff_Weekly", [
+    "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
+  ]);
+  
   var staffSheet = setupSheet(activeSpreadsheet, "MasterStaff", [
     "ID", "Nama", "Posisi", "Status"
   ]);
@@ -363,9 +371,23 @@ function submitFullReport(payloadStr) {
         Number(data.feedback.totalKomplain || 0),
         data.penutup.kendala || "",
         fileUrl,
-        Number(data.penjualan.target || 0),
-        JSON.stringify(data.staff || [])
+        Number(data.penjualan.target || 0)
       ]);
+      
+      if (data.staff && data.staff.length > 0) {
+        var stSheet = setupSheet(ss, "Staff_Daily", [
+          "Tanggal", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"
+        ]);
+        var bulanLaporan = "";
+        if (data.tanggal) {
+          bulanLaporan = String(data.tanggal).substring(0, 7);
+        }
+        data.staff.forEach(function(s) {
+          stSheet.appendRow([
+            data.tanggal, bulanLaporan, data.outlet, data.supervisor, s.nama, s.posisi, s.status, s.keramahan ? "YA" : "TIDAK", s.keterangan || ""
+          ]);
+        });
+      }
     } else if (data.type === "weekly") {
       var sheet = ss.getSheetByName("Weekly");
       var totalRealSales = 0;
@@ -382,10 +404,23 @@ function submitFullReport(payloadStr) {
         0, // Reserved
         Number(data.weekly.komplain.total || 0),
         data.weekly.kendalaUtama || "",
-        fileUrl,
-        JSON.stringify(data.weekly.staff || []),
-        data.periodeStart || ""
+        fileUrl
       ]);
+      
+      if (data.weekly.staff && data.weekly.staff.length > 0) {
+        var swSheet = setupSheet(ss, "Staff_Weekly", [
+          "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
+        ]);
+        var bulanLaporan = "";
+        if (data.periodeStart) {
+          bulanLaporan = String(data.periodeStart).substring(0, 7);
+        }
+        data.weekly.staff.forEach(function(s) {
+          swSheet.appendRow([
+            data.periode, bulanLaporan, data.outlet, data.supervisor, s.nama, s.posisi, s.status, s.alasan || ""
+          ]);
+        });
+      }
     } else if (data.type === "monthly") {
       var sheet = ss.getSheetByName("Monthly");
       var bulanFormatted = data.bulan;
@@ -546,24 +581,29 @@ function api_getMonthlyData(monthStr, outlet) {
           totalReal += Number(row[4] || 0); // Col E: Total Omset (shift1+shift2)
           totalKomplain += Number(row[5] || 0); // Col F: Komplain
           totalTarget += Number(row[8] || 0); // Col I: Target
+        }
+      }
+    }
+    
+    var stSheet = ss.getSheetByName("Staff_Daily");
+    if (stSheet) {
+      var stData = stSheet.getDataRange().getValues();
+      for (var s = 1; s < stData.length; s++) {
+        var sRow = stData[s];
+        if (String(sRow[1]) === monthStr && String(sRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
+          var posisi = String(sRow[5]);
+          var statusHadir = String(sRow[6]);
+          var keramahanMiss = String(sRow[7]);
           
-          if (row[9]) {
-            try {
-              var staffArr = JSON.parse(row[9]);
-              for (var s = 0; s < staffArr.length; s++) {
-                var st = staffArr[s];
-                if (st.status === 'Terlambat') {
-                  totalTelat++;
-                }
-                
-                if (st.posisi !== 'Kitchen' && (st.status === 'Hadir' || st.status === 'Terlambat')) {
-                  sopTotalStaff++;
-                  if (!st.keramahan) { // false means not missed = friendly
-                    sopCompliantStaff++;
-                  }
-                }
-              }
-            } catch(e) {}
+          if (statusHadir === 'Terlambat') {
+            totalTelat++;
+          }
+          
+          if (posisi !== 'Kitchen' && (statusHadir === 'Hadir' || statusHadir === 'Terlambat')) {
+            sopTotalStaff++;
+            if (keramahanMiss === 'TIDAK') {
+              sopCompliantStaff++;
+            }
           }
         }
       }
@@ -575,30 +615,15 @@ function api_getMonthlyData(monthStr, outlet) {
     }
     
     var totalTeguran = 0;
-    var weeklySheet = ss.getSheetByName("Weekly");
-    if (weeklySheet) {
-      var wData = weeklySheet.getDataRange().getValues();
-      for (var w = 1; w < wData.length; w++) {
-        var wRow = wData[w];
-        if (String(wRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
-          var wDate = null;
-          if (wRow[9]) {
-             var wp = String(wRow[9]).split("-");
-             if (wp.length === 3) {
-               wDate = new Date(parseInt(wp[0], 10), parseInt(wp[1], 10) - 1, parseInt(wp[2], 10));
-             }
-          }
-          if (wDate && wDate.getFullYear() === targetYear && wDate.getMonth() === targetMonth) {
-            if (wRow[8]) {
-              try {
-                var wStaffArr = JSON.parse(wRow[8]);
-                for (var ws = 0; ws < wStaffArr.length; ws++) {
-                  if (wStaffArr[ws].status === 'Menurun' || wStaffArr[ws].status === 'Menurun / Perlu Evaluasi') {
-                    totalTeguran++;
-                  }
-                }
-              } catch(e) {}
-            }
+    var swSheet = ss.getSheetByName("Staff_Weekly");
+    if (swSheet) {
+      var swData = swSheet.getDataRange().getValues();
+      for (var w = 1; w < swData.length; w++) {
+        var wRow = swData[w];
+        if (String(wRow[1]) === monthStr && String(wRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
+          var evalStatus = String(wRow[6]);
+          if (evalStatus === 'Menurun' || evalStatus === 'Menurun / Perlu Evaluasi') {
+            totalTeguran++;
           }
         }
       }

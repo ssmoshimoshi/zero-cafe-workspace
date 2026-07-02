@@ -96,6 +96,27 @@ function getMonthlyTabContent() {
             <input type="month" value="${form.bulan}" onchange="window.form.bulan = this.value; fetchMonthlyData()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
           </div>
         </div>
+        
+        <div id="monthlySalesContainer" class="bg-zero-black rounded-2xl p-5 mb-4 transition-all duration-300 shadow-md">
+          <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">METRIK PENJUALAN</h3>
+          
+          <div class="grid grid-cols-2 gap-3 mb-3">
+             <div>
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL SALES REAL (RP)</label>
+               <input type="text" value="${form.monthly.sales.total ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.monthly.sales.total) : ''}" onfocus="unformatRupiah(this)" onblur="formatRupiah(this); updateMonthlySalesField('total', parseRupiah(this.value))" class="w-full px-3 py-2 text-sm font-bold bg-transparent border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gray-400">
+             </div>
+             <div>
+               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET SALES (RP)</label>
+               <input type="text" value="${form.monthly.sales.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.monthly.sales.target) : ''}" onfocus="unformatRupiah(this)" onblur="formatRupiah(this); updateMonthlySalesField('target', parseRupiah(this.value))" class="w-full px-3 py-2 text-sm bg-transparent border border-gray-700 rounded-xl text-white focus:outline-none focus:border-gray-400">
+             </div>
+          </div>
+          <div>
+            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERSENTASE PENCAPAIAN</label>
+            <div class="flex items-center px-3 py-2 bg-gray-800 border border-gray-700 rounded-xl">
+              <span id="monthlyPersenDisplay" class="text-sm font-bold text-white">${form.monthly.sales.persen}%</span>
+            </div>
+          </div>
+        </div>
 
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">RINGKASAN EKSEKUTIF</h3>
@@ -114,122 +135,114 @@ function getMonthlyTabContent() {
           </div>
         </div>
 
-        <div id="monthlySalesContainer" class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 transition-all duration-300">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">METRIK PENJUALAN</h3>
-          
-          <div class="grid grid-cols-2 gap-3 mb-3">
-             <div>
-               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL SALES REAL (RP)</label>
-               <input type="text" value="${form.monthly.sales.total ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.monthly.sales.total) : ''}" onfocus="unformatRupiah(this)" onblur="formatRupiah(this); updateMonthlySalesField('total', parseRupiah(this.value))" class="w-full px-3 py-2 text-sm font-bold border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
-             </div>
-             <div>
-               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET SALES (RP)</label>
-               <input type="text" value="${form.monthly.sales.target ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.monthly.sales.target) : ''}" onfocus="unformatRupiah(this)" onblur="formatRupiah(this); updateMonthlySalesField('target', parseRupiah(this.value))" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
-             </div>
-          </div>
-          <div>
-            <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PERSENTASE PENCAPAIAN</label>
-            <div class="flex items-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl">
-              <span id="monthlyPersenDisplay" class="text-sm font-bold text-zero-black">${form.monthly.sales.persen}%</span>
-            </div>
-          </div>
-        </div>
 
         <!-- Card Minuman -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK MINUMAN</h3>
-          
-          <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MINUMAN</span>
-            <div class="space-y-2">
-              ${form.monthly.produk.topMinuman.map((item, idx) => `
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                  <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.topMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
-                  <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MINUMAN</span>
-            <div class="space-y-2">
-              ${form.monthly.produk.bottomMinuman.map((item, idx) => `
-                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                  <div class="flex items-center gap-2 mb-2">
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('monthlyMinuman')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MINUMAN</h3>
+            <svg id="icon-monthlyMinuman" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="monthlyMinuman" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MINUMAN</span>
+              <div class="space-y-2">
+                ${form.monthly.produk.topMinuman.map((item, idx) => `
+                  <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.topMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
                   </div>
-                  <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                </div>
-              `).join('')}
+                `).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MINUMAN</span>
+              <div class="space-y-2">
+                ${form.monthly.produk.bottomMinuman.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
             </div>
           </div>
         </div>
         
         <!-- Card Makanan -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK MAKANAN</h3>
-          
-          <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MAKANAN</span>
-            <div class="space-y-2">
-              ${form.monthly.produk.topMakanan.map((item, idx) => `
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                  <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.topMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
-                  <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MAKANAN</span>
-            <div class="space-y-2">
-              ${form.monthly.produk.bottomMakanan.map((item, idx) => `
-                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                  <div class="flex items-center gap-2 mb-2">
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('monthlyMakanan')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MAKANAN</h3>
+            <svg id="icon-monthlyMakanan" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="monthlyMakanan" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MAKANAN</span>
+              <div class="space-y-2">
+                ${form.monthly.produk.topMakanan.map((item, idx) => `
+                  <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.topMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
                   </div>
-                  <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                </div>
-              `).join('')}
+                `).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MAKANAN</span>
+              <div class="space-y-2">
+                ${form.monthly.produk.bottomMakanan.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
             </div>
           </div>
         </div>
         
         <!-- Card Snack -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK SNACK</h3>
-          
-          <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 SNACK</span>
-            <div class="space-y-2">
-              ${form.monthly.produk.topSnack.map((item, idx) => `
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                  <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.topSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
-                  <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 SNACK</span>
-            <div class="space-y-2">
-              ${form.monthly.produk.bottomSnack.map((item, idx) => `
-                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                  <div class="flex items-center gap-2 mb-2">
+        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
+          <button type="button" onclick="toggleAccordion('monthlySnack')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK SNACK</h3>
+            <svg id="icon-monthlySnack" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="monthlySnack" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 SNACK</span>
+              <div class="space-y-2">
+                ${form.monthly.produk.topSnack.map((item, idx) => `
+                  <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.bottomSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.topSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
                   </div>
-                  <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                </div>
-              `).join('')}
+                `).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 SNACK</span>
+              <div class="space-y-2">
+                ${form.monthly.produk.bottomSnack.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.bottomSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                `).join('')}
+              </div>
             </div>
           </div>
         </div>

@@ -60,7 +60,7 @@ async function fetchMonthlyData() {
   
   try {
     const res = await Server.call('api_getMonthlyData', f.bulan, f.outlet || 'Perintis');
-    if (res.success) {
+    if (res && res.success) {
       f.monthly.sales.total = res.totalReal || 0;
       f.monthly.sales.target = res.totalTarget || 0;
       f.monthly.qc.komplain = res.totalKomplain || 0;
@@ -74,10 +74,14 @@ async function fetchMonthlyData() {
       
       if (!salesContainer) showToast("Data bulanan berhasil ditarik!", "success");
       renderApp();
+    } else if (res && !res.success) {
+      showToast("Gagal dari server: " + res.error, "error");
+      if (salesContainer) salesContainer.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
+      if (qcContainer) qcContainer.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
     }
   } catch (err) {
     console.error("Error fetchMonthlyData", err);
-    showToast("Gagal menarik data bulanan otomatis", "error");
+    showToast("Koneksi gagal: " + (err.message || err), "error");
     if (salesContainer) salesContainer.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
     if (qcContainer) qcContainer.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
   }
@@ -115,6 +119,18 @@ function addMonthlyQCItem() {
   if (!window.form.monthly.qc.items) window.form.monthly.qc.items = [];
   window.form.monthly.qc.items.push({ menu: "", status: "Baik", komplain: "", rekomendasi: "" });
   renderApp();
+}
+
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  const icon = document.getElementById('icon-' + id);
+  if (el && el.classList.contains('hidden')) {
+    el.classList.remove('hidden');
+    if (icon) icon.style.transform = 'rotate(180deg)';
+  } else if (el) {
+    el.classList.add('hidden');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+  }
 }
 function removeMonthlyQCItem(idx) {
   window.form.monthly.qc.items.splice(idx, 1);

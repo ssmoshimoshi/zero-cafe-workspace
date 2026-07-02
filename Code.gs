@@ -390,14 +390,23 @@ function submitFullReport(payloadStr) {
       }
     } else if (data.type === "weekly") {
       var sheet = ss.getSheetByName("Weekly");
+      if (!sheet) {
+        sheet = setupSheet(ss, "Weekly", [
+          "Periode", "Supervisor", "Outlet", "Total Real Sales", "(Reserved)", "Komplain", "Kendala Utama", "URL PDF"
+        ]);
+      }
+      
       var totalRealSales = 0;
       if (data.weekly && data.weekly.salesHarian) {
         data.weekly.salesHarian.forEach(function(s) {
           totalRealSales += Number(s.real || 0);
         });
       }
+      
+      var computedPeriode = data.periode || (data.periodeStart + " s/d " + data.periodeEnd);
+      
       sheet.appendRow([
-        data.periode,
+        computedPeriode,
         data.supervisor,
         data.outlet,
         totalRealSales,
@@ -417,7 +426,7 @@ function submitFullReport(payloadStr) {
         }
         data.weekly.staff.forEach(function(s) {
           swSheet.appendRow([
-            data.periode, bulanLaporan, data.outlet, data.supervisor, s.nama, s.posisi, s.status, s.alasan || ""
+            computedPeriode, bulanLaporan, data.outlet, data.supervisor, s.nama || "", s.posisi || "", s.status || "", s.alasan || ""
           ]);
         });
       }

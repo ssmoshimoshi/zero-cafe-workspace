@@ -50,17 +50,22 @@ window.getMonthlyFormTemplate = function() {
         </div>
       </div>
 
-      <!-- Footer Navigation -->
-      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 p-4 flex justify-between gap-3 z-30">
-        ${AppState.currentTab > 1 ? `
-          <button type="button" onclick="prevTab()" class="flex-1 py-3 border border-gray-200 rounded-2xl text-xs font-bold text-zero-black hover:bg-gray-50 transition-all">SEBELUMNYA</button>
-        ` : `<div class="flex-1"></div>`}
-        
-        ${AppState.currentTab === 3 ? `
-          <button type="button" onclick="openPreviewModal()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">TINJAU & KIRIM</button>
-        ` : `
-          <button type="button" onclick="nextTab()" class="flex-1 py-3 bg-zero-black text-white rounded-2xl text-xs font-bold hover:bg-gray-800 transition-all">SELANJUTNYA</button>
-        `}
+      <!-- Footer Navigation: minimalist dots + arrows -->
+      <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between z-30">
+        <!-- Prev arrow -->
+        <button type="button" onclick="prevTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 1 ? 'disabled' : ''}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <!-- Dots -->
+        <div class="flex items-center gap-1.5">
+          ${tabs.map(t => `
+            <button type="button" onclick="switchTab(${t.num})" class="transition-all duration-300 rounded-full ${AppState.currentTab === t.num ? 'w-6 h-2 bg-zero-black' : 'w-2 h-2 bg-gray-200 hover:bg-gray-300'}"></button>
+          `).join('')}
+        </div>
+        <!-- Next arrow -->
+        <button type="button" onclick="nextTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 3 ? 'disabled' : ''}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
       </div>
     </div>
   `;
@@ -97,15 +102,15 @@ function getMonthlyTabContent() {
           
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENCAPAIAN UTAMA BULAN INI</label>
-            <input type="text" value="${form.monthly.ringkasan.pencapaian}" onchange="window.form.monthly.ringkasan.pencapaian = this.value" placeholder="Misal: Mencapai 110% dari target sales" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+            <textarea onchange="window.form.monthly.ringkasan.pencapaian = this.value" placeholder="Misal: Mencapai 110% dari target sales" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black min-h-[80px]">${form.monthly.ringkasan.pencapaian}</textarea>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">MASALAH / ISU UTAMA</label>
-            <input type="text" value="${form.monthly.ringkasan.masalah}" onchange="window.form.monthly.ringkasan.masalah = this.value" placeholder="Misal: Sering mati lampu" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+            <textarea onchange="window.form.monthly.ringkasan.masalah = this.value" placeholder="Misal: Sering mati lampu" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black min-h-[80px]">${form.monthly.ringkasan.masalah}</textarea>
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">KESIMPULAN KESELURUHAN</label>
-            <input type="text" value="${form.monthly.ringkasan.kesimpulan}" onchange="window.form.monthly.ringkasan.kesimpulan = this.value" placeholder="Status operasional bulan ini..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black">
+            <textarea onchange="window.form.monthly.ringkasan.kesimpulan = this.value" placeholder="Status operasional bulan ini..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-zero-black min-h-[80px]">${form.monthly.ringkasan.kesimpulan}</textarea>
           </div>
         </div>
 
@@ -130,8 +135,9 @@ function getMonthlyTabContent() {
           </div>
         </div>
 
+        <!-- Card Minuman -->
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK TOP & BOTTOM</h3>
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK MINUMAN</h3>
           
           <div>
             <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MINUMAN</span>
@@ -146,7 +152,7 @@ function getMonthlyTabContent() {
             </div>
           </div>
           <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">BOTTOM 3 MINUMAN</span>
+            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MINUMAN</span>
             <div class="space-y-2">
               ${form.monthly.produk.bottomMinuman.map((item, idx) => `
                 <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
@@ -160,9 +166,14 @@ function getMonthlyTabContent() {
               `).join('')}
             </div>
           </div>
+        </div>
+        
+        <!-- Card Makanan -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK MAKANAN</h3>
           
           <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">TOP 3 MAKANAN</span>
+            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 MAKANAN</span>
             <div class="space-y-2">
               ${form.monthly.produk.topMakanan.map((item, idx) => `
                 <div class="flex items-center gap-2">
@@ -174,7 +185,7 @@ function getMonthlyTabContent() {
             </div>
           </div>
           <div>
-            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">BOTTOM 3 MAKANAN</span>
+            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MAKANAN</span>
             <div class="space-y-2">
               ${form.monthly.produk.bottomMakanan.map((item, idx) => `
                 <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
@@ -184,6 +195,39 @@ function getMonthlyTabContent() {
                     <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
                   </div>
                   <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Card Snack -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 space-y-4">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK SNACK</h3>
+          
+          <div>
+            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 3 SNACK</span>
+            <div class="space-y-2">
+              ${form.monthly.produk.topSnack.map((item, idx) => `
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                  <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.topSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                  <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div>
+            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 SNACK</span>
+            <div class="space-y-2">
+              ${form.monthly.produk.bottomSnack.map((item, idx) => `
+                <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" onchange="window.form.monthly.produk.bottomSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <input type="number" value="${item.terjual}" onchange="window.form.monthly.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
+                  <input type="text" value="${item.rencana}" onchange="window.form.monthly.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Rencana (Promo/Hapus/dll)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
                 </div>
               `).join('')}
             </div>

@@ -84,6 +84,93 @@ Forgetting this causes `ReferenceError` and the entire app goes blank.
 
 ---
 
+### Rule 4: Stable File List — DO NOT MODIFY WITHOUT CONFIRMATION
+The following files have passed user-confirmed stable checkpoints. **Do NOT modify them unless the user explicitly asks to change that specific file.** If a new feature requires touching a stable file, explain the risk and get confirmation first.
+
+| File | Checkpoint | GAS Version |
+|---|---|---|
+| `Partial-Form-Daily.html` | Checkpoint 1 | v118 |
+| `Partial-Form-Weekly.html` | Checkpoint 2 | v124 |
+
+When a new checkpoint is reached, update this table and `references/stable-checkpoints.md`.
+
+---
+
+### Rule 5: Read-Before-Write
+**Never edit a file you haven't read in the current session.** Before modifying any file:
+1. Use `view_file` to read the relevant sections first
+2. Understand what's already there
+3. Then make targeted edits
+
+This prevents "guessing" file contents and accidentally overwriting working code.
+
+---
+
+### Rule 6: One Task, One Deploy
+Do not combine 4-5 unrelated features into a single editing session. For each user request:
+1. If it contains multiple independent tasks, suggest breaking them into steps
+2. Complete one task → verify → deploy → then move to the next
+3. This reduces risk of cascading breakage
+
+---
+
+### Rule 7: Confirm Before Code
+For medium-to-large tasks (anything that touches 2+ files or adds new logic):
+1. Explain the plan in 3-5 bullet points
+2. Wait for user confirmation
+3. Then execute
+
+For trivial fixes (typo, single-line change, style tweak): proceed directly.
+
+---
+
+### Rule 8: Smart Rejection
+You are **allowed and encouraged** to push back on requests that:
+- Risk breaking stable files without clear benefit
+- Combine too many changes at once (suggest splitting)
+- Duplicate existing functionality
+- Contradict a previous user-confirmed decision
+
+Always provide **data-based reasoning** when rejecting. Never reject without an alternative suggestion.
+
+---
+
+### Rule 9: Always Use `window.form` in Inline Handlers
+In all `onchange`, `oninput`, `onclick` attributes inside template literals:
+- ✅ `window.form.penjualan.target`
+- ❌ `form.penjualan.target`
+
+The bare `form` reference can be captured by an HTML `<form>` element's scope chain, causing silent data loss.
+
+---
+
+## 🎨 Brand Design Rules — Zero Cafe
+
+### Color Palette
+| Usage | Color | Hex |
+|---|---|---|
+| Primary (text, buttons) | Hitam Zero | `#171717` |
+| Background | Putih Zero | `#f0efef` |
+| Card background | Putih | `#FFFFFF` |
+| Border/divider | Abu Zero | `#919191` |
+| Label/secondary text | Abu | `#9CA3AF` |
+| Success indicator | Hijau | `#16A34A` |
+| Warning indicator | Kuning/Oranye | `#D97706` |
+| Danger indicator | Merah | `#DC2626` |
+
+### Forbidden
+- ❌ Jangan gunakan warna merah untuk tombol aksi (tombol utama harus hitam/putih)
+- ❌ Jangan gunakan warna di luar palet ini tanpa konfirmasi
+
+### Mobile-First Checklist
+Sebelum menambahkan komponen UI baru, pastikan:
+- [ ] Touch target minimal 44x44px untuk tombol
+- [ ] Font size minimal 14px untuk input field
+- [ ] Jangan letakkan 2 kolom input kecil bersebelahan di layar < 375px tanpa konfirmasi
+- [ ] Test responsive di browser DevTools (375px width)
+
+---
+
 ## 📁 File Structure Reference
 
 | File | Purpose |
@@ -98,6 +185,17 @@ Forgetting this causes `ReferenceError` and the entire app goes blank.
 | `Partial-Form-Weekly.html` | Weekly form HTML template + tab content |
 | `Partial-Form-Monthly.html` | Monthly form HTML template + tab content |
 | `Partial-Dashboard-GM.html` | GM Dashboard template |
+
+---
+
+## 📚 References & Examples
+For detailed data schemas, API docs, and code patterns, read:
+- `references/data-schema.md` — Structure of `window.form` and Google Sheets columns
+- `references/api-reference.md` — All backend API functions with parameters and return values
+- `references/stable-checkpoints.md` — Stable versions and rollback instructions
+- `references/known-bugs.md` — Historical bugs and their solutions
+- `examples/rupiah-input-pattern.md` — Proven pattern for Rupiah-formatted inputs
+- `examples/new-api-endpoint.md` — How to add a new API endpoint end-to-end
 
 ---
 

@@ -242,10 +242,14 @@ function getDynamicFolder(year, monthName, data) {
     var dayFolderName = day + " " + monthName;
     return getOrCreateSubFolder(monthFolder, dayFolderName);
   } else if (data.type === "weekly") {
-    // Mingguan folder: "1-7 juli Laporan mingguan"
-    var periodeStr = data.periode || (data.periodeStart + "-" + data.periodeEnd) || "1-7";
-    var periodeClean = periodeStr.replace(/\s+/g, '');
-    var folderName = periodeClean + " " + monthName.toLowerCase() + " Laporan mingguan";
+    // Mingguan folder format: <start_day>-<end_day>-<month>-<year>
+    var pStart = data.periodeStart ? data.periodeStart.split("-") : [];
+    var pEnd = data.periodeEnd ? data.periodeEnd.split("-") : [];
+    
+    var startDay = pStart.length === 3 ? parseInt(pStart[2], 10) : "1";
+    var endDay = pEnd.length === 3 ? parseInt(pEnd[2], 10) : "7";
+    
+    var folderName = startDay + "-" + endDay + "-" + monthName.toLowerCase() + "-" + year;
     return getOrCreateSubFolder(monthFolder, folderName);
   } else if (data.type === "monthly") {
     // Bulanan folder: "Laporan Bulanan"
@@ -356,6 +360,17 @@ function submitFullReport(payloadStr) {
     
     // 2. Save to Google Drive folder
     var folder = getDynamicFolder(year, monthName, data);
+    
+    // 3. Pengecekan Duplikat
+    var existingFiles = folder.getFilesByName(fileName);
+    if (existingFiles.hasNext()) {
+      return { 
+        success: false, 
+        isDuplicate: true, 
+        message: "Laporan untuk periode ini sudah ada. Pengiriman ganda digagalkan!" 
+      };
+    }
+    
     var file = folder.createFile(pdfBlob);
     var fileUrl = file.getUrl();
     

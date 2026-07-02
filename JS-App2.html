@@ -44,6 +44,45 @@ async function fetchWeeklyData() {
   }
 }
 
+async function fetchMonthlyData() {
+  const f = window.form;
+  if (!f.bulan) return;
+  
+  const salesContainer = document.getElementById('monthlySalesContainer');
+  const qcContainer = document.getElementById('monthlyQcContainer');
+  
+  if (salesContainer) salesContainer.classList.add('shimmer-loading', 'opacity-50', 'pointer-events-none');
+  if (qcContainer) qcContainer.classList.add('shimmer-loading', 'opacity-50', 'pointer-events-none');
+  
+  if (!salesContainer) {
+    showToast("Mengambil data rekap bulanan...", "info");
+  }
+  
+  try {
+    const res = await Server.call('api_getMonthlyData', f.bulan, f.outlet || 'Perintis');
+    if (res.success) {
+      f.monthly.sales.total = res.totalReal || 0;
+      f.monthly.sales.target = res.totalTarget || 0;
+      f.monthly.qc.komplain = res.totalKomplain || 0;
+      
+      // Calculate percentage
+      if (f.monthly.sales.target > 0) {
+        f.monthly.sales.persen = Math.round(f.monthly.sales.total / f.monthly.sales.target * 100);
+      } else {
+        f.monthly.sales.persen = 0;
+      }
+      
+      if (!salesContainer) showToast("Data bulanan berhasil ditarik!", "success");
+      renderApp();
+    }
+  } catch (err) {
+    console.error("Error fetchMonthlyData", err);
+    showToast("Gagal menarik data bulanan otomatis", "error");
+    if (salesContainer) salesContainer.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
+    if (qcContainer) qcContainer.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
+  }
+}
+
 function updateWeeklySalesField(idx, field, value) {
   window.form.weekly.salesHarian[idx][field] = parseRupiah(value);
   setTimeout(() => { if (AppState.currentTab === 2) renderApp(); }, 100);

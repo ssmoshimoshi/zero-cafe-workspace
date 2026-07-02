@@ -497,6 +497,59 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
 }
 
 /**
+ * Fetches monthly summary data (Total Omset, Target, Komplain) for a given month and outlet.
+ * monthStr should be YYYY-MM.
+ */
+function api_getMonthlyData(monthStr, outlet) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("Daily");
+    if (!sheet) return { success: false, error: "Tab Daily tidak ditemukan" };
+    
+    var data = sheet.getDataRange().getValues();
+    var monthParts = monthStr.split("-"); // [YYYY, MM]
+    var targetYear = parseInt(monthParts[0], 10);
+    var targetMonth = parseInt(monthParts[1], 10) - 1; // JS months are 0-11
+    
+    var totalReal = 0;
+    var totalTarget = 0;
+    var totalKomplain = 0;
+    
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var rowDate = null;
+      if (row[0] instanceof Date) {
+        rowDate = row[0];
+      } else {
+        var dateParts = String(row[0]).split("-");
+        if (dateParts.length === 3) {
+          var d = parseInt(dateParts[0], 10);
+          var m = parseInt(dateParts[1], 10) - 1;
+          var y = parseInt(dateParts[2], 10);
+          if (y < 2000) { // Format is likely YYYY-MM-DD
+            y = parseInt(dateParts[0], 10);
+            d = parseInt(dateParts[2], 10);
+          }
+          rowDate = new Date(y, m, d);
+        }
+      }
+      
+      if (rowDate) {
+        if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(row[2]).toLowerCase() === String(outlet).toLowerCase()) {
+          totalReal += Number(row[4] || 0); // Col E: Total Omset (shift1+shift2)
+          totalKomplain += Number(row[5] || 0); // Col F: Komplain
+          totalTarget += Number(row[8] || 0); // Col I: Target
+        }
+      }
+    }
+    
+    return { success: true, totalReal: totalReal, totalTarget: totalTarget, totalKomplain: totalKomplain };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+
+/**
  * Fetches dashboard analytics data for GM.
  */
 function api_gm_fetchReports(monthName, year) {

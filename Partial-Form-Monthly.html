@@ -80,7 +80,7 @@ function getMonthlyTabContent() {
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET</label>
-              <select onchange="window.form.outlet = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
+              <select onchange="window.form.outlet = this.value; fetchMonthlyData()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
                 <option value="Perintis" ${form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
                 <option value="Dg Tata" ${form.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
               </select>
@@ -88,7 +88,7 @@ function getMonthlyTabContent() {
           </div>
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">BULAN LAPORAN</label>
-            <input type="month" value="${form.bulan}" onchange="window.form.bulan = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+            <input type="month" value="${form.bulan}" onchange="window.form.bulan = this.value; fetchMonthlyData()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
           </div>
         </div>
 
@@ -109,7 +109,7 @@ function getMonthlyTabContent() {
           </div>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+        <div id="monthlySalesContainer" class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 transition-all duration-300">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">METRIK PENJUALAN</h3>
           
           <div class="grid grid-cols-2 gap-3 mb-3">
@@ -237,7 +237,7 @@ function getMonthlyTabContent() {
           </div>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
+        <div id="monthlyQcContainer" class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 transition-all duration-300">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">REKAP QUALITY CONTROL & KOMPLAIN</h3>
           
           <div class="flex gap-3 mb-4">

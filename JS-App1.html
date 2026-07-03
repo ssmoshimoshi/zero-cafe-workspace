@@ -169,7 +169,7 @@ function resetFormData(type) {
         ]
       },
       staff: [],
-      operasional: { kepatuhanSop: 100, telat: 0, teguran: 0, penyebab: "" },
+      operasional: { kepatuhanSop: 100, telat: 0, teguran: 0, penyebab: "", resignList: [] },
       qc: { komplain: 0, remake: 0, penyebab: "", espresso: "", rekomendasi: "", items: [] },
       fasilitas: { pengeluaran: 0, eskalasi: "" },
       rencana: { strategi: "", target: "", gm: "" },
@@ -667,6 +667,69 @@ async function uploadPhoto(fileInput, category, customFilename) {
 function addAuditRow() { window.form.kas.audit.push({ jam: "12:00", aktual: 0, qris: 0, tunai: 0, keterangan: "" }); renderApp(); }
 function removeAuditRow(idx) { window.form.kas.audit.splice(idx, 1); renderApp(); }
 function updateAuditField(idx, field, value) { window.form.kas.audit[idx][field] = value; }
+function updateMonthlyStaff(idx, field, value) {
+  window.form.monthly.staff[idx][field] = value;
+  renderApp();
+}
+
+function openResignModal(idx = -1) {
+  try {
+    const modal = document.getElementById('resignModal');
+    const selId = document.getElementById('resignModalId');
+    const txtAlasan = document.getElementById('resignModalAlasan');
+    document.getElementById('resignModalIdx').value = idx;
+    
+    selId.innerHTML = '<option value="">Pilih Staf...</option>' + 
+      (AppState.masterStaff || []).map(s => `<option value="${s.id}">${s.nama}</option>`).join('');
+    
+    if (idx >= 0) {
+      const item = window.form.monthly.operasional.resignList[idx];
+      selId.value = item.id || "";
+      txtAlasan.value = item.alasan || "";
+    } else {
+      selId.value = "";
+      txtAlasan.value = "";
+    }
+    
+    modal.classList.remove('hidden');
+  } catch(e) {
+    showToast("Error buka modal: " + e.message, "error");
+  }
+}
+
+function closeResignModal() {
+  document.getElementById('resignModal').classList.add('hidden');
+}
+
+function saveResignModal() {
+  const idx = parseInt(document.getElementById('resignModalIdx').value, 10);
+  const selId = document.getElementById('resignModalId').value;
+  const txtAlasan = document.getElementById('resignModalAlasan').value;
+  
+  if (!selId) { showToast("Pilih nama staf terlebih dahulu!", "error"); return; }
+  if (!txtAlasan) { showToast("Alasan resign tidak boleh kosong!", "error"); return; }
+  
+  const staffObj = AppState.masterStaff.find(s => s.id.toString() === selId.toString());
+  const nama = staffObj ? staffObj.nama : "";
+  
+  if (!window.form.monthly.operasional.resignList) window.form.monthly.operasional.resignList = [];
+  
+  if (idx >= 0) {
+    window.form.monthly.operasional.resignList[idx] = { id: selId, nama, alasan: txtAlasan };
+  } else {
+    window.form.monthly.operasional.resignList.push({ id: selId, nama, alasan: txtAlasan });
+  }
+  
+  closeResignModal();
+  renderApp();
+}
+
+function removeResignStaff(idx) {
+  if (!window.form.monthly.operasional.resignList) return;
+  window.form.monthly.operasional.resignList.splice(idx, 1);
+  renderApp();
+}
+
 function updateStaffField(idx, field, value) { window.form.staff[idx][field] = value; }
 function addQcRow() { window.form.qc.items.push({ jam: "12:00", nama: "", status: "Baik", keterangan: "" }); renderApp(); }
 function removeQcRow(idx) { window.form.qc.items.splice(idx, 1); renderApp(); }

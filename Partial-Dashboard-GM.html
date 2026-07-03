@@ -382,7 +382,9 @@ async function fetchGMAnalytics() {
   
   showLoading(true);
   try {
-    const res = await Server.call('api_gm_fetchReports', month, year, outlet);
+    const rawRes = await Server.call('api_gm_fetchReports', month, year, outlet);
+    const res = typeof rawRes === 'string' ? JSON.parse(rawRes) : rawRes;
+    
     if (res.status === 'success') {
       AppState.dashboardData = res.data;
       showToast("Data analitik berhasil diperbarui.");

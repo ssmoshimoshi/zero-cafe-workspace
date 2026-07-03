@@ -486,20 +486,17 @@ window.addStaffSubmit = async function() {
   const nameEl = document.getElementById('newStaffName');
   const posEl = document.getElementById('newStaffPosition');
   if (!nameEl || !posEl) return;
-  
   const name = nameEl.value.trim();
   const pos = posEl.value;
-  if (!name) {
-    showToast("Nama staf tidak boleh kosong!", "error");
-    return;
-  }
-  closeAddStaffModal();
-  showLoading(true);
+  if (!name) return;
+  
   try {
-    const res = await Server.call('api_addStaff', name, pos);
+    const res = await Server.call('api_addMasterStaff', name, pos);
     if (res.success) {
-      showToast(res.message);
-      await fetchMasterStaff();
+      // Add to local master list
+      AppState.masterStaff.push({ nama: name, posisi: pos });
+      
+      // Auto-add to current form based on type
       if (window.form.type === 'daily') {
         window.form.staff.push({ nama: name, posisi: pos, status: "Hadir", keramahan: false, keterangan: "" });
       } else if (window.form.type === 'weekly') {
@@ -507,14 +504,14 @@ window.addStaffSubmit = async function() {
       }
       renderApp();
     } else {
-      showToast("Gagal menyimpan staff: " + res.error, "error");
+      showToast("Gagal menambahkan staff: " + res.error, "error");
     }
   } catch (err) {
-    showToast("Error: " + err.toString(), "error");
+    showToast("Koneksi gagal", "error");
   } finally {
-    showLoading(false);
+    window.closeAddStaffModal();
   }
-}
+};
 
 /*  === DARK MODE INIT === */
 (function() {

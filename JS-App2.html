@@ -435,7 +435,9 @@ function confirmResetForm() {
       return;
     }
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
   } catch(e) {
     showToast("Error: " + e.message, "error");
   }
@@ -443,7 +445,10 @@ function confirmResetForm() {
 
 function closeResetModal() {
   const modal = document.getElementById('confirmResetModal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
 }
 
 function executeResetForm() {
@@ -484,7 +489,9 @@ function openAddStaffModal() {
     }
     if (input) input.value = "";
     modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
   } catch(e) {
     showToast("Error: " + e.message, "error");
   }
@@ -492,7 +499,10 @@ function openAddStaffModal() {
 
 function closeAddStaffModal() {
   const modal = document.getElementById('addStaffModal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
 }
 
 async function addStaffSubmit() {

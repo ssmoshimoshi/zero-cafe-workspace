@@ -71,7 +71,7 @@
 
   <!-- 2. Add Staff Modal -->
   <div id="addStaffModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4">
-    <div class="absolute inset-0 bg-[#0f0f0f]/60 backdrop-blur-sm" onclick="closeAddStaffModal()"></div>
+    <div class="absolute inset-0 bg-[#0f0f0f]/60 backdrop-blur-sm" onclick="window.closeAddStaffModal()"></div>
     <div class="relative bg-zero-white dark:bg-zero-black max-w-sm w-full rounded-t-3xl sm:rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 p-6 pb-8 sm:pb-6 animate-slide-up">
       <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6 sm:hidden"></div>
       <h3 class="font-bold text-lg text-gray-900 dark:text-zero-white mb-4 flex items-center space-x-2">
@@ -92,15 +92,15 @@
         </div>
       </div>
       <div class="mt-6 flex gap-3">
-        <button onclick="closeAddStaffModal()" class="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Batal</button>
-        <button onclick="addStaffSubmit()" class="flex-1 px-4 py-3 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors">Simpan</button>
+        <button onclick="window.closeAddStaffModal()" class="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Batal</button>
+        <button onclick="window.addStaffSubmit()" class="flex-1 px-4 py-3 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors">Simpan</button>
       </div>
     </div>
   </div>
 
   <!-- 3. Confirm Reset Modal -->
   <div id="confirmResetModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4">
-    <div class="absolute inset-0 bg-[#0f0f0f]/60 backdrop-blur-sm" onclick="closeResetModal()"></div>
+    <div class="absolute inset-0 bg-[#0f0f0f]/60 backdrop-blur-sm" onclick="window.closeResetModal()"></div>
     <div class="relative bg-zero-white dark:bg-zero-black max-w-sm w-full rounded-t-3xl sm:rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 p-6 pb-8 sm:pb-6 text-center animate-slide-up">
       <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6 sm:hidden"></div>
       <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -109,8 +109,8 @@
       <h3 class="font-bold text-xl text-gray-900 mb-2">Reset Laporan?</h3>
       <p class="text-gray-500 text-sm mb-6">Anda yakin ingin mereset formulir ini? Semua isian yang belum terkirim akan hilang selamanya.</p>
       <div class="flex gap-3">
-        <button onclick="closeResetModal()" class="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-2xl font-bold text-gray-700 hover:bg-gray-50 transition-colors">Batal</button>
-        <button onclick="executeResetForm()" class="flex-1 px-4 py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-colors shadow-md shadow-red-500/20">Ya, Reset</button>
+        <button onclick="window.closeResetModal()" class="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-2xl font-bold text-gray-700 hover:bg-gray-50 transition-colors">Batal</button>
+        <button onclick="window.executeResetForm()" class="flex-1 px-4 py-3 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-colors shadow-md shadow-red-500/20">Ya, Reset</button>
       </div>
     </div>
   </div>

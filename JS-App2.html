@@ -445,20 +445,20 @@ window.confirmResetForm = function() {
   }
 };
 
-function closeResetModal() {
+window.closeResetModal = function() {
   const modal = document.getElementById('confirmResetModal');
   if (modal) {
     modal.classList.add('hidden');
-    modal.style.display = 'none';
+    modal.style.setProperty('display', 'none', 'important');
   }
-}
+};
 
-function executeResetForm() {
+window.executeResetForm = function() {
   try {
-    closeResetModal();
+    window.closeResetModal();
     const currentType = window.form.type;
     if (!currentType) {
-      showToast("Tipe laporan tidak ditemukan", "error");
+      if (window.showToast) window.showToast("Tipe laporan tidak ditemukan", "error");
       return;
     }
     
@@ -473,15 +473,12 @@ function executeResetForm() {
     } else if (currentType === 'monthly') {
       window.form.monthly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
     }
-};
-
-window.executeResetForm = function() {
-  if (AppState.currentTab === 1) window.form = getEmptyDailyForm();
-  else if (AppState.currentTab === 2) window.form = getEmptyWeeklyForm();
-  else if (AppState.currentTab === 3) window.form = getEmptyMonthlyForm();
-  window.closeResetModal();
-  renderApp();
-  if (window.showToast) window.showToast("Formulir berhasil direset.", "success");
+    
+    renderApp();
+    if (window.showToast) window.showToast("Laporan telah direset", "success");
+  } catch(e) {
+    if (window.showToast) window.showToast("Error reset: " + e.message, "error");
+  }
 };
 
 window.openAddStaffModal = function() {
@@ -508,7 +505,7 @@ window.closeAddStaffModal = function() {
   const modal = document.getElementById('addStaffModal');
   if (modal) {
     modal.classList.add('hidden');
-    modal.style.display = 'none';
+    modal.style.setProperty('display', 'none', 'important');
   }
 };
 

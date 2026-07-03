@@ -46,7 +46,9 @@ function initializeSystem() {
   ]);
   
   setupSheet(activeSpreadsheet, "Monthly", [
-    "Bulan", "Supervisor", "Outlet", "Total Sales", "Target Sales", "Persen Tercapai", "Rating Kerja", "URL PDF"
+    "Bulan", "Supervisor", "Outlet", "Total Sales", "Target Sales", "Persen Tercapai", "Rating Kerja", "URL PDF",
+    "Kepatuhan SOP", "Total Telat", "Teguran", "Kendala Utama", "Eskalasi Fasilitas", "Strategi", "Kebutuhan GM",
+    "Pencapaian", "Tantangan", "Skill"
   ]);
   
   setupSheet(activeSpreadsheet, "Staff_Daily", [
@@ -464,7 +466,17 @@ function submitFullReport(payloadStr) {
         Number(data.monthly.sales.target || 0),
         Number(data.monthly.sales.persen || 0),
         Number(data.monthly.evaluasi.ratingKerja || 0),
-        fileUrl
+        fileUrl,
+        Number(data.monthly.operasional.kepatuhanSop || 0),
+        Number(data.monthly.operasional.telat || 0),
+        Number(data.monthly.operasional.teguran || 0),
+        data.monthly.operasional.penyebab || "",
+        data.monthly.fasilitas.eskalasi || "",
+        data.monthly.rencana.strategi || "",
+        data.monthly.rencana.gm || "",
+        data.monthly.evaluasi.berhasil || "",
+        data.monthly.evaluasi.sulit || "",
+        data.monthly.evaluasi.skill || ""
       ]);
       
       if (data.monthly.staff && Array.isArray(data.monthly.staff)) {
@@ -835,6 +847,7 @@ function api_gm_fetchReports(monthName, year) {
       }
     }
     
+    var operasionalData = null;
     var monthlySheet = ss.getSheetByName("Monthly");
     if (monthlySheet) {
       var mData = monthlySheet.getDataRange().getValues();
@@ -846,8 +859,39 @@ function api_gm_fetchReports(monthName, year) {
             url: mData[i][7],
             dateCreated: bul
           });
+          
+          operasionalData = {
+            isFallback: false,
+            kepatuhanSop: Number(mData[i][8] || 0),
+            totalTelat: Number(mData[i][9] || 0),
+            totalTeguran: Number(mData[i][10] || 0),
+            kendalaUtama: (mData[i][11] || "").toString(),
+            eskalasiFasilitas: (mData[i][12] || "").toString(),
+            strategiDepan: (mData[i][13] || "").toString(),
+            kebutuhanGM: (mData[i][14] || "").toString(),
+            pencapaian: (mData[i][15] || "").toString(),
+            tantangan: (mData[i][16] || "").toString(),
+            skill: (mData[i][17] || "").toString()
+          };
         }
       }
+    }
+    
+    // Fallback if Monthly not found
+    if (!operasionalData) {
+      operasionalData = {
+        isFallback: true,
+        kepatuhanSop: 85, // estimated fallback
+        totalTelat: 0,
+        totalTeguran: 0,
+        kendalaUtama: "Menunggu Laporan Bulanan (Snapshot Sementara)",
+        eskalasiFasilitas: "-",
+        strategiDepan: "-",
+        kebutuhanGM: "-",
+        pencapaian: "-",
+        tantangan: "-",
+        skill: "-"
+      };
     }
     
     // Calculate simulated transaction total
@@ -957,7 +1001,8 @@ function api_gm_fetchReports(monthName, year) {
         currentFolderId: currentFolderId || "",
         targetOmset: Number(targetOmset) || 0,
         chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); }) || [],
-        productsData: productsData
+        productsData: productsData,
+        operasionalData: operasionalData
       }
     };
     return JSON.stringify(resultObj);

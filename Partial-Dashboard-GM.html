@@ -14,33 +14,114 @@ window.getDashboardGMTemplate = function() {
   
   if (AppState.dashboardData) {
     const data = AppState.dashboardData;
-    statsHtml = `
-      <div class="space-y-4 mb-6">
-        <!-- Sales Card -->
-        <div class="bg-zero-black p-5 rounded-2xl text-white flex justify-between items-center shadow-md">
-          <div>
-            <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset Outlet</span>
-            <span class="text-xl font-extrabold">Rp ${data.omsetTotal.toLocaleString()}</span>
+      const op = data.operasionalData || {
+        isFallback: true, kepatuhanSop: 0, totalTelat: 0, totalTeguran: 0,
+        kendalaUtama: "Data bulanan belum ditarik.", eskalasiFasilitas: "-", strategiDepan: "-",
+        kebutuhanGM: "-", pencapaian: "-", tantangan: "-", skill: "-"
+      };
+      const salesPercent = data.targetOmset > 0 ? Math.round((data.omsetTotal / data.targetOmset) * 100) : 0;
+      
+      statsHtml = `
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <!-- Sales Card -->
+          <div class="col-span-2 bg-zero-black p-5 rounded-2xl text-white shadow-md">
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset & Target</span>
+              ${op.isFallback ? '<span class="text-[8px] bg-gray-800 text-gray-400 px-2 py-1 rounded-full">Snapshot Mingguan</span>' : ''}
+            </div>
+            <div class="flex items-end justify-between mb-3">
+              <span class="text-2xl font-extrabold">Rp ${data.omsetTotal.toLocaleString()}</span>
+              <span class="text-xs font-bold text-gray-400">/ Rp ${data.targetOmset.toLocaleString()}</span>
+            </div>
+            <div class="w-full bg-gray-800 rounded-full h-1.5 mb-1">
+              <div class="bg-emerald-500 h-1.5 rounded-full" style="width: ${Math.min(salesPercent, 100)}%"></div>
+            </div>
+            <span class="text-[9px] font-bold text-gray-400">${salesPercent}% Tercapai</span>
           </div>
-        </div>
 
-        <!-- Transactions Card -->
-        <div class="bg-white p-5 rounded-2xl border border-gray-200 flex justify-between items-center">
-          <div>
-            <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Transaksi</span>
-            <span class="text-xl font-extrabold text-zero-black">${data.transaksiTotal} Struk</span>
+          <!-- SOP Card -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center">
+            <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Kepatuhan SOP</span>
+            <span class="text-xl font-extrabold text-zero-black">${op.kepatuhanSop}%</span>
           </div>
-        </div>
 
-        <!-- Complaint Card -->
-        <div class="bg-white p-5 rounded-2xl border border-gray-200 flex justify-between items-center">
-          <div>
-            <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Insiden Komplain</span>
-            <span class="text-xl font-extrabold ${data.komplainTotal > 0 ? 'text-red-500' : 'text-zero-black'}">${data.komplainTotal} Kasus</span>
+          <!-- Complaint Card -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center">
+            <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Kasus QC</span>
+            <span class="text-xl font-extrabold ${data.komplainTotal > 0 ? 'text-red-500' : 'text-zero-black'}">${data.komplainTotal}</span>
           </div>
         </div>
-      </div>
-    `;
+      `;
+      
+      let kesehatanHtml = `
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            KESEHATAN TIM & ASET
+          </h3>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+              <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Total Telat</span>
+              <span class="text-lg font-black text-zero-black">${op.totalTelat} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+              <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Teguran (SP)</span>
+              <span class="text-lg font-black ${op.totalTeguran > 0 ? 'text-red-500' : 'text-zero-black'}">${op.totalTeguran} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Penyebab Kendala Staff Utama</span>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs text-zero-black leading-relaxed">
+              ${op.kendalaUtama || '-'}
+            </div>
+          </div>
+          
+          <div>
+            <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Eskalasi Fasilitas Kritis</span>
+            <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-xs text-red-700 font-medium leading-relaxed">
+              ${op.eskalasiFasilitas || '-'}
+            </div>
+          </div>
+        </div>
+      `;
+
+      let strategiHtml = `
+        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
+          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+            PANDANGAN KE DEPAN & EVALUASI SPV
+          </h3>
+          
+          <div class="space-y-4">
+            <div>
+              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Strategi Bulan Depan</span>
+              <div class="text-xs text-zero-black leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                ${op.strategiDepan || '-'}
+              </div>
+            </div>
+            
+            <div>
+              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Kebutuhan Approval GM</span>
+              <div class="text-xs text-zero-black leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                ${op.kebutuhanGM || '-'}
+              </div>
+            </div>
+            
+            <div class="pt-3 border-t border-gray-100">
+              <span class="block text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Evaluasi Mandiri SPV</span>
+              <div class="grid grid-cols-1 gap-2">
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Pencapaian Terbaik</span>
+                  <p class="text-[10px] text-zero-black">${op.pencapaian || '-'}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Tantangan Tersulit</span>
+                  <p class="text-[10px] text-zero-black">${op.tantangan || '-'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     
     if (data.listLaporan.length === 0) {
       reportsHtml = `
@@ -116,10 +197,14 @@ window.getDashboardGMTemplate = function() {
                         <span class="text-xs font-extrabold text-red-500">${item.terjual} <span class="text-[9px] font-normal text-gray-400">cup/porsi</span></span>
                       </div>
                       ${item.rencana ? `
-                        <div class="text-[10px] text-gray-500 leading-relaxed pl-5 mt-1 border-l-2 border-gray-200">
+                        <div class="text-[10px] text-gray-500 leading-relaxed pl-3 mt-2 border-l-2 border-gray-300">
                           <strong>Rencana:</strong> ${item.rencana}
                         </div>
-                      ` : ''}
+                      ` : `
+                        <div class="text-[9px] text-red-500 font-bold leading-relaxed pl-3 mt-2 border-l-2 border-red-400">
+                          ! TIDAK ADA RENCANA TINDAKAN DARI SPV
+                        </div>
+                      `}
                     </div>
                   `).join('')}
                 </div>
@@ -193,6 +278,12 @@ window.getDashboardGMTemplate = function() {
         
         <!-- Tren Produk (Hanya jika data ditarik) -->
         ${topProdukHtml}
+
+        <!-- Tier 3: Kesehatan Tim & Aset -->
+        ${AppState.dashboardData ? kesehatanHtml : ''}
+
+        <!-- Tier 4: Strategi ke Depan -->
+        ${AppState.dashboardData ? strategiHtml : ''}
 
         <!-- PDF Archives -->
         ${AppState.dashboardData ? `

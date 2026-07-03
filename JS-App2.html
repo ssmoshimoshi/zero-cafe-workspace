@@ -428,10 +428,13 @@ function closeSuccessModal() {
 
 /* === FORM RESET LOGIC === */
 window.confirmResetForm = function() {
+  console.log("Reset button clicked!");
   const modal = document.getElementById('confirmResetModal');
   if (modal) {
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
+  } else {
+    alert("Error: Modal reset tidak ditemukan di halaman!");
   }
 };
 

@@ -30,3 +30,5 @@ clasp deploy -i AKfycbz7mSoOmKpOtZnACm0LwFnmOGtZL-KlUOekGzylA8b20_j9mMsom1dgaSNE
 clasp deploy -i AKfycbzmjpOPY34k7AQ4YTieRxRwnkGKsWsPH6-Xcl4bZK4nvNLRIAbOOKONRnMVFCE3ZjWf -d "Sinkronisasi versi lama"
 
 echo "=== Selesai! Aplikasi Anda telah diperbarui di GAS dan GitHub ==="
+# Deploy ke Zero Report
+clasp deploy -i AKfycbw_W9Mg6uFdpXy_VUQnMLCPS77O5-yLcSQ9BmtWi45xkIb1-2_2JU2EThhGt18Azq2S -d "Pembaruan otomatis dari deploy.sh"

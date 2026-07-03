@@ -427,18 +427,24 @@ function closeSuccessModal() {
 }
 
 /* === FORM RESET LOGIC === */
-function confirmResetForm() {
+window.confirmResetForm = function() {
   const modal = document.getElementById('confirmResetModal');
-  if (modal) modal.classList.remove('hidden');
-}
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+  }
+};
 
-function closeResetModal() {
+window.closeResetModal = function() {
   const modal = document.getElementById('confirmResetModal');
-  if (modal) modal.classList.add('hidden');
-}
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+};
 
-function executeResetForm() {
-  closeResetModal();
+window.executeResetForm = function() {
+  window.closeResetModal();
   const currentType = window.form.type;
   if (!currentType) return;
   
@@ -456,21 +462,27 @@ function executeResetForm() {
   
   renderApp();
   showToast("Laporan telah direset", "success");
-}
+};
 
-function openAddStaffModal() {
+window.openAddStaffModal = function() {
   const input = document.getElementById('newStaffName');
   const modal = document.getElementById('addStaffModal');
   if (input) input.value = "";
-  if (modal) modal.classList.remove('hidden');
-}
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+  }
+};
 
-function closeAddStaffModal() {
+window.closeAddStaffModal = function() {
   const modal = document.getElementById('addStaffModal');
-  if (modal) modal.classList.add('hidden');
-}
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+};
 
-async function addStaffSubmit() {
+window.addStaffSubmit = async function() {
   const nameEl = document.getElementById('newStaffName');
   const posEl = document.getElementById('newStaffPosition');
   if (!nameEl || !posEl) return;

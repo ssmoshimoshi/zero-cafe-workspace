@@ -23,13 +23,16 @@ window.getDashboardGMTemplate = function() {
       };
       const salesPercent = data.targetOmset > 0 ? Math.round((data.omsetTotal / data.targetOmset) * 100) : 0;
       
+      const sopColor = op.kepatuhanSop >= 95 ? 'text-green-500' : (op.kepatuhanSop >= 80 ? 'text-yellow-500' : 'text-red-500');
+      const qcColor = data.komplainTotal <= 2 ? 'text-green-500' : 'text-red-500';
+
       statsHtml = `
         <div class="grid grid-cols-2 gap-3 mb-6">
           <!-- Sales Card -->
           <div class="col-span-2 bg-zero-black p-5 rounded-2xl text-white shadow-md">
             <div class="flex justify-between items-start mb-2">
               <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset & Target</span>
-              ${op.isFallback ? '<span class="text-[8px] bg-gray-800 text-gray-400 px-2 py-1 rounded-full">Snapshot Mingguan</span>' : ''}
+              ${op.isFallback ? '<span class="text-[8px] bg-gray-800 text-gray-400 px-2 py-1 rounded-full border border-gray-700">Snapshot Mingguan</span>' : ''}
             </div>
             <div class="flex items-end justify-between mb-3">
               <span class="text-2xl font-extrabold">Rp ${data.omsetTotal.toLocaleString()}</span>
@@ -39,113 +42,136 @@ window.getDashboardGMTemplate = function() {
               <div class="bg-emerald-500 h-1.5 rounded-full" style="width: ${Math.min(salesPercent, 100)}%"></div>
             </div>
             <span class="text-[9px] font-bold text-gray-400">${salesPercent}% Tercapai</span>
+            
+            <!-- Minimalist Chart Canvas -->
+            <div class="mt-4 pt-4 border-t border-gray-800">
+              <canvas id="gmOmsetChart" class="w-full h-24"></canvas>
+            </div>
           </div>
 
           <!-- SOP Card -->
-          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center">
+          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm">
             <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Kepatuhan SOP</span>
-            <span class="text-xl font-extrabold text-zero-black">${op.kepatuhanSop}%</span>
+            <span class="text-xl font-extrabold ${sopColor}">${op.kepatuhanSop}%</span>
           </div>
 
           <!-- Complaint Card -->
-          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center">
+          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm">
             <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Kasus QC</span>
-            <span class="text-xl font-extrabold ${data.komplainTotal > 0 ? 'text-red-500' : 'text-zero-black'}">${data.komplainTotal}</span>
+            <span class="text-xl font-extrabold ${qcColor}">${data.komplainTotal}</span>
           </div>
         </div>
       `;
       
       kesehatanHtml = `
-        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+        <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm" open>
+          <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
             KESEHATAN TIM & ASET
-          </h3>
-          <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
-              <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Total Telat</span>
-              <span class="text-lg font-black text-zero-black">${op.totalTelat} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+            <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          </summary>
+          <div class="p-5 bg-white">
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Total Telat</span>
+                <span class="text-lg font-black text-zero-black">${op.totalTelat} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+              </div>
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Teguran (SP)</span>
+                <span class="text-lg font-black ${op.totalTeguran > 0 ? 'text-red-500' : 'text-zero-black'}">${op.totalTeguran} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+              </div>
             </div>
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
-              <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Teguran (SP)</span>
-              <span class="text-lg font-black ${op.totalTeguran > 0 ? 'text-red-500' : 'text-zero-black'}">${op.totalTeguran} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+            
+            <div class="mb-4">
+              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Penyebab Kendala Staff Utama</span>
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs text-zero-black leading-relaxed">
+                ${op.kendalaUtama || '-'}
+              </div>
+            </div>
+            
+            <div>
+              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Eskalasi Fasilitas Kritis</span>
+              <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-xs text-red-700 font-medium leading-relaxed">
+                ${op.eskalasiFasilitas || '-'}
+              </div>
             </div>
           </div>
-          
-          <div class="mb-4">
-            <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Penyebab Kendala Staff Utama</span>
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs text-zero-black leading-relaxed">
-              ${op.kendalaUtama || '-'}
-            </div>
-          </div>
-          
-          <div>
-            <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Eskalasi Fasilitas Kritis</span>
-            <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-xs text-red-700 font-medium leading-relaxed">
-              ${op.eskalasiFasilitas || '-'}
-            </div>
-          </div>
-        </div>
+        </details>
       `;
 
       strategiHtml = `
-        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
-          <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+        <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
+          <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
             PANDANGAN KE DEPAN & EVALUASI SPV
-          </h3>
-          
-          <div class="space-y-4">
-            <div>
-              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Strategi Bulan Depan</span>
-              <div class="text-xs text-zero-black leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
-                ${op.strategiDepan || '-'}
-              </div>
-            </div>
-            
-            <div>
-              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Kebutuhan Approval GM</span>
-              <div class="text-xs text-zero-black leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
-                ${op.kebutuhanGM || '-'}
-              </div>
-            </div>
-            
-            <div class="pt-3 border-t border-gray-100">
-              <span class="block text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Evaluasi Mandiri SPV</span>
-              <div class="grid grid-cols-1 gap-2">
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                  <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Pencapaian Terbaik</span>
-                  <p class="text-[10px] text-zero-black">${op.pencapaian || '-'}</p>
+            <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          </summary>
+          <div class="p-5 bg-white">
+            <div class="space-y-4">
+              <div>
+                <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Strategi Bulan Depan</span>
+                <div class="text-xs text-zero-black leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  ${op.strategiDepan || '-'}
                 </div>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                  <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Tantangan Tersulit</span>
-                  <p class="text-[10px] text-zero-black">${op.tantangan || '-'}</p>
+              </div>
+              
+              <div>
+                <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Kebutuhan Approval GM</span>
+                <div class="text-xs text-zero-black leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  ${op.kebutuhanGM || '-'}
+                </div>
+              </div>
+              
+              <div class="pt-3 border-t border-gray-100">
+                <span class="block text-[9px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Evaluasi Mandiri SPV</span>
+                <div class="grid grid-cols-1 gap-2">
+                  <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Pencapaian Terbaik</span>
+                    <p class="text-[10px] text-zero-black">${op.pencapaian || '-'}</p>
+                  </div>
+                  <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Tantangan Tersulit</span>
+                    <p class="text-[10px] text-zero-black">${op.tantangan || '-'}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </details>
       `;
     
     if (data.listLaporan.length === 0) {
       reportsHtml = `
-        <div class="py-12 text-center text-gray-400">
-          <p class="text-[10px] uppercase font-bold tracking-widest">Tidak ada arsip laporan.</p>
-        </div>
+        <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
+          <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-gray-400 uppercase tracking-widest cursor-pointer">
+            ARSIP LAPORAN PDF
+          </summary>
+          <div class="p-5 text-center text-gray-400">
+            <p class="text-[10px] uppercase font-bold tracking-widest">Tidak ada arsip laporan.</p>
+          </div>
+        </details>
       `;
     } else {
       reportsHtml = `
-        <div class="space-y-3">
-          ${data.listLaporan.map(item => `
-            <div class="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-2xl">
-              <div>
-                <h4 class="font-bold text-zero-black text-xs">${item.name}</h4>
-                <p class="text-[10px] text-gray-400 font-bold mt-1">Upload: ${item.dateCreated}</p>
-              </div>
-              <a href="${item.url}" target="_blank" class="px-4 py-2 border border-gray-200 bg-white hover:bg-gray-100 text-zero-black rounded-full text-[10px] font-bold transition-all">
-                PDF
-              </a>
+        <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
+          <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
+            ARSIP LAPORAN PDF (${data.listLaporan.length})
+            <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+          </summary>
+          <div class="p-5 bg-white">
+            <div class="space-y-3">
+              ${data.listLaporan.map(item => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                  <div>
+                    <h4 class="font-bold text-zero-black text-xs">${item.name}</h4>
+                    <p class="text-[10px] text-gray-400 font-bold mt-1">Upload: ${item.dateCreated}</p>
+                  </div>
+                  <a href="${item.url}" target="_blank" class="px-3 py-1.5 border border-gray-200 bg-white hover:bg-gray-100 text-zero-black rounded-full text-[10px] font-bold transition-all">
+                    PDF
+                  </a>
+                </div>
+              `).join('')}
             </div>
-          `).join('')}
-        </div>
+          </div>
+        </details>
       `;
     }
     
@@ -218,19 +244,22 @@ window.getDashboardGMTemplate = function() {
     };
 
     topProdukHtml = `
-      <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
-        <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-3 border-b border-gray-100 pb-2">
+      <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
+        <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
           ANALISIS PERFORMA PRODUK
-        </h3>
-        <div class="bg-gray-50 border-l-4 border-zero-black p-3 rounded-xl">
-          <p class="text-[9px] text-zero-black leading-relaxed font-medium">
-            Catatan Analisis: Tren penjualan ini diakumulasikan murni dari Laporan Mingguan/Bulanan (Sinkronisasi POS Zero). Data Laporan Harian sengaja tidak diakumulasikan di sini untuk menghindari selisih angka dan memastikan GM mendapatkan data riil 100%.
-          </p>
+          <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </summary>
+        <div class="p-5 bg-white space-y-6">
+          <div class="bg-gray-50 border-l-4 border-zero-black p-3 rounded-xl mb-4">
+            <p class="text-[9px] text-zero-black leading-relaxed font-medium">
+              Catatan Analisis: Tren penjualan ini diakumulasikan murni dari Laporan Mingguan/Bulanan (Sinkronisasi POS Zero). Data Laporan Harian sengaja tidak diakumulasikan di sini untuk menghindari selisih angka dan memastikan GM mendapatkan data riil 100%. Top 5 adalah produk paling laris, Bottom 3 adalah produk dengan penjualan terendah dalam periode ini.
+            </p>
+          </div>
+          ${renderCategorySection("Minuman", "minuman")}
+          ${renderCategorySection("Makanan", "makanan")}
+          ${renderCategorySection("Snack", "snack")}
         </div>
-      </div>
-      ${renderCategorySection("Minuman", "minuman")}
-      ${renderCategorySection("Makanan", "makanan")}
-      ${renderCategorySection("Snack", "snack")}
+      </details>
     `;
     
   } else {
@@ -249,7 +278,7 @@ window.getDashboardGMTemplate = function() {
           <h2 class="text-sm font-extrabold text-zero-black">DASHBOARD GM</h2>
           <p class="text-[10px] font-bold text-gray-400">Zero Cafe Analytics</p>
         </div>
-        <button type="button" onclick="handleLogin('')" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+        <button type="button" onclick="handleLogout()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
           KELUAR
         </button>
       </div>
@@ -283,24 +312,17 @@ window.getDashboardGMTemplate = function() {
         <!-- Stats Grid -->
         ${statsHtml}
         
+        <!-- Tier 3: Kesehatan Tim & Aset (Di atas Performa Produk) -->
+        ${AppState.dashboardData ? kesehatanHtml : ''}
+        
         <!-- Tren Produk (Hanya jika data ditarik) -->
         ${topProdukHtml}
-
-        <!-- Tier 3: Kesehatan Tim & Aset -->
-        ${AppState.dashboardData ? kesehatanHtml : ''}
 
         <!-- Tier 4: Strategi ke Depan -->
         ${AppState.dashboardData ? strategiHtml : ''}
 
         <!-- PDF Archives -->
-        ${AppState.dashboardData ? `
-          <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
-            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">
-              Arsip PDF (${AppState.activeFilters.month} ${AppState.activeFilters.year})
-            </h3>
-            ${reportsHtml}
-          </div>
-        ` : ''}
+        ${AppState.dashboardData ? reportsHtml : ''}
 
         <!-- Pengaturan Sistem -->
         <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
@@ -372,6 +394,71 @@ async function fetchGMAnalytics() {
   } finally {
     showLoading(false);
     renderApp();
+    
+    // Render chart after DOM is updated
+    if (AppState.dashboardData && AppState.dashboardData.chartData) {
+      setTimeout(renderGMChart, 100);
+    }
   }
+}
+
+let gmChartInstance = null;
+function renderGMChart() {
+  const ctx = document.getElementById('gmOmsetChart');
+  if (!ctx) return;
+  
+  if (gmChartInstance) {
+    gmChartInstance.destroy();
+  }
+  
+  const cData = AppState.dashboardData.chartData || [];
+  const labels = cData.map(d => {
+    // Format date MM-DD
+    const parts = d.date.split('-');
+    return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : d.date;
+  });
+  const data = cData.map(d => d.omset);
+  
+  gmChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Omset Harian',
+        data: data,
+        borderColor: '#10b981', // emerald-500
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointBackgroundColor: '#10b981',
+        pointRadius: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return 'Rp ' + context.raw.toLocaleString('id-ID');
+            }
+          }
+        }
+      },
+      scales: {
+        x: { 
+          grid: { display: false },
+          ticks: { font: { size: 9 }, color: '#9ca3af' }
+        },
+        y: { 
+          display: false,
+          beginAtZero: true 
+        }
+      }
+    }
+  });
 }
 </script>

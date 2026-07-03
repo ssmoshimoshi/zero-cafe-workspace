@@ -281,6 +281,11 @@ function renderApp() {
       if (activeTabBtn) {
         activeTabBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
+      
+      // Render chart if in GM Dashboard
+      if (AppState.menu === 'dashboard_gm' && typeof renderGMChart === 'function' && AppState.dashboardData) {
+        renderGMChart();
+      }
     }, 50);
   } catch (err) {
     console.error("Render Error:", err);

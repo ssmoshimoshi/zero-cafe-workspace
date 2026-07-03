@@ -427,45 +427,58 @@ function closeSuccessModal() {
 }
 
 /* === FORM RESET LOGIC === */
-window.confirmResetForm = function() {
-  console.log("Reset button clicked!");
+function confirmResetForm() {
+  alert("CONFIRM RESET DIPANGGIL!");
   const modal = document.getElementById('confirmResetModal');
   if (modal) {
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
   } else {
-    alert("Error: Modal reset tidak ditemukan di halaman!");
+    alert("MODAL TIDAK DITEMUKAN!");
   }
-};
+}
 
-window.closeResetModal = function() {
+function closeResetModal() {
   const modal = document.getElementById('confirmResetModal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
-  }
-};
+  if (modal) modal.classList.add('hidden');
+}
 
-window.executeResetForm = function() {
-  window.closeResetModal();
-  const currentType = window.form.type;
-  if (!currentType) return;
-  
-  StorageHelper.remove('zc_draft_' + currentType);
-  resetFormData(currentType);
-  
-  // Re-initialize dynamic staff if it was daily
-  if (currentType === 'daily') {
-    window.form.staff = [];
-  } else if (currentType === 'weekly') {
-    window.form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, kpi: "", kendala: "" }));
-  } else if (currentType === 'monthly') {
-    window.form.monthly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
+function executeResetForm() {
+  try {
+    closeResetModal();
+    const currentType = window.form.type;
+    if (!currentType) {
+      alert("Error: Tipe form tidak ditemukan.");
+      return;
+    }
+    
+    // Clear live DOM to prevent Safari DOM restoration bug
+    const root = document.getElementById('app-root');
+    if (root) {
+      const inputs = root.querySelectorAll('input, textarea, select');
+      for (let i = 0; i < inputs.length; i++) {
+        if (inputs[i].type === 'checkbox' || inputs[i].type === 'radio') inputs[i].checked = false;
+        else inputs[i].value = '';
+      }
+    }
+    
+    StorageHelper.remove('zc_draft_' + currentType);
+    resetFormData(currentType);
+    
+    if (currentType === 'daily') {
+      window.form.staff = [];
+    } else if (currentType === 'weekly') {
+      window.form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, kpi: "", kendala: "" }));
+    } else if (currentType === 'monthly') {
+      window.form.monthly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
+    }
+    
+    renderApp();
+    showToast("Laporan telah direset", "success");
+  } catch (err) {
+    alert("CRITICAL ERROR: " + err.message);
   }
-  
-  renderApp();
-  showToast("Laporan telah direset", "success");
-};
+}
 
 window.openAddStaffModal = function() {
   const input = document.getElementById('newStaffName');

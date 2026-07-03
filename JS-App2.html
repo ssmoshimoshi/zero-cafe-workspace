@@ -428,8 +428,17 @@ function closeSuccessModal() {
 
 /* === FORM RESET LOGIC === */
 function confirmResetForm() {
-  const modal = document.getElementById('confirmResetModal');
-  if (modal) modal.classList.remove('hidden');
+  try {
+    const modal = document.getElementById('confirmResetModal');
+    if (!modal) {
+      showToast("Modal Reset tidak ditemukan", "error");
+      return;
+    }
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  } catch(e) {
+    showToast("Error: " + e.message, "error");
+  }
 }
 
 function closeResetModal() {
@@ -466,10 +475,19 @@ function executeResetForm() {
 }
 
 function openAddStaffModal() {
-  const input = document.getElementById('newStaffName');
-  const modal = document.getElementById('addStaffModal');
-  if (input) input.value = "";
-  if (modal) modal.classList.remove('hidden');
+  try {
+    const input = document.getElementById('newStaffName');
+    const modal = document.getElementById('addStaffModal');
+    if (!modal) {
+      showToast("Modal Tambah Staff tidak ditemukan", "error");
+      return;
+    }
+    if (input) input.value = "";
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  } catch(e) {
+    showToast("Error: " + e.message, "error");
+  }
 }
 
 function closeAddStaffModal() {

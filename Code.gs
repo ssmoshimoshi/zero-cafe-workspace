@@ -476,8 +476,26 @@ function submitFullReport(payloadStr) {
         data.monthly.rencana.gm || "",
         data.monthly.evaluasi.berhasil || "",
         data.monthly.evaluasi.sulit || "",
-        data.monthly.evaluasi.skill || ""
+        data.monthly.evaluasi.skill || "",
+        data.monthly.operasional.resignList ? data.monthly.operasional.resignList.length : 0 // Jumlah Resign
       ]);
+      
+      // Auto-Sync Turnover Barista to MasterStaff
+      if (data.monthly.operasional.resignList && data.monthly.operasional.resignList.length > 0) {
+        var masterSheet = ss.getSheetByName("MasterStaff");
+        if (masterSheet) {
+          var mData = masterSheet.getDataRange().getValues();
+          data.monthly.operasional.resignList.forEach(function(resignItem) {
+            if (!resignItem.id) return;
+            for (var i = 1; i < mData.length; i++) {
+              if (mData[i][0].toString() === resignItem.id.toString()) {
+                masterSheet.getRange(i + 1, 4).setValue("Resign"); // Kolom D (Status)
+                break;
+              }
+            }
+          });
+        }
+      }
       
       if (data.monthly.staff && Array.isArray(data.monthly.staff)) {
         var smSheet = setupSheet(ss, "Staff_Monthly", [
@@ -889,7 +907,8 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
               kebutuhanGM: (mData[i][14] || "").toString(),
               pencapaian: (mData[i][15] || "").toString(),
               tantangan: (mData[i][16] || "").toString(),
-              skill: (mData[i][17] || "").toString()
+              skill: (mData[i][17] || "").toString(),
+              turnoverBarista: Number(mData[i][18] || 0)
             };
           }
         }
@@ -909,7 +928,8 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
         kebutuhanGM: "-",
         pencapaian: "-",
         tantangan: "-",
-        skill: "-"
+        skill: "-",
+        turnoverBarista: 0
       };
     }
     

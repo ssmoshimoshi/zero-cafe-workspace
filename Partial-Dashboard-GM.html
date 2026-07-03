@@ -83,14 +83,18 @@ window.getDashboardGMTemplate = function() {
             <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
           </summary>
           <div class="p-5 bg-white">
-            <div class="grid grid-cols-2 gap-3 mb-4">
-              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+            <div class="grid grid-cols-3 gap-3 mb-4">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
                 <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Total Telat</span>
-                <span class="text-lg font-black text-zero-black">${op.totalTelat} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+                <span class="text-lg font-black ${op.totalTelat >= 3 ? 'text-red-500' : 'text-green-500'}">${op.totalTelat} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
               </div>
-              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
                 <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Teguran (SP)</span>
-                <span class="text-lg font-black ${op.totalTeguran > 0 ? 'text-red-500' : 'text-zero-black'}">${op.totalTeguran} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+                <span class="text-lg font-black ${op.totalTeguran >= 5 ? 'text-red-500' : 'text-green-500'}">${op.totalTeguran} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
+              </div>
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
+                <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Turnover</span>
+                <span class="text-lg font-black ${op.turnoverBarista > 0 ? 'text-red-500' : 'text-green-500'}">${op.turnoverBarista} <span class="text-[9px] font-normal text-gray-400">org</span></span>
               </div>
             </div>
             

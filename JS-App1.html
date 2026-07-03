@@ -674,9 +674,16 @@ function updateMonthlyStaff(idx, field, value) {
 
 function openResignModal(idx = -1) {
   try {
+    showToast("Memuat form...", "success");
     const modal = document.getElementById('resignModal');
     const selId = document.getElementById('resignModalId');
     const txtAlasan = document.getElementById('resignModalAlasan');
+    
+    if (!modal || !selId || !txtAlasan) {
+      showToast("Elemen UI tidak lengkap", "error");
+      return;
+    }
+    
     document.getElementById('resignModalIdx').value = idx;
     
     selId.innerHTML = '<option value="">Pilih Staf...</option>' + 
@@ -692,6 +699,7 @@ function openResignModal(idx = -1) {
     }
     
     modal.classList.remove('hidden');
+    modal.classList.add('flex'); // Pastikan flex aktif
   } catch(e) {
     showToast("Error buka modal: " + e.message, "error");
   }

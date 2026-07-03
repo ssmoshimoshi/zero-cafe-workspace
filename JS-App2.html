@@ -208,69 +208,71 @@ async function saveTargetOmset() {
 
 let gmChartInstance = null;
 function renderGMChart() {
-  const ctx = document.getElementById('gmChart');
+  const ctx = document.getElementById('gmOmsetChart');
   if (!ctx) return;
   
   if (gmChartInstance) {
     gmChartInstance.destroy();
   }
   
-  const data = AppState.dashboardData.chartData || [];
-  const labels = data.map(d => {
-    // Convert YYYY-MM-DD to DD (e.g. "2026-07-05" -> "05")
-    let parts = d.date.split('-');
-    return parts.length === 3 ? parts[2] : d.date;
+  const cData = AppState.dashboardData.chartData || [];
+  const labels = cData.map(d => {
+    // Format date MM-DD
+    const parts = d.date.split('-');
+    return parts.length >= 3 ? `${parts[2]}/${parts[1]}` : d.date;
   });
-  const values = data.map(d => d.omset);
+  const data = cData.map(d => d.omset);
   
   gmChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Omset Harian (Rp)',
-        data: values,
-        borderColor: '#0f0f0f',
-        backgroundColor: 'rgba(15, 15, 15, 0.1)',
+        label: 'Omset Harian',
+        data: data,
+        borderColor: '#10b981', // emerald-500
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
         borderWidth: 2,
         tension: 0.3,
         fill: true,
-        pointBackgroundColor: '#ffffff',
-        pointBorderColor: '#0f0f0f',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointBackgroundColor: '#10b981',
       }]
     },
     options: {
+      animation: {
+        duration: 1500,
+        easing: 'easeOutQuart'
+      },
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#0f0f0f',
-          padding: 10,
-          titleFont: { size: 10, weight: 'bold' },
-          bodyFont: { size: 12, weight: 'bold' },
+          mode: 'index',
+          intersect: false,
           callbacks: {
             label: function(context) {
-              return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+              return 'Rp ' + context.raw.toLocaleString('id-ID');
             }
           }
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' } } },
+        x: { 
+          grid: { display: false, drawBorder: false },
+          ticks: { font: { size: 9 }, color: '#6b7280' }
+        },
         y: { 
-          grid: { borderDash: [5, 5], color: '#e5e7eb' }, 
-          ticks: { 
-            font: { size: 10, weight: 'bold' },
-            callback: function(value) {
-              if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
-              return value;
-            }
-          }
+          display: false,
+          beginAtZero: true 
         }
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
       }
     }
   });

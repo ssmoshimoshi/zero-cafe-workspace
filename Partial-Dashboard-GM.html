@@ -23,42 +23,56 @@ window.getDashboardGMTemplate = function() {
       };
       const salesPercent = data.targetOmset > 0 ? Math.round((data.omsetTotal / data.targetOmset) * 100) : 0;
       
+      const omsetDiff = data.omsetTotal - (data.omsetBulanLalu || 0);
+      const omsetTrendPercent = data.omsetBulanLalu > 0 ? (omsetDiff / data.omsetBulanLalu) * 100 : 0;
+      const trendSign = omsetDiff >= 0 ? '+' : '';
+      const trendIcon = omsetDiff >= 0 ? '▲' : '▼';
+      const trendColor = omsetDiff >= 0 ? 'text-emerald-400' : 'text-red-400';
+      const trendBg = omsetDiff >= 0 ? 'bg-emerald-400/10' : 'bg-red-400/10';
+      const trendHtml = data.omsetBulanLalu > 0 ? 
+        `<span class="text-[10px] font-bold ${trendColor} ml-2 ${trendBg} px-2 py-1 rounded-full flex items-center gap-1">${trendIcon} ${trendSign}${omsetTrendPercent.toFixed(1)}% bln lalu</span>` : 
+        '';
+
       const sopColor = op.kepatuhanSop >= 95 ? 'text-green-500' : (op.kepatuhanSop >= 80 ? 'text-yellow-500' : 'text-red-500');
       const qcColor = data.komplainTotal <= 2 ? 'text-green-500' : 'text-red-500';
 
       statsHtml = `
         <div class="grid grid-cols-2 gap-3 mb-6">
           <!-- Sales Card -->
-          <div class="col-span-2 bg-zero-black p-5 rounded-2xl text-white shadow-md">
+          <div class="col-span-2 bg-zero-black p-5 rounded-2xl text-white shadow-md transform transition-transform duration-300 hover:scale-[1.01]">
             <div class="flex justify-between items-start mb-2">
               <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset & Target</span>
               ${op.isFallback ? '<span class="text-[8px] bg-gray-800 text-gray-400 px-2 py-1 rounded-full border border-gray-700">Snapshot Mingguan</span>' : ''}
             </div>
-            <div class="flex items-end justify-between mb-3">
-              <span class="text-2xl font-extrabold">Rp ${data.omsetTotal.toLocaleString()}</span>
-              <span class="text-xs font-bold text-gray-400">/ Rp ${data.targetOmset.toLocaleString()}</span>
+            <div class="flex flex-col mb-3">
+              <div class="flex items-center">
+                <span class="text-3xl font-extrabold">Rp ${data.omsetTotal.toLocaleString('id-ID')}</span>
+                ${trendHtml}
+              </div>
+              <span class="text-xs font-bold text-gray-400 mt-1">Target: Rp ${data.targetOmset.toLocaleString('id-ID')}</span>
             </div>
-            <div class="w-full bg-gray-800 rounded-full h-1.5 mb-1">
-              <div class="bg-emerald-500 h-1.5 rounded-full" style="width: ${Math.min(salesPercent, 100)}%"></div>
+            <div class="w-full bg-gray-800 rounded-full h-2 mb-1 overflow-hidden">
+              <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${Math.min(salesPercent, 100)}%"></div>
             </div>
             <span class="text-[9px] font-bold text-gray-400">${salesPercent}% Tercapai</span>
             
             <!-- Minimalist Chart Canvas -->
-            <div class="mt-4 pt-4 border-t border-gray-800">
-              <canvas id="gmOmsetChart" class="w-full h-24"></canvas>
+            <div class="mt-4 pt-4 border-t border-gray-800 relative h-24">
+              <canvas id="gmOmsetChart" class="w-full h-full"></canvas>
             </div>
           </div>
 
           <!-- SOP Card -->
-          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm">
+          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-105">
             <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Kepatuhan SOP</span>
-            <span class="text-xl font-extrabold ${sopColor}">${op.kepatuhanSop}%</span>
+            <span class="text-2xl font-black ${sopColor}">${op.kepatuhanSop}%</span>
           </div>
 
           <!-- Complaint Card -->
-          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm">
+          <div class="bg-white p-4 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-105 relative">
             <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Kasus QC</span>
-            <span class="text-xl font-extrabold ${qcColor}">${data.komplainTotal}</span>
+            <span class="text-2xl font-black ${qcColor}">${data.komplainTotal}</span>
+            ${data.komplainTotal > 2 ? '<a href="https://wa.me/" target="_blank" class="absolute bottom-2 text-[8px] bg-red-100 text-red-600 px-2 py-1 rounded-full font-bold hover:bg-red-200 transition-colors">Tegur SPV</a>' : ''}
           </div>
         </div>
       `;
@@ -433,16 +447,23 @@ function renderGMChart() {
         borderWidth: 2,
         tension: 0.3,
         fill: true,
+        pointRadius: 0,
+        pointHoverRadius: 4,
         pointBackgroundColor: '#10b981',
-        pointRadius: 2
       }]
     },
     options: {
+      animation: {
+        duration: 1500,
+        easing: 'easeOutQuart'
+      },
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
+          mode: 'index',
+          intersect: false,
           callbacks: {
             label: function(context) {
               return 'Rp ' + context.raw.toLocaleString('id-ID');
@@ -452,13 +473,18 @@ function renderGMChart() {
       },
       scales: {
         x: { 
-          grid: { display: false },
-          ticks: { font: { size: 9 }, color: '#9ca3af' }
+          grid: { display: false, drawBorder: false },
+          ticks: { font: { size: 9 }, color: '#6b7280' }
         },
         y: { 
           display: false,
           beginAtZero: true 
         }
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
       }
     }
   });

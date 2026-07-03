@@ -787,6 +787,7 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
     
     var data = sheet.getDataRange().getValues();
     var omsetTotal = 0;
+    var omsetBulanLalu = 0;
     var komplainTotal = 0;
     var listLaporan = [];
     var chartData = [];
@@ -798,8 +799,12 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
     ];
     var monthIdx = monthsIndo.indexOf(monthName);
     var monthPrefix = "";
+    var prevMonthPrefix = "";
     if (monthIdx !== -1) {
       monthPrefix = year + "-" + (monthIdx + 1 < 10 ? "0" : "") + (monthIdx + 1);
+      var prevMonthIdx = monthIdx === 0 ? 11 : monthIdx - 1;
+      var prevYear = monthIdx === 0 ? parseInt(year) - 1 : year;
+      prevMonthPrefix = prevYear + "-" + (prevMonthIdx + 1 < 10 ? "0" : "") + (prevMonthIdx + 1);
     }
     
     // Skip headers
@@ -814,10 +819,13 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
         rowDate = (rowDateObj || "").toString();
       }
       
-      if (rowDate.startsWith(monthPrefix)) {
-        var rowOutlet = (data[i][2] || "").toString();
-        if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
-          var rowOmset = Number(data[i][4] || 0);
+      var rowOutlet = (data[i][2] || "").toString();
+      var matchesFilter = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
+      
+      if (matchesFilter) {
+        var rowOmset = Number(data[i][4] || 0);
+        
+        if (rowDate.startsWith(monthPrefix)) {
           omsetTotal += rowOmset;
           komplainTotal += Number(data[i][5] || 0);
           listLaporan.push({
@@ -829,6 +837,8 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
             date: rowDate,
             omset: rowOmset
           });
+        } else if (rowDate.startsWith(prevMonthPrefix)) {
+          omsetBulanLalu += rowOmset;
         }
       }
     }
@@ -1012,6 +1022,7 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
       status: "success",
       data: {
         omsetTotal: omsetTotal || 0,
+        omsetBulanLalu: omsetBulanLalu || 0,
         transaksiTotal: transaksiTotal || 0,
         komplainTotal: komplainTotal || 0,
         listLaporan: listLaporan || [],

@@ -779,7 +779,7 @@ function api_getMonthlyData(monthStr, outlet) {
 /**
  * Fetches dashboard analytics data for GM.
  */
-function api_gm_fetchReports(monthName, year) {
+function api_gm_fetchReports(monthName, year, outletFilter) {
   try {
     var ss = getSpreadsheet();
     var sheet = ss.getSheetByName("Daily");
@@ -815,18 +815,21 @@ function api_gm_fetchReports(monthName, year) {
       }
       
       if (rowDate.startsWith(monthPrefix)) {
-        var rowOmset = Number(data[i][4] || 0);
-        omsetTotal += rowOmset;
-        komplainTotal += Number(data[i][5] || 0);
-        listLaporan.push({
-          name: "Daily Report - " + rowDate + " (" + data[i][1] + ")",
-          url: data[i][7],
-          dateCreated: rowDate
-        });
-        chartData.push({
-          date: rowDate,
-          omset: rowOmset
-        });
+        var rowOutlet = (data[i][2] || "").toString();
+        if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+          var rowOmset = Number(data[i][4] || 0);
+          omsetTotal += rowOmset;
+          komplainTotal += Number(data[i][5] || 0);
+          listLaporan.push({
+            name: "Daily Report - " + rowDate + " (" + data[i][1] + ")",
+            url: data[i][7],
+            dateCreated: rowDate
+          });
+          chartData.push({
+            date: rowDate,
+            omset: rowOmset
+          });
+        }
       }
     }
     
@@ -838,11 +841,14 @@ function api_gm_fetchReports(monthName, year) {
         var period = wData[i][0].toString();
         // If the period matches our target month
         if (period.indexOf(monthName) !== -1) {
-          listLaporan.push({
-            name: "Weekly Report - " + period + " (" + wData[i][1] + ")",
-            url: wData[i][7],
-            dateCreated: period
-          });
+          var rowOutlet = (wData[i][2] || "").toString();
+          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+            listLaporan.push({
+              name: "Weekly Report - " + period + " (" + wData[i][1] + ")",
+              url: wData[i][7],
+              dateCreated: period
+            });
+          }
         }
       }
     }
@@ -854,25 +860,28 @@ function api_gm_fetchReports(monthName, year) {
       for (var i = 1; i < mData.length; i++) {
         var bul = mData[i][0].toString(); // YYYY-MM
         if (bul === monthPrefix) {
-          listLaporan.push({
-            name: "Monthly Report - " + bul + " (" + mData[i][1] + ")",
-            url: mData[i][7],
-            dateCreated: bul
-          });
-          
-          operasionalData = {
-            isFallback: false,
-            kepatuhanSop: Number(mData[i][8] || 0),
-            totalTelat: Number(mData[i][9] || 0),
-            totalTeguran: Number(mData[i][10] || 0),
-            kendalaUtama: (mData[i][11] || "").toString(),
-            eskalasiFasilitas: (mData[i][12] || "").toString(),
-            strategiDepan: (mData[i][13] || "").toString(),
-            kebutuhanGM: (mData[i][14] || "").toString(),
-            pencapaian: (mData[i][15] || "").toString(),
-            tantangan: (mData[i][16] || "").toString(),
-            skill: (mData[i][17] || "").toString()
-          };
+          var rowOutlet = (mData[i][2] || "").toString();
+          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+            listLaporan.push({
+              name: "Monthly Report - " + bul + " (" + mData[i][1] + ")",
+              url: mData[i][7],
+              dateCreated: bul
+            });
+            
+            operasionalData = {
+              isFallback: false,
+              kepatuhanSop: Number(mData[i][8] || 0),
+              totalTelat: Number(mData[i][9] || 0),
+              totalTeguran: Number(mData[i][10] || 0),
+              kendalaUtama: (mData[i][11] || "").toString(),
+              eskalasiFasilitas: (mData[i][12] || "").toString(),
+              strategiDepan: (mData[i][13] || "").toString(),
+              kebutuhanGM: (mData[i][14] || "").toString(),
+              pencapaian: (mData[i][15] || "").toString(),
+              tantangan: (mData[i][16] || "").toString(),
+              skill: (mData[i][17] || "").toString()
+            };
+          }
         }
       }
     }
@@ -918,9 +927,13 @@ function api_gm_fetchReports(monthName, year) {
       for (var i = 1; i < dbData.length; i++) {
         var tipe = dbData[i][1].toString();
         var periode = dbData[i][0].toString();
-        if (tipe === "monthly" && periode === monthPrefix) {
-          hasMonthly = true;
-          monthlyRows.push(dbData[i]);
+        var rowOutlet = (dbData[i][2] || "").toString();
+        
+        if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+          if (tipe === "monthly" && periode === monthPrefix) {
+            hasMonthly = true;
+            monthlyRows.push(dbData[i]);
+          }
         }
       }
       
@@ -931,8 +944,12 @@ function api_gm_fetchReports(monthName, year) {
         for (var i = 1; i < dbData.length; i++) {
           var tipe = dbData[i][1].toString();
           var periode = dbData[i][0].toString();
-          if (tipe === "weekly" && periode.indexOf(monthName) !== -1) {
-            targetRows.push(dbData[i]);
+          var rowOutlet = (dbData[i][2] || "").toString();
+          
+          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+            if (tipe === "weekly" && periode.indexOf(monthName) !== -1) {
+              targetRows.push(dbData[i]);
+            }
           }
         }
       }

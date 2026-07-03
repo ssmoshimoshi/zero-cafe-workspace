@@ -9,8 +9,8 @@ function validateWeeklyPeriode() {
   const diffDays = Math.ceil(Math.abs(new Date(window.form.periodeEnd) - new Date(window.form.periodeStart)) / (1000 * 60 * 60 * 24));
   const warningEl = document.getElementById('periodeWarning');
   if (warningEl) {
-    if (diffDays !== 6) { 
-      warningEl.textContent = 'Peringatan: Periode harus tepat 7 hari (misal: Senin-Minggu)!';
+    if (diffDays > 6) { 
+      warningEl.textContent = 'Peringatan: Periode maksimal 7 hari!';
       warningEl.classList.remove('hidden');
     } else {
       warningEl.classList.add('hidden');

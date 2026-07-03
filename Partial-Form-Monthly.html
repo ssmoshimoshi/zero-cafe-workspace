@@ -255,11 +255,11 @@ function getMonthlyTabContent() {
           <div class="grid grid-cols-3 gap-2 mb-4 border-b border-gray-100 pb-4">
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">% KEPATUHAN SOP</label>
-               <input type="number" value="${form.monthly.operasional.kepatuhanSop}" onchange="window.form.monthly.operasional.kepatuhanSop = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center font-bold border border-gray-200 rounded-lg focus:outline-none">
+               <input type="number" value="${form.monthly.operasional.kepatuhanSop}" readonly class="w-full px-2 py-1.5 text-xs text-center font-bold border border-gray-200 rounded-lg focus:outline-none bg-gray-100 cursor-not-allowed">
              </div>
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TOTAL TELAT (KALI)</label>
-               <input type="number" value="${form.monthly.operasional.telat}" onchange="window.form.monthly.operasional.telat = Number(this.value)" class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+               <input type="number" value="${form.monthly.operasional.telat}" readonly class="w-full px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-gray-100 cursor-not-allowed text-red-500 font-bold">
              </div>
              <div>
                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">SP / TEGURAN KELUAR</label>
@@ -272,24 +272,37 @@ function getMonthlyTabContent() {
             <input type="text" value="${form.monthly.operasional.penyebab}" onchange="window.form.monthly.operasional.penyebab = this.value" placeholder="Misal: Kurang koordinasi antar shift" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none">
           </div>
 
-          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-6">EVALUASI PERFORMA INDIVIDU</label>
-          <div class="space-y-3">
+          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 mt-6">EVALUASI PERFORMA INDIVIDU</label>
+          <div class="text-[8px] text-gray-400 italic mb-3 leading-tight">
+            * Sistem menampilkan rekomendasi tren dari akumulasi mingguan. SPV wajib memeriksa ulang dan berhak mengubah penilaian akhir.
+          </div>
+          <div class="space-y-2">
             ${form.monthly.staff.map((s, idx) => `
-              <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/30">
-                <div class="flex justify-between items-center mb-2">
+              <details class="group border border-gray-200 rounded-xl bg-white overflow-hidden">
+                <summary class="flex justify-between items-center p-3 cursor-pointer select-none bg-gray-50 group-open:bg-gray-100 transition-colors">
                   <span class="text-xs font-bold text-zero-black">${s.nama} <span class="text-[10px] text-gray-500 font-normal">(${s.posisi})</span></span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${s.status === 'Berkembang' ? 'bg-green-100 text-green-700' : s.status === 'Menurun' ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-700'}">${s.status || 'Stagnan'}</span>
+                    <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="p-3 border-t border-gray-100">
+                  <div class="mb-2">
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Status Penilaian</label>
+                    <select onchange="updateMonthlyStaff(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <option value="Berkembang" ${s.status === 'Berkembang' ? 'selected' : ''}>Berprogress Baik</option>
+                      <option value="Stagnan" ${s.status === 'Stagnan' ? 'selected' : ''}>Stagnan / Standar</option>
+                      <option value="Menurun" ${s.status === 'Menurun' ? 'selected' : ''}>Menurun / Perlu Evaluasi</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Catatan / Alasan</label>
+                    <input type="text" value="${s.alasan || ''}" onchange="updateMonthlyStaff(${idx}, 'alasan', this.value)" placeholder="Catatan/Alasan Evaluasi" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
+                  </div>
                 </div>
-                <div class="mb-2">
-                  <select onchange="updateMonthlyStaff(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    <option value="Berkembang" ${s.status === 'Berkembang' ? 'selected' : ''}>Berprogress Baik</option>
-                    <option value="Stagnan" ${s.status === 'Stagnan' ? 'selected' : ''}>Stagnan / Standar</option>
-                    <option value="Menurun" ${s.status === 'Menurun' ? 'selected' : ''}>Menurun / Perlu Evaluasi</option>
-                  </select>
-                </div>
-                <div>
-                  <input type="text" value="${s.alasan || ''}" onchange="updateMonthlyStaff(${idx}, 'alasan', this.value)" placeholder="Catatan/Alasan Evaluasi" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                </div>
-              </div>
+              </details>
             `).join('')}
           </div>
         </div>

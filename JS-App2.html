@@ -65,7 +65,7 @@ async function fetchMonthlyData() {
       f.monthly.sales.target = res.totalTarget || 0;
       f.monthly.qc.komplain = res.totalKomplain || 0;
       f.monthly.operasional.telat = res.totalTelat || 0;
-      f.monthly.operasional.teguran = res.totalTeguran || 0;
+      // f.monthly.operasional.teguran = res.totalTeguran || 0; // DISABLED: SP/Teguran is now input manually by SPV
       f.monthly.operasional.kepatuhanSop = res.kepatuhanSop || 0;
       
       if (res.staffEvaluations && res.staffEvaluations.length > 0) {

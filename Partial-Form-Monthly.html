@@ -390,15 +390,15 @@ function getMonthlyTabContent() {
           <div class="space-y-4">
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">PENCAPAIAN TERBAIK ANDA SECARA PRIBADI?</label>
-              <input type="text" value="${form.monthly.evaluasi.berhasil}" onchange="window.form.monthly.evaluasi.berhasil = this.value" placeholder="Berhasil menekan angka telat..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <textarea rows="2" onchange="window.form.monthly.evaluasi.berhasil = this.value" placeholder="Berhasil menekan angka telat..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none resize-y">${form.monthly.evaluasi.berhasil}</textarea>
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">TANTANGAN TERSULIT YANG DIHADAPI?</label>
-              <input type="text" value="${form.monthly.evaluasi.sulit}" onchange="window.form.monthly.evaluasi.sulit = this.value" placeholder="Mengatur jadwal saat chaos..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <textarea rows="2" onchange="window.form.monthly.evaluasi.sulit = this.value" placeholder="Mengatur jadwal saat chaos..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none resize-y">${form.monthly.evaluasi.sulit}</textarea>
             </div>
             <div>
               <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">SKILL YANG INGIN DITINGKATKAN?</label>
-              <input type="text" value="${form.monthly.evaluasi.skill}" onchange="window.form.monthly.evaluasi.skill = this.value" placeholder="Komunikasi & problem solving..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none">
+              <textarea rows="2" onchange="window.form.monthly.evaluasi.skill = this.value" placeholder="Komunikasi & problem solving..." class="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none resize-y">${form.monthly.evaluasi.skill}</textarea>
             </div>
             
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4 text-center">

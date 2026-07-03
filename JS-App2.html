@@ -427,21 +427,23 @@ function closeSuccessModal() {
 }
 
 /* === FORM RESET LOGIC === */
-function confirmResetForm() {
+window.confirmResetForm = function() {
   try {
     const modal = document.getElementById('confirmResetModal');
     if (!modal) {
-      showToast("Modal Reset tidak ditemukan", "error");
+      if (window.showToast) window.showToast("Modal Reset tidak ditemukan", "error");
       return;
     }
     modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-    modal.style.opacity = '1';
-    modal.style.pointerEvents = 'auto';
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('opacity', '1', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+    modal.style.setProperty('z-index', '9999', 'important');
   } catch(e) {
-    showToast("Error: " + e.message, "error");
+    if (window.showToast) window.showToast("Error: " + e.message, "error");
+    alert("Error: " + e.message);
   }
-}
+};
 
 function closeResetModal() {
   const modal = document.getElementById('confirmResetModal');
@@ -471,41 +473,46 @@ function executeResetForm() {
     } else if (currentType === 'monthly') {
       window.form.monthly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
     }
-    
-    renderApp();
-    showToast("Laporan telah direset", "success");
-  } catch(e) {
-    showToast("Error reset: " + e.message, "error");
-  }
-}
+};
 
-function openAddStaffModal() {
+window.executeResetForm = function() {
+  if (AppState.currentTab === 1) window.form = getEmptyDailyForm();
+  else if (AppState.currentTab === 2) window.form = getEmptyWeeklyForm();
+  else if (AppState.currentTab === 3) window.form = getEmptyMonthlyForm();
+  window.closeResetModal();
+  renderApp();
+  if (window.showToast) window.showToast("Formulir berhasil direset.", "success");
+};
+
+window.openAddStaffModal = function() {
   try {
     const input = document.getElementById('newStaffName');
     const modal = document.getElementById('addStaffModal');
     if (!modal) {
-      showToast("Modal Tambah Staff tidak ditemukan", "error");
+      if (window.showToast) window.showToast("Modal Tambah Staff tidak ditemukan", "error");
       return;
     }
     if (input) input.value = "";
     modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-    modal.style.opacity = '1';
-    modal.style.pointerEvents = 'auto';
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('opacity', '1', 'important');
+    modal.style.setProperty('pointer-events', 'auto', 'important');
+    modal.style.setProperty('z-index', '9999', 'important');
   } catch(e) {
-    showToast("Error: " + e.message, "error");
+    if (window.showToast) window.showToast("Error: " + e.message, "error");
+    alert("Error: " + e.message);
   }
-}
+};
 
-function closeAddStaffModal() {
+window.closeAddStaffModal = function() {
   const modal = document.getElementById('addStaffModal');
   if (modal) {
     modal.classList.add('hidden');
     modal.style.display = 'none';
   }
-}
+};
 
-async function addStaffSubmit() {
+window.addStaffSubmit = async function() {
   const nameEl = document.getElementById('newStaffName');
   const posEl = document.getElementById('newStaffPosition');
   if (!nameEl || !posEl) return;
@@ -513,15 +520,16 @@ async function addStaffSubmit() {
   const name = nameEl.value.trim();
   const pos = posEl.value;
   if (!name) {
-    showToast("Nama staf tidak boleh kosong!", "error");
+    if (window.showToast) window.showToast("Nama staf tidak boleh kosong!", "error");
     return;
   }
-  closeAddStaffModal();
+  
+  window.closeAddStaffModal();
   showLoading(true);
   try {
     const res = await Server.call('api_addStaff', name, pos);
     if (res.success) {
-      showToast(res.message);
+      if (window.showToast) window.showToast(res.message);
       await fetchMasterStaff();
       if (window.form.type === 'daily') {
         window.form.staff.push({ nama: name, posisi: pos, status: "Hadir", keramahan: false, keterangan: "" });
@@ -533,14 +541,14 @@ async function addStaffSubmit() {
       }
       renderApp();
     } else {
-      showToast("Gagal menyimpan staff: " + res.error, "error");
+      if (window.showToast) window.showToast("Gagal menyimpan staff: " + res.error, "error");
     }
   } catch (err) {
-    showToast("Error: " + err.toString(), "error");
+    if (window.showToast) window.showToast("Error: " + err.toString(), "error");
   } finally {
     showLoading(false);
   }
-}
+};
 
 /*  === DARK MODE INIT === */
 (function() {

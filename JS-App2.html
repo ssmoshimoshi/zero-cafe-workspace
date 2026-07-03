@@ -68,6 +68,10 @@ async function fetchMonthlyData() {
       f.monthly.operasional.teguran = res.totalTeguran || 0;
       f.monthly.operasional.kepatuhanSop = res.kepatuhanSop || 0;
       
+      if (res.staffEvaluations && res.staffEvaluations.length > 0) {
+        f.monthly.staff = res.staffEvaluations;
+      }
+      
       // Calculate percentage
       if (f.monthly.sales.target > 0) {
         f.monthly.sales.persen = Math.round(f.monthly.sales.total / f.monthly.sales.target * 100);

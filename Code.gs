@@ -692,17 +692,61 @@ function api_getMonthlyData(monthStr, outlet) {
     
     var totalTeguran = 0;
     var swSheet = ss.getSheetByName("Staff_Weekly");
+    var staffMap = {};
+
     if (swSheet) {
       var swData = swSheet.getDataRange().getValues();
       for (var w = 1; w < swData.length; w++) {
         var wRow = swData[w];
         if (String(wRow[1]) === monthStr && String(wRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
+          var nama = String(wRow[4]);
+          var posisi = String(wRow[5]);
           var evalStatus = String(wRow[6]);
+          var catatan = String(wRow[7]);
+
           if (evalStatus === 'Menurun' || evalStatus === 'Menurun / Perlu Evaluasi') {
             totalTeguran++;
           }
+          
+          if (!staffMap[nama]) {
+            staffMap[nama] = { posisi: posisi, evals: [], catatans: [] };
+          }
+          staffMap[nama].evals.push(evalStatus);
+          if (catatan) staffMap[nama].catatans.push(catatan);
         }
       }
+    }
+    
+    // Hitung Tren Performa per Staf (Mode / Mayoritas)
+    var staffEvaluations = [];
+    for (var nama in staffMap) {
+      var s = staffMap[nama];
+      var counts = {};
+      var maxCount = 0;
+      var modeEval = "Stagnan";
+      
+      s.evals.forEach(function(e) {
+        counts[e] = (counts[e] || 0) + 1;
+        if (counts[e] > maxCount) {
+          maxCount = counts[e];
+          modeEval = e;
+        }
+      });
+      
+      // Normalisasi status untuk UI Bulanan
+      var finalStatus = "Stagnan";
+      if (modeEval.indexOf("Berkembang") !== -1) finalStatus = "Berkembang";
+      else if (modeEval.indexOf("Stagnan") !== -1) finalStatus = "Stagnan";
+      else if (modeEval.indexOf("Menurun") !== -1) finalStatus = "Menurun";
+      
+      var finalCatatan = s.catatans.join("; ");
+      
+      staffEvaluations.push({
+        nama: nama,
+        posisi: s.posisi,
+        status: finalStatus,
+        alasan: finalCatatan
+      });
     }
     
     return { 
@@ -712,7 +756,8 @@ function api_getMonthlyData(monthStr, outlet) {
       totalKomplain: totalKomplain,
       totalTelat: totalTelat,
       kepatuhanSop: kepatuhanSop,
-      totalTeguran: totalTeguran
+      totalTeguran: totalTeguran,
+      staffEvaluations: staffEvaluations
     };
   } catch (err) {
     return { success: false, error: err.toString() };

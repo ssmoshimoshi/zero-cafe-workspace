@@ -248,33 +248,6 @@ function showToast(message, type = "success") {
   }, 4000);
 }
 
-/* === GLOBAL CLICK INTERCEPTORS === */
-// Ini untuk memastikan tombol-tombol krusial selalu merespons meskipun HTML-nya tersangkut cache PWA
-document.addEventListener('click', function(e) {
-  // Intercept tombol Reset Laporan
-  const resetBtn = e.target.closest('[title="Reset Laporan"]');
-  if (resetBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (typeof window.confirmResetForm === 'function') {
-      window.confirmResetForm();
-    } else {
-      alert("Error: Fungsi confirmResetForm belum termuat!");
-    }
-  }
-  
-  // Intercept tombol Tambah Staff Baru
-  if (e.target.innerText && e.target.innerText.includes('+ STAFF BARU')) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (typeof window.openAddStaffModal === 'function') {
-      window.openAddStaffModal();
-    } else {
-      alert("Error: Fungsi openAddStaffModal belum termuat!");
-    }
-  }
-});
-
 function showLoading(show) {
   AppState.isLoading = show;
   const spinner = document.getElementById('loadingSpinner');

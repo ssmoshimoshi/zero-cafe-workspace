@@ -427,89 +427,50 @@ function closeSuccessModal() {
 }
 
 /* === FORM RESET LOGIC === */
-window.confirmResetForm = function() {
-  try {
-    const modal = document.getElementById('confirmResetModal');
-    if (!modal) {
-      if (window.showToast) window.showToast("Modal Reset tidak ditemukan", "error");
-      return;
-    }
-    modal.classList.remove('hidden');
-    modal.style.setProperty('display', 'flex', 'important');
-    modal.style.setProperty('opacity', '1', 'important');
-    modal.style.setProperty('pointer-events', 'auto', 'important');
-    modal.style.setProperty('z-index', '9999', 'important');
-  } catch(e) {
-    if (window.showToast) window.showToast("Error: " + e.message, "error");
-    alert("Error: " + e.message);
-  }
-};
-
-window.closeResetModal = function() {
+function confirmResetForm() {
   const modal = document.getElementById('confirmResetModal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.style.setProperty('display', 'none', 'important');
-  }
-};
+  if (modal) modal.classList.remove('hidden');
+}
 
-window.executeResetForm = function() {
-  try {
-    window.closeResetModal();
-    const currentType = window.form.type;
-    if (!currentType) {
-      if (window.showToast) window.showToast("Tipe laporan tidak ditemukan", "error");
-      return;
-    }
-    
-    StorageHelper.remove('zc_draft_' + currentType);
-    resetFormData(currentType);
-    
-    // Re-initialize dynamic staff if it was daily
-    if (currentType === 'daily') {
-      window.form.staff = [];
-    } else if (currentType === 'weekly') {
-      window.form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" }));
-    } else if (currentType === 'monthly') {
-      window.form.monthly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
-    }
-    
-    renderApp();
-    if (window.showToast) window.showToast("Laporan telah direset", "success");
-  } catch(e) {
-    if (window.showToast) window.showToast("Error reset: " + e.message, "error");
-  }
-};
+function closeResetModal() {
+  const modal = document.getElementById('confirmResetModal');
+  if (modal) modal.classList.add('hidden');
+}
 
-window.openAddStaffModal = function() {
-  try {
-    const input = document.getElementById('newStaffName');
-    const modal = document.getElementById('addStaffModal');
-    if (!modal) {
-      if (window.showToast) window.showToast("Modal Tambah Staff tidak ditemukan", "error");
-      return;
-    }
-    if (input) input.value = "";
-    modal.classList.remove('hidden');
-    modal.style.setProperty('display', 'flex', 'important');
-    modal.style.setProperty('opacity', '1', 'important');
-    modal.style.setProperty('pointer-events', 'auto', 'important');
-    modal.style.setProperty('z-index', '9999', 'important');
-  } catch(e) {
-    if (window.showToast) window.showToast("Error: " + e.message, "error");
-    alert("Error: " + e.message);
+function executeResetForm() {
+  closeResetModal();
+  const currentType = window.form.type;
+  if (!currentType) return;
+  
+  StorageHelper.remove('zc_draft_' + currentType);
+  resetFormData(currentType);
+  
+  // Re-initialize dynamic staff if it was daily
+  if (currentType === 'daily') {
+    window.form.staff = [];
+  } else if (currentType === 'weekly') {
+    window.form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, kpi: "", kendala: "" }));
+  } else if (currentType === 'monthly') {
+    window.form.monthly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
   }
-};
+  
+  renderApp();
+  showToast("Laporan telah direset", "success");
+}
 
-window.closeAddStaffModal = function() {
+function openAddStaffModal() {
+  const input = document.getElementById('newStaffName');
   const modal = document.getElementById('addStaffModal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.style.setProperty('display', 'none', 'important');
-  }
-};
+  if (input) input.value = "";
+  if (modal) modal.classList.remove('hidden');
+}
 
-window.addStaffSubmit = async function() {
+function closeAddStaffModal() {
+  const modal = document.getElementById('addStaffModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function addStaffSubmit() {
   const nameEl = document.getElementById('newStaffName');
   const posEl = document.getElementById('newStaffPosition');
   if (!nameEl || !posEl) return;
@@ -517,35 +478,31 @@ window.addStaffSubmit = async function() {
   const name = nameEl.value.trim();
   const pos = posEl.value;
   if (!name) {
-    if (window.showToast) window.showToast("Nama staf tidak boleh kosong!", "error");
+    showToast("Nama staf tidak boleh kosong!", "error");
     return;
   }
-  
-  window.closeAddStaffModal();
+  closeAddStaffModal();
   showLoading(true);
   try {
     const res = await Server.call('api_addStaff', name, pos);
     if (res.success) {
-      if (window.showToast) window.showToast(res.message);
+      showToast(res.message);
       await fetchMasterStaff();
       if (window.form.type === 'daily') {
         window.form.staff.push({ nama: name, posisi: pos, status: "Hadir", keramahan: false, keterangan: "" });
       } else if (window.form.type === 'weekly') {
-        window.form.weekly.staff = AppState.masterStaff.map(s => {
-          const existing = window.form.weekly.staff.find(fs => fs.nama === s.nama);
-          return existing || { nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: "" };
-        });
+        window.form.weekly.staff.push({ nama: name, posisi: pos, status: "Berkembang", alasan: "" });
       }
       renderApp();
     } else {
-      if (window.showToast) window.showToast("Gagal menyimpan staff: " + res.error, "error");
+      showToast("Gagal menyimpan staff: " + res.error, "error");
     }
   } catch (err) {
-    if (window.showToast) window.showToast("Error: " + err.toString(), "error");
+    showToast("Error: " + err.toString(), "error");
   } finally {
     showLoading(false);
   }
-};
+}
 
 /*  === DARK MODE INIT === */
 (function() {

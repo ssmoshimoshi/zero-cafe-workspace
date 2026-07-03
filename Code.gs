@@ -57,6 +57,10 @@ function initializeSystem() {
     "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
   ]);
   
+  setupSheet(activeSpreadsheet, "Staff_Monthly", [
+    "Bulan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
+  ]);
+  
   var staffSheet = setupSheet(activeSpreadsheet, "MasterStaff", [
     "ID", "Nama", "Posisi", "Status"
   ]);
@@ -462,6 +466,17 @@ function submitFullReport(payloadStr) {
         Number(data.monthly.evaluasi.ratingKerja || 0),
         fileUrl
       ]);
+      
+      if (data.monthly.staff && Array.isArray(data.monthly.staff)) {
+        var smSheet = setupSheet(ss, "Staff_Monthly", [
+          "Bulan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
+        ]);
+        data.monthly.staff.forEach(function(s) {
+          smSheet.appendRow([
+            bulanFormatted, data.outlet, data.supervisor, s.nama || "", s.posisi || "", s.status || "", s.alasan || ""
+          ]);
+        });
+      }
     }
     
     // 5. Database Produk Terpusat

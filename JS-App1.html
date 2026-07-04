@@ -666,7 +666,6 @@ function updateMonthlyStaff(idx, field, value) {
 
 function openResignModal(idx = -1) {
   try {
-    showToast("Memuat form...", "success");
     const modal = document.getElementById('resignModal');
     const selId = document.getElementById('resignModalId');
     const txtAlasan = document.getElementById('resignModalAlasan');
@@ -679,19 +678,27 @@ function openResignModal(idx = -1) {
     document.getElementById('resignModalIdx').value = idx;
     
     selId.innerHTML = '<option value="">Pilih Staf...</option>' + 
-      (AppState.masterStaff || []).map(s => `<option value="${s.id}">${s.nama}</option>`).join('');
+      (AppState.masterStaff || []).map(s => `<option value="${s.nama}">${s.nama}</option>`).join('');
     
     if (idx >= 0) {
+      // Pastikan resignList ada untuk backward compatibility draft lama
+      if (!window.form.monthly.operasional.resignList) {
+         window.form.monthly.operasional.resignList = [];
+      }
       const item = window.form.monthly.operasional.resignList[idx];
-      selId.value = item.id || "";
-      txtAlasan.value = item.alasan || "";
+      if (item) {
+        selId.value = item.nama || item.id || "";
+        txtAlasan.value = item.alasan || "";
+      }
     } else {
       selId.value = "";
       txtAlasan.value = "";
     }
     
     modal.classList.remove('hidden');
-    modal.classList.add('flex'); // Pastikan flex aktif
+    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.zIndex = '9999';
   } catch(e) {
     showToast("Error buka modal: " + e.message, "error");
   }
@@ -709,15 +716,14 @@ function saveResignModal() {
   if (!selId) { showToast("Pilih nama staf terlebih dahulu!", "error"); return; }
   if (!txtAlasan) { showToast("Alasan resign tidak boleh kosong!", "error"); return; }
   
-  const staffObj = AppState.masterStaff.find(s => s.id.toString() === selId.toString());
-  const nama = staffObj ? staffObj.nama : "";
+  const newItem = { id: selId, nama: selId, alasan: txtAlasan };
   
   if (!window.form.monthly.operasional.resignList) window.form.monthly.operasional.resignList = [];
   
   if (idx >= 0) {
-    window.form.monthly.operasional.resignList[idx] = { id: selId, nama, alasan: txtAlasan };
+    window.form.monthly.operasional.resignList[idx] = newItem;
   } else {
-    window.form.monthly.operasional.resignList.push({ id: selId, nama, alasan: txtAlasan });
+    window.form.monthly.operasional.resignList.push(newItem);
   }
   
   closeResignModal();

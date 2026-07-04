@@ -1,0 +1,1296 @@
+
+
+
+/*  === STORAGE HELPER (BUG FIX: Mengatasi SecurityError localStorage di Iframe GAS) === */
+const StorageHelper = {
+  memory: {},
+  get: function(key) {
+    try { return localStorage.getItem(key) || sessionStorage.getItem(key) || this.memory[key]; } 
+    catch(e) { 
+      try { return sessionStorage.getItem(key) || this.memory[key]; }
+      catch(err) { return this.memory[key]; }
+    }
+  },
+  set: function(key, value) {
+    try { localStorage.setItem(key, value); return; } catch(e) {}
+    try { sessionStorage.setItem(key, value); return; } catch(e) {}
+    this.memory[key] = value;
+  },
+  remove: function(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
+    try { sessionStorage.removeItem(key); } catch(e) {}
+    delete this.memory[key];
+  }
+};
+
+/*  === FORMAT DATE HELPER === */
+function formatDateIndo(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    return parts[2] + "-" + parts[1] + "-" + parts[0];
+  }
+  return dateStr;
+}
+
+/*  === PILL BUTTON UI HELPER === */
+function renderPillGroup(options, currentValue, onChangeStr) {
+  return '<div class="flex flex-wrap gap-2">' + options.map(function(opt) {
+    const isSelected = currentValue === opt.value;
+    const baseClass = "px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all whitespace-nowrap cursor-pointer select-none ";
+    const selectedClass = isSelected ? "bg-zero-black text-white shadow-md" : "bg-white text-gray-400 hover:bg-gray-100 border border-gray-200";
+    return '<label class="' + baseClass + selectedClass + '">' +
+             '<input type="radio" value="' + opt.value + '" onchange="' + onChangeStr + '; renderApp();" class="hidden" ' + (isSelected ? 'checked' : '') + '>' +
+             opt.label +
+           '</label>';
+  }).join('') + '</div>';
+}
+
+/*  === GLOBAL APPLICATION STATE === */
+const AppState = {
+  role: null,             /*  "SPV" | "GM" | null */
+  menu: "select_report",  /*  "select_report" | "form_daily" | "form_weekly" | "form_monthly" | "dashboard_gm" */
+  currentTab: 1,          /*  1-indexed active tab in forms */
+  isLoading: false,
+  masterStaff: [],        /*  Loaded dynamically from Sheet */
+  dashboardData: null,    /*  GM dashboard analytics cache */
+  activeFilters: {
+    month: "Juni",
+    year: "2026"
+  }
+};
+
+/*  Default structures for forms */
+let form = {};
+Object.defineProperty(window, 'form', {
+  get: function() { return form; },
+  set: function(val) { form = val; },
+  configurable: true
+});
+
+function resetFormData(type) {
+  form = {
+    type: type,
+    tanggal: new Date().toISOString().split('T')[0],
+    bulan: new Date().toISOString().substring(0, 7), /*  YYYY-MM */
+    periodeStart: "",
+    periodeEnd: "",
+    periode: "",
+    supervisor: "",
+    shift: "06:00",
+    outlet: "Perintis",
+    
+    /*  Daily Specific */
+    penjualan: { target: 0, shift1: 0, shift2: 0, transaksi: 0 },
+    produk: {
+      topMinuman: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+      bottomMinuman: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+      topMakanan: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+      bottomMakanan: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+      topSnack: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+      bottomSnack: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ]
+    },
+    kas: { modalAwal: 200000, audit: [] },
+    staff: [], /*  dynamically structured based on masterStaff */
+    briefing: { target: "", fokus: "", masalah: "", solusi: "" },
+    qc: { espresso: { jam: "07:00", status: "Baik", keterangan: "" }, items: [] },
+    feedback: { items: [], totalKomplain: 0, totalRemake: 0, analisisRemake: "" },
+    fasilitas: [],
+    bahan: [],
+    penutup: { kendala: "", rekomendasi: "" },
+
+    /*  Weekly Specific */
+    weekly: {
+      salesHarian: [
+        { hari: "Senin", target: 0, real: 0 },
+        { hari: "Selasa", target: 0, real: 0 },
+        { hari: "Rabu", target: 0, real: 0 },
+        { hari: "Kamis", target: 0, real: 0 },
+        { hari: "Jumat", target: 0, real: 0 },
+        { hari: "Sabtu", target: 0, real: 0 },
+        { hari: "Minggu", target: 0, real: 0 }
+      ],
+      produk: {
+        topMinuman: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+        bottomMinuman: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+        topMakanan: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+        bottomMakanan: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ],
+        topSnack: [ {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0}, {nama: "", terjual: 0} ],
+        bottomSnack: [ {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""}, {nama: "", terjual: 0, rencana: ""} ]
+      },
+      komplain: { total: 0, remake: 0, penyebab: "" },
+      kendalaUtama: "",
+      staff: [], /*  dynamic staff list evaluations */
+      rencana: [""],
+      kebutuhan: [""]
+    },
+
+    /*  Monthly Specific */
+    monthly: {
+      ringkasan: { pencapaian: "", masalah: "", kesimpulan: "" },
+      sales: { total: 0, target: 0, persen: 0 },
+      produk: {
+        topMinuman: [
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0}
+        ],
+        bottomMinuman: [
+          {nama: "", terjual: 0, rencana: ""},
+          {nama: "", terjual: 0, rencana: ""},
+          {nama: "", terjual: 0, rencana: ""}
+        ],
+        topMakanan: [
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0}
+        ],
+        bottomMakanan: [
+          {nama: "", terjual: 0, rencana: ""},
+          {nama: "", terjual: 0, rencana: ""},
+          {nama: "", terjual: 0, rencana: ""}
+        ],
+        topSnack: [
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0},
+          {nama: "", terjual: 0}
+        ],
+        bottomSnack: [
+          {nama: "", terjual: 0, rencana: ""},
+          {nama: "", terjual: 0, rencana: ""},
+          {nama: "", terjual: 0, rencana: ""}
+        ]
+      },
+      staff: [],
+      operasional: { kepatuhanSop: 100, telat: 0, teguran: 0, penyebab: "", resignList: [] },
+      qc: { komplain: 0, remake: 0, penyebab: "", espresso: "", rekomendasi: "", items: [] },
+      fasilitas: { pengeluaran: 0, eskalasi: "" },
+      rencana: { strategi: "", target: "", gm: "" },
+      evaluasi: { berhasil: "", sulit: "", skill: "", ratingKerja: 8 }
+    }
+  };
+}
+
+/*  === BOOTSTRAP / INITIALIZATION === */
+function bootstrapApp() {
+  const root = document.getElementById('app-root');
+  
+  if (!root) {
+    console.warn("DOM 'app-root' belum siap, menunda bootstrap...");
+    setTimeout(bootstrapApp, 50);
+    return;
+  }
+  
+  if (window.__appInitialized) return;
+  window.__appInitialized = true;
+  
+  try {
+    const savedRole = StorageHelper.get('zc_role');
+    if (savedRole) {
+      AppState.role = savedRole;
+      AppState.menu = savedRole === 'SPV' ? 'select_report' : 'dashboard_gm';
+    } else {
+      AppState.role = null;
+      AppState.menu = 'login';
+    }
+    
+    renderApp();
+    
+    // Fetch data first, initialLoader acts as the loader
+    const startTime = Date.now();
+    fetchMasterStaff().finally(() => {
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, 1500 - elapsed); // Ensure at least 1.5s loader
+      
+      setTimeout(() => {
+        const loader = document.getElementById('initialLoader');
+        if (loader) {
+          loader.classList.add('opacity-0');
+          setTimeout(() => loader.style.display = 'none', 700);
+        }
+        
+        const root = document.getElementById('app-root');
+        if (root) root.classList.remove('opacity-0');
+      }, remainingTime);
+    });
+  } catch (e) {
+    console.error("Bootstrap Error:", e);
+  }
+}
+
+/*  Jalankan langsung dan daftarkan juga ke event listeners untuk memastikan eksekusi di berbagai lingkungan browser / GAS */
+bootstrapApp();
+window.addEventListener('load', bootstrapApp);
+document.addEventListener('DOMContentLoaded', bootstrapApp);
+
+async function fetchMasterStaff() {
+  try {
+    const list = await Server.call('api_getMasterStaff');
+    AppState.masterStaff = list || [];
+  } catch (err) {
+    showToast("Gagal memuat data staf: " + err.toString(), "error");
+  }
+}
+
+/*  === TOAST NOTIFICATIONS === */
+function showToast(message, type = "success") {
+  const toast = document.getElementById('toastNotification');
+  if (!toast) {
+    console.warn("Toast diabaikan (DOM belum siap):", message);
+    return;
+  }
+  
+  toast.className = `fixed bottom-5 right-5 px-6 py-3 rounded-2xl z-50 transition-all duration-300 transform translate-y-0 opacity-100 ${
+    type === 'success' ? 'bg-gray-900 text-white' : 'bg-rose-600 text-white'
+  }`;
+  toast.innerHTML = `<div class="flex items-center space-x-2">
+    <span>${message}</span>
+  </div>`;
+  
+  setTimeout(() => {
+    if (toast) { /*  Pengaman tambahan */
+      toast.className = "fixed bottom-5 right-5 px-6 py-3 rounded-2xl z-50 transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none";
+    }
+  }, 4000);
+}
+
+function showLoading(show) {
+  AppState.isLoading = show;
+  const spinner = document.getElementById('loadingSpinner');
+  if (!spinner) return;
+  
+  if (show) {
+    spinner.classList.remove('hidden');
+  } else {
+    spinner.classList.add('hidden');
+  }
+}
+
+/*  === TEMPLATE RENDERING & ROUTER === */
+function renderApp() {
+  const root = document.getElementById('app-root');
+  if (!root) return; /*  Sudah ditangani oleh bootstrapApp */
+  
+  try {
+    let html = "";
+    if (AppState.menu === 'login') html = getLoginTemplate();
+    else if (AppState.menu === 'select_report') html = getMenuSPVTemplate();
+    else if (AppState.menu === 'form_daily') html = getDailyFormTemplate();
+    else if (AppState.menu === 'form_weekly') html = getWeeklyFormTemplate();
+    else if (AppState.menu === 'form_monthly') html = getMonthlyFormTemplate();
+    else if (AppState.menu === 'dashboard_gm') html = getDashboardGMTemplate();
+    root.innerHTML = html;
+    bindEvents();
+    
+    setTimeout(() => {
+      const activeTabBtn = document.getElementById('activeTabBtn');
+      if (activeTabBtn) {
+        activeTabBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+      
+      // Render chart if in GM Dashboard
+      if (AppState.menu === 'dashboard_gm' && typeof renderGMChart === 'function' && AppState.dashboardData) {
+        renderGMChart();
+      }
+    }, 50);
+  } catch (err) {
+    console.error("Render Error:", err);
+    if (err.name === "ReferenceError" || (err.message && err.message.includes("not a function"))) {
+      showToast("Error Sistem: Komponen form tidak ditemukan.", "error");
+    } else {
+      showToast("Sistem mendeteksi data rusak. Mereset draft window.form.", "error");
+      StorageHelper.remove('zc_draft_daily');
+      StorageHelper.remove('zc_draft_weekly');
+      StorageHelper.remove('zc_draft_monthly');
+    }
+    
+    /*  Fallback to menu safely */
+    AppState.menu = 'select_report';
+    if (root) {
+      root.innerHTML = getMenuSPVTemplate();
+      bindEvents();
+    }
+  }
+}
+
+/*  === THEME TOGGLE LOGIC === */
+function toggleTheme() {
+  const html = document.documentElement;
+  if (html.classList.contains('dark')) {
+    html.classList.remove('dark');
+    StorageHelper.set('zc_theme', 'light');
+  } else {
+    html.classList.add('dark');
+    StorageHelper.set('zc_theme', 'dark');
+  }
+}
+
+/*  === EVENT BINDING === */
+function bindEvents() {
+  /*  Logout function */
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      handleLogout();
+    });
+  }
+}
+
+function transitionToMenu(menuKey, callback) {
+  const root = document.getElementById('app-root');
+  if (root) {
+    root.classList.add('opacity-0');
+    setTimeout(() => {
+      if (callback) callback();
+      AppState.menu = menuKey;
+      renderApp();
+      root.classList.remove('opacity-0');
+    }, 300);
+  } else {
+    if (callback) callback();
+    AppState.menu = menuKey;
+    renderApp();
+  }
+}
+
+function handleLogout() {
+  transitionToMenu('login', () => {
+    StorageHelper.remove('zc_role');
+    AppState.role = null;
+  });
+}
+
+/*  === TEMPLATES === */
+
+function getLoginTemplate() {
+  return `
+    <div class="flex flex-col h-full w-full min-h-screen bg-transparent">
+      
+      <!-- Hero Center -->
+      <div class="flex-grow flex flex-col justify-center items-center animate-slide-up" style="animation-duration: 0.8s;">
+        <h1 class="text-[3.5rem] font-black text-zero-black tracking-tight leading-none mb-1">ZERO</h1>
+        <p class="text-xs font-semibold text-gray-500 tracking-[0.15em] uppercase">Halo Teman dari Zero</p>
+      </div>
+
+      <!-- Action Buttons Bottom -->
+      <div class="pb-16 px-6 flex flex-col items-center space-y-4 animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.8s; animation-fill-mode: both;">
+        
+        <!-- SPV -->
+        <button onclick="handleLogin('SPV')" class="w-full max-w-[260px] bg-white border-[0.5px] border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md active:scale-[0.97] transition-all duration-300">
+          Saya Supervisor
+        </button>
+        
+        <!-- GM -->
+        <button onclick="handleLogin('GM')" class="w-full max-w-[260px] bg-white border-[0.5px] border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md active:scale-[0.97] transition-all duration-300">
+          Saya General Manager
+        </button>
+        
+      </div>
+      
+    </div>
+  `;
+}
+
+function handleLogin(role) {
+  transitionToMenu(role === 'SPV' ? 'select_report' : 'dashboard_gm', () => {
+    StorageHelper.set('zc_role', role);
+    AppState.role = role;
+  });
+}
+
+function getMenuSPVTemplate() {
+  return `
+    <div class="w-full px-6 py-6 bg-transparent">
+      <div class="flex justify-between items-center mb-10 mt-2 border-b-[0.5px] border-gray-200 pb-4 animate-slide-up" style="animation-duration: 0.6s;">
+        <h2 class="text-lg font-extrabold text-zero-black tracking-tight">ZERO WORKSPACE</h2>
+        <button onclick="handleLogout()" class="px-4 py-1.5 border-[0.5px] border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:text-zero-black hover:bg-gray-50 transition-all duration-300">KELUAR</button>
+      </div>
+      
+      <div class="text-center mb-8 mt-16 animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.6s; animation-fill-mode: both;">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Pilih Jenis Laporan</p>
+      </div>
+      
+      <div class="space-y-4">
+        <!-- Harian -->
+        <div onclick="startNewForm('daily')" class="bg-white border-[0.5px] border-gray-200 p-5 rounded-3xl cursor-pointer hover:shadow-sm active:bg-gray-50 active:scale-[0.98] transition-all duration-300 flex justify-between items-center group animate-slide-up" style="animation-delay: 0.2s; animation-duration: 0.6s; animation-fill-mode: both;">
+          <div>
+            <h3 class="font-bold text-sm text-zero-black mb-1">LAPORAN HARIAN</h3>
+            <p class="text-[11px] font-medium text-gray-400">Daily Report Shift</p>
+          </div>
+          <span class="text-gray-300 group-hover:text-zero-black transition-colors">→</span>
+        </div>
+        
+        <!-- Mingguan -->
+        <div onclick="startNewForm('weekly')" class="bg-white border-[0.5px] border-gray-200 p-5 rounded-3xl cursor-pointer hover:shadow-sm active:bg-gray-50 active:scale-[0.98] transition-all duration-300 flex justify-between items-center group animate-slide-up" style="animation-delay: 0.3s; animation-duration: 0.6s; animation-fill-mode: both;">
+          <div>
+            <h3 class="font-bold text-sm text-zero-black mb-1">LAPORAN MINGGUAN</h3>
+            <p class="text-[11px] font-medium text-gray-400">Weekly Rekap Penjualan</p>
+          </div>
+          <span class="text-gray-300 group-hover:text-zero-black transition-colors">→</span>
+        </div>
+        
+        <!-- Bulanan -->
+        <div onclick="startNewForm('monthly')" class="bg-white border-[0.5px] border-gray-200 p-5 rounded-3xl cursor-pointer hover:shadow-sm active:bg-gray-50 active:scale-[0.98] transition-all duration-300 flex justify-between items-center group animate-slide-up" style="animation-delay: 0.4s; animation-duration: 0.6s; animation-fill-mode: both;">
+          <div>
+            <h3 class="font-bold text-sm text-zero-black mb-1">LAPORAN BULANAN</h3>
+            <p class="text-[11px] font-medium text-gray-400">Monthly Executive Summary</p>
+          </div>
+          <span class="text-gray-300 group-hover:text-zero-black transition-colors">→</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Global functions for Install Guide
+window.showInstallGuide = function() {
+  const modal = document.getElementById('installGuideModal');
+  const content = document.getElementById('installGuideContent');
+  if (modal && content) {
+    modal.classList.remove('hidden');
+    // Allow display block to apply before animating opacity
+    setTimeout(() => {
+      modal.classList.remove('opacity-0');
+      content.classList.remove('translate-y-10');
+    }, 10);
+  }
+};
+
+window.hideInstallGuide = function() {
+  const modal = document.getElementById('installGuideModal');
+  const content = document.getElementById('installGuideContent');
+  if (modal && content) {
+    modal.classList.add('opacity-0');
+    content.classList.add('translate-y-10');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300); // Wait for transition
+  }
+};
+
+function startNewForm(type) {
+  if (loadDraft(type)) {
+    transitionToMenu(`form_${type}`, () => {
+      AppState.currentTab = 1;
+    });
+    return;
+  }
+
+  resetFormData(type);
+  
+  /*  Setup staff fields in daily/weekly/monthly form dynamically */
+  if (type === 'daily') {
+    window.form.staff = [];
+  } else if (type === 'weekly') {
+    window.form.weekly.staff = AppState.masterStaff.map(s => ({
+      nama: s.nama,
+      posisi: s.posisi,
+      status: "",
+      alasan: ""
+    }));
+  } else if (type === 'monthly') {
+    window.form.monthly.staff = AppState.masterStaff.map(s => ({
+      nama: s.nama,
+      posisi: s.posisi,
+      status: "Berkembang",
+      alasan: ""
+    }));
+  }
+  
+  transitionToMenu(`form_${type}`, () => {
+    AppState.currentTab = 1;
+  });
+}
+
+function goBackMenu() {
+  saveDraft(true); /*  Save draft before going back */
+  transitionToMenu("select_report");
+}
+
+/*  === DRAFT LOGIC === */
+
+function addSelectedStaff() {
+  const select = document.getElementById('staffSelectDropdown');
+  if (!select) return;
+  const nama = select.value;
+  if (!nama) return;
+  
+  if (window.form.staff.some(s => s.nama === nama)) return;
+  
+  const master = AppState.masterStaff.find(s => s.nama === nama);
+  if (master) {
+    window.form.staff.push({
+      nama: master.nama,
+      posisi: master.posisi,
+      status: "Hadir",
+      keramahan: false,
+      keterangan: ""
+    });
+    renderApp();
+  }
+}
+
+function removeStaffRow(idx) {
+  window.form.staff.splice(idx, 1);
+  renderApp();
+}
+
+function saveDraft(quiet = false) {
+  if (window.form.type === 'daily' || window.form.type === 'weekly' || window.form.type === 'monthly') {
+    StorageHelper.set(`zc_draft_${window.form.type}`, JSON.stringify(form));
+    
+    if (!quiet) showToast("Draft berhasil disimpan!");
+    
+    // Tampilkan indikator visual (Auto-Save)
+    const indicator = document.getElementById('draftIndicator');
+    if (indicator) {
+      indicator.classList.remove('opacity-0');
+      clearTimeout(window.draftIndicatorTimeout);
+      window.draftIndicatorTimeout = setTimeout(() => {
+        indicator.classList.add('opacity-0');
+      }, 2000);
+    }
+  }
+}
+
+function loadDraft(type) {
+  const draft = StorageHelper.get(`zc_draft_${type}`);
+  if (draft) {
+    try {
+      const parsed = JSON.parse(draft);
+      
+      let isOldSchema = false;
+      if (type === 'daily' && parsed.produk && !parsed.produk.topMinuman) isOldSchema = true;
+      if (type === 'weekly' && parsed.weekly && parsed.weekly.produk && !parsed.weekly.produk.topMinuman) isOldSchema = true;
+      
+      if (isOldSchema) {
+        console.warn("Old draft schema detected. Clearing to prevent crash.");
+        StorageHelper.remove(`zc_draft_${type}`);
+        return false;
+      }
+      
+      showToast("Melanjutkan draft yang belum terkirim...", "success");
+      Object.assign(form, parsed);
+      return true;
+    } catch(e) {
+      StorageHelper.remove(`zc_draft_${type}`);
+    }
+  }
+  return false;
+}
+
+// Auto-save global listener untuk setiap input/change
+function bindAutoSave() {
+  const root = document.getElementById('app-root');
+  if (!root) return;
+  root.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+      clearTimeout(window.autoSaveDebounce);
+      window.autoSaveDebounce = setTimeout(() => saveDraft(true), 800);
+    }
+  });
+}
+
+// Pasang listener sekali saat load
+document.addEventListener('DOMContentLoaded', bindAutoSave);
+
+/*  Auto-save aman dengan Wrapper (tidak crash saat quota storage error) */
+setInterval(() => {
+  if (AppState.menu && AppState.menu.startsWith('form_')) {
+    saveDraft(true);
+  }
+}, 30000);
+
+/*  === UTILS: PHOTO UPLOAD & COMPRESSION === */
+async function uploadPhoto(fileInput, category, customFilename) {
+  const file = fileInput.files[0];
+  if (!file) return null;
+  
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = async function() {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        const filename = customFilename ? `${customFilename}.jpeg` : `${category}_${Date.now()}.jpg`;
+        
+        try {
+          showLoading(true);
+          const res = await Server.call('api_uploadImage', dataUrl, filename, category);
+          showLoading(false);
+          
+          if (res.success) {
+            showToast("Foto berhasil diunggah!");
+            resolve(res.url);
+          } else {
+            showToast("Gagal mengunggah foto.", "error");
+            reject(res.error);
+          }
+        } catch (err) {
+          showLoading(false);
+          showToast("Error upload.", "error");
+          reject(err);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/*  === FORM TEMPLATES & LOGIC === */
+
+function addAuditRow() { window.form.kas.audit.push({ jam: "12:00", aktual: 0, qris: 0, tunai: 0, keterangan: "" }); renderApp(); }
+function removeAuditRow(idx) { window.form.kas.audit.splice(idx, 1); renderApp(); }
+function updateAuditField(idx, field, value) { window.form.kas.audit[idx][field] = value; }
+function updateMonthlyStaff(idx, field, value) {
+  window.form.monthly.staff[idx][field] = value;
+  renderApp();
+}
+
+function openResignModal(idx = -1) {
+  try {
+    const modal = document.getElementById('resignModal');
+    const selId = document.getElementById('resignModalId');
+    const txtAlasan = document.getElementById('resignModalAlasan');
+    
+    if (!modal || !selId || !txtAlasan) {
+      showToast("Elemen UI tidak lengkap", "error");
+      return;
+    }
+    
+    document.getElementById('resignModalIdx').value = idx;
+    
+    selId.innerHTML = '<option value="">Pilih Staf...</option>' + 
+      (AppState.masterStaff || []).map(s => `<option value="${s.nama}">${s.nama}</option>`).join('');
+    
+    if (idx >= 0) {
+      // Pastikan resignList ada untuk backward compatibility draft lama
+      if (!window.form.monthly.operasional.resignList) {
+         window.form.monthly.operasional.resignList = [];
+      }
+      const item = window.form.monthly.operasional.resignList[idx];
+      if (item) {
+        selId.value = item.nama || item.id || "";
+        txtAlasan.value = item.alasan || "";
+      }
+    } else {
+      selId.value = "";
+      txtAlasan.value = "";
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modal.style.display = 'flex';
+    modal.style.zIndex = '9999';
+  } catch(e) {
+    showToast("Error buka modal: " + e.message, "error");
+  }
+}
+
+function closeResignModal() {
+  document.getElementById('resignModal').classList.add('hidden');
+}
+
+function saveResignModal() {
+  const idx = parseInt(document.getElementById('resignModalIdx').value, 10);
+  const selId = document.getElementById('resignModalId').value;
+  const txtAlasan = document.getElementById('resignModalAlasan').value;
+  
+  if (!selId) { showToast("Pilih nama staf terlebih dahulu!", "error"); return; }
+  if (!txtAlasan) { showToast("Alasan resign tidak boleh kosong!", "error"); return; }
+  
+  const newItem = { id: selId, nama: selId, alasan: txtAlasan };
+  
+  if (!window.form.monthly.operasional.resignList) window.form.monthly.operasional.resignList = [];
+  
+  if (idx >= 0) {
+    window.form.monthly.operasional.resignList[idx] = newItem;
+  } else {
+    window.form.monthly.operasional.resignList.push(newItem);
+  }
+  
+  closeResignModal();
+  renderApp();
+}
+
+function removeResignStaff(idx) {
+  if (!window.form.monthly.operasional.resignList) return;
+  window.form.monthly.operasional.resignList.splice(idx, 1);
+  renderApp();
+}
+
+function updateStaffField(idx, field, value) { window.form.staff[idx][field] = value; }
+function addQcRow() { window.form.qc.items.push({ jam: "12:00", nama: "", status: "Baik", keterangan: "" }); renderApp(); }
+function removeQcRow(idx) { window.form.qc.items.splice(idx, 1); renderApp(); }
+function updateQcField(idx, field, value) { window.form.qc.items[idx][field] = value; }
+function addFeedbackRow() { window.form.feedback.items.push({ jam: "12:00", inisial: "", isi: "", remake: false, eskalasi: false, respon: "" }); renderApp(); }
+function removeFeedbackRow(idx) { window.form.feedback.items.splice(idx, 1); renderApp(); }
+function updateFeedbackField(idx, field, value) { window.form.feedback.items[idx][field] = value; }
+function updateTotalRemake(value) { window.form.feedback.totalRemake = value; renderApp(); }
+function addFasilitasRow() { window.form.fasilitas.push({ item: "", status: "Rusak Ringan", eskalasi: false, keterangan: "", photoUrl: "" }); renderApp(); }
+function removeFasilitasRow(idx) { window.form.fasilitas.splice(idx, 1); renderApp(); }
+function updateFasilitasField(idx, field, value) { window.form.fasilitas[idx][field] = value; }
+async function handleFasilitasPhoto(input, idx) {
+  try {
+    const row = window.form.fasilitas[idx];
+    const dateStr = window.form.tanggal || new Date().toISOString().split('T')[0];
+    const [year, month, day] = dateStr.split("-");
+    const ddmmyy = day && month ? `${day}-${month}` : "UnknownDate";
+    const itemName = row.item ? row.item.replace(/\s+/g, '') : "Fasilitas";
+    const statusName = row.status ? row.status.replace(/\s+/g, '') : "Rusak";
+    const customFilename = `${ddmmyy}-${itemName}-${statusName}`;
+    
+    const url = await uploadPhoto(input, 'Trouble', customFilename);
+    if (url) { updateFasilitasField(idx, 'photoUrl', url); renderApp(); }
+  } catch (e) { console.error(e); }
+}
+function addBahanRow() { window.form.bahan.push({ nama: "", ketersediaan: "Habis", harga: 0, photoUrl: "" }); renderApp(); }
+function removeBahanRow(idx) { window.form.bahan.splice(idx, 1); renderApp(); }
+function updateBahanField(idx, field, value) { window.form.bahan[idx][field] = value; }
+async function handleBahanPhoto(input, idx) {
+  try {
+    const row = window.form.bahan[idx];
+    const dateStr = window.form.tanggal || new Date().toISOString().split('T')[0];
+    const [year, month, day] = dateStr.split("-");
+    const ddmmyy = day && month ? `${day}-${month}` : "UnknownDate";
+    const itemName = row.nama ? row.nama.replace(/\s+/g, '') : "Bahan";
+    const statusName = row.ketersediaan ? row.ketersediaan.replace(/\s+/g, '') : "Habis";
+    const customFilename = `${ddmmyy}-${itemName}-${statusName}`;
+    
+    const url = await uploadPhoto(input, 'Nota Pengeluaran', customFilename);
+    if (url) { updateBahanField(idx, 'photoUrl', url); renderApp(); }
+  } catch (e) { console.error(e); }
+}
+
+
+/* ====================================================
+   PDF EXPORT SYSTEM
+   buildPDFHtml() → exportPDF() → downloadPDF() / sharePDF()
+   ==================================================== */
+
+function formatRupiahPDF(num) {
+  if (!num || num === 0) return 'Rp 0';
+  return 'Rp ' + Number(num).toLocaleString('id-ID');
+}
+
+function buildPDFHtml(f) {
+  const jenis = f.type === 'daily' ? 'HARIAN' : f.type === 'weekly' ? 'MINGGUAN' : 'BULANAN';
+  const periode = f.type === 'daily' ? f.tanggal : f.type === 'weekly' ? (f.periode || f.periodeStart + ' s/d ' + f.periodeEnd) : f.bulan;
+  const now = new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
+
+  const base = `
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+      .pdf-page * { margin: 0; padding: 0; box-sizing: border-box; }
+      .pdf-page { font-family: 'Inter', sans-serif; font-size: 11px; color: #1a1a1a; background: #fff; padding: 28px 32px; min-height: 1122px; }
+      .pdf-page .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #111; padding-bottom: 14px; margin-bottom: 20px; }
+      .pdf-page .header-title { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+      .pdf-page .header-sub { font-size: 10px; color: #666; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+      .pdf-page .header-meta { text-align: right; font-size: 10px; color: #666; }
+      .pdf-page .header-meta strong { display: block; font-size: 13px; font-weight: 700; color: #111; }
+      .pdf-page .section { margin-bottom: 18px; }
+      .pdf-page .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #888; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+      .pdf-page table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+      .pdf-page th { background: #111; color: #fff; padding: 6px 8px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .pdf-page td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+      .pdf-page tr:nth-child(even) td { background: #fafafa; }
+      .pdf-page .badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: 9px; font-weight: 700; }
+      .pdf-page .badge-green { background: #dcfce7; color: #15803d; }
+      .pdf-page .badge-yellow { background: #fef9c3; color: #a16207; }
+      .pdf-page .badge-red { background: #fee2e2; color: #b91c1c; }
+      .pdf-page .badge-gray { background: #f3f4f6; color: #374151; }
+      .pdf-page .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .pdf-page .stat-box { background: #f8f8f8; border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; }
+      .pdf-page .stat-label { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 3px; }
+      .pdf-page .stat-value { font-size: 16px; font-weight: 900; color: #111; }
+      .pdf-page .stat-value.green { color: #16a34a; }
+      .pdf-page .stat-value.red { color: #dc2626; }
+      .pdf-page p.note { font-size: 10.5px; color: #444; line-height: 1.6; padding: 8px 10px; background: #f9f9f9; border-left: 3px solid #ddd; border-radius: 0 6px 6px 0; }
+      .pdf-page .footer { margin-top: 30px; padding-top: 14px; border-top: 1px solid #eee; display: flex; justify-content: space-between; font-size: 9px; color: #aaa; }
+    </style>
+    <div class="pdf-page">
+      <div class="header">
+        <div>
+          <div class="header-title">ZERO CAFE</div>
+          <div class="header-sub">Laporan ${jenis} · ${f.outlet || 'Perintis'}</div>
+        </div>
+        <div class="header-meta">
+          <strong>${f.supervisor || '-'}</strong>
+          ${periode || '-'}<br>Dicetak: ${now}
+        </div>
+      </div>`;
+
+  if (f.type === 'daily') return base + buildDailyPDF(f) + pdfFooter(f);
+  if (f.type === 'weekly') return base + buildWeeklyPDF(f) + pdfFooter(f);
+  if (f.type === 'monthly') return base + buildMonthlyPDF(f) + pdfFooter(f);
+  return base + pdfFooter(f);
+}
+
+function pdfFooter(f) {
+  return `
+      <div class="footer">
+        <span>Zero Cafe Workspace · Laporan ${f.type === 'daily' ? 'Harian' : f.type === 'weekly' ? 'Mingguan' : 'Bulanan'} · ${f.outlet || 'Perintis'}</span>
+        <span>${f.supervisor || ''}</span>
+      </div>
+    </div>`;
+}
+
+function buildDailyPDF(f) {
+  const totalOmset = (f.penjualan.shift1 || 0) + (f.penjualan.shift2 || 0);
+  const pct = f.penjualan.target > 0 ? Math.round(totalOmset / f.penjualan.target * 100) : 0;
+  const pctBadge = pct >= 100 ? 'badge-green' : pct >= 80 ? 'badge-yellow' : 'badge-red';
+
+  const staffRows = (f.staff || []).map(s => `
+    <tr>
+      <td>${s.nama || '-'}</td>
+      <td>${s.posisi || '-'}</td>
+      <td><span class="badge ${s.hadir === 'Hadir' ? 'badge-green' : s.hadir === 'Izin' ? 'badge-yellow' : 'badge-red'}">${s.hadir || '-'}</span></td>
+      <td>${s.terlambat > 0 ? s.terlambat + ' mnt' : '—'}</td>
+      <td>${s.sikap || '-'}</td>
+    </tr>`).join('');
+
+  const kasRows = (f.kas.audit || []).map(a => `
+    <tr>
+      <td>${a.jam || '-'}</td>
+      <td>${formatRupiahPDF(a.aktual)}</td>
+      <td>${formatRupiahPDF(a.qris)}</td>
+      <td>${formatRupiahPDF(a.tunai)}</td>
+      <td>${a.keterangan || '—'}</td>
+    </tr>`).join('');
+
+  const fbRows = (f.feedback.items || []).filter(i => i.isi).map(i => `
+    <tr>
+      <td>${i.jam || '-'}</td>
+      <td>${i.inisial || '-'}</td>
+      <td>${i.isi || '-'}</td>
+      <td><span class="badge ${i.remake ? 'badge-red' : 'badge-green'}">${i.remake ? 'Ya' : 'Tidak'}</span></td>
+      <td>${i.respon || '—'}</td>
+    </tr>`).join('');
+
+  const fasRows = (f.fasilitas || []).filter(r => r.item).map(r => `
+    <tr>
+      <td>${r.item || '-'}</td>
+      <td><span class="badge ${r.status === 'Rusak Berat' ? 'badge-red' : r.status === 'Rusak Sedang' ? 'badge-yellow' : 'badge-gray'}">${r.status}</span></td>
+      <td>${r.eskalasi ? '⚠️ Eskalasi' : '—'}</td>
+      <td>${r.keterangan || '—'}</td>
+    </tr>`).join('');
+
+  return `
+    <div class="section">
+      <div class="section-title">Ringkasan Penjualan</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">Total Omset</div>
+          <div class="stat-value ${pct >= 100 ? 'green' : 'red'}">${formatRupiahPDF(totalOmset)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Target</div>
+          <div class="stat-value">${formatRupiahPDF(f.penjualan.target)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Pencapaian</div>
+          <div class="stat-value">${pct}% <span class="badge ${pctBadge}">${pct >= 100 ? 'Tercapai' : 'Belum'}</span></div>
+        </div>
+      </div>
+      <table style="margin-top:10px">
+        <tr><th>Shift 08:00 - 17:00</th><th>Shift 17:00 - 23:00</th><th>Jumlah Transaksi</th><th>Modal Awal Kasir</th></tr>
+        <tr><td>${formatRupiahPDF(f.penjualan.shift1)}</td><td>${formatRupiahPDF(f.penjualan.shift2)}</td><td>${f.penjualan.transaksi || 0} transaksi</td><td>${formatRupiahPDF(f.kas.modalAwal)}</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Produk Terlaris (Top 3)</div>
+      <table>
+        <tr><th>#</th><th>Minuman</th><th>Jml</th><th>Makanan</th><th>Jml</th><th>Snack</th><th>Jml</th></tr>
+        ${[0,1,2].map(i => `
+          <tr>
+            <td>${i+1}</td>
+            <td>${f.produk.topMinuman[i]?.nama || '—'}</td><td>${f.produk.topMinuman[i]?.terjual || 0}</td>
+            <td>${f.produk.topMakanan[i]?.nama || '—'}</td><td>${f.produk.topMakanan[i]?.terjual || 0}</td>
+            <td>${f.produk.topSnack[i]?.nama || '—'}</td><td>${f.produk.topSnack[i]?.terjual || 0}</td>
+          </tr>
+        `).join('')}
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Evaluasi Produk (Bottom 3)</div>
+      <table>
+        <tr><th>Kategori</th><th>Nama Produk</th><th>Terjual</th><th>Rencana / Catatan</th></tr>
+        ${f.produk.bottomMinuman.filter(x=>x.nama).map(i => `<tr><td>Minuman</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${f.produk.bottomMakanan.filter(x=>x.nama).map(i => `<tr><td>Makanan</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${f.produk.bottomSnack.filter(x=>x.nama).map(i => `<tr><td>Snack</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Briefing Shift</div>
+      <table>
+        <tr><th>Target Shift</th><td>${f.briefing.target || '—'}</td><th>Fokus</th><td>${f.briefing.fokus || '—'}</td></tr>
+        <tr><th>Masalah Kemarin</th><td>${f.briefing.masalah || '—'}</td><th>Solusi</th><td>${f.briefing.solusi || '—'}</td></tr>
+      </table>
+    </div>
+
+    ${staffRows ? `
+    <div class="section">
+      <div class="section-title">Absensi & Kepatuhan Staff</div>
+      <table>
+        <tr><th>Nama</th><th>Posisi</th><th>Status</th><th>Terlambat</th><th>Sikap</th></tr>
+        ${staffRows}
+      </table>
+    </div>` : ''}
+
+    ${kasRows ? `
+    <div class="section">
+      <div class="section-title">Audit Kas</div>
+      <table>
+        <tr><th>Jam</th><th>Aktual</th><th>QRIS</th><th>Tunai</th><th>Keterangan</th></tr>
+        ${kasRows}
+      </table>
+    </div>` : ''}
+
+    ${fbRows ? `
+    <div class="section">
+      <div class="section-title">Feedback & Komplain (Total Komplain: ${f.feedback.totalKomplain || 0} | Remake: ${f.feedback.totalRemake || 0})</div>
+      <table>
+        <tr><th>Jam</th><th>Inisial</th><th>Keluhan</th><th>Remake</th><th>Respon</th></tr>
+        ${fbRows}
+      </table>
+      ${f.feedback.analisisRemake ? `<p class="note" style="margin-top:8px"><strong>Analisis Remake:</strong> ${f.feedback.analisisRemake}</p>` : ''}
+    </div>` : ''}
+
+    ${fasRows ? `
+    <div class="section">
+      <div class="section-title">Fasilitas Bermasalah</div>
+      <table>
+        <tr><th>Item</th><th>Status</th><th>Eskalasi</th><th>Keterangan</th></tr>
+        ${fasRows}
+      </table>
+    </div>` : ''}
+
+    ${f.penutup && (f.penutup.kendala || f.penutup.rekomendasi) ? `
+    <div class="section">
+      <div class="section-title">Penutup</div>
+      ${f.penutup.kendala ? `<p class="note" style="margin-bottom:8px"><strong>Kendala:</strong> ${f.penutup.kendala}</p>` : ''}
+      ${f.penutup.rekomendasi ? `<p class="note"><strong>Rekomendasi:</strong> ${f.penutup.rekomendasi}</p>` : ''}
+    </div>` : ''}`;
+}
+
+function buildWeeklyPDF(f) {
+  const w = f.weekly;
+  const salesRows = (w.salesHarian || []).map(d => {
+    const pct = d.target > 0 ? Math.round(d.real / d.target * 100) : 0;
+    return `<tr><td>${d.hari}</td><td>${formatRupiahPDF(d.target)}</td><td>${formatRupiahPDF(d.real)}</td><td><span class="badge ${pct>=100?'badge-green':pct>=80?'badge-yellow':'badge-red'}">${pct}%</span></td></tr>`;
+  }).join('');
+
+  const staffRows = (w.staff || []).map(s => `
+    <tr><td>${s.nama||'—'}</td><td>${s.posisi||'—'}</td><td><span class="badge ${s.status==='Berkembang'?'badge-green':s.status==='Stagnan'?'badge-yellow':'badge-red'}">${s.status||'—'}</span></td><td>${s.alasan||'—'}</td></tr>`).join('');
+
+  return `
+    <div class="section">
+      <div class="section-title">Rekap Penjualan Harian</div>
+      <table>
+        <tr><th>Hari</th><th>Target</th><th>Realisasi</th><th>Pencapaian</th></tr>
+        ${salesRows}
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Produk Terlaris (Top 3)</div>
+      <table>
+        <tr><th>#</th><th>Minuman</th><th>Jml</th><th>Makanan</th><th>Jml</th><th>Snack</th><th>Jml</th></tr>
+        ${[0,1,2].map(i => `
+          <tr>
+            <td>${i+1}</td>
+            <td>${w.produk.topMinuman[i]?.nama || '—'}</td><td>${w.produk.topMinuman[i]?.terjual || 0}</td>
+            <td>${w.produk.topMakanan[i]?.nama || '—'}</td><td>${w.produk.topMakanan[i]?.terjual || 0}</td>
+            <td>${w.produk.topSnack[i]?.nama || '—'}</td><td>${w.produk.topSnack[i]?.terjual || 0}</td>
+          </tr>
+        `).join('')}
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Evaluasi Produk (Bottom 3)</div>
+      <table>
+        <tr><th>Kategori</th><th>Nama Produk</th><th>Terjual</th><th>Rencana / Catatan</th></tr>
+        ${w.produk.bottomMinuman.filter(x=>x.nama).map(i => `<tr><td>Minuman</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${w.produk.bottomMakanan.filter(x=>x.nama).map(i => `<tr><td>Makanan</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+        ${w.produk.bottomSnack.filter(x=>x.nama).map(i => `<tr><td>Snack</td><td>${i.nama}</td><td>${i.terjual || 0}</td><td>${i.rencana || '—'}</td></tr>`).join('')}
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Feedback & Komplain (Total: ${w.komplain.total||0} | Remake: ${w.komplain.remake||0})</div>
+      ${w.komplain.penyebab ? `<p class="note" style="margin-bottom:8px"><strong>Penyebab Utama:</strong> ${w.komplain.penyebab}</p>` : ''}
+      ${w.kendalaUtama ? `<p class="note"><strong>Kendala Berulang:</strong> ${w.kendalaUtama}</p>` : ''}
+    </div>
+
+    ${staffRows ? `
+    <div class="section">
+      <div class="section-title">Evaluasi Performa Staff</div>
+      <table>
+        <tr><th>Nama</th><th>Posisi</th><th>Status</th><th>Catatan</th></tr>
+        ${staffRows}
+      </table>
+    </div>` : ''}
+
+    ${(w.rencana||[]).some(r=>r) ? `
+    <div class="section">
+      <div class="section-title">Rencana Perbaikan & Kebutuhan</div>
+      <table>
+        <tr><th>#</th><th>Rencana Perbaikan</th><th>Kebutuhan Tim</th></tr>
+        ${[0,1,2].map(i=>`<tr><td>${i+1}</td><td>${(w.rencana||[])[i]||'—'}</td><td>${(w.kebutuhan||[])[i]||'—'}</td></tr>`).join('')}
+      </table>
+    </div>` : ''}`;
+}
+
+function buildMonthlyPDF(f) {
+  const m = f.monthly;
+  const pct = m.sales.target > 0 ? Math.round(m.sales.total / m.sales.target * 100) : 0;
+  const pctBadge = pct >= 100 ? 'badge-green' : pct >= 80 ? 'badge-yellow' : 'badge-red';
+
+  const staffRows = (m.staff||[]).map(s=>`<tr><td>${s.nama||'—'}</td><td>${s.kriteria||'—'}</td><td><span class="badge ${s.nilai==='Baik'?'badge-green':s.nilai==='Cukup'?'badge-yellow':'badge-red'}">${s.nilai||'—'}</span></td><td>${s.alasan||'—'}</td></tr>`).join('');
+
+  return `
+    <div class="section">
+      <div class="section-title">Ringkasan Eksekutif</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">Total Omset</div>
+          <div class="stat-value ${pct>=100?'green':'red'}">${formatRupiahPDF(m.sales.total)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Target</div>
+          <div class="stat-value">${formatRupiahPDF(m.sales.target)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Pencapaian</div>
+          <div class="stat-value">${pct}% <span class="badge ${pctBadge}">${pct>=100?'Tercapai':'Belum'}</span></div>
+        </div>
+      </div>
+      ${m.ringkasan.pencapaian ? `<p class="note" style="margin-top:10px"><strong>Pencapaian Terbaik:</strong> ${m.ringkasan.pencapaian}</p>` : ''}
+      ${m.ringkasan.masalah ? `<p class="note" style="margin-top:6px"><strong>Masalah Utama:</strong> ${m.ringkasan.masalah}</p>` : ''}
+      ${m.ringkasan.kesimpulan ? `<p class="note" style="margin-top:6px"><strong>Kesimpulan:</strong> ${m.ringkasan.kesimpulan}</p>` : ''}
+    </div>
+
+    <div class="section">
+      <div class="section-title">Top 3 Produk Bulan Ini</div>
+      <table>
+        <tr><th>#</th><th>Minuman Terlaris</th><th>Terjual</th><th>Makanan Terlaris</th><th>Terjual</th></tr>
+        ${[0,1,2].map(i=>`<tr><td>${i+1}</td><td>${(m.produk.topMinuman||[])[i]?.nama||'—'}</td><td>${(m.produk.topMinuman||[])[i]?.terjual||0}</td><td>${(m.produk.topMakanan||[])[i]?.nama||'—'}</td><td>${(m.produk.topMakanan||[])[i]?.terjual||0}</td></tr>`).join('')}
+      </table>
+    </div>
+
+    ${staffRows ? `
+    <div class="section">
+      <div class="section-title">Evaluasi Staff</div>
+      <table>
+        <tr><th>Nama</th><th>Kriteria</th><th>Nilai</th><th>Catatan</th></tr>
+        ${staffRows}
+      </table>
+    </div>` : ''}
+
+    <div class="section">
+      <div class="section-title">Operasional & QC</div>
+      <table>
+        <tr><th>Kepatuhan SOP</th><td>${m.operasional.kepatuhanSop||100}%</td><th>Telat</th><td>${m.operasional.telat||0} org</td><th>Teguran</th><td>${m.operasional.teguran||0}</td></tr>
+        <tr><th>Total Komplain</th><td>${m.qc.komplain||0}</td><th>Total Remake</th><td>${m.qc.remake||0}</td><th>Eskalasi Fasilitas</th><td>${m.fasilitas.eskalasi||'—'}</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Strategi Bulan Depan</div>
+      ${m.rencana.strategi ? `<p class="note" style="margin-bottom:6px"><strong>Fokus & Strategi:</strong> ${m.rencana.strategi}</p>` : ''}
+      ${m.rencana.gm ? `<p class="note"><strong>Kebutuhan untuk GM:</strong> ${m.rencana.gm}</p>` : ''}
+    </div>
+
+    <div class="section">
+      <div class="section-title">Evaluasi Mandiri Supervisor</div>
+      <table>
+        <tr><th>Pencapaian Terbaik</th><td>${m.evaluasi.berhasil||'—'}</td></tr>
+        <tr><th>Tantangan Tersulit</th><td>${m.evaluasi.sulit||'—'}</td></tr>
+        <tr><th>Skill Ingin Ditingkatkan</th><td>${m.evaluasi.skill||'—'}</td></tr>
+        <tr><th>Rating Kinerja Diri</th><td><strong>${m.evaluasi.ratingKerja||8}/10</strong></td></tr>
+      </table>
+    </div>`;
+}
+
+window.validateFormCompletion = function(f) {
+  if (!f.supervisor) return 'Nama Supervisor wajib diisi!';
+  if (f.type === 'weekly') {
+    if (!f.periodeStart || !f.periodeEnd) return 'Periode laporan wajib diisi!';
+    const diff = Math.ceil(Math.abs(new Date(f.periodeEnd) - new Date(f.periodeStart)) / (1000 * 60 * 60 * 24));
+    if (diff !== 6) return 'Periode laporan harus tepat 7 hari!';
+    if (f.weekly.staff.some(s => !s.status)) return 'Semua status evaluasi staff wajib diisi!';
+    if (f.weekly.staff.some(s => !s.alasan)) return 'Alasan evaluasi staff wajib diisi!';
+    if (!f.weekly.kendalaUtama) return 'Kendala Utama wajib diisi!';
+  }
+  return null;
+};
+
+/* ----- Modal Controllers ----- */
+function exportPDF() {
+  const f = window.form;
+  const modal = document.getElementById('pdfPreviewModal');
+  const body = document.getElementById('pdfPreviewBody');
+  const subtitle = document.getElementById('pdfPreviewSubtitle');
+
+  if (!f || !f.type) { showToast('Tidak ada data laporan.', 'error'); return; }
+  
+  const err = window.validateFormCompletion(f);
+  if (err) { showToast(err, 'error'); return; }
+
+  const jenis = f.type === 'daily' ? 'Harian' : f.type === 'weekly' ? 'Mingguan' : 'Bulanan';
+  const periode = f.type === 'daily' ? f.tanggal : f.type === 'weekly' ? (f.periode || f.periodeStart) : f.bulan;
+  subtitle.innerText = `Laporan ${jenis} · ${f.outlet || 'Perintis'} · ${periode || ''}`;
+
+  body.innerHTML = buildPDFHtml(f);
+  modal.classList.remove('hidden');
+}
+
+function closePDFPreview() {
+  document.getElementById('pdfPreviewModal').classList.add('hidden');
+}
+
+function getPDFFilename() {
+  const f = window.form;
+  const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  
+  if (f.type === 'daily') {
+    const parts = (f.tanggal || "").split("-");
+    if (parts.length === 3) {
+      const monthName = months[parseInt(parts[1], 10) - 1].toLowerCase();
+      return `${parts[2]}-${monthName}-laporan harian.pdf`;
+    }
+  } else if (f.type === 'weekly') {
+    let startDD = "1", endDD = "7", monthName = "juli";
+    if (f.periodeStart && f.periodeEnd) {
+      const pStart = f.periodeStart.split("-");
+      const pEnd = f.periodeEnd.split("-");
+      if (pStart.length === 3 && pEnd.length === 3) {
+        startDD = parseInt(pStart[2], 10);
+        endDD = parseInt(pEnd[2], 10);
+        monthName = months[parseInt(pStart[1], 10) - 1].toLowerCase();
+      }
+    }
+    return `${startDD}-${endDD}-${monthName}-laporan mingguan.pdf`;
+  } else if (f.type === 'monthly') {
+    const parts = (f.bulan || "").split("-");
+    let monthName = "juli";
+    if (parts.length >= 2) {
+      monthName = months[parseInt(parts[1], 10) - 1].toLowerCase();
+    }
+    return `${monthName}-laporan-bulanan.pdf`;
+  }
+  return "laporan.pdf";
+}
+
+async function createPdfContainer(htmlContent) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlContent;
+  // Fix blank screen bug: Must be in viewport, but behind everything
+  tempDiv.style.position = 'fixed';
+  tempDiv.style.top = '0';
+  tempDiv.style.left = '0';
+  tempDiv.style.width = '794px';
+  tempDiv.style.zIndex = '-9999';
+  tempDiv.style.backgroundColor = '#ffffff'; // Force white background
+  document.body.appendChild(tempDiv);
+  
+  // Wait for fonts and styles to render properly before html2canvas captures
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return tempDiv;
+}
+
+async function downloadPDF() {
+  const f = window.form;
+  if (!f || !f.type) { showToast('Tidak ada data laporan.', 'error'); return; }
+
+  showLoading(true);
+  const htmlContent = buildPDFHtml(f);
+  const filename = getPDFFilename();
+
+  const opt = {
+    margin: 0,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(htmlContent).save().then(() => {
+    showLoading(false);
+    showToast('PDF berhasil disimpan!', 'success');
+  }).catch(err => {
+    showLoading(false);
+    console.error(err);
+    showToast('Gagal membuat PDF. Coba lagi.', 'error');
+  });
+}
+
+async function sharePDF() {
+  const f = window.form;
+  if (!f || !f.type) { showToast('Tidak ada data laporan.', 'error'); return; }
+
+  showLoading(true);
+  const htmlContent = buildPDFHtml(f);
+  const filename = getPDFFilename();
+
+  const opt = {
+    margin: 0,
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  try {
+    const pdfBlob = await html2pdf().set(opt).from(htmlContent).outputPdf('blob');
+    showLoading(false);
+
+    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: filename.replace('.pdf', '').replace(/_/g, ' '),
+        files: [file]
+      });
+      showToast('Laporan berhasil dibagikan!', 'success');
+    } else {
+      /* Fallback: download biasa untuk desktop */
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('PDF diunduh (berbagi tidak didukung di perangkat ini).', 'success');
+    }
+  } catch (err) {
+    if (tempDiv.parentNode) document.body.removeChild(tempDiv);
+    showLoading(false);
+    if (err.name !== 'AbortError') {
+      console.error(err);
+      showToast('Gagal membagikan PDF.', 'error');
+    }
+  }
+}
+

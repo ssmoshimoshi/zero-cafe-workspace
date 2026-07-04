@@ -705,7 +705,12 @@ function openResignModal(idx = -1) {
 }
 
 function closeResignModal() {
-  document.getElementById('resignModal').classList.add('hidden');
+  const modal = document.getElementById('resignModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    modal.style.display = '';
+  }
 }
 
 function saveResignModal() {

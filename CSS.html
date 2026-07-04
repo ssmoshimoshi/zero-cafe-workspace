@@ -141,6 +141,34 @@
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
+  /* Brutalist UI Animations */
+  @keyframes brutalSlideUp {
+    0% { transform: translateY(60px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  .brutal-animate {
+    opacity: 0;
+    animation: brutalSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes letterSlideIn {
+    0% { transform: translateX(50vw); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  .letter-anim {
+    display: inline-block;
+    opacity: 0;
+    animation: letterSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes fadeOutBlur {
+    0% { filter: blur(0px); opacity: 1; }
+    100% { filter: blur(20px); opacity: 0; visibility: hidden; }
+  }
+  .loader-fade-out {
+    animation: fadeOutBlur 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
   /* Shimmer Loading Animation */
   @keyframes shimmer {
     0% { background-position: -200% 0; }

@@ -203,6 +203,15 @@ function bootstrapApp() {
     
     renderApp();
     
+    // Hide Initial Loader
+    setTimeout(() => {
+      const loader = document.getElementById('initialLoader');
+      if (loader) {
+        loader.classList.add('opacity-0');
+        setTimeout(() => loader.style.display = 'none', 700);
+      }
+    }, 1500);
+    
     showLoading(true);
     fetchMasterStaff().finally(() => {
       showLoading(false);
@@ -330,11 +339,28 @@ function bindEvents() {
   }
 }
 
+function transitionToMenu(menuKey, callback) {
+  const root = document.getElementById('app-root');
+  if (root) {
+    root.classList.add('opacity-0');
+    setTimeout(() => {
+      if (callback) callback();
+      AppState.menu = menuKey;
+      renderApp();
+      root.classList.remove('opacity-0');
+    }, 300);
+  } else {
+    if (callback) callback();
+    AppState.menu = menuKey;
+    renderApp();
+  }
+}
+
 function handleLogout() {
-  StorageHelper.remove('zc_role');
-  AppState.role = null;
-  AppState.menu = 'login';
-  renderApp();
+  transitionToMenu('login', () => {
+    StorageHelper.remove('zc_role');
+    AppState.role = null;
+  });
 }
 
 /*  === TEMPLATES === */
@@ -369,10 +395,10 @@ function getLoginTemplate() {
 }
 
 function handleLogin(role) {
-  StorageHelper.set('zc_role', role);
-  AppState.role = role;
-  AppState.menu = role === 'SPV' ? 'select_report' : 'dashboard_gm';
-  renderApp();
+  transitionToMenu(role === 'SPV' ? 'select_report' : 'dashboard_gm', () => {
+    StorageHelper.set('zc_role', role);
+    AppState.role = role;
+  });
 }
 
 function getMenuSPVTemplate() {
@@ -447,9 +473,9 @@ window.hideInstallGuide = function() {
 
 function startNewForm(type) {
   if (loadDraft(type)) {
-    AppState.menu = `form_${type}`;
-    AppState.currentTab = 1;
-    renderApp();
+    transitionToMenu(`form_${type}`, () => {
+      AppState.currentTab = 1;
+    });
     return;
   }
 
@@ -474,15 +500,14 @@ function startNewForm(type) {
     }));
   }
   
-  AppState.menu = `form_${type}`;
-  AppState.currentTab = 1;
-  renderApp();
+  transitionToMenu(`form_${type}`, () => {
+    AppState.currentTab = 1;
+  });
 }
 
 function goBackMenu() {
   saveDraft(true); /*  Save draft before going back */
-  AppState.menu = "select_report";
-  renderApp();
+  transitionToMenu("select_report");
 }
 
 /*  === DRAFT LOGIC === */

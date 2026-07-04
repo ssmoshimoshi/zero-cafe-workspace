@@ -36,11 +36,18 @@
       }
     } catch(e) { console.warn("PWA Manifest failed", e); }
   </script>
+  <!-- ldrs Loader Library -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/newtonsCradle.js"></script>
   <?!= include('CSS'); ?>
 </head>
 <body class="overflow-x-hidden antialiased bg-[#f3f4f6]">
+  <!-- Initial App Loader Overlay -->
+  <div id="initialLoader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/70 backdrop-blur-md transition-opacity duration-700 ease-in-out">
+    <l-newtons-cradle size="78" speed="1.4" color="black"></l-newtons-cradle>
+  </div>
+
   <!-- Main Root Container -->
-  <div id="app-root" class="max-w-md mx-auto bg-white min-h-screen relative overflow-x-hidden border-x border-gray-100 shadow-sm"></div>
+  <div id="app-root" class="max-w-md mx-auto bg-white min-h-screen relative overflow-x-hidden border-x border-gray-100 shadow-sm opacity-0 transition-opacity duration-500 ease-out"></div>
 
   <!-- Global Loading Spinner overlay -->
   <div id="loadingSpinner" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden">

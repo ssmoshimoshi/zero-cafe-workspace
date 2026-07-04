@@ -341,7 +341,7 @@ function handleLogout() {
 
 function getLoginTemplate() {
   return `
-    <div class="flex flex-col h-full w-full min-h-screen bg-[#F0EFEF]">
+    <div class="flex flex-col h-full w-full min-h-screen bg-transparent">
       
       <!-- Hero Center -->
       <div class="flex-grow flex flex-col justify-center items-center animate-slide-up" style="animation-duration: 0.8s;">
@@ -362,14 +362,6 @@ function getLoginTemplate() {
           Saya General Manager
         </button>
         
-        <!-- PWA Install -->
-        <div class="pt-6 w-full text-center">
-          <button onclick="showInstallGuide()" class="inline-flex items-center gap-2 px-4 py-2 bg-transparent text-gray-400 hover:text-zero-black rounded-full text-[10px] font-bold uppercase tracking-widest transition-all">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Install App di HP
-          </button>
-        </div>
-        
       </div>
       
     </div>
@@ -385,81 +377,17 @@ function handleLogin(role) {
 
 function getMenuSPVTemplate() {
   return `
-    <div class="w-full px-6 py-6">
-      <div class="flex justify-between items-center mb-10 mt-2 border-b border-gray-200 pb-4">
-        <h2 class="text-lg font-extrabold text-zero-black">ZERO WORKSPACE</h2>
-        <button onclick="handleLogout()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-500 hover:bg-gray-50">KELUAR</button>
+    <div class="w-full px-6 py-6 bg-transparent">
+      <div class="flex justify-between items-center mb-10 mt-2 border-b-[0.5px] border-gray-200 pb-4 animate-slide-up" style="animation-duration: 0.6s;">
+        <h2 class="text-lg font-extrabold text-zero-black tracking-tight">ZERO WORKSPACE</h2>
+        <button onclick="handleLogout()" class="px-4 py-1.5 border-[0.5px] border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:text-zero-black hover:bg-gray-50 transition-all duration-300">KELUAR</button>
       </div>
       
-      <div class="text-center mb-6 mt-16">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Pilih Jenis Laporan</p>
+      <div class="text-center mb-8 mt-16 animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.6s; animation-fill-mode: both;">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Pilih Jenis Laporan</p>
       </div>
       
       <div class="space-y-4">
-        <div onclick="startNewForm('daily')" class="bg-white border border-gray-200 p-5 rounded-2xl cursor-pointer hover:bg-gray-50 active:bg-zero-black active:text-white transition-all duration-300 transform hover:scale-[1.02] hover:shadow-md flex justify-between items-center group">
-          <div>
-            <h3 class="font-bold text-sm text-zero-black group-active:text-white mb-1">LAPORAN HARIAN</h3>
-            <p class="text-xs text-gray-400 group-active:text-gray-300">Daily Report Shift</p>
-          </div>
-          <span class="text-gray-300 group-active:text-white transition-transform group-hover:translate-x-1">→</span>
-        </div>
-        
-        <div onclick="startNewForm('weekly')" class="bg-white border border-gray-200 p-5 rounded-2xl cursor-pointer hover:bg-gray-50 active:bg-zero-black active:text-white transition-all duration-300 transform hover:scale-[1.02] hover:shadow-md flex justify-between items-center group">
-          <div>
-            <h3 class="font-bold text-sm text-zero-black group-active:text-white mb-1">LAPORAN MINGGUAN</h3>
-            <p class="text-xs text-gray-400 group-active:text-gray-300">Weekly Rekap Penjualan</p>
-          </div>
-          <span class="text-gray-300 group-active:text-white transition-transform group-hover:translate-x-1">→</span>
-        </div>
-        
-        <div onclick="startNewForm('monthly')" class="bg-white border border-gray-200 p-5 rounded-2xl cursor-pointer hover:bg-gray-50 active:bg-zero-black active:text-white transition-all duration-300 transform hover:scale-[1.02] hover:shadow-md flex justify-between items-center group">
-          <div>
-            <h3 class="font-bold text-sm text-zero-black group-active:text-white mb-1">LAPORAN BULANAN</h3>
-            <p class="text-xs text-gray-400 group-active:text-gray-300">Monthly Executive Summary</p>
-          </div>
-          <span class="text-gray-300 group-active:text-white transition-transform group-hover:translate-x-1">→</span>
-        </div>
-      </div>
-      
-      <!-- PWA Install Button & Guide -->
-      <div class="mt-12 text-center">
-        <button onclick="showInstallGuide()" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-zero-black rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-all">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Install App di HP
-        </button>
-      </div>
-      
-      <!-- Install Guide Modal (Hidden by default) -->
-      <div id="installGuideModal" class="fixed inset-0 bg-black/60 z-50 hidden flex-col items-center justify-end pb-10 px-4 transition-opacity duration-300 opacity-0">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 transform translate-y-10 transition-transform duration-300 shadow-2xl" id="installGuideContent">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-sm font-extrabold text-zero-black">CARA INSTALL APLIKASI</h3>
-            <button onclick="hideInstallGuide()" class="text-gray-400 hover:text-zero-black font-bold text-lg leading-none">&times;</button>
-          </div>
-          
-          <div class="space-y-4 text-xs text-gray-600 mb-6">
-            <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
-              <p class="font-bold text-blue-900 mb-1">Android (Chrome)</p>
-              <p>1. Ketuk ikon <strong>Titik Tiga (⋮)</strong> di pojok kanan atas browser.</p>
-              <p>2. Pilih <strong>"Tambahkan ke Layar Utama"</strong> (Add to Home screen).</p>
-              <p>3. Ketuk "Tambahkan".</p>
-            </div>
-            
-            <div class="p-3 bg-gray-50/50 rounded-xl border border-gray-200">
-              <p class="font-bold text-gray-900 mb-1">iOS (Safari/iPhone)</p>
-              <p>1. Ketuk ikon <strong>Bagikan (Share)</strong> di menu bawah.</p>
-              <p>2. Scroll ke bawah dan pilih <strong>"Tambah ke Layar Utama"</strong>.</p>
-              <p>3. Ketuk "Tambah" di pojok kanan atas.</p>
-            </div>
-            
-            <p class="text-[10px] text-gray-400 text-center italic mt-2">Aplikasi akan muncul di layar utama HP Anda tanpa perlu mendownload dari App Store / Play Store.</p>
-          </div>
-          
-          <button onclick="hideInstallGuide()" class="w-full py-3 bg-zero-black text-white font-bold rounded-2xl text-xs uppercase tracking-widest hover:bg-gray-800 transition-colors">Saya Mengerti</button>
-        </div>
-      </div>
-    </div>
-  `;
 }
 
 // Global functions for Install Guide

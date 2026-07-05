@@ -48,7 +48,8 @@ function initializeSystem() {
   setupSheet(activeSpreadsheet, "Monthly", [
     "Bulan", "Supervisor", "Outlet", "Total Sales", "Target Sales", "Persen Tercapai", "Rating Kerja", "URL PDF",
     "Kepatuhan SOP", "Total Telat", "Teguran", "Kendala Utama", "Eskalasi Fasilitas", "Strategi", "Kebutuhan GM",
-    "Pencapaian", "Tantangan", "Skill"
+    "Pencapaian", "Tantangan", "Skill", "Turnover Barista",
+    "Ringkasan Masalah", "Kesimpulan", "QC Komplain", "QC Remake", "QC Espresso", "QC Rekomendasi", "Pengeluaran Fasilitas"
   ]);
   
   setupSheet(activeSpreadsheet, "Staff_Daily", [
@@ -63,21 +64,37 @@ function initializeSystem() {
     "Bulan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
   ]);
   
+  setupSheet(activeSpreadsheet, "Log_Audit_Kas", [
+    "Tanggal", "Outlet", "Shift/Jam", "Total QRIS", "Total Tunai", "Aktual Sistem", "Selisih", "Keterangan"
+  ]);
+  
+  setupSheet(activeSpreadsheet, "Log_QC", [
+    "Tanggal", "Outlet", "Kategori", "Item/Menu", "Status", "Keterangan"
+  ]);
+  
+  setupSheet(activeSpreadsheet, "Log_Fasilitas_Bahan", [
+    "Tanggal", "Outlet", "Tipe", "Nama Item", "Status/Ketersediaan", "Biaya Estimasi", "URL Foto", "Eskalasi"
+  ]);
+  
+  setupSheet(activeSpreadsheet, "Config_Target", [
+    "Bulan", "Tahun", "Outlet", "Target Omset"
+  ]);
+  
   var staffSheet = setupSheet(activeSpreadsheet, "MasterStaff", [
-    "ID", "Nama", "Posisi", "Status"
+    "ID", "Nama", "Posisi", "Status", "Outlet"
   ]);
   
   // Populate default staff if empty
   if (staffSheet.getLastRow() <= 1) {
     var defaultStaff = [
-      [1, "Amel", "Barista", "Aktif"],
-      [2, "Irma", "Waitres", "Aktif"],
-      [3, "Fitri", "Kitchen", "Aktif"],
-      [4, "Syarif", "Barista", "Aktif"],
-      [5, "Reni", "Kitchen", "Aktif"],
-      [6, "Gita", "Barista", "Aktif"]
+      [1, "Amel", "Barista", "Aktif", "Perintis"],
+      [2, "Irma", "Waitres", "Aktif", "Perintis"],
+      [3, "Fitri", "Kitchen", "Aktif", "Perintis"],
+      [4, "Syarif", "Barista", "Aktif", "Dg Tata"],
+      [5, "Reni", "Kitchen", "Aktif", "Dg Tata"],
+      [6, "Gita", "Barista", "Aktif", "Dg Tata"]
     ];
-    staffSheet.getRange(2, 1, defaultStaff.length, 4).setValues(defaultStaff);
+    staffSheet.getRange(2, 1, defaultStaff.length, 5).setValues(defaultStaff);
   }
   
   var scriptProperties = PropertiesService.getScriptProperties();
@@ -396,6 +413,35 @@ function submitFullReport(payloadStr) {
         Number(data.penjualan.transaksi || 0)
       ]);
       
+      if (data.kas && data.kas.audit && data.kas.audit.length > 0) {
+        var auditSheet = setupSheet(ss, "Log_Audit_Kas", ["Tanggal", "Outlet", "Shift/Jam", "Total QRIS", "Total Tunai", "Aktual Sistem", "Selisih", "Keterangan"]);
+        data.kas.audit.forEach(function(a) {
+          auditSheet.appendRow([data.tanggal, data.outlet, a.jam, Number(a.qris||0), Number(a.tunai||0), Number(a.aktual||0), Number(a.selisih||0), a.keterangan||""]);
+        });
+      }
+      
+      var qcSheet = setupSheet(ss, "Log_QC", ["Tanggal", "Outlet", "Kategori", "Item/Menu", "Status", "Keterangan"]);
+      if (data.qc && data.qc.espresso) {
+        qcSheet.appendRow([data.tanggal, data.outlet, "Espresso", "Kalibrasi Espresso", data.qc.espresso.status || "", data.qc.espresso.keterangan || ""]);
+      }
+      if (data.qc && data.qc.items && data.qc.items.length > 0) {
+        data.qc.items.forEach(function(q) {
+          qcSheet.appendRow([data.tanggal, data.outlet, "Menu", q.nama, q.status, q.keterangan || ""]);
+        });
+      }
+      
+      var fbSheet = setupSheet(ss, "Log_Fasilitas_Bahan", ["Tanggal", "Outlet", "Tipe", "Nama Item", "Status/Ketersediaan", "Biaya Estimasi", "URL Foto", "Eskalasi"]);
+      if (data.fasilitas && data.fasilitas.length > 0) {
+        data.fasilitas.forEach(function(f) {
+          fbSheet.appendRow([data.tanggal, data.outlet, "Fasilitas", f.item, f.status, 0, f.photoUrl || "", f.eskalasi ? "YA" : "TIDAK"]);
+        });
+      }
+      if (data.bahan && data.bahan.length > 0) {
+        data.bahan.forEach(function(b) {
+          fbSheet.appendRow([data.tanggal, data.outlet, "Bahan", b.nama, b.ketersediaan, Number(b.harga||0), b.photoUrl || "", "TIDAK"]);
+        });
+      }
+      
       if (data.staff && data.staff.length > 0) {
         var stSheet = setupSheet(ss, "Staff_Daily", [
           "Tanggal", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"
@@ -481,7 +527,14 @@ function submitFullReport(payloadStr) {
         data.monthly.evaluasi.berhasil || "",
         data.monthly.evaluasi.sulit || "",
         data.monthly.evaluasi.skill || "",
-        data.monthly.operasional.resignList ? data.monthly.operasional.resignList.length : 0 // Jumlah Resign
+        data.monthly.operasional.resignList ? data.monthly.operasional.resignList.length : 0, // Jumlah Resign
+        data.monthly.ringkasan.masalah || "",
+        data.monthly.ringkasan.kesimpulan || "",
+        Number(data.monthly.qc.komplain || 0),
+        Number(data.monthly.qc.remake || 0),
+        data.monthly.qc.espresso || "",
+        data.monthly.qc.rekomendasi || "",
+        Number(data.monthly.fasilitas.pengeluaran || 0)
       ]);
       
       // Auto-Sync Turnover Barista to MasterStaff
@@ -958,8 +1011,30 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
     var currentFolderId = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_ID") || "";
     
     // Get target omset for the selected month
-    var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
-    var targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
+    var targetBul = monthPrefix;
+    if (monthPrefix.indexOf("-") !== -1) {
+      var p = monthPrefix.split("-");
+      targetBul = p[1] + "-" + p[0]; // MM-YYYY
+    }
+    
+    var targetOmset = 0;
+    var configSheet = ss.getSheetByName("Config_Target");
+    if (configSheet) {
+      var configData = configSheet.getDataRange().getValues();
+      for (var j = 1; j < configData.length; j++) {
+        var cBul = configData[j][0].toString();
+        if (cBul === targetBul) {
+           var cOutlet = (configData[j][2] || "").toString();
+           if (!outletFilter || outletFilter === "Semua" || cOutlet === outletFilter || cOutlet === "Semua") {
+             targetOmset += Number(configData[j][3] || 0);
+           }
+        }
+      }
+    }
+    if (targetOmset === 0) {
+      var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
+      targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
+    }
     
     var productsData = {
       minuman: { top: [], bottom: [] },
@@ -1529,6 +1604,36 @@ function api_gm_setTargetOmset(monthName, year, targetValue) {
     var key = "TARGET_OMSET_" + monthName + "_" + year;
     var props = PropertiesService.getScriptProperties();
     props.setProperty(key, targetValue.toString());
+    
+    // Convert monthName to MM-YYYY
+    var mm = "01";
+    var mList = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+    var idx = mList.indexOf(monthName.toLowerCase());
+    if (idx !== -1) {
+       mm = (idx + 1 < 10 ? "0" : "") + (idx + 1);
+    }
+    var bul = mm + "-" + year;
+    
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var configSheet = ss.getSheetByName("Config_Target");
+    if (!configSheet) {
+      configSheet = setupSheet(ss, "Config_Target", ["Bulan", "Tahun", "Outlet", "Target Omset"]);
+    }
+    
+    var data = configSheet.getDataRange().getValues();
+    var found = false;
+    for (var i = 1; i < data.length; i++) {
+       if (data[i][0].toString() === bul && (data[i][2].toString() === "Semua" || data[i][2].toString() === "")) {
+          configSheet.getRange(i+1, 4).setValue(targetValue);
+          configSheet.getRange(i+1, 3).setValue("Semua");
+          found = true;
+          break;
+       }
+    }
+    if (!found) {
+       configSheet.appendRow([bul, year, "Semua", targetValue]);
+    }
+    
     return { success: true };
   } catch (err) {
     return { success: false, error: err.toString() };

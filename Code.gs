@@ -38,11 +38,11 @@ function initializeSystem() {
   
   // Set up Sheets
   setupSheet(activeSpreadsheet, "Daily", [
-    "Tanggal", "Supervisor", "Outlet", "Shift", "Total Omset", "Komplain", "Kendala", "URL PDF"
+    "Tanggal", "Supervisor", "Outlet", "Shift", "Total Omset", "Komplain", "Kendala", "URL PDF", "Target Omset", "Transaksi"
   ]);
   
   setupSheet(activeSpreadsheet, "Weekly", [
-    "Periode", "Supervisor", "Outlet", "Total Real Sales", "(Reserved)", "Komplain", "Kendala Utama", "URL PDF"
+    "Periode", "Supervisor", "Outlet", "Total Real Sales", "Total Target", "Komplain", "Kendala Utama", "URL PDF"
   ]);
   
   setupSheet(activeSpreadsheet, "Monthly", [
@@ -392,7 +392,8 @@ function submitFullReport(payloadStr) {
         Number(data.feedback.totalKomplain || 0),
         data.penutup.kendala || "",
         fileUrl,
-        Number(data.penjualan.target || 0)
+        Number(data.penjualan.target || 0),
+        Number(data.penjualan.transaksi || 0)
       ]);
       
       if (data.staff && data.staff.length > 0) {
@@ -401,7 +402,8 @@ function submitFullReport(payloadStr) {
         ]);
         var bulanLaporan = "";
         if (data.tanggal) {
-          bulanLaporan = String(data.tanggal).substring(0, 7);
+          // data.tanggal is DD-MM-YYYY, we want MM-YYYY
+          bulanLaporan = String(data.tanggal).substring(3, 10);
         }
         data.staff.forEach(function(s) {
           stSheet.appendRow([
@@ -413,14 +415,16 @@ function submitFullReport(payloadStr) {
       var sheet = ss.getSheetByName("Weekly");
       if (!sheet) {
         sheet = setupSheet(ss, "Weekly", [
-          "Periode", "Supervisor", "Outlet", "Total Real Sales", "(Reserved)", "Komplain", "Kendala Utama", "URL PDF"
+          "Periode", "Supervisor", "Outlet", "Total Real Sales", "Total Target", "Komplain", "Kendala Utama", "URL PDF"
         ]);
       }
       
       var totalRealSales = 0;
+      var totalTargetSales = 0;
       if (data.weekly && data.weekly.salesHarian) {
         data.weekly.salesHarian.forEach(function(s) {
           totalRealSales += Number(s.real || 0);
+          totalTargetSales += Number(s.target || 0);
         });
       }
       
@@ -431,7 +435,7 @@ function submitFullReport(payloadStr) {
         data.supervisor,
         data.outlet,
         totalRealSales,
-        0, // Reserved
+        totalTargetSales,
         Number(data.weekly.komplain.total || 0),
         data.weekly.kendalaUtama || "",
         fileUrl
@@ -807,6 +811,7 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
     var omsetTotal = 0;
     var omsetBulanLalu = 0;
     var komplainTotal = 0;
+    var transaksiTotal = 0;
     var listLaporan = [];
     var chartData = [];
     
@@ -834,7 +839,15 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
         var d = rowDateObj.getDate();
         rowDate = rowDateObj.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
       } else {
-        rowDate = (rowDateObj || "").toString();
+        var str = (rowDateObj || "").toString();
+        var parts = str.split("-");
+        if (parts.length === 3) {
+          if (parts[0].length === 4) {
+            rowDate = str; // YYYY-MM-DD
+          } else if (parts[2].length === 4) {
+            rowDate = parts[2] + "-" + parts[1] + "-" + parts[0]; // DD-MM-YYYY to YYYY-MM-DD
+          }
+        }
       }
       
       var rowOutlet = (data[i][2] || "").toString();
@@ -846,6 +859,7 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
         if (rowDate.startsWith(monthPrefix)) {
           omsetTotal += rowOmset;
           komplainTotal += Number(data[i][5] || 0);
+          transaksiTotal += Number(data[i][9] || 0); // Read real transaction data from col 10
           listLaporan.push({
             name: "Daily Report - " + rowDate + " (" + data[i][1] + ")",
             url: data[i][7],
@@ -885,9 +899,16 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
     var monthlySheet = ss.getSheetByName("Monthly");
     if (monthlySheet) {
       var mData = monthlySheet.getDataRange().getValues();
+      // We need to compare monthPrefix (YYYY-MM) with the sheet format (MM-YYYY)
+      var targetBul = monthPrefix;
+      if (monthPrefix.indexOf("-") !== -1) {
+        var p = monthPrefix.split("-");
+        targetBul = p[1] + "-" + p[0];
+      }
+      
       for (var i = 1; i < mData.length; i++) {
-        var bul = mData[i][0].toString(); // YYYY-MM
-        if (bul === monthPrefix) {
+        var bul = mData[i][0].toString(); // MM-YYYY
+        if (bul === targetBul) {
           var rowOutlet = (mData[i][2] || "").toString();
           if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
             listLaporan.push({
@@ -932,10 +953,8 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
         turnoverBarista: 0
       };
     }
-    
-    // Calculate simulated transaction total
-    var transaksiTotal = listLaporan.length * 45; // arbitrary placeholder simulation
-    
+    // Transaction total is now calculated inside the main loop
+    // var transaksiTotal = listLaporan.length * 45;
     var currentFolderId = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_ID") || "";
     
     // Get target omset for the selected month

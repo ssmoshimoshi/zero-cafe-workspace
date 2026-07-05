@@ -413,36 +413,36 @@ function getMenuSPVTemplate() {
         <button onclick="handleLogout()" class="px-4 py-1.5 border-[0.5px] border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:text-zero-black hover:bg-gray-50 transition-all duration-300">KELUAR</button>
       </div>
       
-      <div class="text-center mb-8 mt-16 animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.6s; animation-fill-mode: both;">
-        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Pilih Jenis Laporan</p>
+      <div class="text-left mb-6 mt-12 animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.6s; animation-fill-mode: both;">
+        <p class="text-[11px] font-bold text-zero-black uppercase tracking-[0.2em]">Pilih Jenis Laporan</p>
       </div>
       
-      <div class="space-y-4">
+      <div class="flex flex-col">
         <!-- Harian -->
-        <div onclick="startNewForm('daily')" class="bg-white border-[0.5px] border-gray-200 p-5 rounded-3xl cursor-pointer hover:shadow-sm active:bg-gray-50 active:scale-[0.98] transition-all duration-300 flex justify-between items-center group animate-slide-up" style="animation-delay: 0.2s; animation-duration: 0.6s; animation-fill-mode: both;">
+        <div onclick="startNewForm('daily')" class="py-6 border-b-[0.5px] border-gray-300 cursor-pointer group hover:bg-black/5 active:bg-black/10 transition-colors animate-slide-up flex justify-between items-center" style="animation-delay: 0.2s; animation-duration: 0.6s; animation-fill-mode: both;">
           <div>
-            <h3 class="font-bold text-sm text-zero-black mb-1">LAPORAN HARIAN</h3>
-            <p class="text-[11px] font-medium text-gray-400">Daily Report Shift</p>
+            <h3 class="font-extrabold text-xl text-zero-black tracking-wider mb-1">LAPORAN HARIAN</h3>
+            <p class="text-sm font-medium text-gray-400">Daily Report Shift</p>
           </div>
-          <span class="text-gray-300 group-hover:text-zero-black transition-colors">→</span>
+          <span class="text-zero-black font-bold text-2xl group-hover:translate-x-2 transition-transform duration-300">→</span>
         </div>
         
         <!-- Mingguan -->
-        <div onclick="startNewForm('weekly')" class="bg-white border-[0.5px] border-gray-200 p-5 rounded-3xl cursor-pointer hover:shadow-sm active:bg-gray-50 active:scale-[0.98] transition-all duration-300 flex justify-between items-center group animate-slide-up" style="animation-delay: 0.3s; animation-duration: 0.6s; animation-fill-mode: both;">
+        <div onclick="startNewForm('weekly')" class="py-6 border-b-[0.5px] border-gray-300 cursor-pointer group hover:bg-black/5 active:bg-black/10 transition-colors animate-slide-up flex justify-between items-center" style="animation-delay: 0.3s; animation-duration: 0.6s; animation-fill-mode: both;">
           <div>
-            <h3 class="font-bold text-sm text-zero-black mb-1">LAPORAN MINGGUAN</h3>
-            <p class="text-[11px] font-medium text-gray-400">Weekly Rekap Penjualan</p>
+            <h3 class="font-extrabold text-xl text-zero-black tracking-wider mb-1">LAPORAN MINGGUAN</h3>
+            <p class="text-sm font-medium text-gray-400">Weekly Rekap Penjualan</p>
           </div>
-          <span class="text-gray-300 group-hover:text-zero-black transition-colors">→</span>
+          <span class="text-zero-black font-bold text-2xl group-hover:translate-x-2 transition-transform duration-300">→</span>
         </div>
         
         <!-- Bulanan -->
-        <div onclick="startNewForm('monthly')" class="bg-white border-[0.5px] border-gray-200 p-5 rounded-3xl cursor-pointer hover:shadow-sm active:bg-gray-50 active:scale-[0.98] transition-all duration-300 flex justify-between items-center group animate-slide-up" style="animation-delay: 0.4s; animation-duration: 0.6s; animation-fill-mode: both;">
+        <div onclick="startNewForm('monthly')" class="py-6 border-b-[0.5px] border-gray-300 cursor-pointer group hover:bg-black/5 active:bg-black/10 transition-colors animate-slide-up flex justify-between items-center" style="animation-delay: 0.4s; animation-duration: 0.6s; animation-fill-mode: both;">
           <div>
-            <h3 class="font-bold text-sm text-zero-black mb-1">LAPORAN BULANAN</h3>
-            <p class="text-[11px] font-medium text-gray-400">Monthly Executive Summary</p>
+            <h3 class="font-extrabold text-xl text-zero-black tracking-wider mb-1">LAPORAN BULANAN</h3>
+            <p class="text-sm font-medium text-gray-400">Monthly Executive Summary</p>
           </div>
-          <span class="text-gray-300 group-hover:text-zero-black transition-colors">→</span>
+          <span class="text-zero-black font-bold text-2xl group-hover:translate-x-2 transition-transform duration-300">→</span>
         </div>
       </div>
     </div>

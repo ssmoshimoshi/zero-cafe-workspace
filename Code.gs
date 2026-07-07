@@ -96,6 +96,24 @@ function initializeSystem() {
     ];
     staffSheet.getRange(2, 1, defaultStaff.length, 5).setValues(defaultStaff);
   }
+
+  var menuSheet = setupSheet(activeSpreadsheet, "MasterMenu", [
+    "Kategori", "Nama Menu"
+  ]);
+  
+  // Populate default menu if empty
+  if (menuSheet.getLastRow() <= 1) {
+    var defaultMenu = [
+      ["minuman", "Espresso"], ["minuman", "Americano"], ["minuman", "Kopi Susu Gula Aren"], ["minuman", "Kopi Susu Pandan"],
+      ["minuman", "Cappuccino"], ["minuman", "Cafe Latte"], ["minuman", "Vanilla Latte"], ["minuman", "Matcha Latte"],
+      ["minuman", "Red Velvet Latte"], ["minuman", "Chocolate"], ["minuman", "Taro Latte"], ["minuman", "Lemon Tea"], ["minuman", "Lychee Tea"],
+      ["makanan", "Nasi Goreng Spesial"], ["makanan", "Nasi Goreng Seafood"], ["makanan", "Mie Goreng Jawa"], ["makanan", "Mie Kuah Spesial"],
+      ["makanan", "Ricebowl Chicken Katsu"], ["makanan", "Ricebowl Chicken Teriyaki"], ["makanan", "Spaghetti Bolognese"], ["makanan", "Spaghetti Carbonara"],
+      ["snack", "Kentang Goreng"], ["snack", "Roti Bakar Coklat"], ["snack", "Roti Bakar Keju"], ["snack", "Pisang Goreng Keju"],
+      ["snack", "Dimsum"], ["snack", "Cireng Bumbu Rujak"], ["snack", "Tahu Walik"], ["snack", "Churros"]
+    ];
+    menuSheet.getRange(2, 1, defaultMenu.length, 2).setValues(defaultMenu);
+  }
   
   var scriptProperties = PropertiesService.getScriptProperties();
   scriptProperties.setProperty("SPREADSHEET_ID", ssId);
@@ -175,7 +193,8 @@ function api_getMasterStaff() {
         staffList.push({
           id: data[i][0],
           nama: data[i][1],
-          posisi: data[i][2]
+          posisi: data[i][2],
+          outlet: data[i][4] || ""
         });
       }
     }
@@ -183,6 +202,38 @@ function api_getMasterStaff() {
   } catch (err) {
     Logger.log("Error in api_getMasterStaff: " + err.toString());
     return [];
+  }
+}
+
+function api_getMasterMenu() {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("Database_Produk");
+    if (!sheet) return { success: false, data: { minuman: [], makanan: [], snack: [] } };
+    
+    var data = sheet.getDataRange().getValues();
+    var menuData = { minuman: [], makanan: [], snack: [] };
+    
+    for (var i = 1; i < data.length; i++) {
+      var cat = (data[i][3] || "").toString().toLowerCase(); // Kategori is in Column D (index 3)
+      var name = (data[i][5] || "").toString(); // Nama Produk is in Column F (index 5)
+      
+      if (cat && name) {
+        if (!menuData[cat]) menuData[cat] = [];
+        if (menuData[cat].indexOf(name) === -1) {
+          menuData[cat].push(name);
+        }
+      }
+    }
+    
+    // Sort alphabetically
+    Object.keys(menuData).forEach(function(k) {
+       menuData[k].sort();
+    });
+    
+    return { success: true, data: menuData };
+  } catch(err) {
+    return { success: false, error: err.toString() };
   }
 }
 
@@ -245,13 +296,20 @@ function getStructuredFolder(year, monthName, category) {
  * Creates dynamic folder hierarchy based on report type.
  */
 function getDynamicFolder(year, monthName, data) {
-  var rootFolderId = "1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj";
+  // [A3] Centralize: selalu baca ROOT_FOLDER_ID dari ScriptProperties
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
   var rootFolder;
+  
+  if (!rootFolderId) {
+    Logger.log("ROOT_FOLDER_ID belum diset. Gunakan menu Pengaturan Sistem di Dasbor GM.");
+    return null;
+  }
   
   try {
     rootFolder = DriveApp.getFolderById(rootFolderId);
   } catch(e) {
-    Logger.log("Folder root tidak ditemukan");
+    Logger.log("Folder root tidak ditemukan: " + e.toString());
     return null;
   }
   
@@ -381,6 +439,18 @@ function submitFullReport(payloadStr) {
       pdfBlob = htmlOutput.getAs("application/pdf").setName(fileName);
     }
     
+    // 1.b Generate Kebersihan PDF blob if exists
+    var kbPdfBlob = null;
+    var kbFileName = data.tanggal + "-checklistbox-" + outlet + ".pdf";
+    if (data.type === "daily" && data.kebersihanPdfBase64) {
+      try {
+        var decodedKb = Utilities.base64Decode(data.kebersihanPdfBase64);
+        kbPdfBlob = Utilities.newBlob(decodedKb, "application/pdf", kbFileName);
+      } catch (e) {
+        Logger.log("Failed to decode kebersihan base64: " + e.toString());
+      }
+    }
+    
     // 2. Save to Google Drive folder
     var folder = getDynamicFolder(year, monthName, data);
     
@@ -397,9 +467,37 @@ function submitFullReport(payloadStr) {
     var file = folder.createFile(pdfBlob);
     var fileUrl = file.getUrl();
     
+    // Save Kebersihan PDF to its specific folder
+    if (kbPdfBlob) {
+      // Find or create "checklist kebersihan" folder inside the current month folder
+      var kbFolder;
+      var kbFolders = folder.getFoldersByName("checklist kebersihan");
+      if (kbFolders.hasNext()) {
+        kbFolder = kbFolders.next();
+      } else {
+        kbFolder = folder.createFolder("checklist kebersihan");
+      }
+      kbFolder.createFile(kbPdfBlob);
+    }
+    
     // 4. Append row to corresponding Sheet tab
     if (data.type === "daily") {
       var sheet = ss.getSheetByName("Daily");
+      
+      // [A1] Anti-Duplikat: cek kombinasi Tanggal + Outlet sebelum appendRow
+      var existingData = sheet.getDataRange().getValues();
+      for (var di = 1; di < existingData.length; di++) {
+        var existTgl = existingData[di][0].toString();
+        var existOutlet = existingData[di][2].toString();
+        if (existTgl === data.tanggal && existOutlet === (data.outlet || "Perintis")) {
+          return {
+            success: false,
+            isDuplicate: true,
+            message: "Laporan harian untuk " + data.tanggal + " di outlet " + data.outlet + " sudah pernah dikirim. Pengiriman ganda dicegah!"
+          };
+        }
+      }
+      
       sheet.appendRow([
         data.tanggal,
         data.supervisor,
@@ -439,6 +537,15 @@ function submitFullReport(payloadStr) {
       if (data.bahan && data.bahan.length > 0) {
         data.bahan.forEach(function(b) {
           fbSheet.appendRow([data.tanggal, data.outlet, "Bahan", b.nama, b.ketersediaan, Number(b.harga||0), b.photoUrl || "", "TIDAK"]);
+        });
+      }
+      
+      if (data.kebersihan && data.kebersihan.length > 0) {
+        var kbSheet = setupSheet(ss, "Database_Kebersihan", [
+          "Tanggal", "Outlet", "Area", "Item Pemeriksaan", "Skor", "Status", "Keterangan"
+        ]);
+        data.kebersihan.forEach(function(k) {
+          kbSheet.appendRow([data.tanggal, data.outlet, k.area, k.point, Number(k.skor || 0), k.status || "", k.ket || ""]);
         });
       }
       
@@ -621,6 +728,108 @@ function submitFullReport(payloadStr) {
   }
 }
 
+function calculateAggregatedProducts(startDate, endDate, outlet) {
+  var ss = getSpreadsheet();
+  var dbSheet = ss.getSheetByName("Database_Produk");
+  if (!dbSheet) return null;
+  
+  var dbData = dbSheet.getDataRange().getValues();
+  function parseFilterDate(str) {
+    if (!str) return 0;
+    var p = str.split("-");
+    if (p.length === 3) {
+      var y = parseInt(p[0], 10), m = parseInt(p[1], 10) - 1, d = parseInt(p[2], 10);
+      if (y < 2000) { y = parseInt(p[2], 10); d = parseInt(p[0], 10); } // Handle DD-MM-YYYY
+      return new Date(y, m, d).getTime();
+    }
+    return new Date(str).getTime();
+  }
+  
+  var start = parseFilterDate(startDate);
+  var end = parseFilterDate(endDate);
+  
+  var agg = {
+    topMinuman: {}, bottomMinuman: {},
+    topMakanan: {}, bottomMakanan: {},
+    topSnack: {}, bottomSnack: {}
+  };
+  
+  for (var i = 1; i < dbData.length; i++) {
+    var row = dbData[i];
+    var tipe = String(row[1]); // Tipe Laporan
+    var rowOutlet = String(row[2]);
+    
+    var isOutletMatch = (!outlet || String(outlet).toLowerCase() === "semua" || rowOutlet.toLowerCase() === String(outlet).toLowerCase());
+    
+    if (tipe === "daily" && isOutletMatch) {
+      var rowDateObj = row[0];
+      var rowDate = null;
+      if (rowDateObj instanceof Date) {
+        rowDate = new Date(rowDateObj.getFullYear(), rowDateObj.getMonth(), rowDateObj.getDate()).getTime();
+      } else {
+        var dateParts = String(row[0]).split("-");
+        if (dateParts.length === 3) {
+          var y = parseInt(dateParts[0], 10);
+          var m = parseInt(dateParts[1], 10) - 1;
+          var d = parseInt(dateParts[2], 10);
+          if (y < 2000) { y = parseInt(dateParts[2], 10); d = parseInt(dateParts[0], 10); }
+          rowDate = new Date(y, m, d).getTime();
+        }
+      }
+      
+      if (rowDate && rowDate >= start && rowDate <= end) {
+        var kategori = String(row[3]).toLowerCase().trim(); // Minuman/Makanan/Snack
+        var peringkat = String(row[4]).toLowerCase().trim(); // Top/Bottom
+        var nama = String(row[5]);
+        var terjual = Number(row[6]) || 0;
+        var rencana = String(row[7]);
+        
+        var key = "";
+        if (peringkat === "top") {
+          if (kategori === "minuman") key = "topMinuman";
+          else if (kategori === "makanan") key = "topMakanan";
+          else if (kategori === "snack") key = "topSnack";
+        } else if (peringkat === "bottom") {
+          if (kategori === "minuman") key = "bottomMinuman";
+          else if (kategori === "makanan") key = "bottomMakanan";
+          else if (kategori === "snack") key = "bottomSnack";
+        }
+        
+        if (key && nama) {
+          if (!agg[key][nama]) {
+            agg[key][nama] = { nama: nama, terjual: 0, rencana: "" };
+          }
+          agg[key][nama].terjual += terjual;
+          if (rencana) {
+            agg[key][nama].rencana = rencana;
+          }
+        }
+      }
+    }
+  }
+  
+  // Convert dict to array, sort, and take top 5 / bottom 3
+  var formatResult = function(obj, isTop) {
+    var arr = Object.keys(obj).map(function(k) { return obj[k]; });
+    if (isTop) {
+      arr.sort(function(a, b) { return b.terjual - a.terjual; });
+      return arr.slice(0, 5);
+    } else {
+      arr.sort(function(a, b) { return a.terjual - b.terjual; }); // lowest sold first
+      return arr.slice(0, 3);
+    }
+  };
+  
+  return {
+    topMinuman: formatResult(agg.topMinuman, true),
+    bottomMinuman: formatResult(agg.bottomMinuman, false),
+    topMakanan: formatResult(agg.topMakanan, true),
+    bottomMakanan: formatResult(agg.bottomMakanan, false),
+    topSnack: formatResult(agg.topSnack, true),
+    bottomSnack: formatResult(agg.bottomSnack, false)
+  };
+}
+
 /**
  * Fetches daily sales data (Realisasi & Target) for a given week period.
  * startDateStr and endDateStr should be YYYY-MM-DD.
@@ -691,7 +900,9 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
       { hari: "Minggu", target: dailyTotals["Minggu"].target, real: dailyTotals["Minggu"].real }
     ];
     
-    return { success: true, data: result };
+    var aggregatedProducts = calculateAggregatedProducts(startDateStr, endDateStr, outlet);
+    
+    return { success: true, data: result, produk: aggregatedProducts };
   } catch (err) {
     return { success: false, error: err.toString() };
   }
@@ -836,6 +1047,10 @@ function api_getMonthlyData(monthStr, outlet) {
       });
     }
     
+    var startDateStr = targetYear + "-" + (targetMonth + 1 < 10 ? "0" + (targetMonth + 1) : (targetMonth + 1)) + "-01";
+    var endDateStr = targetYear + "-" + (targetMonth + 1 < 10 ? "0" + (targetMonth + 1) : (targetMonth + 1)) + "-" + new Date(targetYear, targetMonth + 1, 0).getDate();
+    var aggregatedProducts = calculateAggregatedProducts(startDateStr, endDateStr, outlet);
+    
     return { 
       success: true, 
       totalReal: totalReal, 
@@ -844,7 +1059,8 @@ function api_getMonthlyData(monthStr, outlet) {
       totalTelat: totalTelat,
       kepatuhanSop: kepatuhanSop,
       totalTeguran: totalTeguran,
-      staffEvaluations: staffEvaluations
+      staffEvaluations: staffEvaluations,
+      produk: aggregatedProducts
     };
   } catch (err) {
     return { success: false, error: err.toString() };
@@ -854,7 +1070,7 @@ function api_getMonthlyData(monthStr, outlet) {
 /**
  * Fetches dashboard analytics data for GM.
  */
-function api_gm_fetchReports(monthName, year, outletFilter) {
+function api_gm_fetchReports(startDate, endDate, outletFilter) {
   try {
     var ss = getSpreadsheet();
     var sheet = ss.getSheetByName("Daily");
@@ -862,43 +1078,66 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
     
     var data = sheet.getDataRange().getValues();
     var omsetTotal = 0;
+    var targetOmset = 0;
     var omsetBulanLalu = 0;
     var komplainTotal = 0;
     var transaksiTotal = 0;
     var listLaporan = [];
     var chartData = [];
+    var outletStats = {};
+    var omsetYTD = 0;
     
-    // Map month names to 2-digit format
+    var year = startDate ? startDate.substring(0, 4) : new Date().getFullYear().toString();
+    var targetYTDStr = PropertiesService.getScriptProperties().getProperty("GM_TARGET_TAHUNAN_" + year);
+    var targetYTD = targetYTDStr ? Number(targetYTDStr) : 0;
+    
+    // Define monthName and monthPrefix for compatibility with Weekly/Monthly fetching
+    var startMonthIdx = new Date(startDate).getMonth();
     var monthsIndo = [
       "Januari", "Februari", "Maret", "April", "Mei", "Juni",
       "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
-    var monthIdx = monthsIndo.indexOf(monthName);
-    var monthPrefix = "";
-    var prevMonthPrefix = "";
-    if (monthIdx !== -1) {
-      monthPrefix = year + "-" + (monthIdx + 1 < 10 ? "0" : "") + (monthIdx + 1);
-      var prevMonthIdx = monthIdx === 0 ? 11 : monthIdx - 1;
-      var prevYear = monthIdx === 0 ? parseInt(year) - 1 : year;
-      prevMonthPrefix = prevYear + "-" + (prevMonthIdx + 1 < 10 ? "0" : "") + (prevMonthIdx + 1);
-    }
+    var monthName = monthsIndo[startMonthIdx] || "";
+    var monthPrefix = startDate ? startDate.substring(0, 7) : "";
+    
+    // Calculate previous period for comparison (same duration immediately preceding)
+    var startD = new Date(startDate);
+    var endD = new Date(endDate);
+    var diffTime = Math.abs(endD - startD);
+    var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    var prevEndD = new Date(startD);
+    prevEndD.setDate(prevEndD.getDate() - 1);
+    var prevStartD = new Date(prevEndD);
+    prevStartD.setDate(prevStartD.getDate() - diffDays);
+    
+    var formatDate = function(d) {
+      var m = d.getMonth() + 1;
+      var day = d.getDate();
+      return d.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (day < 10 ? "0" + day : day);
+    };
+    var prevStartDateStr = formatDate(prevStartD);
+    var prevEndDateStr = formatDate(prevEndD);
     
     // Skip headers
     for (var i = 1; i < data.length; i++) {
       var rowDateObj = data[i][0];
       var rowDate = "";
+      // [A2] Standarisasi: hanya satu logika parsing DD-MM-YYYY → internal YYYY-MM-DD
       if (rowDateObj instanceof Date) {
         var m = rowDateObj.getMonth() + 1;
         var d = rowDateObj.getDate();
         rowDate = rowDateObj.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
       } else {
-        var str = (rowDateObj || "").toString();
+        var str = (rowDateObj || "").toString().trim();
         var parts = str.split("-");
         if (parts.length === 3) {
-          if (parts[0].length === 4) {
-            rowDate = str; // YYYY-MM-DD
-          } else if (parts[2].length === 4) {
-            rowDate = parts[2] + "-" + parts[1] + "-" + parts[0]; // DD-MM-YYYY to YYYY-MM-DD
+          if (parts[2].length === 4) {
+            // Format DD-MM-YYYY (format resmi aplikasi)
+            rowDate = parts[2] + "-" + parts[1] + "-" + parts[0];
+          } else if (parts[0].length === 4) {
+            // Format YYYY-MM-DD (legacy/DummyData) → tetap bisa dibaca
+            rowDate = str;
           }
         }
       }
@@ -908,9 +1147,16 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
       
       if (matchesFilter) {
         var rowOmset = Number(data[i][4] || 0);
+        var rowTarget = Number(data[i][8] || 0); // Col I
         
-        if (rowDate.startsWith(monthPrefix)) {
+        // Year-to-Date Calculation
+        if (rowDate.startsWith(year)) {
+          omsetYTD += rowOmset;
+        }
+        
+        if (rowDate >= startDate && rowDate <= endDate) {
           omsetTotal += rowOmset;
+          targetOmset += rowTarget;
           komplainTotal += Number(data[i][5] || 0);
           transaksiTotal += Number(data[i][9] || 0); // Read real transaction data from col 10
           listLaporan.push({
@@ -922,7 +1168,15 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
             date: rowDate,
             omset: rowOmset
           });
-        } else if (rowDate.startsWith(prevMonthPrefix)) {
+          
+          // Leaderboard Outlet
+          var outletName = rowOutlet || "Unknown";
+          if (!outletStats[outletName]) {
+            outletStats[outletName] = 0;
+          }
+          outletStats[outletName] += rowOmset;
+          
+        } else if (rowDate >= prevStartDateStr && rowDate <= prevEndDateStr) {
           omsetBulanLalu += rowOmset;
         }
       }
@@ -960,7 +1214,16 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
       }
       
       for (var i = 1; i < mData.length; i++) {
-        var bul = mData[i][0].toString(); // MM-YYYY
+        var bulObj = mData[i][0];
+        var bul = "";
+        if (bulObj instanceof Date) {
+           var m = bulObj.getMonth() + 1;
+           var y = bulObj.getFullYear();
+           bul = (m < 10 ? "0" + m : m) + "-" + y;
+        } else {
+           bul = (bulObj || "").toString();
+        }
+        
         if (bul === targetBul) {
           var rowOutlet = (mData[i][2] || "").toString();
           if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
@@ -1010,27 +1273,8 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
     // var transaksiTotal = listLaporan.length * 45;
     var currentFolderId = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_ID") || "";
     
-    // Get target omset for the selected month
-    var targetBul = monthPrefix;
-    if (monthPrefix.indexOf("-") !== -1) {
-      var p = monthPrefix.split("-");
-      targetBul = p[1] + "-" + p[0]; // MM-YYYY
-    }
+    // targetOmset is now calculated directly from the Daily sheet
     
-    var targetOmset = 0;
-    var configSheet = ss.getSheetByName("Config_Target");
-    if (configSheet) {
-      var configData = configSheet.getDataRange().getValues();
-      for (var j = 1; j < configData.length; j++) {
-        var cBul = configData[j][0].toString();
-        if (cBul === targetBul) {
-           var cOutlet = (configData[j][2] || "").toString();
-           if (!outletFilter || outletFilter === "Semua" || cOutlet === outletFilter || cOutlet === "Semua") {
-             targetOmset += Number(configData[j][3] || 0);
-           }
-        }
-      }
-    }
     if (targetOmset === 0) {
       var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
       targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
@@ -1042,101 +1286,80 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
       snack: { top: [], bottom: [] }
     };
     
-    var dbSheet = ss.getSheetByName("Database_Produk");
-    if (dbSheet) {
-      var dbData = dbSheet.getDataRange().getValues();
-      var hasMonthly = false;
-      var monthlyRows = [];
-      
-      for (var i = 1; i < dbData.length; i++) {
-        var tipe = dbData[i][1].toString();
-        var periode = dbData[i][0].toString();
-        var rowOutlet = (dbData[i][2] || "").toString();
-        
-        if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
-          if (tipe === "monthly" && periode === monthPrefix) {
-            hasMonthly = true;
-            monthlyRows.push(dbData[i]);
+    var aggProducts = calculateAggregatedProducts(startDate, endDate, outletFilter || "Semua");
+    if (aggProducts) {
+      productsData = {
+        minuman: { top: aggProducts.topMinuman, bottom: aggProducts.bottomMinuman },
+        makanan: { top: aggProducts.topMakanan, bottom: aggProducts.bottomMakanan },
+        snack: { top: aggProducts.topSnack, bottom: aggProducts.bottomSnack }
+      };
+    }
+    
+    // Sort Outlet Leaderboard
+    var leaderboard = [];
+    for (var out in outletStats) {
+      leaderboard.push({ name: out, omset: outletStats[out] });
+    }
+    leaderboard.sort(function(a, b) { return b.omset - a.omset; });
+
+    // Calculate Kebersihan (Hygiene) Score
+    var hygieneScoreTotal = 0;
+    var hygieneCount = 0;
+    var hygieneAreas = {};
+    var kbSheet = ss.getSheetByName("Database_Kebersihan");
+    if (kbSheet) {
+      var kbData = kbSheet.getDataRange().getValues();
+      for (var i = 1; i < kbData.length; i++) {
+        var rowDateStr = "";
+        var dObj = kbData[i][0];
+        if (dObj instanceof Date) {
+          rowDateStr = formatDate(dObj);
+        } else {
+          var str = (dObj||"").toString();
+          var p = str.split("-");
+          if(p.length===3) {
+            if(p[0].length===4) rowDateStr = str;
+            else if(p[2].length===4) rowDateStr = p[2]+"-"+p[1]+"-"+p[0];
           }
         }
-      }
-      
-      var targetRows = [];
-      if (hasMonthly) {
-        targetRows = monthlyRows;
-      } else {
-        for (var i = 1; i < dbData.length; i++) {
-          var tipe = dbData[i][1].toString();
-          var periode = dbData[i][0].toString();
-          var rowOutlet = (dbData[i][2] || "").toString();
+        var rowOutlet = (kbData[i][1] || "").toString();
+        var matches = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
+        if (matches && rowDateStr >= startDate && rowDateStr <= endDate) {
+          var area = kbData[i][2];
+          var skor = Number(kbData[i][4]);
+          var ket = kbData[i][6];
+          hygieneScoreTotal += skor;
+          hygieneCount++;
           
-          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
-            if (tipe === "weekly" && periode.indexOf(monthName) !== -1) {
-              targetRows.push(dbData[i]);
-            }
+          if (!hygieneAreas[area]) hygieneAreas[area] = { totalSkor: 0, count: 0, logs: [] };
+          hygieneAreas[area].totalSkor += skor;
+          hygieneAreas[area].count++;
+          if (ket && ket.trim() !== "") {
+            hygieneAreas[area].logs.push(ket);
           }
         }
-      }
-      
-      if (targetRows.length > 0) {
-        var categories = ["Minuman", "Makanan", "Snack"];
-        categories.forEach(function(cat) {
-          var catKey = cat.toLowerCase();
-          var topMap = {};
-          var bottomMap = {};
-          
-          targetRows.forEach(function(row) {
-            var rowCat = row[3].toString();
-            if (rowCat === cat) {
-              var peringkat = row[4].toString();
-              var nama = row[5].toString().trim();
-              var terjual = Number(row[6] || 0);
-              var rencana = row[7].toString().trim();
-              
-              if (nama) {
-                if (peringkat === "Top") {
-                  if (!topMap[nama]) topMap[nama] = 0;
-                  topMap[nama] += terjual;
-                } else if (peringkat === "Bottom") {
-                  if (!bottomMap[nama]) {
-                    bottomMap[nama] = { terjual: 0, rencanaList: [] };
-                  }
-                  bottomMap[nama].terjual += terjual;
-                  if (rencana && bottomMap[nama].rencanaList.indexOf(rencana) === -1) {
-                    bottomMap[nama].rencanaList.push(rencana);
-                  }
-                }
-              }
-            }
-          });
-          
-          var topArray = [];
-          for (var name in topMap) {
-            topArray.push({ nama: name, terjual: topMap[name] });
-          }
-          topArray.sort(function(a, b) { return b.terjual - a.terjual; });
-          
-          var bottomArray = [];
-          for (var name in bottomMap) {
-            bottomArray.push({ 
-              nama: name, 
-              terjual: bottomMap[name].terjual, 
-              rencana: bottomMap[name].rencanaList.join("; ") 
-            });
-          }
-          bottomArray.sort(function(a, b) { return b.terjual - a.terjual; });
-          
-          productsData[catKey].top = topArray.slice(0, 5);
-          productsData[catKey].bottom = bottomArray.slice(0, 3);
-        });
       }
     }
     
+    var hygieneScore = hygieneCount > 0 ? Math.round(hygieneScoreTotal / hygieneCount) : 0;
+    var hygieneKritis = [];
+    for (var area in hygieneAreas) {
+      hygieneKritis.push({
+        area: area,
+        avg: Math.round(hygieneAreas[area].totalSkor / hygieneAreas[area].count),
+        ket: hygieneAreas[area].logs.length > 0 ? hygieneAreas[area].logs[0] : "-"
+      });
+    }
+    hygieneKritis.sort(function(a,b) { return a.avg - b.avg; });
+    hygieneKritis = hygieneKritis.slice(0, 3);
+
     var resultObj = {
       status: "success",
       data: {
         omsetTotal: omsetTotal || 0,
         omsetBulanLalu: omsetBulanLalu || 0,
+        omsetYTD: omsetYTD || 0,
+        targetYTD: targetYTD || 0,
         transaksiTotal: transaksiTotal || 0,
         komplainTotal: komplainTotal || 0,
         listLaporan: listLaporan || [],
@@ -1144,7 +1367,10 @@ function api_gm_fetchReports(monthName, year, outletFilter) {
         targetOmset: Number(targetOmset) || 0,
         chartData: chartData.sort(function(a, b) { return a.date.localeCompare(b.date); }) || [],
         productsData: productsData,
-        operasionalData: operasionalData
+        operasionalData: operasionalData,
+        leaderboard: leaderboard,
+        hygieneScore: hygieneScore,
+        hygieneKritis: hygieneKritis
       }
     };
     return JSON.stringify(resultObj);
@@ -1507,13 +1733,18 @@ function api_uploadImage(base64Data, filename, category) {
     var monthName = getIndonesianMonth(date.toISOString().split('T')[0]);
     
     // Get or create category folder inside month folder
-    var rootFolderId = "1cpwnFb5lh4OVJxbFpezBA48iLEglSZyj";
+    // [A3] Centralize: selalu baca ROOT_FOLDER_ID dari ScriptProperties
+    var rootFolderId = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_ID");
     var rootFolder;
+    
+    if (!rootFolderId) {
+      return { success: false, error: "Root folder belum dikonfigurasi. Set ROOT_FOLDER_ID di Dasbor GM terlebih dahulu." };
+    }
     
     try {
       rootFolder = DriveApp.getFolderById(rootFolderId);
     } catch (e) {
-      Logger.log("Folder root tidak ditemukan");
+      Logger.log("Folder root tidak ditemukan: " + e.toString());
       return { success: false, error: "Root folder not found" };
     }
     
@@ -1594,49 +1825,420 @@ function JALANKAN_INI_UNTUK_UBAH_FOLDER() {
   }
 }
 
+
 /**
- * =========================================================================
- * KONFIGURASI TARGET OMSET GM
- * =========================================================================
+ * Save GM Settings (Fixed Annual Target)
  */
-function api_gm_setTargetOmset(monthName, year, targetValue) {
+function api_gm_saveSettings(payloadStr) {
   try {
-    var key = "TARGET_OMSET_" + monthName + "_" + year;
-    var props = PropertiesService.getScriptProperties();
-    props.setProperty(key, targetValue.toString());
+    var payload = JSON.parse(payloadStr);
+    var year = payload.year || new Date().getFullYear().toString();
+    var target = payload.target || "0";
     
-    // Convert monthName to MM-YYYY
-    var mm = "01";
-    var mList = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
-    var idx = mList.indexOf(monthName.toLowerCase());
-    if (idx !== -1) {
-       mm = (idx + 1 < 10 ? "0" : "") + (idx + 1);
-    }
-    var bul = mm + "-" + year;
+    PropertiesService.getScriptProperties().setProperty("GM_TARGET_TAHUNAN_" + year, target);
     
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var configSheet = ss.getSheetByName("Config_Target");
-    if (!configSheet) {
-      configSheet = setupSheet(ss, "Config_Target", ["Bulan", "Tahun", "Outlet", "Target Omset"]);
-    }
-    
-    var data = configSheet.getDataRange().getValues();
-    var found = false;
-    for (var i = 1; i < data.length; i++) {
-       if (data[i][0].toString() === bul && (data[i][2].toString() === "Semua" || data[i][2].toString() === "")) {
-          configSheet.getRange(i+1, 4).setValue(targetValue);
-          configSheet.getRange(i+1, 3).setValue("Semua");
-          found = true;
-          break;
-       }
-    }
-    if (!found) {
-       configSheet.appendRow([bul, year, "Semua", targetValue]);
-    }
-    
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: err.toString() };
+    return JSON.stringify({ status: "success", message: "Target tahun " + year + " berhasil disimpan!" });
+  } catch (e) {
+    return JSON.stringify({ status: "error", error: e.toString() });
   }
 }
 
+/**
+ * =========================================================================
+ * AI MARKETING INTELLIGENCE ENGINE — v3.0
+ * Checkpoint 12: Zero Cafe Workspace
+ * =========================================================================
+ * Membaca pola dari data historis SPV (Daily, Weekly, Monthly, Kebersihan,
+ * Produk) dan menghasilkan insight action-oriented untuk Dasbor GM.
+ */
+function api_gm_getMarketingInsights(payloadStr) {
+  try {
+    var payload = JSON.parse(payloadStr);
+    var startDate = payload.startDate; // YYYY-MM-DD
+    var endDate = payload.endDate;
+    var outlet = payload.outlet || "Semua";
+    var benchmarkATS = Number(payload.benchmarkATS || 30000);
+
+    var ss = getSpreadsheet();
+    var insights = [];
+
+    // ─────────────────────────────────────────────────────────────────
+    // HELPER: Normalisasi tanggal ke YYYY-MM-DD (DD-MM-YYYY atau Date obj)
+    // ─────────────────────────────────────────────────────────────────
+    function normDate(raw) {
+      if (!raw) return "";
+      if (raw instanceof Date) {
+        var m = raw.getMonth() + 1;
+        var d = raw.getDate();
+        return raw.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
+      }
+      var str = raw.toString().trim();
+      var p = str.split("-");
+      if (p.length === 3) {
+        if (p[2].length === 4) return p[2] + "-" + p[1] + "-" + p[0]; // DD-MM-YYYY
+        if (p[0].length === 4) return str; // YYYY-MM-DD
+      }
+      return "";
+    }
+
+    function outletMatch(rowOutlet) {
+      return !outlet || outlet === "Semua" || rowOutlet === outlet;
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // MODUL C1: Tren Omset Mingguan
+    // Baca Weekly sheet, bandingkan total sales per minggu dalam rentang
+    // ─────────────────────────────────────────────────────────────────
+    var weeklySheet = ss.getSheetByName("Weekly");
+    var weeklyInsight = { modul: "Tren Omset Mingguan", status: "insufficient", level: "info", title: "", desc: "", action: "" };
+
+    if (weeklySheet) {
+      var wData = weeklySheet.getDataRange().getValues();
+      var weeklySales = []; // array { periode, sales }
+
+      for (var i = 1; i < wData.length; i++) {
+        var periodeStr = wData[i][0].toString();
+        var rowOut = wData[i][2].toString();
+        var wSales = Number(wData[i][3] || 0);
+
+        // Cek apakah periode minggu ini masuk dalam rentang filter
+        // Format periode: "YYYY-MM-DD s/d YYYY-MM-DD" atau "DD-MM-YYYY s/d DD-MM-YYYY"
+        var periodeStart = "";
+        if (periodeStr.indexOf("s/d") !== -1) {
+          periodeStart = normDate(periodeStr.split("s/d")[0].trim());
+        }
+        if (!periodeStart) continue;
+        if (periodeStart < startDate || periodeStart > endDate) continue;
+        if (!outletMatch(rowOut)) continue;
+
+        weeklySales.push({ periode: periodeStart, sales: wSales });
+      }
+
+      weeklySales.sort(function(a, b) { return a.periode.localeCompare(b.periode); });
+
+      if (weeklySales.length < 3) {
+        weeklyInsight.status = "insufficient";
+        weeklyInsight.desc = "Dibutuhkan minimal 3 minggu data Weekly untuk mendeteksi tren.";
+      } else {
+        var n = weeklySales.length;
+        var last = weeklySales[n - 1].sales;
+        var prev = weeklySales[n - 2].sales;
+        var prev2 = weeklySales[n - 3].sales;
+
+        var isNaik3 = last > prev && prev > prev2;
+        var isTurun2 = last < prev && prev < prev2;
+        var isTurun3 = last < prev && prev < prev2;
+        var growthPct = prev > 0 ? Math.round(((last - prev) / prev) * 100) : 0;
+
+        weeklyInsight.status = "ok";
+        if (isNaik3) {
+          weeklyInsight.level = "positive";
+          weeklyInsight.title = "Tren Naik 3 Minggu Berturut";
+          weeklyInsight.desc = "Omset konsisten naik selama 3 minggu terakhir (" + (growthPct > 0 ? "+" : "") + growthPct + "% minggu ini). Momentum ini sangat ideal untuk memperkenalkan menu baru atau program bundling.";
+          weeklyInsight.action = "Manfaatkan momentum: luncurkan 1 promo baru minggu ini saat traffic sedang tinggi.";
+        } else if (isTurun2) {
+          weeklyInsight.level = "critical";
+          weeklyInsight.title = "Tren Turun 2–3 Minggu Berturut";
+          weeklyInsight.desc = "Omset turun " + Math.abs(growthPct) + "% dan sudah berlangsung lebih dari 2 minggu. Ini bukan fluktuasi biasa — ada sesuatu yang sistemik.";
+          weeklyInsight.action = "Tindakan segera: evaluasi apakah ada kompetitor baru, perubahan jam ramai, atau penurunan kualitas layanan.";
+        } else if (Math.abs(growthPct) < 5) {
+          weeklyInsight.level = "warning";
+          weeklyInsight.title = "Omset Stagnan (Flat)";
+          weeklyInsight.desc = "Perubahan omset minggu ini sangat kecil (" + growthPct + "%). Bisnis tidak tumbuh dan tidak turun — tapi stagnansi adalah sinyal bahaya jangka panjang.";
+          weeklyInsight.action = "Coba strategi baru: promo limited-time, konten sosmed, atau bundling produk yang kurang laris.";
+        } else {
+          weeklyInsight.level = "info";
+          weeklyInsight.title = "Omset Fluktuatif Normal";
+          weeklyInsight.desc = "Omset bergerak " + (growthPct > 0 ? "naik" : "turun") + " " + Math.abs(growthPct) + "% minggu ini. Fluktuasi masih dalam batas wajar.";
+          weeklyInsight.action = "Pantau tren 2–3 minggu ke depan untuk deteksi pola lebih kuat.";
+        }
+      }
+    }
+    insights.push(weeklyInsight);
+
+    // ─────────────────────────────────────────────────────────────────
+    // MODUL C2: Dead Menu / Hero Product
+    // Baca Database_Produk, hitung konsistensi top/bottom per produk
+    // ─────────────────────────────────────────────────────────────────
+    var produkSheet = ss.getSheetByName("Database_Produk");
+    var produkInsight = { modul: "Analisis Menu", status: "insufficient", level: "info", title: "", desc: "", action: "" };
+
+    if (produkSheet) {
+      var pData = produkSheet.getDataRange().getValues();
+      var bottomCount = {}; // { nama: count }
+      var topCount = {};
+      var totalWeeks = 0;
+      var seenWeeks = {};
+
+      for (var i = 1; i < pData.length; i++) {
+        var rowDate = normDate(pData[i][0]);
+        var rowOut = pData[i][2].toString();
+        var peringkat = pData[i][4].toString();
+        var nama = pData[i][5].toString();
+
+        if (!rowDate || rowDate < startDate || rowDate > endDate) continue;
+        if (!outletMatch(rowOut)) continue;
+        if (!nama) continue;
+
+        if (!seenWeeks[rowDate]) { seenWeeks[rowDate] = true; totalWeeks++; }
+
+        if (peringkat === "Bottom") {
+          bottomCount[nama] = (bottomCount[nama] || 0) + 1;
+        } else if (peringkat === "Top") {
+          topCount[nama] = (topCount[nama] || 0) + 1;
+        }
+      }
+
+      var weekThreshold = Math.max(2, Math.floor(totalWeeks * 0.6)); // 60% dari periode
+
+      var deadMenus = [];
+      for (var nm in bottomCount) {
+        if (bottomCount[nm] >= weekThreshold) deadMenus.push({ nama: nm, count: bottomCount[nm] });
+      }
+      var heroMenus = [];
+      for (var nm in topCount) {
+        if (topCount[nm] >= weekThreshold) heroMenus.push({ nama: nm, count: topCount[nm] });
+      }
+
+      produkInsight.status = totalWeeks < 4 ? "insufficient" : "ok";
+      if (produkInsight.status === "insufficient") {
+        produkInsight.desc = "Dibutuhkan minimal 4 minggu data produk untuk mendeteksi pola konsisten.";
+      } else if (deadMenus.length > 0 && heroMenus.length > 0) {
+        produkInsight.level = "warning";
+        produkInsight.title = "Produk Mati & Produk Andalan Terdeteksi";
+        produkInsight.desc = "MATI: " + deadMenus.map(function(x){ return x.nama; }).join(", ") + ". ANDALAN: " + heroMenus.map(function(x){ return x.nama; }).join(", ") + ".";
+        produkInsight.action = "Pertimbangkan discontinue produk mati atau rebranding. Pastikan stok produk andalan tidak pernah habis.";
+      } else if (deadMenus.length > 0) {
+        produkInsight.level = "critical";
+        produkInsight.title = "Dead Menu Alert: " + deadMenus.length + " Produk Tidak Bergerak";
+        produkInsight.desc = "Produk yang konsisten di Bottom: " + deadMenus.map(function(x){ return x.nama + " (" + x.count + "x)"; }).join(", ") + ". Ini membuang slot menu dan stok bahan baku.";
+        produkInsight.action = "Evaluasi menu ini: discontinue, ganti resep, atau bundling dengan produk lain agar lebih menarik.";
+      } else if (heroMenus.length > 0) {
+        produkInsight.level = "positive";
+        produkInsight.title = "Hero Product: " + heroMenus.map(function(x){ return x.nama; }).join(", ");
+        produkInsight.desc = "Produk ini konsisten jadi terlaris. Mesin pendapatan kafe Anda yang sesungguhnya.";
+        produkInsight.action = "Jadikan produk ini focal point promosi. Pastikan bahannya selalu tersedia dan barista mahir membuatnya.";
+      } else {
+        produkInsight.level = "info";
+        produkInsight.title = "Penjualan Produk Seimbang";
+        produkInsight.desc = "Tidak ada produk yang dominan sebagai terlaris atau terendah secara konsisten. Penjualan relatif merata.";
+        produkInsight.action = "Lakukan A/B testing promo pada beberapa produk untuk mulai membentuk 'Hero Product'.";
+      }
+    }
+    insights.push(produkInsight);
+
+    // ─────────────────────────────────────────────────────────────────
+    // MODUL C3: Korelasi Kebersihan × Omset
+    // ─────────────────────────────────────────────────────────────────
+    var dailySheet = ss.getSheetByName("Daily");
+    var kbSheet2 = ss.getSheetByName("Database_Kebersihan");
+    var hygieneInsight = { modul: "Korelasi Kebersihan & Omset", status: "insufficient", level: "info", title: "", desc: "", action: "" };
+
+    if (dailySheet && kbSheet2) {
+      // Hitung omset rata-rata harian dalam periode
+      var dData = dailySheet.getDataRange().getValues();
+      var totalOmset = 0, omsetCount = 0;
+      var targetTotal = 0;
+      for (var i = 1; i < dData.length; i++) {
+        var rd = normDate(dData[i][0]);
+        if (!rd || rd < startDate || rd > endDate) continue;
+        if (!outletMatch(dData[i][2].toString())) continue;
+        totalOmset += Number(dData[i][4] || 0);
+        targetTotal += Number(dData[i][8] || 0);
+        omsetCount++;
+      }
+
+      // Hitung skor kebersihan rata-rata
+      var kbData2 = kbSheet2.getDataRange().getValues();
+      var kbTotal = 0, kbCount = 0;
+      for (var i = 1; i < kbData2.length; i++) {
+        var krd = normDate(kbData2[i][0]);
+        if (!krd || krd < startDate || krd > endDate) continue;
+        if (!outletMatch(kbData2[i][1].toString())) continue;
+        kbTotal += Number(kbData2[i][4] || 0);
+        kbCount++;
+      }
+
+      if (omsetCount < 7 || kbCount < 7) {
+        hygieneInsight.status = "insufficient";
+        hygieneInsight.desc = "Dibutuhkan minimal 7 hari data harian dan kebersihan untuk korelasi yang valid.";
+      } else {
+        hygieneInsight.status = "ok";
+        var avgOmset = totalOmset / omsetCount;
+        var avgTarget = targetTotal / omsetCount;
+        var targetPct = avgTarget > 0 ? (avgOmset / avgTarget) * 100 : 0;
+        var avgHygiene = kbTotal / kbCount;
+
+        if (targetPct >= 90 && avgHygiene < 70) {
+          hygieneInsight.level = "critical";
+          hygieneInsight.title = "The Perfect Storm: Ramai tapi Kotor";
+          hygieneInsight.desc = "Omset mencapai " + Math.round(targetPct) + "% target namun Hygiene Score hanya " + Math.round(avgHygiene) + "%. Kondisi ini berbahaya — tamu datang banyak tapi kondisi kafe tidak layak. Satu ulasan negatif viral bisa menghancurkan tren ini.";
+          hygieneInsight.action = "Prioritas: tambah jadwal cleaning di jam-jam sibuk. Evaluasi apakah perlu tenaga kebersihan tambahan.";
+        } else if (targetPct < 70 && avgHygiene < 70) {
+          hygieneInsight.level = "critical";
+          hygieneInsight.title = "The Lazy Shift: Sepi dan Kotor";
+          hygieneInsight.desc = "Omset hanya " + Math.round(targetPct) + "% dari target dan Hygiene Score " + Math.round(avgHygiene) + "%. Kafe sepi, bukan alasan untuk dibiarkan kotor — ini sinyal kuat kemalasan atau kurang disiplin tim.";
+          hygieneInsight.action = "Lakukan sidak mendadak. Pertimbangkan evaluasi kinerja tim dan revisi SOP kebersihan.";
+        } else if (avgHygiene >= 90 && targetPct >= 85) {
+          hygieneInsight.level = "positive";
+          hygieneInsight.title = "The Good Standard: Performa Ideal";
+          hygieneInsight.desc = "Omset " + Math.round(targetPct) + "% dari target dengan Hygiene Score " + Math.round(avgHygiene) + "%. Standar operasional terjaga dengan sangat baik. Tim lapangan memberikan kinerja terbaik.";
+          hygieneInsight.action = "Pertahankan standar ini. Dokumentasikan sebagai benchmark untuk outlet lain.";
+        } else if (avgHygiene < 80) {
+          hygieneInsight.level = "warning";
+          hygieneInsight.title = "Hygiene Score di Bawah Standar";
+          hygieneInsight.desc = "Kebersihan rata-rata " + Math.round(avgHygiene) + "% — belum mencapai standar ideal (>80%). Risiko komplain tamu meningkat.";
+          hygieneInsight.action = "Review checklist kebersihan. Pastikan SPV mengaudit setiap shift, bukan hanya pagi.";
+        } else {
+          hygieneInsight.level = "info";
+          hygieneInsight.title = "Operasional Normal";
+          hygieneInsight.desc = "Omset " + Math.round(targetPct) + "% target, Hygiene " + Math.round(avgHygiene) + "%. Tidak ada korelasi anomali yang perlu diwaspadai.";
+          hygieneInsight.action = "Pantau tren kebersihan tiap minggu untuk mencegah degradasi bertahap.";
+        }
+      }
+    }
+    insights.push(hygieneInsight);
+
+    // ─────────────────────────────────────────────────────────────────
+    // MODUL C4: SDM & Risiko Operasional
+    // Baca Monthly sheet untuk tren telat dan resign
+    // ─────────────────────────────────────────────────────────────────
+    var monthlySheet2 = ss.getSheetByName("Monthly");
+    var sdmInsight = { modul: "SDM & Risiko Operasional", status: "insufficient", level: "info", title: "", desc: "", action: "" };
+
+    if (monthlySheet2) {
+      var mData = monthlySheet2.getDataRange().getValues();
+      var sdmRows = [];
+
+      for (var i = 1; i < mData.length; i++) {
+        var rowOut = mData[i][2].toString();
+        if (!outletMatch(rowOut)) continue;
+        // Col: [0]Bulan [9]Telat [10]Teguran [18]Resign [21]Komplain
+        sdmRows.push({
+          bulan: mData[i][0].toString(),
+          telat: Number(mData[i][9] || 0),
+          teguran: Number(mData[i][10] || 0),
+          resign: Number(mData[i][18] || 0),
+          komplain: Number(mData[i][21] || 0)
+        });
+      }
+
+      sdmRows.sort(function(a, b) { return a.bulan.localeCompare(b.bulan); });
+
+      if (sdmRows.length < 1) {
+        sdmInsight.status = "insufficient";
+        sdmInsight.desc = "Dibutuhkan minimal 1 Laporan Bulanan untuk analisis SDM.";
+      } else {
+        sdmInsight.status = "ok";
+        var latest = sdmRows[sdmRows.length - 1];
+        var issues = [];
+
+        if (latest.resign > 0 && latest.komplain > 5) {
+          sdmInsight.level = "critical";
+          sdmInsight.title = "Sinyal Bahaya: Resign + Komplain Naik Bersamaan";
+          sdmInsight.desc = latest.resign + " staf resign bulan ini dan komplain mencapai " + latest.komplain + " kasus. Kemungkinan besar kualitas layanan turun karena kekosongan SDM.";
+          sdmInsight.action = "Prioritas rekrutmen pengganti. Bagi tugas tim sisa secara merata dan awasi kualitas layanan ekstra ketat.";
+        } else if (latest.telat >= 5) {
+          sdmInsight.level = "warning";
+          sdmInsight.title = "Keterlambatan Staf Tinggi: " + latest.telat + " Kali";
+          sdmInsight.desc = "Jumlah keterlambatan " + latest.telat + " kali bulan ini melebihi batas toleransi. Ini biasanya sinyal jadwal shift tidak cocok atau masalah motivasi.";
+          sdmInsight.action = "Evaluasi jadwal shift. Pertimbangkan reward/punishment berbasis kehadiran yang lebih ketat.";
+        } else if (latest.teguran >= 3) {
+          sdmInsight.level = "warning";
+          sdmInsight.title = latest.teguran + " Teguran (SP) Bulan Ini";
+          sdmInsight.desc = "Jumlah SP (Surat Peringatan) yang dikeluarkan cukup tinggi. Jika ini berlanjut, ada risiko turnover yang tidak direncanakan.";
+          sdmInsight.action = "Review penyebab utama SP. Apakah ada pola berulang dari staf yang sama?";
+        } else {
+          sdmInsight.level = "positive";
+          sdmInsight.title = "Tim Stabil & Disiplin";
+          sdmInsight.desc = "Telat: " + latest.telat + ", Teguran: " + latest.teguran + ", Resign: " + latest.resign + ". Tidak ada indikator risiko SDM yang mengkhawatirkan.";
+          sdmInsight.action = "Pertahankan budaya kerja positif. Pertimbangkan program apresiasi (Employee of the Month).";
+        }
+      }
+    }
+    insights.push(sdmInsight);
+
+    // ─────────────────────────────────────────────────────────────────
+    // MODUL C5: Benchmarking ATS (Average Ticket Size)
+    // Bandingkan ATS aktual dengan benchmark yang di-set GM
+    // ─────────────────────────────────────────────────────────────────
+    var atsInsight = { modul: "Benchmarking ATS Industri", status: "insufficient", level: "info", title: "", desc: "", action: "" };
+    
+    var savedBenchmark = PropertiesService.getScriptProperties().getProperty("GM_BENCHMARK_ATS");
+    var effectiveBenchmark = savedBenchmark ? Number(savedBenchmark) : benchmarkATS;
+
+    if (dailySheet) {
+      var dData2 = dailySheet.getDataRange().getValues();
+      var totalOmsetATS = 0, totalTransATS = 0;
+      for (var i = 1; i < dData2.length; i++) {
+        var rd = normDate(dData2[i][0]);
+        if (!rd || rd < startDate || rd > endDate) continue;
+        if (!outletMatch(dData2[i][2].toString())) continue;
+        totalOmsetATS += Number(dData2[i][4] || 0);
+        totalTransATS += Number(dData2[i][9] || 0);
+      }
+
+      if (totalTransATS < 50) {
+        atsInsight.status = "insufficient";
+        atsInsight.desc = "Dibutuhkan minimal 50 transaksi untuk kalkulasi ATS yang representatif.";
+      } else {
+        atsInsight.status = "ok";
+        var actualATS = Math.round(totalOmsetATS / totalTransATS);
+        var atsDiff = actualATS - effectiveBenchmark;
+        var atsPct = effectiveBenchmark > 0 ? Math.round((atsDiff / effectiveBenchmark) * 100) : 0;
+
+        if (actualATS < effectiveBenchmark * 0.8) {
+          atsInsight.level = "critical";
+          atsInsight.title = "ATS Jauh di Bawah Benchmark (" + atsPct + "%)";
+          atsInsight.desc = "ATS aktual Rp " + actualATS.toLocaleString("id-ID") + " vs benchmark Rp " + effectiveBenchmark.toLocaleString("id-ID") + ". Pelanggan rata-rata menghabiskan jauh lebih sedikit dari potensinya.";
+          atsInsight.action = "Latih staf untuk upselling: tawarkan paket minuman + snack, size upgrade, atau add-on topping kepada setiap pelanggan.";
+        } else if (actualATS < effectiveBenchmark) {
+          atsInsight.level = "warning";
+          atsInsight.title = "ATS Masih di Bawah Benchmark (" + atsPct + "%)";
+          atsInsight.desc = "ATS Rp " + actualATS.toLocaleString("id-ID") + " — belum mencapai benchmark industri Rp " + effectiveBenchmark.toLocaleString("id-ID") + ". Ada ruang untuk meningkatkan nilai transaksi per pelanggan.";
+          atsInsight.action = "Coba strategi bundling: 'minuman + snack dengan harga spesial'. Tampilkan di papan menu dengan visual menarik.";
+        } else {
+          atsInsight.level = "positive";
+          atsInsight.title = "ATS di Atas Benchmark (+" + atsPct + "%)";
+          atsInsight.desc = "ATS Rp " + actualATS.toLocaleString("id-ID") + " — melampaui benchmark industri Rp " + effectiveBenchmark.toLocaleString("id-ID") + ". Pelanggan rela menghabiskan lebih banyak di kafe ini.";
+          atsInsight.action = "Pertahankan strategi pricing dan upselling yang sudah berjalan. Coba naikkan benchmark untuk mendorong pertumbuhan lebih jauh.";
+        }
+      }
+    }
+    insights.push(atsInsight);
+
+    // ─────────────────────────────────────────────────────────────────
+    // Hitung ringkasan: berapa kritis, peringatan, positif
+    // ─────────────────────────────────────────────────────────────────
+    var summary = { critical: 0, warning: 0, positive: 0, insufficient: 0 };
+    insights.forEach(function(ins) {
+      if (ins.status === "insufficient") summary.insufficient++;
+      else if (ins.level === "critical") summary.critical++;
+      else if (ins.level === "warning") summary.warning++;
+      else if (ins.level === "positive") summary.positive++;
+    });
+
+    return JSON.stringify({
+      status: "success",
+      summary: summary,
+      insights: insights,
+      benchmarkATS: effectiveBenchmark
+    });
+
+  } catch (e) {
+    Logger.log("Error in api_gm_getMarketingInsights: " + e.toString());
+    return JSON.stringify({ status: "error", error: e.toString() });
+  }
+}
+
+/**
+ * Simpan benchmark ATS yang dikonfigurasi GM
+ */
+function api_gm_saveBenchmarkATS(newATS) {
+  try {
+    PropertiesService.getScriptProperties().setProperty("GM_BENCHMARK_ATS", newATS.toString());
+    return JSON.stringify({ status: "success" });
+  } catch(e) {
+    return JSON.stringify({ status: "error", error: e.toString() });
+  }
+}

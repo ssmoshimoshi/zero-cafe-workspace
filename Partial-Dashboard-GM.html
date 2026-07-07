@@ -13,6 +13,7 @@ window.getDashboardGMTemplate = function() {
   let topProdukHtml = "";
   let kesehatanHtml = "";
   let strategiHtml = "";
+  let hygieneAiHtml = "";
   
   if (AppState.dashboardData) {
     const data = AppState.dashboardData;
@@ -36,10 +37,115 @@ window.getDashboardGMTemplate = function() {
       const sopColor = op.kepatuhanSop >= 95 ? 'text-green-500' : (op.kepatuhanSop >= 80 ? 'text-yellow-500' : 'text-red-500');
       const qcColor = data.komplainTotal <= 2 ? 'text-green-500' : 'text-red-500';
 
-      statsHtml = `
-        <div class="grid grid-cols-3 gap-3 mb-6">
+      // Time-Awareness Detection
+      let tenses = "Command";
+      let todayStr = new Date().toISOString().split('T')[0];
+      if (AppState.activeFilters.endDate && AppState.activeFilters.endDate < todayStr) {
+        tenses = "History";
+      }
+
+      let summaryTitle = "";
+      let summaryText = "";
+      let summaryColor = "blue"; // blue, red, green, yellow
+
+      const pSop = op.kepatuhanSop || 100;
+      const pKomplain = data.komplainTotal || 0;
+      const pOmset = data.targetOmset > 0 ? (data.omsetTotal / data.targetOmset) * 100 : 0;
+      const pTrans = data.transaksiTotal || 0;
+      const pATS = pTrans > 0 ? (data.omsetTotal / pTrans) : 0;
+      const pTelat = op.telat || 0;
+      const pSp = op.teguran || 0;
+
+      // God-Level Decision Matrix
+      if (pOmset >= 100 && pSop < 85 && pKomplain > 4) {
+        // Hollow Growth
+        summaryTitle = "PERTUMBUHAN SEMU";
+        summaryColor = "red";
+        summaryText = tenses === "Command" 
+          ? "Omset melonjak tajam, namun tim operasional kewalahan dan mengorbankan kualitas (SOP anjlok & Komplain meledak). Segera tahan promosi marketing sementara, atau tambah Manpower (Part-time) sebelum citra (Brand Image) kafe hancur di mata pelanggan baru!"
+          : "Pada periode ini terjadi Pertumbuhan Semu. Omset berhasil dicapai, namun operasional hancur. Ini menjadi catatan sejarah bahwa lonjakan transaksi yang tidak diimbangi kesiapan staf akan mengorbankan kepatuhan SOP.";
+      } else if (pOmset >= 80 && pTrans > (data.targetOmset/20000) && pATS < 25000) {
+        // Silent Killer
+        summaryTitle = "KEBOCORAN FINANSIAL";
+        summaryColor = "yellow";
+        summaryText = tenses === "Command"
+          ? "Kafe luar biasa ramai (transaksi membludak), tapi pelanggan hanya membeli produk murah/promo (ATS sangat rendah). Beban fisik mesin dan barista sangat tinggi namun margin tipis. Wajibkan kasir melakukan teknik Upselling ke produk premium minggu ini!"
+          : "Periode ini mencatat kebocoran margin (Silent Killer). Ramainya transaksi tidak sebanding dengan omset karena rata-rata pembelanjaan (ATS) yang rendah. Evaluasi efektivitas promosi yang berjalan di tanggal tersebut.";
+      } else if (pOmset >= 80 && pTelat > 5 && pSp > 0) {
+        // Toxic Workplace
+        summaryTitle = "KRISIS SDM TERSEMBUNYI";
+        summaryColor = "red";
+        summaryText = tenses === "Command"
+          ? "Secara finansial aman, namun kedisiplinan tim hancur total dibarengi tingginya SP/Telat. Kemungkinan besar ada masalah kepemimpinan (toxic) di level outlet. Lakukan audit internal 1-on-1 dengan staf bawah."
+          : "Meski omset aman, periode ini mencatat rekor buruk kedisiplinan (Krisis SDM). Angka keterlambatan dan teguran yang tinggi menjadi indikator awal masalah kepemimpinan di lapangan pada waktu itu.";
+      } else if (pOmset < 80 && pSop >= 95 && pKomplain === 0) {
+        // Marketing Illusion
+        summaryTitle = "DARURAT TRAFFIC (ILUSI MARKETING)";
+        summaryColor = "blue";
+        summaryText = tenses === "Command"
+          ? "Tim operasional sudah bekerja sangat sempurna tanpa celah, namun pengunjung memang tidak ada. Ini BUKAN masalah kualitas produk atau pelayanan, ini murni masalah MARKETING. Evaluasi ulang efektivitas budget iklan dan strategi konten bulan ini."
+          : "Periode ilusi marketing: Evaluasi SOP menunjukkan nilai sempurna tanpa komplain, namun gagal mencapai target finansial. Ini membuktikan bahwa di periode tersebut masalah murni ada pada kurangnya trafik pengunjung, bukan pada kualitas layanan.";
+      } else if (pOmset >= 100 && pSop >= 95 && pKomplain === 0 && pTelat <= 2) {
+        // Golden Era
+        summaryTitle = "GOLDEN ERA";
+        summaryColor = "green";
+        summaryText = tenses === "Command"
+          ? "Eksekusi sempurna bulan ini. Terjadi keseimbangan mutlak antara agresivitas penjualan marketing dan keandalan kualitas operasional. Pertahankan formasi tim ini dan cairkan insentif maksimal!"
+          : "Golden Era: Keseimbangan sempurna operasional dan finansial terjadi di periode ini. Kinerja ini layak dijadikan patokan standar operasional (benchmark) untuk bulan-bulan lainnya.";
+      } else {
+        // Default / Standard
+        summaryTitle = "ANALISIS STABIL";
+        summaryColor = "blue";
+        summaryText = tenses === "Command"
+          ? "Seluruh matriks utama (Finansial, SOP, HR) belum menunjukkan anomali kritis. Terus pantau eksekusi harian dan pastikan konsistensi layanan."
+          : "Tidak ada anomali ekstrem pada periode ini. Kinerja finansial dan operasional berjalan seimbang dalam batas toleransi wajar.";
+      }
+
+      const bgMap = { 'red': 'bg-red-50 border-red-500', 'yellow': 'bg-amber-50 border-amber-500', 'green': 'bg-emerald-50 border-emerald-500', 'blue': 'bg-blue-50 border-blue-500' };
+      const iconMap = { 'red': 'text-red-600', 'yellow': 'text-amber-600', 'green': 'text-emerald-600', 'blue': 'text-blue-600' };
+      const textMap = { 'red': 'text-red-900', 'yellow': 'text-amber-900', 'green': 'text-emerald-900', 'blue': 'text-blue-900' };
+      const titleMap = { 'red': 'text-red-800', 'yellow': 'text-amber-800', 'green': 'text-emerald-800', 'blue': 'text-blue-800' };
+
+      let summaryHtml = `
+        <div class="${bgMap[summaryColor]} border-l-4 p-4 rounded-xl mb-4 shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
+          <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 ${iconMap[summaryColor]}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-[10px] font-extrabold ${titleMap[summaryColor]} uppercase tracking-widest">AI SUMMARY: ${summaryTitle}</span>
+          </div>
+          <p class="text-xs ${textMap[summaryColor]} leading-relaxed font-medium">
+            ${summaryText}
+          </p>
+        </div>
+      `;
+
+      const ytdPercent = data.targetYTD > 0 ? Math.round((data.omsetYTD / data.targetYTD) * 100) : 0;
+      const ytdColor = ytdPercent >= 100 ? 'bg-emerald-500' : (ytdPercent >= 80 ? 'bg-yellow-500' : 'bg-blue-500');
+      
+      let ytdHtml = `
+        <div class="col-span-3 bg-white p-4 rounded-2xl border border-gray-200 mb-6 shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Year-to-Date (YTD) Trajectory</span>
+            <span class="text-[10px] font-extrabold text-zero-black">${ytdPercent}%</span>
+          </div>
+          <div class="flex justify-between items-end mb-3">
+            <div>
+              <span class="text-xl font-black text-zero-black">Rp ${data.omsetYTD.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[9px] font-bold text-gray-400 block mb-1">Target Tahunan</span>
+              <span class="text-xs font-bold text-gray-600">Rp ${data.targetYTD.toLocaleString('id-ID')}</span>
+            </div>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div class="${ytdColor} h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${Math.min(ytdPercent, 100)}%"></div>
+          </div>
+        </div>
+      `;
+
+      statsHtml = summaryHtml + ytdHtml + `
+        <div class="grid grid-cols-2 gap-3 mb-6">
           <!-- Sales Card -->
-          <div class="col-span-3 bg-zero-black p-5 rounded-2xl text-white shadow-md transform transition-transform duration-300 hover:scale-[1.01]">
+          <div class="col-span-2 bg-zero-black p-5 rounded-2xl text-white shadow-md transform transition-transform duration-300 hover:scale-[1.01]">
             <div class="flex justify-between items-start mb-2">
               <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset & Target</span>
               ${op.isFallback ? '<span class="text-[8px] bg-gray-800 text-gray-400 px-2 py-1 rounded-full border border-gray-700">Snapshot Mingguan</span>' : ''}
@@ -62,25 +168,118 @@ window.getDashboardGMTemplate = function() {
             </div>
           </div>
 
-          <!-- SOP Card -->
-          <div class="col-span-1 bg-white p-3 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-105">
-            <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Kepatuhan SOP</span>
-            <span class="text-xl font-black ${sopColor}">${op.kepatuhanSop}%</span>
-          </div>
-
-          <!-- Complaint Card -->
-          <div class="col-span-1 bg-white p-3 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-105 relative">
-            <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Kasus QC</span>
-            <span class="text-xl font-black ${qcColor}">${data.komplainTotal}</span>
-          </div>
-
           <!-- Transaction Card -->
-          <div class="col-span-1 bg-white p-3 rounded-2xl border border-gray-200 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-105">
-            <span class="text-[9px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Transaksi</span>
-            <span class="text-xl font-black text-zero-black">${data.transaksiTotal || 0}</span>
+          <div class="col-span-2 bg-white p-4 rounded-2xl border border-gray-200 flex justify-between items-center shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
+            <div>
+              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Transaksi</span>
+              <span class="text-2xl font-black text-zero-black">${data.transaksiTotal || 0} <span class="text-[10px] text-gray-400 font-normal">struk</span></span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Average Ticket Size</span>
+              <span class="text-xl font-bold text-gray-700">Rp ${data.transaksiTotal > 0 ? Math.round(data.omsetTotal / data.transaksiTotal).toLocaleString('id-ID') : 0}</span>
+            </div>
           </div>
         </div>
       `;
+      
+      let hygieneKritisHtml = "";
+      if (data.hygieneKritis && data.hygieneKritis.length > 0) {
+        hygieneKritisHtml = `
+          <div class="bg-red-50 p-5 rounded-2xl border border-red-100 mb-6 shadow-sm">
+            <h3 class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-4 border-b border-red-200 pb-2 flex items-center justify-between">
+              <span>3 AREA KRITIS (KEBERSIHAN)</span>
+              <span class="text-[8px] bg-red-200 text-red-800 px-2 py-0.5 rounded-full">ACTION REQUIRED</span>
+            </h3>
+            <div class="space-y-3">
+              ${data.hygieneKritis.map((k, idx) => `
+                <div class="flex flex-col p-3 bg-white border border-red-100 rounded-xl">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-red-900">${idx + 1}. ${k.area}</span>
+                    </div>
+                    <span class="text-[10px] font-extrabold text-red-600">Skor: ${k.avg}%</span>
+                  </div>
+                  <span class="text-[9px] text-gray-500 italic">"${k.ket}"</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      let leaderboardHtml = "";
+      if ((!AppState.activeFilters.outlet || AppState.activeFilters.outlet === 'Semua') && data.leaderboard && data.leaderboard.length > 0) {
+        leaderboardHtml = `
+          <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6 shadow-sm">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
+              MULTI-OUTLET LEADERBOARD
+            </h3>
+            <div class="space-y-3">
+              ${data.leaderboard.map((out, idx) => `
+                <div class="flex items-center justify-between p-3 ${idx === 0 ? 'bg-yellow-50 border-yellow-100' : 'bg-gray-50 border-gray-100'} border rounded-xl">
+                  <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 rounded-full ${idx === 0 ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-500'} text-[10px] font-bold flex items-center justify-center flex-shrink-0">${idx + 1}</span>
+                    <span class="text-xs font-bold ${idx === 0 ? 'text-yellow-900' : 'text-zero-black'}">${out.name}</span>
+                  </div>
+                  <span class="text-xs font-extrabold ${idx === 0 ? 'text-yellow-700' : 'text-zero-black'}">Rp ${out.omset.toLocaleString('id-ID')}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
+      hygieneAiHtml = "";
+      if (data.hygieneScore !== undefined && data.targetOmset > 0) {
+        let aiTitle = "";
+        let aiDesc = "";
+        let aiColor = "";
+        
+        let targetPercent = (data.omsetTotal / data.targetOmset) * 100;
+        
+        if (targetPercent >= 90 && data.hygieneScore < 80) {
+          aiTitle = "The Perfect Storm (Ramai & Kotor)";
+          aiDesc = "Volume transaksi membludak sehingga staf mengorbankan kebersihan. Rawan komplain tamu dine-in. Segera evaluasi perlunya staf Part-time (Bantuan) di jam sibuk.";
+          aiColor = "bg-orange-50 border-orange-200 text-orange-800";
+        } else if (targetPercent < 70 && data.hygieneScore < 80) {
+          aiTitle = "The Lazy Shift (Sepi & Kotor)";
+          aiDesc = "Kafe sedang sepi pengunjung, namun kebersihan tetap buruk. Ini adalah indikator kuat kemalasan/kurang disiplin. Berikan SP atau lakukan sidak mendadak.";
+          aiColor = "bg-red-50 border-red-200 text-red-800";
+        } else if (data.hygieneScore >= 90) {
+          aiTitle = "The Good Standard (Ideal)";
+          aiDesc = "Standar kebersihan dan sanitasi terjaga dengan sangat baik. Kinerja tim lapangan memuaskan, pertahankan untuk audit eksternal.";
+          aiColor = "bg-emerald-50 border-emerald-200 text-emerald-800";
+        } else if (data.hygieneKritis && data.hygieneKritis.length > 0) {
+          aiTitle = "Spot Warning (Area Kritis)";
+          aiDesc = "Beberapa area dilaporkan kotor. Cek ketersediaan bahan pembersih atau fasilitas yang mungkin rusak di area tersebut.";
+          aiColor = "bg-yellow-50 border-yellow-200 text-yellow-800";
+        } else {
+          aiTitle = "Dalam Batas Standar";
+          aiDesc = "Kebersihan cukup terjaga, namun belum mencapai tingkat ideal (>90%). Tetap perhatikan area-area yang rentan.";
+          aiColor = "bg-gray-50 border-gray-200 text-gray-700";
+        }
+        
+        hygieneAiHtml = `
+          <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6 shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2 flex items-center justify-between">
+              <span>AI INSIGHT: HIGIENISITAS</span>
+              <span class="text-[8px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-bold">ANALYSIS</span>
+            </h3>
+            
+            <div class="flex items-center gap-4 mb-4">
+              <div class="flex-shrink-0 w-16 h-16 rounded-full border-4 ${data.hygieneScore >= 80 ? 'border-emerald-400 text-emerald-600' : 'border-red-400 text-red-600'} flex items-center justify-center text-xl font-black bg-white shadow-inner">
+                ${data.hygieneScore}%
+              </div>
+              <div class="${aiColor} p-3 rounded-xl border flex-1">
+                <span class="block text-[10px] font-bold uppercase mb-1">${aiTitle}</span>
+                <span class="block text-xs leading-relaxed">${aiDesc}</span>
+              </div>
+            </div>
+            
+            ${hygieneKritisHtml}
+          </div>
+        `;
+      }
       
       kesehatanHtml = `
         <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm" open>
@@ -89,6 +288,11 @@ window.getDashboardGMTemplate = function() {
             <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
           </summary>
           <div class="p-5 bg-white">
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-[1.01] mb-4">
+              <span class="text-[9px] text-gray-500 uppercase tracking-widest block font-bold mb-1">Kepatuhan SOP Bulanan</span>
+              <span class="text-3xl font-black ${sopColor}">${op.kepatuhanSop}%</span>
+            </div>
+            
             <div class="grid grid-cols-3 gap-3 mb-4">
               <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
                 <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Total Telat</span>
@@ -108,13 +312,6 @@ window.getDashboardGMTemplate = function() {
               <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Penyebab Kendala Staff Utama</span>
               <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs text-zero-black leading-relaxed">
                 ${op.kendalaUtama || '-'}
-              </div>
-            </div>
-            
-            <div>
-              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-1">Eskalasi Fasilitas Kritis</span>
-              <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-xs text-red-700 font-medium leading-relaxed">
-                ${op.eskalasiFasilitas || '-'}
               </div>
             </div>
           </div>
@@ -206,7 +403,7 @@ window.getDashboardGMTemplate = function() {
       const maxTop = topItems.length > 0 ? topItems[0].terjual : 1;
       
       return `
-        <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6">
+        <div class="mb-6 last:mb-0">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">
             EVALUASI PRODUK ${catTitle.toUpperCase()}
           </h3>
@@ -261,7 +458,6 @@ window.getDashboardGMTemplate = function() {
                 </div>
               `}
             </div>
-          </div>
         </div>
       `;
     };
@@ -275,15 +471,19 @@ window.getDashboardGMTemplate = function() {
         <div class="p-5 bg-white space-y-6">
           <div class="bg-gray-50 border-l-4 border-zero-black p-3 rounded-xl mb-4">
             <p class="text-[9px] text-zero-black leading-relaxed font-medium">
-              Catatan Analisis: Tren penjualan ini diakumulasikan murni dari Laporan Mingguan/Bulanan (Sinkronisasi POS Zero). Data Laporan Harian sengaja tidak diakumulasikan di sini untuk menghindari selisih angka dan memastikan GM mendapatkan data riil 100%. Top 5 adalah produk paling laris, Bottom 3 adalah produk dengan penjualan terendah dalam periode ini.
+              Catatan Analisis: Tren penjualan ini diakumulasikan secara dinamis dan <i>real-time</i> dari <b>Laporan Harian (Daily Report)</b> SPV berdasarkan rentang tanggal dan outlet yang Anda pilih. Top 5 adalah produk paling laris, Bottom 3 adalah produk dengan penjualan terendah beserta Rencana Tindakan dari SPV.
             </p>
           </div>
           ${renderCategorySection("Minuman", "minuman")}
           ${renderCategorySection("Makanan", "makanan")}
           ${renderCategorySection("Snack", "snack")}
         </div>
+        </div>
       </details>
     `;
+    
+    // Combine everything
+    statsHtml = statsHtml + leaderboardHtml;
     
   } else {
     statsHtml = `
@@ -301,9 +501,14 @@ window.getDashboardGMTemplate = function() {
           <h2 class="text-sm font-extrabold text-zero-black">DASHBOARD GM</h2>
           <p class="text-[10px] font-bold text-gray-400">Zero Cafe Analytics</p>
         </div>
-        <button type="button" onclick="handleLogout()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
-          KELUAR
-        </button>
+        <div class="flex gap-2">
+          <button type="button" onclick="openGMSettings()" class="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-zero-black transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          </button>
+          <button type="button" onclick="handleLogout()" class="px-3 py-1 border border-gray-200 rounded-full text-[10px] font-bold text-gray-400 hover:bg-gray-50 transition-all">
+            KELUAR
+          </button>
+        </div>
       </div>
 
       <div class="px-4 mt-6">
@@ -314,17 +519,16 @@ window.getDashboardGMTemplate = function() {
           <div class="flex flex-col gap-3 bg-white p-4 rounded-2xl border border-gray-200">
             <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-2">Filter Data</h3>
             <div class="flex gap-2">
-              <select id="filterOutlet" class="flex-1 px-3 py-2 text-xs font-bold text-zero-black bg-gray-50 border border-gray-200 rounded-xl focus:outline-none">
+              <select id="filterOutlet" class="w-1/3 px-3 py-2 text-xs font-bold text-zero-black bg-gray-50 border border-gray-200 rounded-xl focus:outline-none">
                 <option value="Semua" ${!AppState.activeFilters.outlet || AppState.activeFilters.outlet === 'Semua' ? 'selected' : ''}>Semua Outlet</option>
                 <option value="Perintis" ${AppState.activeFilters.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
                 <option value="Dg Tata" ${AppState.activeFilters.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
               </select>
-              <select id="filterMonth" class="flex-1 px-3 py-2 text-xs font-bold text-zero-black bg-gray-50 border border-gray-200 rounded-xl focus:outline-none">
-                ${months.map(m => `<option value="${m}" ${AppState.activeFilters.month === m ? 'selected' : ''}>${m}</option>`).join('')}
-              </select>
-              <select id="filterYear" class="flex-1 px-3 py-2 text-xs font-bold text-zero-black bg-gray-50 border border-gray-200 rounded-xl focus:outline-none">
-                ${years.map(y => `<option value="${y}" ${AppState.activeFilters.year === y ? 'selected' : ''}>${y}</option>`).join('')}
-              </select>
+              <div class="flex w-2/3 gap-1 items-center bg-gray-50 border border-gray-200 rounded-xl px-2 overflow-hidden">
+                 <input type="date" id="filterStartDate" value="${AppState.activeFilters.startDate || ''}" class="w-full bg-transparent text-[10px] font-bold text-zero-black focus:outline-none py-2" required>
+                 <span class="text-gray-400 font-bold">-</span>
+                 <input type="date" id="filterEndDate" value="${AppState.activeFilters.endDate || ''}" class="w-full bg-transparent text-[10px] font-bold text-zero-black focus:outline-none py-2" required>
+              </div>
             </div>
             <button onclick="fetchGMAnalytics()" class="w-full mt-2 py-3 bg-zero-black hover:bg-gray-800 text-white rounded-xl text-[10px] font-bold tracking-widest transition-all uppercase">
               Tarik Data
@@ -332,19 +536,100 @@ window.getDashboardGMTemplate = function() {
           </div>
         </div>
 
-        <!-- Stats Grid -->
-        ${statsHtml}
-        
-        <!-- Tier 3: Kesehatan Tim & Aset (Di atas Performa Produk) -->
-        ${AppState.dashboardData ? kesehatanHtml : ''}
-        
-        <!-- Tren Produk (Hanya jika data ditarik) -->
-        ${topProdukHtml}
+        <!-- GM Tabs Header -->
+        <div class="flex items-center gap-4 mb-6 border-b border-gray-200 overflow-x-auto hide-scrollbar sticky top-[65px] bg-[#f3f4f6] z-10 pt-2">
+          <button onclick="switchGmTab('finansial')" id="tabBtn-finansial" class="pb-3 text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap transition-all border-b-2 border-zero-black text-zero-black">Finansial & Kinerja</button>
+          <button onclick="switchGmTab('operasional')" id="tabBtn-operasional" class="pb-3 text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap transition-all border-b-2 border-transparent text-gray-400 hover:text-zero-black">Operasional & Layanan</button>
+          <button onclick="switchGmTab('sdm')" id="tabBtn-sdm" class="pb-3 text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap transition-all border-b-2 border-transparent text-gray-400 hover:text-zero-black">SDM & Evaluasi</button>
+        </div>
 
-        <!-- Tier 4: Strategi ke Depan -->
-        ${AppState.dashboardData ? strategiHtml : ''}
+        <!-- Tab 1: FINANSIAL & KINERJA -->
+        <div id="tabContent-finansial" class="gm-tab-content">
+          ${statsHtml}
+          
+          <!-- [D1] Marketing Intelligence Report Section -->
+          <div class="bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
+            <div class="p-5 border-b border-gray-100">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">Marketing Intelligence</h3>
+                  <p class="text-[9px] text-gray-400 mt-0.5">Analisis pola & tren otomatis dari data SPV</p>
+                </div>
+                <span class="text-[8px] font-bold bg-zero-black text-white px-2 py-0.5 rounded-full">BETA</span>
+              </div>
+              <!-- Summary Badges -->
+              <div id="ai-summary-badges" class="flex gap-2 mt-3 flex-wrap">
+                <span class="text-[9px] text-gray-400 italic">Klik "Tarik Analisis AI" untuk memulai...</span>
+              </div>
+            </div>
+            
+            <!-- Benchmark ATS Configurator Accordion -->
+            <details class="group border-b border-gray-100 bg-gray-50">
+              <summary class="px-5 py-3 flex items-center justify-between cursor-pointer list-none">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest block">Pengaturan AI & Target ATS</span>
+                </div>
+                <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+              </summary>
+              <div class="px-5 py-4 border-t border-gray-100 flex flex-col gap-3">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <label class="text-[9px] font-bold text-gray-500 uppercase tracking-widest block">Benchmark ATS:</label>
+                    <p class="text-[8px] text-gray-400 mt-0.5">Average Transaction Size (Target rata-rata per struk)</p>
+                  </div>
+                  <input type="text" id="benchmarkATSInput" value="Rp 30.000" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-24 px-3 py-1.5 text-xs font-bold text-zero-black bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-zero-black text-right" placeholder="Rp 30.000">
+                </div>
+                <button onclick="saveAndRunInsights()" class="w-full py-2.5 bg-zero-black text-white text-[10px] font-bold rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
+                  Simpan & Tarik Analisis
+                </button>
+              </div>
+            </details>
+            
+            <!-- Insights Container -->
+            <div id="ai-insights-container" class="p-4 space-y-2">
+              <p class="text-[10px] text-gray-400 text-center py-4">Tekan tombol "Tarik Analisis AI" di atas setelah menarik data Dasbor.</p>
+            </div>
+          </div>
+          
+          ${topProdukHtml}
+        </div>
+        
+        <!-- Tab 2: OPERASIONAL & LAYANAN -->
+        <div id="tabContent-operasional" class="gm-tab-content hidden">
+          ${typeof hygieneAiHtml !== 'undefined' ? hygieneAiHtml : ''}
+          
+          <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6 shadow-sm">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">STATISTIK KOMPLAIN & QC</h3>
+            <div class="flex flex-col items-center justify-center py-6 text-center">
+              <span class="text-4xl font-black ${AppState.dashboardData && AppState.dashboardData.komplainTotal <= 2 ? 'text-green-500' : 'text-red-500'} mb-2">
+                ${AppState.dashboardData ? AppState.dashboardData.komplainTotal : 0}
+              </span>
+              <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Total Komplain / Retur</span>
+            </div>
+          </div>
+          
+          <!-- Eskalasi Fasilitas from KesehatanHtml originally -->
+          ${AppState.dashboardData && AppState.dashboardData.operasionalData && AppState.dashboardData.operasionalData.eskalasiFasilitas && AppState.dashboardData.operasionalData.eskalasiFasilitas !== '-' ? `
+            <div class="bg-red-50 p-5 rounded-2xl border border-red-100 mb-6 shadow-sm">
+              <h3 class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-3 border-b border-red-200 pb-2 flex items-center justify-between">
+                <span>ESKALASI FASILITAS KRITIS</span>
+                <span class="text-[8px] bg-red-200 text-red-800 px-2 py-0.5 rounded-full">ACTION REQUIRED</span>
+              </h3>
+              <div class="text-xs text-red-700 font-medium leading-relaxed">
+                ${AppState.dashboardData.operasionalData.eskalasiFasilitas}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        
+        <!-- Tab 3: SDM & EVALUASI -->
+        <div id="tabContent-sdm" class="gm-tab-content hidden">
+          ${AppState.dashboardData ? kesehatanHtml : ''}
+          ${AppState.dashboardData ? strategiHtml : ''}
+        </div>
 
-        <!-- PDF Archives -->
+        <!-- PDF Archives (Always visible at bottom) -->
         ${AppState.dashboardData ? reportsHtml : ''}
 
         <!-- Pengaturan Sistem -->
@@ -363,9 +648,178 @@ window.getDashboardGMTemplate = function() {
         </div>
 
       </div>
+      
+      <!-- GM Settings Modal -->
+      <div id="modalGMSettings" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeGMSettings()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] flex flex-col transform transition-transform translate-y-full" id="modalGMSettingsContent">
+          <div class="flex-shrink-0 p-5 border-b border-gray-100 flex justify-between items-center">
+            <div>
+              <h3 class="text-sm font-extrabold text-zero-black">PENGATURAN EKSEKUTIF</h3>
+              <p class="text-[10px] text-gray-400 mt-1">Konfigurasi Target Mutlak Tahunan</p>
+            </div>
+            <button type="button" onclick="closeGMSettings()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          
+          <div class="p-5 overflow-y-auto">
+            <div class="mb-4">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Tahun Berjalan</label>
+              <input type="text" id="gmSettingYear" readonly class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold border-none outline-none">
+            </div>
+            <div class="mb-6">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Target Mutlak YTD</label>
+              <input type="text" id="gmSettingTarget" placeholder="Rp 0" oninput="formatRupiah(this)" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-zero-black rounded-xl font-black text-lg focus:outline-none focus:border-zero-black transition-colors">
+              <p class="text-[9px] text-gray-400 mt-2">Target ini akan menjadi garis finish mutlak bagi Omset YTD di tahun yang bersangkutan.</p>
+            </div>
+            
+            <button type="button" id="btnSaveGMSettings" onclick="saveGMSettings()" class="w-full py-4 bg-zero-black text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-colors shadow-lg shadow-black/20 relative">
+              <span id="btnSaveGMSettingsText">Simpan Pengaturan</span>
+              <div id="btnSaveGMSettingsLoader" class="hidden absolute inset-0 flex items-center justify-center">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
 
+
+window.switchGmTab = function(tabName) {
+  const tabs = ['finansial', 'operasional', 'sdm'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tabBtn-${t}`);
+    const content = document.getElementById(`tabContent-${t}`);
+    if (btn && content) {
+      if (t === tabName) {
+        btn.className = 'pb-3 text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap transition-all border-b-2 border-zero-black text-zero-black';
+        content.classList.remove('hidden');
+      } else {
+        btn.className = 'pb-3 text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap transition-all border-b-2 border-transparent text-gray-400 hover:text-zero-black';
+        content.classList.add('hidden');
+      }
+    }
+  });
+};
+
+// [D2 & D3] AI Marketing Intelligence Functions
+window.saveAndRunInsights = function() {
+  const container = document.getElementById('ai-insights-container');
+  const badges = document.getElementById('ai-summary-badges');
+  if (!container) return;
+
+  if (!AppState.activeFilters || !AppState.activeFilters.startDate) {
+    container.innerHTML = '<p class="text-[10px] text-red-500 text-center py-4">Tarik data Dasbor terlebih dahulu sebelum menjalankan analisis.</p>';
+    return;
+  }
+
+  const benchmarkInput = document.getElementById('benchmarkATSInput');
+  const benchmarkATS = benchmarkInput ? parseRupiah(benchmarkInput.value) || 30000 : 30000;
+
+  container.innerHTML = '<div class="flex items-center justify-center gap-2 py-6"><svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="text-[10px] text-gray-400">Menganalisis pola data...</span></div>';
+
+  const payload = JSON.stringify({
+    startDate: AppState.activeFilters.startDate,
+    endDate: AppState.activeFilters.endDate,
+    outlet: AppState.activeFilters.outlet || 'Semua',
+    benchmarkATS: benchmarkATS
+  });
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      try {
+        const data = JSON.parse(result);
+        if (data.status === 'error') {
+          container.innerHTML = '<p class="text-[10px] text-red-500 text-center py-4">Error: ' + data.error + '</p>';
+          return;
+        }
+        renderInsights(data.insights, data.summary, badges, container);
+        // Save benchmark
+        google.script.run.api_gm_saveBenchmarkATS(benchmarkATS);
+      } catch(e) {
+        container.innerHTML = '<p class="text-[10px] text-red-500 text-center py-4">Gagal memuat insight.</p>';
+      }
+    })
+    .withFailureHandler(function(err) {
+      container.innerHTML = '<p class="text-[10px] text-red-500 text-center py-4">Error koneksi: ' + err.message + '</p>';
+    })
+    .api_gm_getMarketingInsights(payload);
+};
+
+window.renderInsights = function(insights, summary, badgesEl, containerEl) {
+  // Render summary badges
+  if (badgesEl) {
+    badgesEl.innerHTML = '';
+    if (summary.critical > 0) {
+      badgesEl.innerHTML += '<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-red-100 text-red-700 px-2 py-1 rounded-full">' + summary.critical + ' Kritis</span>';
+    }
+    if (summary.warning > 0) {
+      badgesEl.innerHTML += '<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">' + summary.warning + ' Perhatian</span>';
+    }
+    if (summary.positive > 0) {
+      badgesEl.innerHTML += '<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">' + summary.positive + ' Positif</span>';
+    }
+    if (summary.insufficient > 0) {
+      badgesEl.innerHTML += '<span class="inline-flex items-center gap-1 text-[9px] font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-full">' + summary.insufficient + ' Data Kurang</span>';
+    }
+  }
+
+  // Render each insight accordion
+  const levelConfig = {
+    critical: { bg: 'bg-red-50', border: 'border-red-200', header: 'text-red-800', dot: 'bg-red-500', badge: 'bg-red-100 text-red-700', label: 'KRITIS' },
+    warning:  { bg: 'bg-yellow-50', border: 'border-yellow-200', header: 'text-yellow-800', dot: 'bg-yellow-400', badge: 'bg-yellow-100 text-yellow-700', label: 'PERHATIAN' },
+    positive: { bg: 'bg-emerald-50', border: 'border-emerald-200', header: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'POSITIF' },
+    info:     { bg: 'bg-gray-50', border: 'border-gray-200', header: 'text-gray-700', dot: 'bg-gray-400', badge: 'bg-gray-100 text-gray-600', label: 'INFO' }
+  };
+
+  let html = '';
+  insights.forEach(function(ins, idx) {
+    if (ins.status === 'insufficient') {
+      html += `
+        <div class="flex items-start gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="w-2 h-2 rounded-full bg-gray-300 mt-1 flex-shrink-0"></div>
+          <div>
+            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">${ins.modul}</p>
+            <p class="text-[10px] text-gray-500 mt-0.5">${ins.desc}</p>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const cfg = levelConfig[ins.level] || levelConfig.info;
+    const accordionId = 'ai-accordion-' + idx;
+    html += `
+      <details class="group rounded-xl border ${cfg.border} overflow-hidden">
+        <summary class="${cfg.bg} px-4 py-3 flex items-center justify-between cursor-pointer list-none">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full ${cfg.dot} flex-shrink-0"></div>
+            <div>
+              <p class="text-[8px] font-bold ${cfg.header} uppercase tracking-widest">${ins.modul}</p>
+              <p class="text-[10px] font-bold text-zero-black mt-0.5">${ins.title}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-[8px] font-bold ${cfg.badge} px-2 py-0.5 rounded-full">${cfg.label}</span>
+            <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </summary>
+        <div class="bg-white px-4 py-3 border-t ${cfg.border}">
+          <p class="text-[11px] text-gray-600 leading-relaxed mb-3">${ins.desc}</p>
+          <div class="flex items-start gap-2 bg-zero-black/5 rounded-lg p-3">
+            <span class="text-[8px] font-extrabold text-zero-black uppercase tracking-widest whitespace-nowrap mt-0.5">ACTION:</span>
+            <p class="text-[10px] text-zero-black font-semibold leading-relaxed">${ins.action}</p>
+          </div>
+        </div>
+      </details>`;
+  });
+
+  containerEl.innerHTML = html || '<p class="text-[10px] text-gray-400 text-center py-4">Tidak ada insight yang tersedia.</p>';
+};
 
 </script>

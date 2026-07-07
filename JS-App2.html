@@ -34,6 +34,24 @@ async function fetchWeeklyData() {
     const res = await Server.call('api_getWeeklyData', f.periodeStart, f.periodeEnd, f.outlet || 'Perintis');
     if (res.success && res.data) {
       f.weekly.salesHarian = res.data;
+      if (res.produk) {
+        Object.keys(res.produk).forEach(key => {
+          if (f.weekly.produk[key]) {
+            // Reset existing first
+            f.weekly.produk[key].forEach(item => { item.nama = ''; item.terjual = ''; });
+            // Populate new
+            res.produk[key].forEach((item, idx) => {
+              if (idx < f.weekly.produk[key].length) {
+                f.weekly.produk[key][idx].nama = item.nama;
+                f.weekly.produk[key][idx].terjual = item.terjual;
+                if (item.rencana && f.weekly.produk[key][idx].rencana !== undefined) {
+                  f.weekly.produk[key][idx].rencana = item.rencana;
+                }
+              }
+            });
+          }
+        });
+      }
       if (!container) showToast("Data omset dan target harian berhasil ditarik!", "success");
       renderApp(); // This will re-render and implicitly remove the shimmer class since it recreates the DOM element
     }
@@ -77,6 +95,23 @@ async function fetchMonthlyData() {
         f.monthly.sales.persen = Math.round(f.monthly.sales.total / f.monthly.sales.target * 100);
       } else {
         f.monthly.sales.persen = 0;
+      }
+      
+      if (res.produk) {
+        Object.keys(res.produk).forEach(key => {
+          if (f.monthly.produk[key]) {
+            f.monthly.produk[key].forEach(item => { item.nama = ''; item.terjual = ''; });
+            res.produk[key].forEach((item, idx) => {
+              if (idx < f.monthly.produk[key].length) {
+                f.monthly.produk[key][idx].nama = item.nama;
+                f.monthly.produk[key][idx].terjual = item.terjual;
+                if (item.rencana && f.monthly.produk[key][idx].rencana !== undefined) {
+                  f.monthly.produk[key][idx].rencana = item.rencana;
+                }
+              }
+            });
+          }
+        });
       }
       
       if (!salesContainer) showToast("Data bulanan berhasil ditarik!", "success");
@@ -150,16 +185,23 @@ function updateMonthlyQCItem(idx, field, value) {
 
 
 async function fetchGMAnalytics() {
-  const monthEl = document.getElementById('filterMonth');
-  const yearEl = document.getElementById('filterYear');
-  if (!monthEl || !yearEl) return;
+  const outletEl = document.getElementById('filterOutlet');
+  const startDateEl = document.getElementById('filterStartDate');
+  const endDateEl = document.getElementById('filterEndDate');
   
-  AppState.activeFilters.month = monthEl.value;
-  AppState.activeFilters.year = yearEl.value;
+  if (outletEl) AppState.activeFilters.outlet = outletEl.value;
+  if (startDateEl) AppState.activeFilters.startDate = startDateEl.value;
+  if (endDateEl) AppState.activeFilters.endDate = endDateEl.value;
+  
+  // Validasi
+  if (!AppState.activeFilters.startDate || !AppState.activeFilters.endDate) {
+    showToast("Silakan pilih Tanggal Mulai dan Tanggal Akhir", "error");
+    return;
+  }
   
   showLoading(true);
   try {
-    const rawRes = await Server.call('api_gm_fetchReports', AppState.activeFilters.month, AppState.activeFilters.year);
+    const rawRes = await Server.call('api_gm_fetchReports', AppState.activeFilters.startDate, AppState.activeFilters.endDate, AppState.activeFilters.outlet);
     const res = typeof rawRes === 'string' ? JSON.parse(rawRes) : rawRes;
     
     if (res && res.status === 'success') {
@@ -179,32 +221,7 @@ async function fetchGMAnalytics() {
   }
 }
 
-async function saveTargetOmset() {
-  const input = document.getElementById('inputTargetOmset');
-  if (!input) return;
-  const targetVal = input.value;
-  
-  if (!targetVal || isNaN(targetVal)) {
-    showToast("Target omset tidak valid", "error");
-    return;
-  }
-  
-  showLoading(true);
-  try {
-    const res = await Server.call('api_gm_setTargetOmset', AppState.activeFilters.month, AppState.activeFilters.year, targetVal);
-    if (res.success) {
-      showToast("Target Omset berhasil disimpan!");
-      // Refresh analytics to recalculate percentage
-      fetchGMAnalytics();
-    } else {
-      showToast("Gagal menyimpan: " + res.error, "error");
-    }
-  } catch (err) {
-    showToast("Kesalahan sistem: " + err.toString(), "error");
-  } finally {
-    showLoading(false);
-  }
-}
+
 
 let gmChartInstance = null;
 function renderGMChart() {
@@ -366,6 +383,20 @@ async function submitReport() {
       }
     } catch (e) {
       console.warn("Gagal membuat base64 PDF, mengirim tanpa PDF base64", e);
+    }
+    
+    if (f.type === 'daily' && f.kebersihan && f.kebersihan.length > 0) {
+      const kbHtmlContent = buildKebersihanPDFHtml(f);
+      if (kbHtmlContent) {
+        try {
+          const kbBase64String = await html2pdf().set(opt).from(kbHtmlContent).outputPdf('datauristring');
+          if (kbBase64String && kbBase64String.includes(',')) {
+            f.kebersihanPdfBase64 = kbBase64String.split(',')[1];
+          }
+        } catch (e) {
+          console.warn("Gagal membuat base64 PDF Kebersihan", e);
+        }
+      }
     }
     
     const payloadStr = JSON.stringify(f);

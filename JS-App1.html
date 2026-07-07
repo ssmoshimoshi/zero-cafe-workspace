@@ -54,10 +54,9 @@ const AppState = {
   currentTab: 1,          /*  1-indexed active tab in forms */
   isLoading: false,
   masterStaff: [],        /*  Loaded dynamically from Sheet */
+  masterMenu: { minuman: [], makanan: [], snack: [] },
   dashboardData: null,    /*  GM dashboard analytics cache */
   activeFilters: {
-    month: "Juni",
-    year: "2026"
   }
 };
 
@@ -98,6 +97,37 @@ function resetFormData(type) {
     feedback: { items: [], totalKomplain: 0, totalRemake: 0, analisisRemake: "" },
     fasilitas: [],
     bahan: [],
+    kebersihan: [
+      { area: "Kaca dan Kusen", point: "Kaca dan kusen bebas dari noda", status: "", skor: 80, ket: "" },
+      { area: "Lantai", point: "Lantai tidak ada bercak kaki dan sudah di pel", status: "", skor: 80, ket: "" },
+      { area: "Lantai", point: "Tidak ada remahan dan sampah berserakan di lantai café", status: "", skor: 80, ket: "" },
+      { area: "Tembok", point: "Tembok tidak ada bercak", status: "", skor: 80, ket: "" },
+      { area: "Tembok", point: "Tidak ada sarang laba-laba pada setiap sudut tembok", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Dinding tidak ada bercak", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Luar & dalam closet tidak ada noda", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Lantai selalu bersih dan kering", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Tempat sampah tidak penuh dan bau", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Sabun & Pengharum ruangan tersedia dan berfungsi", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Celing/Plafon tidak ada sarang laba-laba", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Ember bersih tanpa noda", status: "", skor: 80, ket: "" },
+      { area: "Wastafel", point: "Cermin tidak ada bercak air dan tidak buram", status: "", skor: 80, ket: "" },
+      { area: "Wastafel", point: "Lantai bersih dan kering", status: "", skor: 80, ket: "" },
+      { area: "Wastafel", point: "Sabun selalu tersedia", status: "", skor: 80, ket: "" },
+      { area: "Parking Area", point: "Tidak ada sampah berceceran pada setiap sudut", status: "", skor: 80, ket: "" },
+      { area: "Parking Area", point: "Tempat sampah tidak berantakan (terisi dalam trash bag)", status: "", skor: 80, ket: "" },
+      { area: "Parking Area", point: "Lantai depan pintu bersih dan sudah di pel", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Tembok bar sudah di lap dan tidak ada bercak air", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Showcase bersih, tidak bau, stock mineral dingin tersedia", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Area Lift tidak ada debu yang tertinggal", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Lantai bersih, tidak ada tumpahan kopi, dan tidak berpasir", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Mesin espresso dan grinder bebas debu dan bercak", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Botol display tidak lengket dan berantakan", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Tools making produk tetap bersih", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Rak Bar tidak ada sampah/barang tak pantas, area bawah bersih", status: "", skor: 80, ket: "" },
+      { area: "Musholah", point: "Lantai sudah disapu dan pel", status: "", skor: 80, ket: "" },
+      { area: "Musholah", point: "Alat shalat wangi, rapi, dan bersih", status: "", skor: 80, ket: "" },
+      { area: "Musholah", point: "Tempat wudhu tidak ada noda menguning dan kering", status: "", skor: 80, ket: "" }
+    ],
     penutup: { kendala: "", rekomendasi: "" },
 
     /*  Weekly Specific */
@@ -234,8 +264,14 @@ async function fetchMasterStaff() {
   try {
     const list = await Server.call('api_getMasterStaff');
     AppState.masterStaff = list || [];
+    
+    // Fetch master menu
+    const menuRes = await Server.call('api_getMasterMenu');
+    if (menuRes && menuRes.success) {
+      AppState.masterMenu = menuRes.data;
+    }
   } catch (err) {
-    showToast("Gagal memuat data staf: " + err.toString(), "error");
+    showToast("Gagal memuat data awal: " + err.toString(), "error");
   }
 }
 
@@ -981,6 +1017,11 @@ function buildDailyPDF(f) {
       ${f.feedback.analisisRemake ? `<p class="note" style="margin-top:8px"><strong>Analisis Remake:</strong> ${f.feedback.analisisRemake}</p>` : ''}
     </div>` : ''}
 
+    ${(function(){
+      // Checklist Kebersihan dipindah ke PDF terpisah
+      return '';
+    })()}
+
     ${fasRows ? `
     <div class="section">
       <div class="section-title">Fasilitas Bermasalah</div>
@@ -996,6 +1037,81 @@ function buildDailyPDF(f) {
       ${f.penutup.kendala ? `<p class="note" style="margin-bottom:8px"><strong>Kendala:</strong> ${f.penutup.kendala}</p>` : ''}
       ${f.penutup.rekomendasi ? `<p class="note"><strong>Rekomendasi:</strong> ${f.penutup.rekomendasi}</p>` : ''}
     </div>` : ''}`;
+}
+
+function buildKebersihanPDFHtml(f) {
+  if (!f.kebersihan || f.kebersihan.length === 0) return '';
+  const avgHygiene = Math.round(f.kebersihan.reduce((acc, k) => acc + (k.skor || 0), 0) / f.kebersihan.length);
+  
+  // Group kebersihan items by Area
+  const grouped = f.kebersihan.reduce((acc, k) => {
+    if (!acc[k.area]) acc[k.area] = [];
+    acc[k.area].push(k);
+    return acc;
+  }, {});
+
+  const areaSections = Object.entries(grouped).map(([area, items]) => {
+    const rows = items.map(k => {
+      const isKotor = k.status === 'Kotor' || k.skor < 80;
+      return `<tr>
+        <td>${k.point}</td>
+        <td><span class="badge ${k.status === 'Bersih' ? 'badge-green' : k.status === 'Cukup Bersih' ? 'badge-yellow' : 'badge-red'}">${k.status}</span></td>
+        <td style="${isKotor ? 'color:#ef4444;font-weight:bold;' : ''}">${k.skor}</td>
+        <td>${k.ket || '-'}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="section">
+        <div class="section-title">${area}</div>
+        <table>
+          <tr><th>Item Pemeriksaan</th><th>Status</th><th>Skor</th><th>Keterangan</th></tr>
+          ${rows}
+        </table>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <style>
+      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #1f2937; line-height: 1.5; font-size:12px; }
+      .header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+      .title { font-size: 24px; font-weight: 900; margin:0; text-transform:uppercase; letter-spacing:1px; }
+      .subtitle { font-size: 14px; color: #6b7280; font-weight:bold; }
+      .meta { font-size: 11px; margin-top:5px; }
+      .meta strong { color: #111827; }
+      .section { margin-bottom: 20px; page-break-inside: avoid; }
+      .section-title { font-size: 14px; font-weight: bold; background: #000; color: #fff; padding: 6px 12px; margin-bottom: 10px; border-radius:4px; }
+      table { w-full; width:100%; border-collapse: collapse; margin-bottom: 10px; font-size:11px; }
+      th, td { border: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; }
+      th { background: #f9fafb; font-weight: 700; color:#374151; }
+      .badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:bold; text-transform:uppercase; }
+      .badge-green { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
+      .badge-yellow { background:#fef9c3; color:#854d0e; border:1px solid #fef08a; }
+      .badge-red { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
+      .summary-card { border:2px solid #e5e7eb; padding:15px; border-radius:8px; text-align:center; margin-bottom:20px; background:#f8fafc; }
+      .summary-score { font-size: 28px; font-weight:900; color: ${avgHygiene >= 80 ? '#16a34a' : '#dc2626'}; }
+    </style>
+    <div class="header">
+      <div>
+        <h1 class="title">Laporan Kebersihan</h1>
+        <div class="subtitle">Inspeksi Higienisitas Outlet</div>
+      </div>
+      <div style="text-align:right">
+        <div class="meta">Outlet: <strong>${f.outlet}</strong></div>
+        <div class="meta">Tanggal: <strong>${f.tanggal}</strong></div>
+        <div class="meta">Supervisor: <strong>${f.supervisor}</strong></div>
+      </div>
+    </div>
+    
+    <div class="summary-card">
+      <div style="font-size:12px; font-weight:bold; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Skor Kebersihan Rata-rata</div>
+      <div class="summary-score">${avgHygiene}%</div>
+      <div style="font-size:11px; color:#64748b; margin-top:5px;">Dari 29 titik inspeksi</div>
+    </div>
+
+    ${areaSections}
+  `;
 }
 
 function buildWeeklyPDF(f) {
@@ -1140,6 +1256,20 @@ function buildMonthlyPDF(f) {
 
 window.validateFormCompletion = function(f) {
   if (!f.supervisor) return 'Nama Supervisor wajib diisi!';
+  
+  if (f.type === 'daily') {
+    if (f.kebersihan) {
+      const missed = f.kebersihan.filter(k => k.status === '');
+      if (missed.length > 0) {
+        return `Anda belum menginspeksi ${missed.length} item kebersihan! Wajib periksa semua area.`;
+      }
+      const kotorTanpaKet = f.kebersihan.filter(k => (k.status === 'Kotor' || k.skor < 80) && !k.ket.trim());
+      if (kotorTanpaKet.length > 0) {
+        return `Ada area Kotor (atau skor < 80) yang belum diberi keterangan alasan. Wajib diisi!`;
+      }
+    }
+  }
+  
   if (f.type === 'weekly') {
     if (!f.periodeStart || !f.periodeEnd) return 'Periode laporan wajib diisi!';
     const diff = Math.ceil(Math.abs(new Date(f.periodeEnd) - new Date(f.periodeStart)) / (1000 * 60 * 60 * 24));
@@ -1298,6 +1428,182 @@ async function sharePDF() {
       showToast('Gagal membagikan PDF.', 'error');
     }
   }
+}
+
+/* === MENU PICKER MODAL === */
+let _menuPickerTargetCat = '';
+let _menuPickerTargetField = '';
+let _menuPickerTargetIndex = -1;
+
+function openMenuPicker(category, targetField, targetIndex) {
+  _menuPickerTargetCat = category.toLowerCase();
+  _menuPickerTargetField = targetField; // "topMinuman", "bottomSnack", dll.
+  _menuPickerTargetIndex = targetIndex;
+  
+  const modal = document.getElementById('menuPickerModal');
+  const overlay = document.getElementById('menuPickerOverlay');
+  const sheet = document.getElementById('menuPickerSheet');
+  
+  document.getElementById('menuPickerTitle').innerText = 'Pilih ' + category.charAt(0).toUpperCase() + category.slice(1);
+  document.getElementById('menuPickerSubtitle').innerText = category.toUpperCase();
+  document.getElementById('menuPickerSearch').value = '';
+  
+  renderMenuPickerList('');
+  
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    overlay.classList.remove('opacity-0');
+    sheet.classList.remove('translate-y-full');
+  }, 10);
+}
+
+function closeMenuPicker() {
+  const overlay = document.getElementById('menuPickerOverlay');
+  const sheet = document.getElementById('menuPickerSheet');
+  
+  overlay.classList.add('opacity-0');
+  sheet.classList.add('translate-y-full');
+  
+  setTimeout(() => {
+    document.getElementById('menuPickerModal').classList.add('hidden');
+  }, 300);
+}
+
+function filterMenuPicker() {
+  const q = document.getElementById('menuPickerSearch').value;
+  renderMenuPickerList(q);
+}
+
+function renderMenuPickerList(query) {
+  const container = document.getElementById('menuPickerList');
+  const menus = AppState.masterMenu[_menuPickerTargetCat] || [];
+  
+  const filtered = menus.filter(m => m.toLowerCase().includes(query.toLowerCase()));
+  
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="p-6 text-center text-gray-400 text-sm">Tidak ada menu ditemukan.</div>`;
+    return;
+  }
+  
+  let html = '';
+  filtered.forEach(m => {
+    html += `
+      <button onclick="selectMenuItem('${m.replace(/'/g, "\\'")}')" class="w-full bg-white p-4 rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-gray-100 shadow-sm mb-2">
+        <span class="font-bold text-gray-800 text-sm">${m}</span>
+        <div class="w-6 h-6 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" class="text-gray-300"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+        </div>
+      </button>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function selectMenuItem(menuName) {
+  closeMenuPicker();
+  
+  // Update state directly via string reference hack or switch
+  if (AppState.menu === 'form_daily') {
+    if (form.produk[_menuPickerTargetField] && form.produk[_menuPickerTargetField][_menuPickerTargetIndex]) {
+       form.produk[_menuPickerTargetField][_menuPickerTargetIndex].nama = menuName;
+    }
+  } else if (AppState.menu === 'form_weekly') {
+    if (form.weekly.produk[_menuPickerTargetField] && form.weekly.produk[_menuPickerTargetField][_menuPickerTargetIndex]) {
+       form.weekly.produk[_menuPickerTargetField][_menuPickerTargetIndex].nama = menuName;
+    }
+  } else if (AppState.menu === 'form_monthly') {
+    if (form.monthly.produk[_menuPickerTargetField] && form.monthly.produk[_menuPickerTargetField][_menuPickerTargetIndex]) {
+       form.monthly.produk[_menuPickerTargetField][_menuPickerTargetIndex].nama = menuName;
+    }
+  }
+  
+  // Update DOM directly to avoid re-rendering and losing accordion state!
+  const inputId = `input-${_menuPickerTargetCat}-${_menuPickerTargetField}-${_menuPickerTargetIndex}`;
+  const inputEl = document.getElementById(inputId);
+  if (inputEl) {
+    inputEl.value = menuName;
+  }
+}
+
+/* === GM SETTINGS MODAL LOGIC === */
+function openGMSettings() {
+  const modal = document.getElementById('modalGMSettings');
+  const content = document.getElementById('modalGMSettingsContent');
+  const yearInput = document.getElementById('gmSettingYear');
+  const targetInput = document.getElementById('gmSettingTarget');
+  
+  if (modal && content) {
+    const currentYear = AppState.activeFilters.startDate ? AppState.activeFilters.startDate.substring(0, 4) : new Date().getFullYear().toString();
+    yearInput.value = currentYear;
+    
+    // Set current target if available in dashboard data
+    if (AppState.dashboardData && AppState.dashboardData.targetYTD) {
+      targetInput.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(AppState.dashboardData.targetYTD);
+    } else {
+      targetInput.value = '';
+    }
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      content.classList.remove('translate-y-full');
+    }, 10);
+  }
+}
+
+function closeGMSettings() {
+  const modal = document.getElementById('modalGMSettings');
+  const content = document.getElementById('modalGMSettingsContent');
+  
+  if (modal && content) {
+    content.classList.add('translate-y-full');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300);
+  }
+}
+
+function saveGMSettings() {
+  const year = document.getElementById('gmSettingYear').value;
+  const targetRaw = document.getElementById('gmSettingTarget').value;
+  const target = parseRupiah(targetRaw);
+  
+  if (!target || target <= 0) {
+    showToast('Silakan masukkan target yang valid', 'error');
+    return;
+  }
+  
+  const btnText = document.getElementById('btnSaveGMSettingsText');
+  const btnLoader = document.getElementById('btnSaveGMSettingsLoader');
+  
+  btnText.classList.add('opacity-0');
+  btnLoader.classList.remove('hidden');
+  
+  const payload = { year: year, target: target };
+  
+  apiSaveGMSettings(payload, (resStr) => {
+    btnText.classList.remove('opacity-0');
+    btnLoader.classList.add('hidden');
+    
+    try {
+      const res = JSON.parse(resStr);
+      if (res.status === 'success') {
+        showToast(res.message, 'success');
+        closeGMSettings();
+        // Refresh dashboard immediately
+        if (typeof fetchGMAnalytics === 'function') {
+          fetchGMAnalytics();
+        }
+      } else {
+        showToast(res.error || 'Gagal menyimpan pengaturan', 'error');
+      }
+    } catch (e) {
+      showToast('Gagal memproses respon server', 'error');
+    }
+  }, (err) => {
+    btnText.classList.remove('opacity-0');
+    btnLoader.classList.add('hidden');
+    showToast('Terjadi kesalahan jaringan', 'error');
+  });
 }
 
 </script>

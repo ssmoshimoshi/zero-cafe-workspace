@@ -71,4 +71,11 @@ function parseRupiah(str) {
   if (!str) return 0;
   return Number(str.toString().replace(/[^0-9-]/g, '')) || 0;
 }
+
+function apiSaveGMSettings(payload, onSuccess, onError) {
+  google.script.run
+    .withSuccessHandler(onSuccess)
+    .withFailureHandler(onError)
+    .api_gm_saveSettings(JSON.stringify(payload));
+}
 </script>

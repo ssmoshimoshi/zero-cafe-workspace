@@ -35,14 +35,15 @@ window.updateDailyProgress = function() {
 
 window.getDailyFormTemplate = function() {
   const tabs = [
-    { num: 1, label: "PENJUALAN" },
+    { num: 1, label: "JUAL" },
     { num: 2, label: "KAS" },
     { num: 3, label: "STAFF" },
-    { num: 4, label: "BRIEFING" },
+    { num: 4, label: "BRIEF" },
     { num: 5, label: "QC" },
-    { num: 6, label: "FEEDBACK" },
-    { num: 7, label: "FASILITAS" },
-    { num: 8, label: "PENUTUP" }
+    { num: 6, label: "BERSIH" },
+    { num: 7, label: "KOMPLAIN" },
+    { num: 8, label: "FASILITAS" },
+    { num: 9, label: "TUTUP" }
   ];
 
   return `
@@ -68,7 +69,7 @@ window.getDailyFormTemplate = function() {
 
       <!-- Tab Navigation Stepper -->
       <div class="bg-white border-b border-gray-200 px-4 py-4 mb-4 sticky top-[65px] z-10 overflow-x-auto hide-scrollbar">
-        <div class="flex justify-between items-start relative min-w-[500px]">
+        <div class="flex justify-between items-start relative min-w-[600px]">
           <!-- Connecting Line -->
           <div class="absolute left-6 right-6 h-0.5 bg-gray-100 z-0 top-2.5"></div>
           ${tabs.map(t => `
@@ -79,6 +80,16 @@ window.getDailyFormTemplate = function() {
               <span class="text-[8px] font-bold tracking-widest text-center ${AppState.currentTab === t.num ? 'text-zero-black' : 'text-gray-400'}">${t.label}</span>
             </button>
           `).join('')}
+        </div>
+        <!-- [B1] Progress Bar: "Halaman X dari Y" -->
+        <div class="mt-3 pt-3 border-t border-gray-100">
+          <div class="flex justify-between items-center mb-1.5">
+            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Progres Pengisian</span>
+            <span class="text-[9px] font-extrabold ${AppState.currentTab === tabs.length ? 'text-emerald-600' : AppState.currentTab > tabs.length / 2 ? 'text-yellow-600' : 'text-gray-500'}">Halaman ${AppState.currentTab} dari ${tabs.length}</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+            <div class="h-1.5 rounded-full transition-all duration-500 ease-out ${AppState.currentTab === tabs.length ? 'bg-emerald-500' : AppState.currentTab > tabs.length / 2 ? 'bg-yellow-400' : 'bg-zero-black'}" style="width: ${Math.round((AppState.currentTab / tabs.length) * 100)}%"></div>
+          </div>
         </div>
       </div>
 
@@ -101,7 +112,7 @@ window.getDailyFormTemplate = function() {
           `).join('')}
         </div>
         <!-- Next arrow -->
-        <button type="button" onclick="nextTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 8 ? 'disabled' : ''}>
+        <button type="button" onclick="nextTab()" class="p-2 text-gray-400 hover:text-zero-black transition-colors disabled:opacity-20" ${AppState.currentTab === 9 ? 'disabled' : ''}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
@@ -114,7 +125,7 @@ window.switchTab = function(tabNum) {
   renderApp();
 }
 window.nextTab = function() {
-  if (AppState.currentTab < 8) switchTab(AppState.currentTab + 1);
+  if (AppState.currentTab < 9) switchTab(AppState.currentTab + 1);
 }
 window.prevTab = function() {
   if (AppState.currentTab > 1) switchTab(AppState.currentTab - 1);
@@ -218,7 +229,7 @@ function getDailyTabContent() {
                 ${form.produk.topMinuman.map((item, idx) => `
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" value="${item.nama}" onchange="window.form.produk.topMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="text" id="input-minuman-topMinuman-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'topMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
                     <input type="number" value="${item.terjual}" onchange="window.form.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
                   </div>
                 `).join('')}
@@ -231,7 +242,7 @@ function getDailyTabContent() {
                   <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" value="${item.nama}" onchange="window.form.produk.bottomMinuman[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="text" id="input-minuman-bottomMinuman-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'bottomMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
                       <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
                     </div>
                     <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
@@ -255,7 +266,7 @@ function getDailyTabContent() {
                 ${form.produk.topMakanan.map((item, idx) => `
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" value="${item.nama}" onchange="window.form.produk.topMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="text" id="input-makanan-topMakanan-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'topMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
                     <input type="number" value="${item.terjual}" onchange="window.form.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
                   </div>
                 `).join('')}
@@ -268,7 +279,7 @@ function getDailyTabContent() {
                   <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" value="${item.nama}" onchange="window.form.produk.bottomMakanan[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="text" id="input-makanan-bottomMakanan-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'bottomMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
                       <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
                     </div>
                     <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
@@ -292,7 +303,7 @@ function getDailyTabContent() {
                 ${form.produk.topSnack.map((item, idx) => `
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" value="${item.nama}" onchange="window.form.produk.topSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="text" id="input-snack-topSnack-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'topSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
                     <input type="number" value="${item.terjual}" onchange="window.form.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
                   </div>
                 `).join('')}
@@ -305,7 +316,7 @@ function getDailyTabContent() {
                   <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" value="${item.nama}" onchange="window.form.produk.bottomSnack[${idx}].nama = this.value" placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="text" id="input-snack-bottomSnack-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'bottomSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
                       <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
                     </div>
                     <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
@@ -505,6 +516,79 @@ function getDailyTabContent() {
       `;
     case 6:
       return `
+        <!-- Checklist Kebersihan -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 overflow-hidden">
+          <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">CHECKLIST KEBERSIHAN (WAJIB)</h3>
+          </div>
+          <div id="dailyKebersihan" class="space-y-3">
+            <p class="text-[9px] text-gray-400 mb-2 leading-relaxed">Seluruh item wajib diinspeksi. Sistem otomatis memblokir pengiriman jika ada yang terlewat. Skor standar kebersihan adalah 80.</p>
+            ${(function() {
+                const grouped = form.kebersihan.reduce((acc, item, idx) => {
+                  if (!acc[item.area]) acc[item.area] = [];
+                  acc[item.area].push({ ...item, originalIdx: idx });
+                  return acc;
+                }, {});
+                return Object.entries(grouped).map(([area, items], areaIdx) => `
+                  <div class="border border-gray-200 rounded-xl overflow-hidden mb-3">
+                    <button type="button" onclick="toggleAccordion('area-${areaIdx}')" class="w-full flex justify-between items-center p-4 bg-gray-50 focus:outline-none hover:bg-gray-100 transition-colors">
+                      <span class="text-[10px] font-bold text-zero-black uppercase tracking-widest">${area}</span>
+                      <svg id="icon-area-${areaIdx}" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div id="area-${areaIdx}" class="hidden p-4 space-y-3 border-t border-gray-100 bg-white">
+                      ${items.map(item => `
+                        <div class="row-kebersihan border rounded-xl p-3 ${item.status === '' ? 'bg-red-50 border-red-200' : 'bg-gray-50/50 border-gray-100'}">
+                          <p class="text-[10px] font-bold text-zero-black mb-2">${item.point}</p>
+                          <div class="flex gap-2 mb-2">
+                            <select onchange="
+                              window.form.kebersihan[${item.originalIdx}].status = this.value; 
+                              let r = this.closest('.row-kebersihan');
+                              let scoreInput = r.querySelector('input[type=number]');
+                              
+                              if(this.value === 'Bersih') {
+                                this.className = 'flex-1 px-2 py-1.5 text-[10px] font-bold border border-emerald-300 bg-emerald-50 text-emerald-700 rounded focus:outline-none';
+                                r.className = 'row-kebersihan border rounded-xl p-3 bg-gray-50/50 border-gray-100';
+                                scoreInput.value = 100;
+                                window.form.kebersihan[${item.originalIdx}].skor = 100;
+                              } else if(this.value === 'Cukup Bersih') {
+                                this.className = 'flex-1 px-2 py-1.5 text-[10px] font-bold border border-yellow-300 bg-yellow-50 text-yellow-700 rounded focus:outline-none';
+                                r.className = 'row-kebersihan border rounded-xl p-3 bg-gray-50/50 border-gray-100';
+                                scoreInput.value = 80;
+                                window.form.kebersihan[${item.originalIdx}].skor = 80;
+                              } else if(this.value === 'Kotor') {
+                                this.className = 'flex-1 px-2 py-1.5 text-[10px] font-bold border border-red-300 bg-red-50 text-red-700 rounded focus:outline-none';
+                                r.className = 'row-kebersihan border rounded-xl p-3 bg-gray-50/50 border-gray-100';
+                                scoreInput.value = 60;
+                                window.form.kebersihan[${item.originalIdx}].skor = 60;
+                              } else {
+                                this.className = 'flex-1 px-2 py-1.5 text-[10px] font-bold border border-red-300 bg-white text-red-500 rounded focus:outline-none';
+                                r.className = 'row-kebersihan border rounded-xl p-3 bg-red-50 border-red-200';
+                              }
+                            " class="flex-1 px-2 py-1.5 text-[10px] font-bold border rounded focus:outline-none ${
+                                item.status === 'Bersih' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 
+                                item.status === 'Cukup Bersih' ? 'border-yellow-300 bg-yellow-50 text-yellow-700' :
+                                item.status === 'Kotor' ? 'border-red-300 bg-red-50 text-red-700' : 
+                                'border-red-300 bg-white text-red-500'
+                            }">
+                              <option value="">-- WAJIB ISI --</option>
+                              <option value="Bersih" ${item.status === 'Bersih' ? 'selected' : ''}>Bersih</option>
+                              <option value="Cukup Bersih" ${item.status === 'Cukup Bersih' ? 'selected' : ''}>Cukup Bersih</option>
+                              <option value="Kotor" ${item.status === 'Kotor' ? 'selected' : ''}>Kotor</option>
+                            </select>
+                            <input type="number" value="${item.skor}" onchange="window.form.kebersihan[${item.originalIdx}].skor = Number(this.value)" placeholder="Skor" class="w-14 px-2 py-1 text-xs text-center border border-gray-200 rounded focus:outline-none font-bold">
+                          </div>
+                          <textarea onchange="window.form.kebersihan[${item.originalIdx}].ket = this.value" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Catatan/Alasan skor..." class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white resize-none overflow-hidden" rows="2" style="min-height:42px">${item.ket || ''}</textarea>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                `).join('');
+            })()}
+          </div>
+        </div>
+      `;
+    case 7:
+      return `
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">STATISTIK KOMPLAIN</h3>
            <div class="flex gap-3">
@@ -560,7 +644,7 @@ function getDailyTabContent() {
           </div>
         </div>
       `;
-    case 7:
+    case 8:
       return `
         <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-4">
           <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">

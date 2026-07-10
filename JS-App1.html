@@ -469,7 +469,7 @@ window.submitPIN = function() {
         if (res.success) {
           hidePINModal();
           // Set outlet dan role
-          window.AppState.outlet = res.outlet;
+          AppState.outlet = res.outlet;
           StorageHelper.set('zc_last_outlet', res.outlet);
           StorageHelper.set('zc_role', 'SPV');
           AppState.role = 'SPV';
@@ -480,8 +480,15 @@ window.submitPIN = function() {
           input.focus();
         }
       } catch(e) {
-        showToast("Error sistem", "error");
+        showToast("Error Parse: " + e.message + " (Res: " + resStr + ")", "error");
+        console.error("Parse Error:", e, resStr);
       }
+    })
+    .withFailureHandler(function(err) {
+      btn.innerHTML = 'MASUK';
+      btn.classList.add('bg-zero-black');
+      btn.classList.remove('bg-gray-400');
+      showToast("Server Error: " + err.message, "error");
     })
     .api_verifyPIN(pin);
 };
@@ -596,7 +603,7 @@ function startNewForm(type) {
           AppState.allPendingLaporan = [];
         }
         
-        window.form.outlet = StorageHelper.get('zc_last_outlet') || "Perintis";
+        window.form.outlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || "Perintis";
         _startNormalForm(type);
       })
       .catch(err => {
@@ -632,7 +639,7 @@ function _startNormalForm(type) {
   
   if (type === 'daily') {
     window.form.staff = [];
-    window.form.outlet = StorageHelper.get('zc_last_outlet') || "Perintis"; // Restore outlet after reset
+    window.form.outlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || "Perintis";
     const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet === window.form.outlet) : null;
     window.form.fase = pending ? 2 : 1;
     if (pending) {
@@ -789,6 +796,12 @@ function loadDraft(type) {
       
       showToast("Melanjutkan draft yang belum terkirim...", "success");
       Object.assign(form, parsed);
+      
+      // BUGS FIX: Paksa timpa outlet dengan outlet dari PIN, supaya tidak menggunakan outlet lama dari draft
+      if (AppState.role === 'SPV' && AppState.outlet) {
+        form.outlet = AppState.outlet;
+      }
+      
       return true;
     } catch(e) {
       StorageHelper.remove(`zc_draft_${type}`);

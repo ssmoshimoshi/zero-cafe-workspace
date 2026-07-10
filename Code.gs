@@ -191,6 +191,55 @@ function getSpreadsheet() {
 }
 
 /**
+ * Gets a specific sheet for an outlet. Creates a copy from the base template if missing.
+ */
+function getSheetForOutlet(ss, baseName, outlet) {
+  var outletName = outlet || "Perintis"; // Default fallback
+  var sheetName = baseName + "_" + outletName;
+  var sheet = ss.getSheetByName(sheetName);
+  
+  if (!sheet) {
+    // Fallback: jika belum di-setup, gunakan base sheet untuk sementara agar tidak error
+    var baseSheet = ss.getSheetByName(baseName);
+    if (baseSheet) {
+      sheet = ss.insertSheet(sheetName);
+      // Copy headers from baseSheet
+      var lastCol = baseSheet.getLastColumn();
+      if (lastCol > 0) {
+        var headers = baseSheet.getRange(1, 1, 1, lastCol).getValues();
+        sheet.getRange(1, 1, 1, lastCol).setValues(headers);
+        sheet.getRange(1, 1, 1, lastCol).setFontWeight("bold");
+      }
+    } else {
+      // Jika baseSheet juga tidak ada (aneh), buat kosong
+      sheet = ss.insertSheet(sheetName);
+    }
+  }
+  return sheet;
+}
+
+/**
+ * Gets all split sheets for a given base report (e.g. Daily_Perintis, Daily_Dg Tata).
+ * If none found, returns the base sheet (e.g. Daily) as a fallback.
+ */
+function getAllOutletSheets(ss, baseName) {
+  var sheets = ss.getSheets();
+  var found = [];
+  for (var i = 0; i < sheets.length; i++) {
+    var name = sheets[i].getName();
+    if (name.indexOf(baseName + "_") === 0) {
+      found.push(sheets[i]);
+    }
+  }
+  
+  if (found.length === 0) {
+    var baseSheet = ss.getSheetByName(baseName);
+    if (baseSheet) found.push(baseSheet);
+  }
+  return found;
+}
+
+/**
  * Fetches the master list of active staff.
  */
 function api_getMasterStaff() {
@@ -2732,4 +2781,38 @@ function api_getTargetBulanan(outlet, monthYear) {
   } catch (e) {
     return JSON.stringify({ status: "error", error: e.toString() });
   }
+}
+
+/**
+ * Migration Script: Setup multi-outlet sheets (Run once by GM)
+ */
+function setup_MultiOutletSheets() {
+  var ss = getSpreadsheet();
+  var outlets = ["Perintis", "Dg Tata"];
+  var baseSheets = ["Daily", "Weekly", "Monthly"]; // Opsional: MasterStaff, dll.
+  
+  for (var i = 0; i < baseSheets.length; i++) {
+    var baseSheet = ss.getSheetByName(baseSheets[i]);
+    if (baseSheet) {
+      for (var j = 0; j < outlets.length; j++) {
+        var newSheetName = baseSheets[i] + "_" + outlets[j];
+        var newSheet = ss.getSheetByName(newSheetName);
+        if (!newSheet) {
+          // Buat sheet baru
+          newSheet = ss.insertSheet(newSheetName);
+          // Copy header
+          var lastCol = baseSheet.getLastColumn();
+          if (lastCol > 0) {
+            var headers = baseSheet.getRange(1, 1, 1, lastCol).getValues();
+            newSheet.getRange(1, 1, 1, lastCol).setValues(headers);
+            newSheet.getRange(1, 1, 1, lastCol).setFontWeight("bold");
+          }
+          Logger.log("Created: " + newSheetName);
+        } else {
+          Logger.log("Already exists: " + newSheetName);
+        }
+      }
+    }
+  }
+  return "Setup Multi-Outlet Sheets Complete!";
 }

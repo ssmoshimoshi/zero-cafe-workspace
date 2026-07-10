@@ -333,13 +333,14 @@ function getDynamicFolder(year, monthName, data) {
   
   var yearFolder = getOrCreateSubFolder(rootFolder, year);
   var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
+  var outletFolder = getOrCreateSubFolder(monthFolder, data.outlet || "Perintis");
   
   if (data.type === "daily") {
-    // Format folder struktur (Bulan/Hari)
+    // Format folder struktur (Bulan/Outlet/Hari)
     var dateParts = (data.tanggal || "").split("-");
     var day = dateParts.length === 3 ? dateParts[2] : new Date().getDate(); 
     var dayFolderName = day + " " + monthName;
-    return getOrCreateSubFolder(monthFolder, dayFolderName);
+    return getOrCreateSubFolder(outletFolder, dayFolderName);
   } else if (data.type === "weekly") {
     // Mingguan folder format: <start_day>-<end_day>-<month>-<year>
     var pStart = data.periodeStart ? data.periodeStart.split("-") : [];
@@ -349,13 +350,13 @@ function getDynamicFolder(year, monthName, data) {
     var endDay = pEnd.length === 3 ? parseInt(pEnd[2], 10) : "7";
     
     var folderName = startDay + "-" + endDay + "-" + monthName.toLowerCase() + "-" + year;
-    return getOrCreateSubFolder(monthFolder, folderName);
+    return getOrCreateSubFolder(outletFolder, folderName);
   } else if (data.type === "monthly") {
     // Bulanan folder: "Laporan Bulanan"
-    return getOrCreateSubFolder(monthFolder, "Laporan Bulanan");
+    return getOrCreateSubFolder(outletFolder, "Laporan Bulanan");
   }
   
-  return monthFolder;
+  return outletFolder;
 }
 
 function getOrCreateSubFolder(parentFolder, folderName) {
@@ -1185,6 +1186,20 @@ function api_getMonthlyData(monthStr, outlet) {
     };
   } catch (err) {
     return { success: false, error: err.toString() };
+  }
+}
+
+/**
+ * Verifikasi PIN SPV untuk menentukan akses ke Outlet
+ */
+function api_verifyPIN(pin) {
+  // Sesuai requirement: 1234 -> Perintis, 5678 -> Dg Tata
+  if (pin === "1234") {
+    return JSON.stringify({ success: true, outlet: "Perintis" });
+  } else if (pin === "5678") {
+    return JSON.stringify({ success: true, outlet: "Dg Tata" });
+  } else {
+    return JSON.stringify({ success: false, error: "PIN tidak valid!" });
   }
 }
 

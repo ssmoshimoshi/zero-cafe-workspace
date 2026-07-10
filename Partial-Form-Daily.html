@@ -61,11 +61,8 @@ window.getDailyFormTemplate = function() {
             <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">INPUT KEUANGAN CLOSING</h3>
             
             <div class="mb-4">
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET (Bisa Diganti Jika Salah)</label>
-              <select onchange="window.changeOutlet(this.value)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
-                <option value="Perintis" ${form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
-                <option value="Dg Tata" ${form.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
-              </select>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET TERKUNCI (PIN)</label>
+              <input type="text" value="${form.outlet || 'Perintis'}" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 cursor-not-allowed" disabled>
             </div>
             
             <div class="mb-4">
@@ -208,12 +205,9 @@ function getDailyTabContent() {
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
               <input type="text" value="${form.supervisor}" oninput="window.form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
-            <div class="flex-1">
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET</label>
-              <select onchange="window.changeOutlet(this.value)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors">
-                <option value="Perintis" ${form.outlet === 'Perintis' ? 'selected' : ''}>Perintis</option>
-                <option value="Dg Tata" ${form.outlet === 'Dg Tata' ? 'selected' : ''}>Dg Tata</option>
-              </select>
+            <div class="mb-4">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">OUTLET TERKUNCI (PIN)</label>
+              <input type="text" value="${form.outlet || 'Perintis'}" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 cursor-not-allowed" disabled>
             </div>
           </div>
 

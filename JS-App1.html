@@ -391,33 +391,108 @@ function getLoginTemplate() {
       <!-- Hero Center -->
       <div class="flex-grow flex flex-col justify-center items-center animate-slide-up" style="animation-duration: 0.8s;">
         <h1 class="text-[3.5rem] font-black text-zero-black tracking-tight leading-none mb-1">ZERO</h1>
-        <p class="text-xs font-semibold text-gray-500 tracking-[0.15em] uppercase">Halo Teman dari Zero</p>
+        <p class="text-[10px] font-bold text-gray-500 tracking-[0.2em] uppercase">Enterprise Workspace</p>
       </div>
 
       <!-- Action Buttons Bottom -->
       <div class="pb-16 px-6 flex flex-col items-center space-y-4 animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.8s; animation-fill-mode: both;">
+        <p class="text-xs text-gray-400 font-medium mb-4">Pilih akses sistem Anda:</p>
         
-        <!-- SPV -->
-        <button onclick="handleLogin('SPV')" class="w-full max-w-[260px] bg-white border-[0.5px] border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md active:scale-[0.97] transition-all duration-300">
-          Saya Supervisor
+        <!-- SPV with PIN -->
+        <button onclick="showPINModal()" class="w-full max-w-[260px] bg-zero-black text-white text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md active:scale-[0.97] transition-all duration-300">
+          Login SPV Outlet
         </button>
         
         <!-- GM -->
-        <button onclick="handleLogin('GM')" class="w-full max-w-[260px] bg-white border-[0.5px] border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md active:scale-[0.97] transition-all duration-300">
-          Saya General Manager
+        <button onclick="handleLogin('GM')" class="w-full max-w-[260px] bg-white border border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md hover:bg-gray-50 active:scale-[0.97] transition-all duration-300">
+          General Manager
         </button>
-        
+      </div>
+      
+      <!-- PIN MODAL (Hidden by default) -->
+      <div id="pinModal" class="fixed inset-0 z-50 hidden bg-white/90 backdrop-blur-sm flex-col items-center justify-center animate-fade-in">
+        <div class="w-full max-w-sm px-8 text-center">
+          <h2 class="text-xl font-black text-zero-black tracking-widest mb-2 uppercase">Kunci Outlet</h2>
+          <p class="text-xs text-gray-500 mb-8 font-medium">Masukkan 4 digit PIN Outlet Anda.</p>
+          
+          <input type="password" id="inputPIN" inputmode="numeric" maxlength="4" placeholder="----" class="w-full text-center text-3xl font-black tracking-[1em] pb-2 border-b-2 border-zero-black bg-transparent focus:outline-none focus:border-gray-400 transition-colors placeholder-gray-200 mb-8" />
+          
+          <div class="flex gap-4 justify-center">
+            <button onclick="hidePINModal()" class="px-6 py-3 border border-gray-200 text-gray-500 text-xs font-bold rounded-full hover:bg-gray-50 transition-colors">BATAL</button>
+            <button id="btnSubmitPIN" onclick="submitPIN()" class="px-8 py-3 bg-gray-500 text-white text-xs font-bold rounded-full transition-colors flex items-center justify-center">MASUK</button>
+          </div>
+        </div>
       </div>
       
     </div>
   `;
 }
 
+window.showPINModal = function() {
+  const modal = document.getElementById('pinModal');
+  const input = document.getElementById('inputPIN');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => { if (input) input.focus(); }, 100);
+  }
+};
+
+window.hidePINModal = function() {
+  const modal = document.getElementById('pinModal');
+  const input = document.getElementById('inputPIN');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  if (input) input.value = '';
+};
+
+window.submitPIN = function() {
+  const input = document.getElementById('inputPIN');
+  const btn = document.getElementById('btnSubmitPIN');
+  if (!input || !input.value) return;
+  
+  const pin = input.value;
+  btn.innerHTML = '<span class="loading-spinner w-4 h-4 mr-2 border-2 border-white"></span> CEK...';
+  btn.classList.remove('bg-zero-black');
+  btn.classList.add('bg-gray-400');
+  
+  google.script.run
+    .withSuccessHandler(function(resStr) {
+      btn.innerHTML = 'MASUK';
+      btn.classList.add('bg-zero-black');
+      btn.classList.remove('bg-gray-400');
+      
+      try {
+        const res = JSON.parse(resStr);
+        if (res.success) {
+          hidePINModal();
+          // Set outlet dan role
+          window.AppState.outlet = res.outlet;
+          StorageHelper.set('zc_last_outlet', res.outlet);
+          StorageHelper.set('zc_role', 'SPV');
+          AppState.role = 'SPV';
+          transitionToMenu('select_report');
+        } else {
+          showToast(res.error || "PIN Salah", "error");
+          input.value = '';
+          input.focus();
+        }
+      } catch(e) {
+        showToast("Error sistem", "error");
+      }
+    })
+    .api_verifyPIN(pin);
+};
+
 function handleLogin(role) {
-  transitionToMenu(role === 'SPV' ? 'select_report' : 'dashboard_gm', () => {
-    StorageHelper.set('zc_role', role);
-    AppState.role = role;
-  });
+  if (role === 'GM') {
+    transitionToMenu('dashboard_gm', () => {
+      StorageHelper.set('zc_role', role);
+      AppState.role = role;
+    });
+  }
 }
 
 function getMenuSPVTemplate() {
@@ -455,12 +530,12 @@ function getMenuSPVTemplate() {
         <div onclick="startNewForm('monthly')" class="py-6 border-b-[0.5px] border-gray-300 cursor-pointer group hover:bg-black/5 active:bg-black/10 transition-colors animate-slide-up flex justify-between items-center" style="animation-delay: 0.4s; animation-duration: 0.6s; animation-fill-mode: both;">
           <div>
             <h3 class="font-extrabold text-xl text-zero-black tracking-wider mb-1">LAPORAN BULANAN</h3>
-            <p class="text-sm font-medium text-gray-400">Monthly Executive Summary</p>
+            <p class="text-sm font-medium text-gray-400">Monthly Branch Assessment</p>
           </div>
           <span class="text-zero-black font-bold text-2xl group-hover:translate-x-2 transition-transform duration-300">→</span>
         </div>
         
-        <!-- Parameter -->
+        <!-- Pengaturan -->
         <div onclick="startParameterForm()" class="py-6 border-b-[0.5px] border-gray-300 cursor-pointer group hover:bg-black/5 active:bg-black/10 transition-colors animate-slide-up flex justify-between items-center" style="animation-delay: 0.5s; animation-duration: 0.6s; animation-fill-mode: both;">
           <div>
             <h3 class="font-extrabold text-xl text-zero-black tracking-wider mb-1">PENGATURAN PARAMETER</h3>

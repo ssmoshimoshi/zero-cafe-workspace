@@ -240,6 +240,22 @@ function getAllOutletSheets(ss, baseName) {
 }
 
 /**
+ * Helper to get all data rows from all outlet sheets for a specific report type.
+ * Returns an array of rows (including a dummy header at index 0 to match existing 1-indexed loops).
+ */
+function getAggregatedData(ss, baseName) {
+  var sheets = getAllOutletSheets(ss, baseName);
+  var allData = [ [] ]; // Dummy header at index 0
+  for (var s = 0; s < sheets.length; s++) {
+    var data = sheets[s].getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      allData.push(data[i]);
+    }
+  }
+  return allData;
+}
+
+/**
  * Fetches the master list of active staff.
  */
 function api_getMasterStaff() {
@@ -974,7 +990,7 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
     }
   }
   
-  // Convert dict to array, sort, and take top 5 / bottom 3
+  // Convert dictionary to sorted array
   var formatResult = function(obj, isTop) {
     var arr = Object.keys(obj).map(function(k) { return obj[k]; });
     if (isTop) {
@@ -1253,43 +1269,45 @@ function api_verifyPIN(pin) {
 function api_checkPendingLaporan() {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("Daily");
-    if (!sheet) return JSON.stringify({ status: "success", pendings: [] });
-    
-    var data = sheet.getDataRange().getValues();
+    var sheets = getAllOutletSheets(ss, "Daily");
     var pendings = [];
     
-    // Cari dari bawah (data terbaru) ke atas, limit ke 60 baris terakhir untuk efisiensi
-    var limit = Math.max(1, data.length - 60);
-    for (var i = data.length - 1; i >= limit; i--) {
-      var rowOutlet = data[i][2] ? data[i][2].toString() : "";
-      var rowStatus = data[i][10] ? data[i][10].toString() : ""; 
+    for (var s = 0; s < sheets.length; s++) {
+      var sheet = sheets[s];
+      var data = sheet.getDataRange().getValues();
       
-      if (rowStatus === "Fase 1") {
-        var rawDate = data[i][0];
-        var formattedDate = "";
-        if (rawDate instanceof Date) {
-          var y = rawDate.getFullYear();
-          var m = ("0" + (rawDate.getMonth() + 1)).slice(-2);
-          var d = ("0" + rawDate.getDate()).slice(-2);
-          formattedDate = y + "-" + m + "-" + d;
-        } else {
-          var ds = rawDate.toString();
-          var parts = ds.split("-");
-          if (parts.length === 3) {
-            formattedDate = parts[2] + "-" + parts[1] + "-" + parts[0];
-          } else {
-            formattedDate = ds;
-          }
-        }
+      // Cari dari bawah (data terbaru) ke atas, limit ke 60 baris terakhir untuk efisiensi
+      var limit = Math.max(1, data.length - 60);
+      for (var i = data.length - 1; i >= limit; i--) {
+        var rowOutlet = data[i][2] ? data[i][2].toString() : "";
+        var rowStatus = data[i][10] ? data[i][10].toString() : ""; 
         
-        pendings.push({
-          outlet: rowOutlet,
-          tanggal: formattedDate,
-          supervisor: data[i][1].toString(),
-          shift1: data[i][4] ? Number(data[i][4]) : 0,
-          rowIdx: i + 1
-        });
+        if (rowStatus === "Fase 1") {
+          var rawDate = data[i][0];
+          var formattedDate = "";
+          if (rawDate instanceof Date) {
+            var y = rawDate.getFullYear();
+            var m = ("0" + (rawDate.getMonth() + 1)).slice(-2);
+            var d = ("0" + rawDate.getDate()).slice(-2);
+            formattedDate = y + "-" + m + "-" + d;
+          } else {
+            var ds = rawDate.toString();
+            var parts = ds.split("-");
+            if (parts.length === 3) {
+              formattedDate = parts[2] + "-" + parts[1] + "-" + parts[0];
+            } else {
+              formattedDate = ds;
+            }
+          }
+          
+          pendings.push({
+            outlet: rowOutlet,
+            tanggal: formattedDate,
+            supervisor: data[i][1].toString(),
+            shift1: data[i][4] ? Number(data[i][4]) : 0,
+            rowIdx: i + 1 // Row index is relative to this specific sheet
+          });
+        }
       }
     }
     
@@ -1305,10 +1323,9 @@ function api_checkPendingLaporan() {
 function api_gm_fetchReports(startDate, endDate, outletFilter) {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("Daily");
-    if (!sheet) throw new Error("Tab Daily tidak ditemukan.");
+    var data = getAggregatedData(ss, "Daily");
+    if (data.length <= 1) throw new Error("Belum ada data laporan harian.");
     
-    var data = sheet.getDataRange().getValues();
     var omsetTotal = 0;
     var targetOmset = 0;
     var omsetBulanLalu = 0;
@@ -1425,33 +1442,28 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     }
     
     // Also grab weekly and monthly reports for listing
-    var weeklySheet = ss.getSheetByName("Weekly");
-    if (weeklySheet) {
-      var wData = weeklySheet.getDataRange().getValues();
-      for (var i = 1; i < wData.length; i++) {
-        var period = wData[i][0].toString();
-        // If the period matches our target month
-        if (period.indexOf(monthName) !== -1) {
-          var rowOutlet = (wData[i][2] || "").toString();
-          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
-            listLaporan.push({
-              name: "Weekly Report - " + period + " (" + wData[i][1] + ")",
-              url: wData[i][7],
-              dateCreated: period
-            });
-          }
+    var wData = getAggregatedData(ss, "Weekly");
+    for (var i = 1; i < wData.length; i++) {
+      var period = wData[i][0].toString();
+      // If the period matches our target month
+      if (period.indexOf(monthName) !== -1) {
+        var rowOutlet = (wData[i][2] || "").toString();
+        if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+          listLaporan.push({
+            name: "Weekly Report - " + period + " (" + wData[i][1] + ")",
+            url: wData[i][7],
+            dateCreated: period
+          });
         }
       }
     }
     
     // --- Real-Time SDM Aggregation ---
     var totalTelatRealtime = 0;
-    var staffSheet = ss.getSheetByName("Staff_Daily");
-    if (staffSheet) {
-      var sdData = staffSheet.getDataRange().getValues();
-      for (var s = 1; s < sdData.length; s++) {
-        var rowDateStr = "";
-        var dObj = sdData[s][0];
+    var sdData = getAggregatedData(ss, "Staff_Daily");
+    for (var s = 1; s < sdData.length; s++) {
+      var rowDateStr = "";
+      var dObj = sdData[s][0];
         if (dObj instanceof Date) {
           rowDateStr = formatDate(dObj);
         } else {
@@ -1475,11 +1487,9 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     }
 
     var operasionalData = null;
-    var monthlySheet = ss.getSheetByName("Monthly");
-    if (monthlySheet) {
-      var mData = monthlySheet.getDataRange().getValues();
-      // We need to compare monthPrefix (YYYY-MM) with the sheet format (MM-YYYY)
-      var targetBul = monthPrefix;
+    var mData = getAggregatedData(ss, "Monthly");
+    // We need to compare monthPrefix (YYYY-MM) with the sheet format (MM-YYYY)
+    var targetBul = monthPrefix;
       if (monthPrefix.indexOf("-") !== -1) {
         var p = monthPrefix.split("-");
         targetBul = p[1] + "-" + p[0];
@@ -1522,7 +1532,6 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           }
         }
       }
-    }
     
     // Fallback if Monthly not found
     if (!operasionalData) {
@@ -2367,11 +2376,11 @@ function api_gm_getMarketingInsights(payloadStr) {
     // MODUL C1: Tren Omset Mingguan
     // Baca Weekly sheet, bandingkan total sales per minggu dalam rentang
     // ─────────────────────────────────────────────────────────────────
-    var weeklySheet = ss.getSheetByName("Weekly");
+    // ─────────────────────────────────────────────────────────────────
+    var wData = getAggregatedData(ss, "Weekly");
     var weeklyInsight = { modul: "Tren Omset Mingguan", status: "insufficient", level: "info", title: "", desc: "", action: "" };
 
-    if (weeklySheet) {
-      var wData = weeklySheet.getDataRange().getValues();
+    if (wData.length > 1) {
       var weeklySales = []; // array { periode, sales }
 
       for (var i = 1; i < wData.length; i++) {
@@ -2508,13 +2517,13 @@ function api_gm_getMarketingInsights(payloadStr) {
     // ─────────────────────────────────────────────────────────────────
     // MODUL C3: Korelasi Kebersihan × Omset
     // ─────────────────────────────────────────────────────────────────
-    var dailySheet = ss.getSheetByName("Daily");
+    // ─────────────────────────────────────────────────────────────────
+    var dData = getAggregatedData(ss, "Daily");
     var kbSheet2 = ss.getSheetByName("Database_Kebersihan");
     var hygieneInsight = { modul: "Korelasi Kebersihan & Omset", status: "insufficient", level: "info", title: "", desc: "", action: "" };
 
-    if (dailySheet && kbSheet2) {
+    if (dData.length > 1 && kbSheet2) {
       // Hitung omset rata-rata harian dalam periode
-      var dData = dailySheet.getDataRange().getValues();
       var totalOmset = 0, omsetCount = 0;
       var targetTotal = 0;
       for (var i = 1; i < dData.length; i++) {

@@ -452,7 +452,7 @@ function submitFullReport(payloadStr) {
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
       
       var ss = getSpreadsheet();
-      var sheet = ss.getSheetByName("Daily");
+      var sheet = getSheetForOutlet(ss, "Daily", data.outlet);
       var draftFileId = "";
       if (sheet && data.rowIdx) {
         // Ambil File ID yang kita simpan di Kolom 8 saat submit Fase 1
@@ -636,7 +636,7 @@ function submitFullReport(payloadStr) {
     
     // 4. Append row to corresponding Sheet tab
     if (data.type === "daily") {
-      var sheet = ss.getSheetByName("Daily");
+      var sheet = getSheetForOutlet(ss, "Daily", data.outlet);
       
       if (isFase2) {
         // FASE 2: Update baris yang sudah ada
@@ -721,9 +721,8 @@ function submitFullReport(payloadStr) {
       }
       
       if (data.staff && data.staff.length > 0) {
-        var stSheet = setupSheet(ss, "Staff_Daily", [
-          "Tanggal", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"
-        ]);
+        var stSheet = getSheetForOutlet(ss, "Staff_Daily", data.outlet);
+        if (stSheet.getLastRow() === 0) stSheet.appendRow(["Tanggal", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"]);
         var bulanLaporan = "";
         if (data.tanggal) {
           // data.tanggal is DD-MM-YYYY, we want MM-YYYY
@@ -736,12 +735,7 @@ function submitFullReport(payloadStr) {
         });
       }
     } else if (data.type === "weekly") {
-      var sheet = ss.getSheetByName("Weekly");
-      if (!sheet) {
-        sheet = setupSheet(ss, "Weekly", [
-          "Periode", "Supervisor", "Outlet", "Total Real Sales", "Total Target", "Komplain", "Kendala Utama", "URL PDF"
-        ]);
-      }
+      var sheet = getSheetForOutlet(ss, "Weekly", data.outlet);
       
       var totalRealSales = 0;
       var totalTargetSales = 0;
@@ -766,7 +760,8 @@ function submitFullReport(payloadStr) {
       ]);
       
       if (data.weekly.staff && data.weekly.staff.length > 0) {
-        var swSheet = setupSheet(ss, "Staff_Weekly", [
+        var swSheetName = "Staff_Weekly_" + (data.outlet || "Perintis").replace(/\s+/g, "_");
+        var swSheet = setupSheet(ss, swSheetName, [
           "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
         ]);
         var bulanLaporan = "";
@@ -780,7 +775,7 @@ function submitFullReport(payloadStr) {
         });
       }
     } else if (data.type === "monthly") {
-      var sheet = ss.getSheetByName("Monthly");
+      var sheet = getSheetForOutlet(ss, "Monthly", data.outlet);
       var bulanFormatted = data.bulan;
       if (bulanFormatted && bulanFormatted.indexOf("-") !== -1) {
         var p = bulanFormatted.split("-");

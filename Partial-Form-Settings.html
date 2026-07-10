@@ -1,0 +1,287 @@
+<!-- Partial-Form-Settings.html -->
+<script>
+window.renderSettingsUI = function() {
+  const root = document.getElementById('app-root');
+  
+  const html = `
+    <div class="px-6 py-6 pb-24 min-h-screen bg-[#F0EFEF]">
+      <div class="mb-8 flex justify-between items-start mt-8">
+        <div>
+          <h2 class="text-2xl font-black text-zero-black mb-2 uppercase tracking-wide">Pengaturan Parameter</h2>
+          <p class="text-sm text-gray-500">Konfigurasi kalender akademik untuk kecerdasan prediksi Dashboard GM.</p>
+        </div>
+        <button onclick="transitionToMenu('select_report')" class="bg-gray-200 p-2 rounded-full text-gray-500 hover:text-zero-black transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Form Pengaturan Target -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8 transform transition-all duration-300 hover:shadow-md">
+        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+          <svg class="w-4 h-4 text-zero-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Target Omset Bulanan
+        </h3>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Outlet</label>
+            <select id="targetOutlet" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+              <option value="Perintis">Perintis</option>
+              <option value="Dg Tata">Dg Tata</option>
+            </select>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Bulan</label>
+              <select id="targetBulan" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Tahun</label>
+              <select id="targetTahun" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Total Target (Rp)</label>
+            <input type="text" id="targetOmsetInput" placeholder="Contoh: 150000000" onfocus="unformatRupiah(this)" onblur="formatRupiah(this)" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+          </div>
+          
+          <button onclick="submitTargetBulanan()" id="btnSaveTarget" class="w-full mt-2 bg-zero-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 transform active:scale-95 flex justify-center items-center gap-2">
+            <span id="btnSaveTargetText">Simpan Target</span>
+            <l-newtons-cradle id="btnSaveTargetLoader" class="hidden" size="20" speed="1.4" color="white"></l-newtons-cradle>
+          </button>
+        </div>
+      </div>
+
+      <!-- Form Tambah Parameter -->
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8 transform transition-all duration-300 hover:shadow-md">
+        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+          <svg class="w-4 h-4 text-zero-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+          Tambah Event Baru
+        </h3>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Outlet</label>
+            <select id="paramOutlet" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+              <option value="Semua">Semua Outlet</option>
+              <option value="Perintis">Perintis</option>
+              <option value="Dg Tata">Dg Tata</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Kategori Event</label>
+            <select id="paramKategori" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+              <option value="Kalender Akademik">Kalender Akademik (Kampus)</option>
+              <option value="Event Lokal">Event Lokal / Festival</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Nama Event</label>
+            <input type="text" id="paramNamaEvent" placeholder="Contoh: UAS Universitas Hasanuddin" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Tgl Mulai</label>
+              <input type="date" id="paramTglMulai" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Tgl Selesai</label>
+              <input type="date" id="paramTglSelesai" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
+            </div>
+          </div>
+          
+          <button onclick="submitParameter()" id="btnSaveParam" class="w-full mt-2 bg-zero-black hover:bg-gray-800 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 transform active:scale-95 flex justify-center items-center gap-2">
+            <span id="btnSaveParamText">Simpan Parameter</span>
+            <l-newtons-cradle id="btnSaveParamLoader" class="hidden" size="20" speed="1.4" color="white"></l-newtons-cradle>
+          </button>
+        </div>
+      </div>
+
+      <!-- Daftar Parameter Aktif -->
+      <div>
+        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2 ml-2">
+          <svg class="w-4 h-4 text-zero-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          Event Tersimpan
+        </h3>
+        
+        <div id="paramListContainer" class="space-y-3">
+          <!-- Injected via JS -->
+          <div class="p-6 bg-white border border-gray-100 rounded-3xl text-center shadow-sm">
+            <l-newtons-cradle size="35" speed="1.4" color="#d1d5db"></l-newtons-cradle>
+            <p class="text-xs text-gray-400 mt-3 font-medium">Memuat data parameter...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  root.style.opacity = 0;
+  setTimeout(() => {
+    root.innerHTML = html;
+    root.style.opacity = 1;
+    loadParametersList();
+  }, 300);
+}
+
+window.loadParametersList = function() {
+  const container = document.getElementById('paramListContainer');
+  const outlet = AppState.outlet || "Semua";
+  
+  google.script.run
+    .withSuccessHandler(function(resStr) {
+      try {
+        const res = JSON.parse(resStr);
+        if (res.status === 'success') {
+          if (res.data.length === 0) {
+            container.innerHTML = `<div class="p-6 bg-white border border-gray-100 rounded-3xl text-center shadow-sm">
+              <p class="text-xs text-gray-400 font-medium">Belum ada event parameter yang tersimpan.</p>
+            </div>`;
+          } else {
+            let listHtml = '';
+            res.data.forEach(p => {
+              listHtml += `
+                <div class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm flex flex-col gap-2">
+                  <div class="flex justify-between items-start">
+                    <span class="text-[10px] font-bold text-white bg-zero-black px-2 py-0.5 rounded-full uppercase tracking-wider">${p.kategori}</span>
+                    <span class="text-[10px] font-bold ${p.status === 'Aktif' ? 'text-emerald-500' : 'text-gray-400'} uppercase tracking-wider">${p.status}</span>
+                  </div>
+                  <h4 class="font-bold text-sm text-zero-black">${p.namaEvent}</h4>
+                  <p class="text-xs text-gray-500 font-medium">${p.tglMulai} s/d ${p.tglSelesai}</p>
+                </div>
+              `;
+            });
+            container.innerHTML = listHtml;
+          }
+        }
+      } catch(e) {
+        console.error(e);
+        container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Gagal memuat data.</p>`;
+      }
+    })
+    .withFailureHandler(function(e) {
+      console.error(e);
+      container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Terjadi kesalahan jaringan.</p>`;
+    })
+    .api_getParameters(outlet);
+}
+window.submitTargetBulanan = function() {
+  const bulan = document.getElementById('targetBulan').value;
+  const tahun = document.getElementById('targetTahun').value;
+  const targetOmsetStr = document.getElementById('targetOmsetInput').value;
+  
+  if (!targetOmsetStr) {
+    showToast("Harap isi Total Target!", "error");
+    return;
+  }
+  
+  const targetOmset = targetOmsetStr.replace(/[^0-9]/g, '');
+  const bulanTahun = bulan + "-" + tahun;
+  const outlet = document.getElementById('targetOutlet').value || AppState.outlet || "Semua";
+  
+  const btnText = document.getElementById('btnSaveTargetText');
+  const btnLoader = document.getElementById('btnSaveTargetLoader');
+  btnText.classList.add('hidden');
+  btnLoader.classList.remove('hidden');
+  
+  google.script.run
+    .withSuccessHandler(function(resStr) {
+      btnText.classList.remove('hidden');
+      btnLoader.classList.add('hidden');
+      try {
+        const res = JSON.parse(resStr);
+        if (res.status === 'success') {
+          showToast("Target Bulanan Berhasil Disimpan!", "success");
+          document.getElementById('targetOmsetInput').value = '';
+        } else {
+          showToast("Gagal: " + res.error, "error");
+        }
+      } catch(e) {
+        showToast("Error parsing response", "error");
+      }
+    })
+    .withFailureHandler(function(e) {
+      btnText.classList.remove('hidden');
+      btnLoader.classList.add('hidden');
+      showToast("Terjadi kesalahan jaringan", "error");
+    })
+    .api_saveConfigTarget(bulanTahun, outlet, targetOmset);
+}
+
+window.submitParameter = function() {
+  const kategori = document.getElementById('paramKategori').value;
+  const namaEvent = document.getElementById('paramNamaEvent').value;
+  const tglMulai = document.getElementById('paramTglMulai').value;
+  const tglSelesai = document.getElementById('paramTglSelesai').value;
+  
+  if (!namaEvent || !tglMulai || !tglSelesai) {
+    showToast("Harap isi Nama Event dan Rentang Tanggal!", "error");
+    return;
+  }
+  
+  if (tglMulai > tglSelesai) {
+    showToast("Tanggal Selesai tidak boleh mendahului Tanggal Mulai!", "error");
+    return;
+  }
+  
+  const payload = {
+    outlet: document.getElementById('paramOutlet').value || AppState.outlet || "Semua",
+    kategori: kategori,
+    namaEvent: namaEvent,
+    tglMulai: tglMulai,
+    tglSelesai: tglSelesai
+  };
+  
+  const btnText = document.getElementById('btnSaveParamText');
+  const btnLoader = document.getElementById('btnSaveParamLoader');
+  btnText.classList.add('hidden');
+  btnLoader.classList.remove('hidden');
+  
+  google.script.run
+    .withSuccessHandler(function(resStr) {
+      btnText.classList.remove('hidden');
+      btnLoader.classList.add('hidden');
+      try {
+        const res = JSON.parse(resStr);
+        if (res.status === 'success') {
+          showToast(res.message, "success");
+          document.getElementById('paramNamaEvent').value = '';
+          document.getElementById('paramTglMulai').value = '';
+          document.getElementById('paramTglSelesai').value = '';
+          loadParametersList();
+        } else {
+          showToast(res.error || "Gagal menyimpan", "error");
+        }
+      } catch(e) {
+        showToast("Error parsing response", "error");
+      }
+    })
+    .withFailureHandler(function(e) {
+      btnText.classList.remove('hidden');
+      btnLoader.classList.add('hidden');
+      showToast("Gagal menghubungi server", "error");
+    })
+    .api_saveParameter(JSON.stringify(payload));
+}
+</script>

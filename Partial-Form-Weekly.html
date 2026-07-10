@@ -24,7 +24,7 @@ window.getWeeklyFormTemplate = function() {
         <div>
           <h2 class="text-sm font-extrabold text-zero-black">LAPORAN MINGGUAN</h2>
           <div class="flex items-center">
-            <p class="text-[10px] font-bold text-gray-400">${form.periode || 'Periode Baru'}</p>
+            <p class="text-[10px] font-bold text-gray-400">${form.periodeStart ? formatDateUI(form.periodeStart) + ' s.d ' + formatDateUI(form.periodeEnd) : 'Periode Baru'}</p>
             <span id="draftIndicator" class="ml-2 text-[8px] text-emerald-500 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-sm opacity-0 transition-opacity duration-300">Tersimpan otomatis</span>
           </div>
         </div>

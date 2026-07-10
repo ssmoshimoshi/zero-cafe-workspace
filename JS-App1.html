@@ -98,35 +98,14 @@ function resetFormData(type) {
     fasilitas: [],
     bahan: [],
     kebersihan: [
-      { area: "Kaca dan Kusen", point: "Kaca dan kusen bebas dari noda", status: "", skor: 80, ket: "" },
-      { area: "Lantai", point: "Lantai tidak ada bercak kaki dan sudah di pel", status: "", skor: 80, ket: "" },
-      { area: "Lantai", point: "Tidak ada remahan dan sampah berserakan di lantai café", status: "", skor: 80, ket: "" },
-      { area: "Tembok", point: "Tembok tidak ada bercak", status: "", skor: 80, ket: "" },
-      { area: "Tembok", point: "Tidak ada sarang laba-laba pada setiap sudut tembok", status: "", skor: 80, ket: "" },
-      { area: "Toilet", point: "Dinding tidak ada bercak", status: "", skor: 80, ket: "" },
-      { area: "Toilet", point: "Luar & dalam closet tidak ada noda", status: "", skor: 80, ket: "" },
-      { area: "Toilet", point: "Lantai selalu bersih dan kering", status: "", skor: 80, ket: "" },
-      { area: "Toilet", point: "Tempat sampah tidak penuh dan bau", status: "", skor: 80, ket: "" },
-      { area: "Toilet", point: "Sabun & Pengharum ruangan tersedia dan berfungsi", status: "", skor: 80, ket: "" },
-      { area: "Toilet", point: "Celing/Plafon tidak ada sarang laba-laba", status: "", skor: 80, ket: "" },
-      { area: "Toilet", point: "Ember bersih tanpa noda", status: "", skor: 80, ket: "" },
-      { area: "Wastafel", point: "Cermin tidak ada bercak air dan tidak buram", status: "", skor: 80, ket: "" },
-      { area: "Wastafel", point: "Lantai bersih dan kering", status: "", skor: 80, ket: "" },
-      { area: "Wastafel", point: "Sabun selalu tersedia", status: "", skor: 80, ket: "" },
-      { area: "Parking Area", point: "Tidak ada sampah berceceran pada setiap sudut", status: "", skor: 80, ket: "" },
-      { area: "Parking Area", point: "Tempat sampah tidak berantakan (terisi dalam trash bag)", status: "", skor: 80, ket: "" },
-      { area: "Parking Area", point: "Lantai depan pintu bersih dan sudah di pel", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Tembok bar sudah di lap dan tidak ada bercak air", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Showcase bersih, tidak bau, stock mineral dingin tersedia", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Area Lift tidak ada debu yang tertinggal", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Lantai bersih, tidak ada tumpahan kopi, dan tidak berpasir", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Mesin espresso dan grinder bebas debu dan bercak", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Botol display tidak lengket dan berantakan", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Tools making produk tetap bersih", status: "", skor: 80, ket: "" },
-      { area: "Bar", point: "Rak Bar tidak ada sampah/barang tak pantas, area bawah bersih", status: "", skor: 80, ket: "" },
-      { area: "Musholah", point: "Lantai sudah disapu dan pel", status: "", skor: 80, ket: "" },
-      { area: "Musholah", point: "Alat shalat wangi, rapi, dan bersih", status: "", skor: 80, ket: "" },
-      { area: "Musholah", point: "Tempat wudhu tidak ada noda menguning dan kering", status: "", skor: 80, ket: "" }
+      { area: "Kaca dan Kusen", point: "Area Kaca dan Kusen", status: "", skor: 80, ket: "" },
+      { area: "Lantai", point: "Area Lantai Utama", status: "", skor: 80, ket: "" },
+      { area: "Tembok", point: "Area Tembok & Plafon", status: "", skor: 80, ket: "" },
+      { area: "Toilet", point: "Fasilitas Toilet", status: "", skor: 80, ket: "" },
+      { area: "Wastafel", point: "Area Wastafel", status: "", skor: 80, ket: "" },
+      { area: "Parking Area", point: "Area Parkir & Depan", status: "", skor: 80, ket: "" },
+      { area: "Bar", point: "Area Operasional & Peralatan Bar", status: "", skor: 80, ket: "" },
+      { area: "Musholah", point: "Fasilitas Musholah", status: "", skor: 80, ket: "" }
     ],
     penutup: { kendala: "", rekomendasi: "" },
 
@@ -480,6 +459,15 @@ function getMenuSPVTemplate() {
           </div>
           <span class="text-zero-black font-bold text-2xl group-hover:translate-x-2 transition-transform duration-300">→</span>
         </div>
+        
+        <!-- Parameter -->
+        <div onclick="startParameterForm()" class="py-6 border-b-[0.5px] border-gray-300 cursor-pointer group hover:bg-black/5 active:bg-black/10 transition-colors animate-slide-up flex justify-between items-center" style="animation-delay: 0.5s; animation-duration: 0.6s; animation-fill-mode: both;">
+          <div>
+            <h3 class="font-extrabold text-xl text-zero-black tracking-wider mb-1">PENGATURAN PARAMETER</h3>
+            <p class="text-sm font-medium text-gray-400">Kalender Akademik & Konteks</p>
+          </div>
+          <span class="text-zero-black font-bold text-2xl group-hover:translate-x-2 transition-transform duration-300">→</span>
+        </div>
       </div>
     </div>
   `;
@@ -512,7 +500,53 @@ window.hideInstallGuide = function() {
 };
 
 function startNewForm(type) {
+  if (type === 'daily') {
+    const loader = document.getElementById('loadingSpinner');
+    if (loader) loader.classList.remove('hidden');
+    
+    // Ensure window.form is defined before calling
+    if (!window.form || !window.form.outlet) resetFormData(type);
+    
+    Server.call('api_checkPendingLaporan')
+      .then(res => {
+        if (loader) loader.classList.add('hidden');
+        try {
+          const result = JSON.parse(res);
+          if (result.status === 'success' && result.pendings) {
+            AppState.allPendingLaporan = result.pendings; // Array of all pendings
+          } else {
+            AppState.allPendingLaporan = [];
+          }
+        } catch(e) {
+          AppState.allPendingLaporan = [];
+        }
+        
+        window.form.outlet = StorageHelper.get('zc_last_outlet') || "Perintis";
+        _startNormalForm(type);
+      })
+      .catch(err => {
+        if (loader) loader.classList.add('hidden');
+        AppState.allPendingLaporan = [];
+        window.form.outlet = StorageHelper.get('zc_last_outlet') || "Perintis";
+        _startNormalForm(type);
+      });
+  } else {
+    _startNormalForm(type);
+  }
+}
+
+function _startNormalForm(type) {
   if (loadDraft(type)) {
+    // Patch missing data for Phase 2 drafts (e.g. supervisor name) that were saved incorrectly before the hotfix
+    if (type === 'daily' && window.form.fase === 2) {
+      const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet === window.form.outlet) : null;
+      if (pending) {
+        window.form.tanggal = pending.tanggal;
+        window.form.supervisor = pending.supervisor;
+        window.form.penjualan.shift1 = pending.shift1;
+        window.form.rowIdx = pending.rowIdx;
+      }
+    }
     transitionToMenu(`form_${type}`, () => {
       AppState.currentTab = 1;
     });
@@ -521,22 +555,25 @@ function startNewForm(type) {
 
   resetFormData(type);
   
-  /*  Setup staff fields in daily/weekly/monthly form dynamically */
   if (type === 'daily') {
     window.form.staff = [];
+    window.form.outlet = StorageHelper.get('zc_last_outlet') || "Perintis"; // Restore outlet after reset
+    const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet === window.form.outlet) : null;
+    window.form.fase = pending ? 2 : 1;
+    if (pending) {
+      window.form.tanggal = pending.tanggal;
+      window.form.supervisor = pending.supervisor;
+      window.form.penjualan.shift1 = pending.shift1;
+      window.form.rowIdx = pending.rowIdx;
+    }
+    window.fetchDailyTarget();
   } else if (type === 'weekly') {
     window.form.weekly.staff = AppState.masterStaff.map(s => ({
-      nama: s.nama,
-      posisi: s.posisi,
-      status: "",
-      alasan: ""
+      nama: s.nama, posisi: s.posisi, status: "", alasan: ""
     }));
   } else if (type === 'monthly') {
     window.form.monthly.staff = AppState.masterStaff.map(s => ({
-      nama: s.nama,
-      posisi: s.posisi,
-      status: "Berkembang",
-      alasan: ""
+      nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: ""
     }));
   }
   
@@ -544,6 +581,68 @@ function startNewForm(type) {
     AppState.currentTab = 1;
   });
 }
+
+window.formatDateUI = function(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return parts[2] + '-' + parts[1] + '-' + parts[0];
+  }
+  return dateStr;
+};
+
+window.formatMonthUI = function(monthStr) {
+  if (!monthStr) return '';
+  const parts = monthStr.split('-');
+  if (parts.length === 2) {
+    return parts[1] + '-' + parts[0];
+  }
+  return monthStr;
+};
+
+window.fetchDailyTarget = function() {
+  if (window.form.type !== 'daily') return;
+  const dObj = window.form.tanggal ? new Date(window.form.tanggal) : new Date();
+  const m = dObj.getMonth() + 1;
+  const monthYear = (m < 10 ? "0"+m : m) + "-" + dObj.getFullYear();
+  const outlet = window.form.outlet || "Perintis";
+  const daysInMonth = new Date(dObj.getFullYear(), m, 0).getDate();
+  
+  google.script.run
+    .withSuccessHandler(function(resStr) {
+      try {
+         const res = JSON.parse(resStr);
+         if (res.status === 'success') {
+           const dailyTarget = res.target > 0 ? Math.round(res.target / daysInMonth) : 0;
+           window.form.penjualan.target = dailyTarget;
+           if (window.updateDailyProgress) window.updateDailyProgress();
+         }
+      } catch(e){}
+    })
+    .api_getTargetBulanan(outlet, monthYear);
+};
+
+window.changeOutlet = function(newOutlet) {
+  window.form.outlet = newOutlet;
+  StorageHelper.set('zc_last_outlet', newOutlet);
+  
+  if (window.form.type === 'daily') {
+    const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet === newOutlet) : null;
+    if (pending) {
+      window.form.fase = 2;
+      window.form.tanggal = pending.tanggal;
+      window.form.supervisor = pending.supervisor;
+      window.form.penjualan.shift1 = pending.shift1;
+      window.form.rowIdx = pending.rowIdx;
+    } else {
+      window.form.fase = 1;
+      window.form.tanggal = new Date().toISOString().split('T')[0];
+      // Do not clear supervisor to save typing, just the Phase 2 specific stuff
+    }
+    window.fetchDailyTarget();
+  }
+  renderApp();
+};
 
 function goBackMenu() {
   saveDraft(true); /*  Save draft before going back */
@@ -605,6 +704,7 @@ function loadDraft(type) {
       let isOldSchema = false;
       if (type === 'daily' && parsed.produk && !parsed.produk.topMinuman) isOldSchema = true;
       if (type === 'weekly' && parsed.weekly && parsed.weekly.produk && !parsed.weekly.produk.topMinuman) isOldSchema = true;
+      if (type === 'daily' && parsed.kebersihan && parsed.kebersihan.length > 8) isOldSchema = true;
       
       if (isOldSchema) {
         console.warn("Old draft schema detected. Clearing to prevent crash.");
@@ -1053,11 +1153,15 @@ function buildKebersihanPDFHtml(f) {
   const areaSections = Object.entries(grouped).map(([area, items]) => {
     const rows = items.map(k => {
       const isKotor = k.status === 'Kotor' || k.skor < 80;
+      let ketFormatted = '-';
+      if (k.ket) {
+        ketFormatted = k.ket.split(', ').map(txt => `&bull; ${txt}`).join('<br>');
+      }
       return `<tr>
         <td>${k.point}</td>
         <td><span class="badge ${k.status === 'Bersih' ? 'badge-green' : k.status === 'Cukup Bersih' ? 'badge-yellow' : 'badge-red'}">${k.status}</span></td>
         <td style="${isKotor ? 'color:#ef4444;font-weight:bold;' : ''}">${k.skor}</td>
-        <td>${k.ket || '-'}</td>
+        <td style="line-height:1.4">${ketFormatted}</td>
       </tr>`;
     }).join('');
 
@@ -1258,6 +1362,12 @@ window.validateFormCompletion = function(f) {
   if (!f.supervisor) return 'Nama Supervisor wajib diisi!';
   
   if (f.type === 'daily') {
+    if (f.fase === 2) {
+      if (!f.penjualan.shift2) return 'Omset Shift 2 wajib diisi!';
+      if (!f.penjualan.transaksi) return 'Total transaksi wajib diisi!';
+      return null; // Bypass kebersihan dll di fase 2
+    }
+    
     if (f.kebersihan) {
       const missed = f.kebersihan.filter(k => k.status === '');
       if (missed.length > 0) {
@@ -1605,5 +1715,13 @@ function saveGMSettings() {
     showToast('Terjadi kesalahan jaringan', 'error');
   });
 }
+
+window.startParameterForm = function() {
+  if (typeof window.renderSettingsUI === 'function') {
+    window.renderSettingsUI();
+  } else {
+    showToast("Fitur pengaturan belum tersedia", "error");
+  }
+};
 
 </script>

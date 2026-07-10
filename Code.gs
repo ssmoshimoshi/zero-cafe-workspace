@@ -38,7 +38,7 @@ function initializeSystem() {
   
   // Set up Sheets
   setupSheet(activeSpreadsheet, "Daily", [
-    "Tanggal", "Supervisor", "Outlet", "Shift", "Total Omset", "Komplain", "Kendala", "URL PDF", "Target Omset", "Transaksi"
+    "Tanggal", "Supervisor", "Outlet", "Shift", "Total Omset", "Komplain", "Kendala", "URL PDF", "Target Omset", "Transaksi", "Status Laporan", "Cuaca"
   ]);
   
   setupSheet(activeSpreadsheet, "Weekly", [
@@ -71,13 +71,29 @@ function initializeSystem() {
   setupSheet(activeSpreadsheet, "Log_QC", [
     "Tanggal", "Outlet", "Kategori", "Item/Menu", "Status", "Keterangan"
   ]);
+
+  setupSheet(activeSpreadsheet, "Database_QC", [
+    "Tanggal Laporan", "Jam Cek", "Outlet", "Shift", "Supervisor",
+    "Produk Random", "Cek Rasa", "Suhu", "Visual", "Catatan",
+    "Timestamp", "Action Taken"
+  ]);
+
+  // Daily Form data structure (Menambahkan Cuaca)
+  setupSheet(activeSpreadsheet, "Daily", [
+    "Tanggal Laporan", "Nama Supervisor", "Outlet", "Shift", "Omset Total", 
+    "Komplain", "Kinerja Kritis", "Foto Rekap", "Target", "Transaksi", "Status", "Cuaca"
+  ]);
   
   setupSheet(activeSpreadsheet, "Log_Fasilitas_Bahan", [
     "Tanggal", "Outlet", "Tipe", "Nama Item", "Status/Ketersediaan", "Biaya Estimasi", "URL Foto", "Eskalasi"
   ]);
   
   setupSheet(activeSpreadsheet, "Config_Target", [
-    "Bulan", "Tahun", "Outlet", "Target Omset"
+    "Tahun", "Outlet", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ]);
+  
+  setupSheet(activeSpreadsheet, "Config_Parameter", [
+    "Outlet", "Kategori", "Nama Event", "Tanggal Mulai", "Tanggal Selesai", "Status"
   ]);
   
   var staffSheet = setupSheet(activeSpreadsheet, "MasterStaff", [
@@ -302,15 +318,17 @@ function getDynamicFolder(year, monthName, data) {
   var rootFolder;
   
   if (!rootFolderId) {
-    Logger.log("ROOT_FOLDER_ID belum diset. Gunakan menu Pengaturan Sistem di Dasbor GM.");
-    return null;
-  }
-  
-  try {
-    rootFolder = DriveApp.getFolderById(rootFolderId);
-  } catch(e) {
-    Logger.log("Folder root tidak ditemukan: " + e.toString());
-    return null;
+    Logger.log("ROOT_FOLDER_ID belum diset. Menggunakan fallback ke 'Zero Cafe Database'.");
+    rootFolder = getOrCreateSubFolder(DriveApp.getRootFolder(), "Zero Cafe Database");
+    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
+  } else {
+    try {
+      rootFolder = DriveApp.getFolderById(rootFolderId);
+    } catch(e) {
+      Logger.log("Folder root tidak ditemukan: " + e.toString() + ". Menggunakan fallback.");
+      rootFolder = getOrCreateSubFolder(DriveApp.getRootFolder(), "Zero Cafe Database");
+      scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
+    }
   }
   
   var yearFolder = getOrCreateSubFolder(rootFolder, year);
@@ -319,7 +337,7 @@ function getDynamicFolder(year, monthName, data) {
   if (data.type === "daily") {
     // Format folder struktur (Bulan/Hari)
     var dateParts = (data.tanggal || "").split("-");
-    var day = dateParts[0] || new Date().getDate(); 
+    var day = dateParts.length === 3 ? dateParts[2] : new Date().getDate(); 
     var dayFolderName = day + " " + monthName;
     return getOrCreateSubFolder(monthFolder, dayFolderName);
   } else if (data.type === "weekly") {
@@ -372,6 +390,79 @@ function submitFullReport(payloadStr) {
     var fileName = "";
     var dd, mm, yyyy;
     
+    var isFase1 = (data.type === "daily" && data.fase === 1);
+    var isFase2 = (data.type === "daily" && data.fase === 2);
+    
+    // FASE 2: Load draft JSON dari Drive terlebih dahulu
+    if (isFase2) {
+      dateFormatted = data.tanggal;
+      var dateParts = dateFormatted.split("-");
+      yyyy = dateParts[0]; mm = dateParts[1]; dd = dateParts[2];
+      year = yyyy; monthName = getIndonesianMonth(dateFormatted);
+      outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
+      
+      var ss = getSpreadsheet();
+      var sheet = ss.getSheetByName("Daily");
+      var draftFileId = "";
+      if (sheet && data.rowIdx) {
+        // Ambil File ID yang kita simpan di Kolom 8 saat submit Fase 1
+        draftFileId = sheet.getRange(data.rowIdx, 8).getValue();
+      }
+      
+      var draftData = null;
+      try {
+        var draftFile = DriveApp.getFileById(draftFileId);
+        draftData = JSON.parse(draftFile.getBlob().getDataAsString());
+      } catch (e) {
+        // Fallback: cari by name jika ID gagal (misal untuk data lama)
+        var folder = getDynamicFolder(year, monthName, data);
+        if (!folder) return { success: false, error: "Gagal mengakses Drive." };
+        
+        var draftFileName = dd + "-" + mm + "-" + yyyy + "-draft-" + outlet + ".json";
+        var draftFiles = folder.getFilesByName(draftFileName);
+        
+        if (!draftFiles.hasNext()) {
+          // SELF-HEALING: Delete the dangling row in the spreadsheet
+          var deletionError = "";
+          try {
+            if (sheet) {
+              var allData = sheet.getDataRange().getValues();
+              var rowsToDelete = [];
+              for (var i = allData.length - 1; i >= 1; i--) {
+                var rowStatus = allData[i][10] ? allData[i][10].toString() : "";
+                var rowOutlet = allData[i][2] ? allData[i][2].toString() : "";
+                if (rowStatus === "Fase 1" && rowOutlet === (data.outlet || "Perintis").replace(/_/g, " ")) {
+                   rowsToDelete.push(i + 1);
+                }
+              }
+              for (var r = 0; r < rowsToDelete.length; r++) {
+                 sheet.deleteRow(rowsToDelete[r]);
+              }
+            }
+          } catch(err) {
+            deletionError = " [ERROR HAPUS: " + err.toString() + "]";
+          }
+          return { success: false, isDangling: true, message: "Data Laporan Fase 1 (Draft JSON) tidak ditemukan di Drive meskipun sudah dicari berulang kali. Sistem telah menghapus status gantung Anda. Harap Refresh halaman ini dan buat ulang laporan dari awal." };
+        }
+        draftData = JSON.parse(draftFiles.next().getBlob().getDataAsString());
+      }
+      
+      // Gabungkan data keuangan shift 2
+      draftData.penjualan.shift2 = data.penjualan.shift2;
+      draftData.penjualan.transaksi = data.penjualan.transaksi;
+      draftData.fase = 2;
+      draftData.rowIdx = data.rowIdx;
+      
+      // Preserve pdfBase64 that was sent from frontend
+      if (data.pdfBase64) {
+        draftData.pdfBase64 = data.pdfBase64;
+      }
+      
+      // Timpa `data` dengan data gabungan untuk pembuatan PDF
+      data = draftData;
+    }
+
+    
     if (data.type === "daily") {
       dateFormatted = data.tanggal; // YYYY-MM-DD
       var dateParts = dateFormatted.split("-");
@@ -385,9 +476,6 @@ function submitFullReport(payloadStr) {
       
       // Filename: 01-juli-laporan harian.PDF
       fileName = dd + "-" + monthName.toLowerCase() + "-laporan harian.pdf";
-      
-      // Update spreadsheet format to DD-MM-YYYY
-      data.tanggal = dd + "-" + mm + "-" + yyyy;
       
     } else if (data.type === "weekly") {
       var startDD = "1", endDD = "7";
@@ -421,9 +509,9 @@ function submitFullReport(payloadStr) {
       fileName = monthName + "-laporan-bulanan.pdf";
     }
     
-    // 1. Generate PDF blob
+    // 1. Generate PDF blob (Hanya jika BUKAN Fase 1)
     var pdfBlob = null;
-    if (data.pdfBase64) {
+    if (!isFase1 && data.pdfBase64) {
       try {
         var decoded = Utilities.base64Decode(data.pdfBase64);
         pdfBlob = Utilities.newBlob(decoded, "application/pdf", fileName);
@@ -432,7 +520,7 @@ function submitFullReport(payloadStr) {
       }
     }
     
-    if (!pdfBlob) {
+    if (!isFase1 && !pdfBlob) {
       // Fallback to GAS simple HTML to PDF if client failed or base64 decode failed
       var htmlContent = generateHtmlReport(data);
       var htmlOutput = HtmlService.createHtmlOutput(htmlContent);
@@ -453,29 +541,45 @@ function submitFullReport(payloadStr) {
     
     // 2. Save to Google Drive folder
     var folder = getDynamicFolder(year, monthName, data);
-    
-    // 3. Pengecekan Duplikat
-    var existingFiles = folder.getFilesByName(fileName);
-    if (existingFiles.hasNext()) {
-      return { 
-        success: false, 
-        isDuplicate: true, 
-        message: "Laporan untuk periode ini sudah ada. Pengiriman ganda digagalkan!" 
-      };
+    if (!folder) {
+      return { success: false, error: "Sistem gagal membuat/mengakses folder di Google Drive. Periksa perizinan Google Drive Anda." };
     }
     
-    var file = folder.createFile(pdfBlob);
-    var fileUrl = file.getUrl();
+    // 3. Pengecekan Duplikat (Hanya jika BUKAN Fase 2, karena Fase 2 PASTI ada file draft)
+    if (!isFase2) {
+      var existingFiles = folder.getFilesByName(fileName);
+      if (existingFiles.hasNext()) {
+        return { 
+          success: false, 
+          isDuplicate: true, 
+          message: "Laporan untuk periode ini sudah ada. Pengiriman ganda digagalkan!" 
+        };
+      }
+    }
+    
+    var fileUrl = "";
+    if (isFase1) {
+      // Simpan Draft JSON
+      var draftFileName = dd + "-" + mm + "-" + yyyy + "-draft-" + outlet + ".json";
+      var draftContent = JSON.stringify(data);
+      var draftFile = folder.createFile(draftFileName, draftContent, MimeType.PLAIN_TEXT);
+      fileUrl = draftFile.getId(); // Save ID for Fase 2 to retrieve instantly
+    } else {
+      // Simpan PDF
+      var file = folder.createFile(pdfBlob);
+      fileUrl = file.getUrl();
+    }
     
     // Save Kebersihan PDF to its specific folder
     if (kbPdfBlob) {
-      // Find or create "checklist kebersihan" folder inside the current month folder
+      // Find or create "Checklist Kebersihan" folder inside the current MONTH folder
       var kbFolder;
-      var kbFolders = folder.getFoldersByName("checklist kebersihan");
+      var parentMonthFolder = (data.type === "daily" && folder.getParents().hasNext()) ? folder.getParents().next() : folder;
+      var kbFolders = parentMonthFolder.getFoldersByName("Checklist Kebersihan");
       if (kbFolders.hasNext()) {
         kbFolder = kbFolders.next();
       } else {
-        kbFolder = folder.createFolder("checklist kebersihan");
+        kbFolder = parentMonthFolder.createFolder("Checklist Kebersihan");
       }
       kbFolder.createFile(kbPdfBlob);
     }
@@ -483,6 +587,20 @@ function submitFullReport(payloadStr) {
     // 4. Append row to corresponding Sheet tab
     if (data.type === "daily") {
       var sheet = ss.getSheetByName("Daily");
+      
+      if (isFase2) {
+        // FASE 2: Update baris yang sudah ada
+        if (data.rowIdx) {
+          var totalOmset = Number(data.penjualan.shift1 || 0) + Number(data.penjualan.shift2 || 0);
+          sheet.getRange(data.rowIdx, 5).setValue(totalOmset); // Col 5: Total Omset
+          sheet.getRange(data.rowIdx, 8).setValue(fileUrl);    // Col 8: URL PDF
+          sheet.getRange(data.rowIdx, 10).setValue(Number(data.penjualan.transaksi || 0)); // Col 10: Transaksi
+          sheet.getRange(data.rowIdx, 11).setValue("Lengkap"); // Col 11: Status Fase
+        }
+        
+        // Return success langsung, tidak perlu catat log audit/QC lagi karena sudah dicatat di Fase 1
+        return { success: true, url: fileUrl };
+      }
       
       // [A1] Anti-Duplikat: cek kombinasi Tanggal + Outlet sebelum appendRow
       var existingData = sheet.getDataRange().getValues();
@@ -498,6 +616,7 @@ function submitFullReport(payloadStr) {
         }
       }
       
+      var statusFase = isFase1 ? "Fase 1" : "Lengkap";
       sheet.appendRow([
         data.tanggal,
         data.supervisor,
@@ -508,7 +627,9 @@ function submitFullReport(payloadStr) {
         data.penutup.kendala || "",
         fileUrl,
         Number(data.penjualan.target || 0),
-        Number(data.penjualan.transaksi || 0)
+        Number(data.penjualan.transaksi || 0),
+        statusFase,
+        data.cuaca || ""
       ]);
       
       if (data.kas && data.kas.audit && data.kas.audit.length > 0) {
@@ -767,7 +888,7 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
       if (rowDateObj instanceof Date) {
         rowDate = new Date(rowDateObj.getFullYear(), rowDateObj.getMonth(), rowDateObj.getDate()).getTime();
       } else {
-        var dateParts = String(row[0]).split("-");
+        var dateParts = String(row[0]).replace(/^'/, "").split("-");
         if (dateParts.length === 3) {
           var y = parseInt(dateParts[0], 10);
           var m = parseInt(dateParts[1], 10) - 1;
@@ -785,11 +906,11 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
         var rencana = String(row[7]);
         
         var key = "";
-        if (peringkat === "top") {
+        if (peringkat.indexOf("top") !== -1) {
           if (kategori === "minuman") key = "topMinuman";
           else if (kategori === "makanan") key = "topMakanan";
           else if (kategori === "snack") key = "topSnack";
-        } else if (peringkat === "bottom") {
+        } else if (peringkat.indexOf("bottom") !== -1) {
           if (kategori === "minuman") key = "bottomMinuman";
           else if (kategori === "makanan") key = "bottomMakanan";
           else if (kategori === "snack") key = "bottomSnack";
@@ -1068,6 +1189,58 @@ function api_getMonthlyData(monthStr, outlet) {
 }
 
 /**
+ * Mengecek apakah ada laporan harian (Fase 1) yang belum dilengkapi keuangan (Fase 2)
+ */
+function api_checkPendingLaporan() {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("Daily");
+    if (!sheet) return JSON.stringify({ status: "success", pendings: [] });
+    
+    var data = sheet.getDataRange().getValues();
+    var pendings = [];
+    
+    // Cari dari bawah (data terbaru) ke atas, limit ke 60 baris terakhir untuk efisiensi
+    var limit = Math.max(1, data.length - 60);
+    for (var i = data.length - 1; i >= limit; i--) {
+      var rowOutlet = data[i][2] ? data[i][2].toString() : "";
+      var rowStatus = data[i][10] ? data[i][10].toString() : ""; 
+      
+      if (rowStatus === "Fase 1") {
+        var rawDate = data[i][0];
+        var formattedDate = "";
+        if (rawDate instanceof Date) {
+          var y = rawDate.getFullYear();
+          var m = ("0" + (rawDate.getMonth() + 1)).slice(-2);
+          var d = ("0" + rawDate.getDate()).slice(-2);
+          formattedDate = y + "-" + m + "-" + d;
+        } else {
+          var ds = rawDate.toString();
+          var parts = ds.split("-");
+          if (parts.length === 3) {
+            formattedDate = parts[2] + "-" + parts[1] + "-" + parts[0];
+          } else {
+            formattedDate = ds;
+          }
+        }
+        
+        pendings.push({
+          outlet: rowOutlet,
+          tanggal: formattedDate,
+          supervisor: data[i][1].toString(),
+          shift1: data[i][4] ? Number(data[i][4]) : 0,
+          rowIdx: i + 1
+        });
+      }
+    }
+    
+    return JSON.stringify({ status: "success", pendings: pendings });
+  } catch(e) {
+    return JSON.stringify({ status: "error", error: e.toString() });
+  }
+}
+
+/**
  * Fetches dashboard analytics data for GM.
  */
 function api_gm_fetchReports(startDate, endDate, outletFilter) {
@@ -1084,6 +1257,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var transaksiTotal = 0;
     var listLaporan = [];
     var chartData = [];
+    var cuacaHujan = 0;
+    var cuacaCerah = 0;
     var outletStats = {};
     var omsetYTD = 0;
     
@@ -1129,7 +1304,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         var d = rowDateObj.getDate();
         rowDate = rowDateObj.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
       } else {
-        var str = (rowDateObj || "").toString().trim();
+        var str = (rowDateObj || "").toString().replace(/^'/, "").trim();
         var parts = str.split("-");
         if (parts.length === 3) {
           if (parts[2].length === 4) {
@@ -1156,9 +1331,17 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         
         if (rowDate >= startDate && rowDate <= endDate) {
           omsetTotal += rowOmset;
-          targetOmset += rowTarget;
+          // targetOmset += rowTarget; (Removed: Now calculated dynamically from Config_Target)
           komplainTotal += Number(data[i][5] || 0);
           transaksiTotal += Number(data[i][9] || 0); // Read real transaction data from col 10
+          
+          var rowCuaca = (data[i][11] || "Cerah / Panas").toString().toLowerCase();
+          if (rowCuaca.indexOf("hujan") !== -1 || rowCuaca.indexOf("mendung") !== -1) {
+            cuacaHujan++;
+          } else {
+            cuacaCerah++;
+          }
+          
           listLaporan.push({
             name: "Daily Report - " + rowDate + " (" + data[i][1] + ")",
             url: data[i][7],
@@ -1202,6 +1385,36 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       }
     }
     
+    // --- Real-Time SDM Aggregation ---
+    var totalTelatRealtime = 0;
+    var staffSheet = ss.getSheetByName("Staff_Daily");
+    if (staffSheet) {
+      var sdData = staffSheet.getDataRange().getValues();
+      for (var s = 1; s < sdData.length; s++) {
+        var rowDateStr = "";
+        var dObj = sdData[s][0];
+        if (dObj instanceof Date) {
+          rowDateStr = formatDate(dObj);
+        } else {
+          var str = (dObj||"").toString().replace(/^'/, "").trim();
+          var p = str.split("-");
+          if(p.length===3) {
+            if(p[0].length===4) rowDateStr = str;
+            else if(p[2].length===4) rowDateStr = p[2]+"-"+p[1]+"-"+p[0];
+          }
+        }
+        var rowOutlet = (sdData[s][2] || "").toString();
+        if (rowDateStr >= startDate && rowDateStr <= endDate) {
+          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+            var statusHadir = (sdData[s][6] || "").toString().toLowerCase();
+            if (statusHadir === "terlambat") {
+              totalTelatRealtime++;
+            }
+          }
+        }
+      }
+    }
+
     var operasionalData = null;
     var monthlySheet = ss.getSheetByName("Monthly");
     if (monthlySheet) {
@@ -1235,9 +1448,9 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
             
             operasionalData = {
               isFallback: false,
-              kepatuhanSop: Number(mData[i][8] || 0),
-              totalTelat: Number(mData[i][9] || 0),
-              totalTeguran: Number(mData[i][10] || 0),
+              kepatuhanSop: null, // UI will use hygieneScore instead
+              totalTelat: totalTelatRealtime, // Override with real-time data
+              totalTeguran: mData[i][10] !== "" ? Number(mData[i][10]) : null,
               kendalaUtama: (mData[i][11] || "").toString(),
               eskalasiFasilitas: (mData[i][12] || "").toString(),
               strategiDepan: (mData[i][13] || "").toString(),
@@ -1245,7 +1458,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
               pencapaian: (mData[i][15] || "").toString(),
               tantangan: (mData[i][16] || "").toString(),
               skill: (mData[i][17] || "").toString(),
-              turnoverBarista: Number(mData[i][18] || 0)
+              turnoverBarista: mData[i][18] !== "" ? Number(mData[i][18]) : null
             };
           }
         }
@@ -1256,9 +1469,9 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     if (!operasionalData) {
       operasionalData = {
         isFallback: true,
-        kepatuhanSop: 85, // estimated fallback
-        totalTelat: 0,
-        totalTeguran: 0,
+        kepatuhanSop: null,
+        totalTelat: totalTelatRealtime,
+        totalTeguran: null,
         kendalaUtama: "Menunggu Laporan Bulanan (Snapshot Sementara)",
         eskalasiFasilitas: "-",
         strategiDepan: "-",
@@ -1266,19 +1479,53 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         pencapaian: "-",
         tantangan: "-",
         skill: "-",
-        turnoverBarista: 0
+        turnoverBarista: null
       };
     }
+
     // Transaction total is now calculated inside the main loop
     // var transaksiTotal = listLaporan.length * 45;
     var currentFolderId = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_ID") || "";
     
     // targetOmset is now calculated directly from the Daily sheet
     
-    if (targetOmset === 0) {
-      var targetOmsetKey = "TARGET_OMSET_" + monthName + "_" + year;
-      targetOmset = PropertiesService.getScriptProperties().getProperty(targetOmsetKey) || "0";
+    // --- Dynamic Target Calculation from Config_Target ---
+    var dStartObj = new Date(startDate);
+    var dEndObj = new Date(endDate || startDate);
+    var durationDays = Math.round((dEndObj - dStartObj) / (1000 * 60 * 60 * 24)) + 1;
+    
+    var mForTarget = dStartObj.getMonth() + 1;
+    var targetBulanStr = (mForTarget < 10 ? "0" + mForTarget : mForTarget) + "-" + dStartObj.getFullYear();
+    
+    var configSheet = ss.getSheetByName("Config_Target");
+    var monthlyTarget = 0;
+    if (configSheet) {
+      var cData = configSheet.getDataRange().getValues();
+      var targetTotalSemua = 0;
+      var foundSpecific = false;
+      
+      for (var c = 1; c < cData.length; c++) {
+        var rowBulanTahun = (cData[c][0] || "").toString();
+        if (rowBulanTahun === targetBulanStr) {
+          var cOutlet = (cData[c][2] || "").toString();
+          if (cOutlet === outletFilter && outletFilter !== "Semua") {
+            monthlyTarget = Number(cData[c][3] || 0);
+            foundSpecific = true;
+            break;
+          }
+          if (!outletFilter || outletFilter === "Semua") {
+             targetTotalSemua += Number(cData[c][3] || 0);
+          }
+        }
+      }
+      if (!foundSpecific && (!outletFilter || outletFilter === "Semua")) {
+        monthlyTarget = targetTotalSemua;
+      }
     }
+    
+    var daysInMonth = new Date(dStartObj.getFullYear(), dStartObj.getMonth() + 1, 0).getDate();
+    var dailyTarget = monthlyTarget / daysInMonth;
+    targetOmset = dailyTarget * durationDays;
     
     var productsData = {
       minuman: { top: [], bottom: [] },
@@ -1353,6 +1600,108 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     hygieneKritis.sort(function(a,b) { return a.avg - b.avg; });
     hygieneKritis = hygieneKritis.slice(0, 3);
 
+    // --- PREDICTIVE SYSTEM ENGINE (v3.0 - Context-Aware Shapeshifter) ---
+    var predictiveAlert = "";
+    var systemVerdict = "Normal";
+    var dStart = new Date(startDate);
+    var dEnd = new Date(endDate || startDate);
+    
+    // Calculate Duration in Days
+    var durationDays = Math.round((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+    
+    var dday = dStart.getDate();
+    var isTanggalMuda = (dday >= 25 || dday <= 5);
+    var isTanggalTua = (dday >= 15 && dday <= 24);
+    
+    // Check Macro Parameters (Akademik, etc)
+    var activeEvent = "";
+    var pSheet = ss.getSheetByName("Config_Parameter");
+    if (pSheet) {
+      var pData = pSheet.getDataRange().getValues();
+      for (var pIdx = 1; pIdx < pData.length; pIdx++) {
+        var pStatus = (pData[pIdx][5] || "").toString();
+        var pOutlet = (pData[pIdx][0] || "").toString();
+        if (pStatus === "Aktif" && (!outletFilter || outletFilter === "Semua" || pOutlet === "Semua" || pOutlet === outletFilter)) {
+          var pMulai = (pData[pIdx][3] || "").toString();
+          var pSelesai = (pData[pIdx][4] || "").toString();
+          if (startDate >= pMulai && startDate <= pSelesai) {
+             activeEvent = pData[pIdx][2];
+             break;
+          }
+        }
+      }
+    }
+
+    var pacingOmset = targetOmset > 0 ? (omsetTotal / targetOmset) : 0;
+    
+    // DYNAMIC AI DECISION MATRIX
+    if (durationDays <= 2) {
+      // TIER 1: TACTICAL MODE (Harian / 1-2 Hari)
+      if (activeEvent !== "" && isTanggalTua) {
+        systemVerdict = "Kuning";
+        predictiveAlert = "Trafik Padat, Daya Beli Rendah (Event: " + activeEvent + " + Tanggal Tua): Kedai akan ramai namun pengunjung mayoritas berhemat. Action: Jangan tambah staf ekstra, alihkan energi ke kebersihan area. Jangan push menu premium, fokus tawarkan promo paket hemat.";
+      } 
+      else if (activeEvent !== "" && isTanggalMuda) {
+        systemVerdict = "Hijau";
+        predictiveAlert = "Momen Emas (Event: " + activeEvent + " + Tanggal Muda): Peluang mencetak rekor omset harian. Action: Pastikan staf full-team & prima. Push upselling menu premium. Kecepatan dapur adalah kunci.";
+      }
+      else if (activeEvent === "" && isTanggalTua && (operasionalData.kepatuhanSop < 85 || komplainTotal > 1)) {
+        systemVerdict = "Merah";
+        predictiveAlert = "Bahaya Kualitas Harian: Trafik sepi (Tanggal Tua) namun staf lalai (SOP turun/Komplain ada). Ini berisiko mengusir pelanggan solo yang tersisa. Action: Berikan teguran ke SPV shift hari ini.";
+      }
+      else if (activeEvent === "" && isTanggalMuda && targetOmset > 0 && omsetTotal < targetOmset) {
+        systemVerdict = "Merah";
+        predictiveAlert = "Darurat Trafik Harian: Harusnya daya beli kuat (Tanggal Muda) namun omset belum capai target. Action: Minta SPV periksa kendala lapangan mendadak (hujan/jalan ditutup) atau jalankan Flash Promo lokal.";
+      }
+      else {
+        systemVerdict = "Biru";
+        predictiveAlert = "Kinerja Taktis Harian: Operasional stabil dan tidak ada anomali cuaca/tanggal yang ekstrem. Terus pantau pelayanan harian.";
+      }
+
+    } else if (durationDays > 2 && durationDays <= 14) {
+      // TIER 2: MOMENTUM MODE (Mingguan / Short Trend)
+      if (pacingOmset >= 1 && komplainTotal > 3) {
+        systemVerdict = "Kuning";
+        predictiveAlert = "Warning Momentum: Kecepatan omset (Run-Rate) mingguan sangat baik, namun mengorbankan kualitas (Komplain Tinggi). Action: Evaluasi kecepatan penyajian dapur dan kontrol kualitas.";
+      }
+      else if (pacingOmset < 0.85 && operasionalData.kepatuhanSop >= 95) {
+        systemVerdict = "Merah";
+        predictiveAlert = "Darurat Trafik Mingguan: Kepatuhan SOP sempurna namun kecepatan omset (Pacing) sangat lambat (<85%). Kinerja layanan bukan masalah, masalahnya murni pada kurangnya trafik. Action: Luncurkan promo lokal / perkuat konten iklan akhir pekan.";
+      }
+      else if (pacingOmset >= 1 && operasionalData.kepatuhanSop >= 90) {
+        systemVerdict = "Hijau";
+        predictiveAlert = "Momentum Positif: Tren pertumbuhan mingguan sangat stabil dengan pelayanan terjaga. Pertahankan formasi tim ini menjelang akhir pekan.";
+      }
+      else {
+        systemVerdict = "Biru";
+        predictiveAlert = "Evaluasi Mingguan: Tren mingguan berjalan fluktuatif namun masih dalam batas toleransi wajar. Tidak ada indikator kritis.";
+      }
+
+    } else {
+      // TIER 3: STRATEGIC MACRO MODE (Bulanan / 15+ Hari)
+      var rasioTelat = (operasionalData.telat || 0) / durationDays;
+      if (pacingOmset < 0.90 && rasioTelat > 0.2) {
+        systemVerdict = "Merah";
+        predictiveAlert = "Krisis Kepemimpinan Bulanan: Pencapaian target GAGAL. Analisis sistem menemukan korelasi kuat antara lambatnya pertumbuhan dengan tingginya tingkat ketidakdisiplinan staf (Keterlambatan). Ada indikasi Toxic Workplace di lapangan.";
+      }
+      else if (pacingOmset >= 1 && komplainTotal > (durationDays * 0.3)) {
+        systemVerdict = "Kuning";
+        predictiveAlert = "Pertumbuhan Semu (Hollow Growth): Target finansial bulanan TERCAPAI, namun citra *brand* rusak (Komplain sangat tinggi secara akumulatif). Action: Anda butuh Manpower tambahan atau efisiensi dapur sebelum pelanggan churn permanen.";
+      }
+      else if (pacingOmset >= 1 && operasionalData.kepatuhanSop >= 95 && komplainTotal < (durationDays * 0.1)) {
+        systemVerdict = "Hijau";
+        predictiveAlert = "Golden Era (Sukses Eksekutif): Keseimbangan sempurna operasional dan finansial skala makro tercapai. Kinerja ini layak dijadikan benchmark. Action: Cairkan insentif maksimal untuk jajaran manajerial.";
+      }
+      else if (pacingOmset < 0.90) {
+        systemVerdict = "Merah";
+        predictiveAlert = "Kegagalan Target Periode: Target gagal dicapai. Evaluasi seluruh matriks *Marketing Intelligence*, produk andalan (Top 5), dan rasio promosi. Perlu perombakan strategi menyeluruh untuk siklus berikutnya.";
+      }
+      else {
+        systemVerdict = "Biru";
+        predictiveAlert = "Kinerja Makro Stabil: Seluruh matriks utama (Finansial, SOP, SDM) dalam satu bulan penuh menunjukkan titik aman tanpa anomali ekstrem. Target tercapai moderat.";
+      }
+    }
+
     var resultObj = {
       status: "success",
       data: {
@@ -1370,12 +1719,80 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         operasionalData: operasionalData,
         leaderboard: leaderboard,
         hygieneScore: hygieneScore,
-        hygieneKritis: hygieneKritis
+        hygieneKritis: hygieneKritis,
+        cuacaHujan: cuacaHujan,
+        cuacaCerah: cuacaCerah,
+        predictiveAlert: predictiveAlert,
+        systemVerdict: systemVerdict
       }
     };
     return JSON.stringify(resultObj);
   } catch (err) {
     return JSON.stringify({ status: "error", error: err.toString() });
+  }
+}
+
+/**
+ * Menambahkan Parameter Makro Baru (Misal: Kalender Akademik)
+ */
+function api_saveParameter(payloadStr) {
+  try {
+    var data = JSON.parse(payloadStr);
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("Config_Parameter");
+    if (!sheet) throw new Error("Tab Config_Parameter tidak ditemukan. Jalankan Setup ulang.");
+    
+    // Validasi data
+    if (!data.kategori || !data.namaEvent || !data.tglMulai || !data.tglSelesai) {
+      throw new Error("Data parameter tidak lengkap.");
+    }
+    
+    var rowData = [
+      data.outlet || "Semua",
+      data.kategori,
+      data.namaEvent,
+      data.tglMulai,
+      data.tglSelesai,
+      "Aktif"
+    ];
+    
+    sheet.appendRow(rowData);
+    return JSON.stringify({ status: "success", message: "Parameter berhasil disimpan." });
+  } catch(e) {
+    return JSON.stringify({ status: "error", error: e.toString() });
+  }
+}
+
+/**
+ * Mengambil daftar Parameter Makro
+ */
+function api_getParameters(outlet) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("Config_Parameter");
+    if (!sheet) return JSON.stringify({ status: "success", data: [] });
+    
+    var data = sheet.getDataRange().getValues();
+    var results = [];
+    
+    for (var i = 1; i < data.length; i++) {
+      var rowOutlet = (data[i][0] || "").toString();
+      if (!outlet || outlet === "Semua" || rowOutlet === "Semua" || rowOutlet === outlet) {
+        results.push({
+          rowIdx: i + 1,
+          outlet: rowOutlet,
+          kategori: data[i][1],
+          namaEvent: data[i][2],
+          tglMulai: data[i][3],
+          tglSelesai: data[i][4],
+          status: data[i][5]
+        });
+      }
+    }
+    
+    return JSON.stringify({ status: "success", data: results });
+  } catch(e) {
+    return JSON.stringify({ status: "error", error: e.toString() });
   }
 }
 
@@ -1422,10 +1839,12 @@ function generateHtmlReport(data) {
     </table>`;
     
     html += `<h2>B. Penjualan Top Produk</h2>`;
-    html += `<table>
-      <tr><th>Kategori</th><th>Top 1</th><th>Top 2</th><th>Top 3</th></tr>
-      <tr><td><strong>Makanan</strong></td><td>${data.produk.makanan[0] || '-'}</td><td>${data.produk.makanan[1] || '-'}</td><td>${data.produk.makanan[2] || '-'}</td></tr>
-      <tr><td><strong>Minuman</strong></td><td>${data.produk.minuman[0] || '-'}</td><td>${data.produk.minuman[1] || '-'}</td><td>${data.produk.minuman[2] || '-'}</td></tr>
+    html += `<h3>Produk Terlaris (Top 3)</h3>
+    <table border="1" cellpadding="5">
+      <tr><th>Kategori</th><th>#1</th><th>#2</th><th>#3</th></tr>
+      <tr><td><strong>Makanan</strong></td><td>${data.produk.topMakanan ? (data.produk.topMakanan[0]?.nama || '-') : '-'}</td><td>${data.produk.topMakanan ? (data.produk.topMakanan[1]?.nama || '-') : '-'}</td><td>${data.produk.topMakanan ? (data.produk.topMakanan[2]?.nama || '-') : '-'}</td></tr>
+      <tr><td><strong>Minuman</strong></td><td>${data.produk.topMinuman ? (data.produk.topMinuman[0]?.nama || '-') : '-'}</td><td>${data.produk.topMinuman ? (data.produk.topMinuman[1]?.nama || '-') : '-'}</td><td>${data.produk.topMinuman ? (data.produk.topMinuman[2]?.nama || '-') : '-'}</td></tr>
+      <tr><td><strong>Snack</strong></td><td>${data.produk.topSnack ? (data.produk.topSnack[0]?.nama || '-') : '-'}</td><td>${data.produk.topSnack ? (data.produk.topSnack[1]?.nama || '-') : '-'}</td><td>${data.produk.topSnack ? (data.produk.topSnack[2]?.nama || '-') : '-'}</td></tr>
     </table>`;
     
     html += `<h2>C. Audit Kas Kasir</h2>`;
@@ -2239,6 +2658,63 @@ function api_gm_saveBenchmarkATS(newATS) {
     PropertiesService.getScriptProperties().setProperty("GM_BENCHMARK_ATS", newATS.toString());
     return JSON.stringify({ status: "success" });
   } catch(e) {
+    return JSON.stringify({ status: "error", error: e.toString() });
+  }
+}
+
+/**
+ * Simpan Target Omset Bulanan per Outlet ke Config_Target
+ */
+function api_saveConfigTarget(bulanTahun, outlet, targetOmset) {
+  try {
+    var ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID"));
+    var sheet = ss.getSheetByName("Config_Target");
+    if (!sheet) {
+      sheet = ss.insertSheet("Config_Target");
+      sheet.appendRow(["Bulan", "Tahun", "Outlet", "Target Omset"]);
+    }
+    
+    var data = sheet.getDataRange().getValues();
+    var tahun = bulanTahun.split("-")[1] || new Date().getFullYear().toString();
+    
+    // Check if exists
+    var found = false;
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0].toString() === bulanTahun && data[i][2].toString() === outlet) {
+        sheet.getRange(i + 1, 4).setValue(Number(targetOmset));
+        found = true;
+        break;
+      }
+    }
+    
+    if (!found) {
+      sheet.appendRow([bulanTahun, tahun, outlet, Number(targetOmset)]);
+    }
+    
+    return JSON.stringify({ status: "success" });
+  } catch (e) {
+    Logger.log("Error in api_saveConfigTarget: " + e.toString());
+    return JSON.stringify({ status: "error", error: e.toString() });
+  }
+}
+
+/**
+ * Get Target Bulanan for a specific outlet
+ */
+function api_getTargetBulanan(outlet, monthYear) {
+  try {
+    var ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID"));
+    var sheet = ss.getSheetByName("Config_Target");
+    if (!sheet) return JSON.stringify({ status: "success", target: 0 });
+    
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0].toString() === monthYear && data[i][2].toString() === outlet) {
+        return JSON.stringify({ status: "success", target: Number(data[i][3]) });
+      }
+    }
+    return JSON.stringify({ status: "success", target: 0 });
+  } catch (e) {
     return JSON.stringify({ status: "error", error: e.toString() });
   }
 }

@@ -352,6 +352,16 @@ function openPreviewModal() {
   // Ensure all data in form is updated before building HTML
   const previewHtml = buildPDFHtml(window.form);
   body.innerHTML = previewHtml;
+  
+  // Reset footer buttons to default state
+  const modalFooter = document.getElementById('previewModalFooter');
+  if (modalFooter) {
+    modalFooter.innerHTML = `
+      <button onclick="closePreviewModal()" class="px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Batal</button>
+      <button onclick="submitReport()" class="px-6 py-2.5 bg-zero-gray hover:bg-gray-400 text-zero-white font-bold rounded-2xl hover: transition-all duration-200">Kirim Laporan</button>
+    `;
+  }
+  
   modal.classList.remove('hidden');
 }
 
@@ -363,6 +373,11 @@ function closePreviewModal() {
 async function submitReport() {
   showLoading(true);
   try {
+    // Force save draft synchronously to capture last-millisecond checkbox changes
+    if (typeof saveDraft === 'function') {
+      saveDraft(true);
+    }
+    
     const f = window.form;
     
     // Generate Base64 PDF to send to GDrive so the format perfectly matches the client
@@ -371,18 +386,22 @@ async function submitReport() {
     const opt = {
       margin: 0,
       filename: 'temp.pdf',
-      image: { type: 'jpeg', quality: 0.8 }, // Reduced for smaller base64 size
-      html2canvas: { scale: 1.2, useCORS: true, logging: false }, // Reduced scale for faster generation & smaller size
+      image: { type: 'jpeg', quality: 0.8 }, 
+      html2canvas: { scale: 1.2, useCORS: true, logging: false }, 
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    try {
-      const base64String = await html2pdf().set(opt).from(htmlContent).outputPdf('datauristring');
-      if (base64String && base64String.includes(',')) {
-        f.pdfBase64 = base64String.split(',')[1];
+    if (f.type === 'daily' && f.fase === 1) {
+      f.pdfBase64 = null; // No PDF for Fase 1
+    } else {
+      try {
+        const base64String = await html2pdf().set(opt).from(htmlContent).outputPdf('datauristring');
+        if (base64String && base64String.includes(',')) {
+          f.pdfBase64 = base64String.split(',')[1];
+        }
+      } catch (e) {
+        console.warn("Gagal membuat base64 PDF, mengirim tanpa PDF base64", e);
       }
-    } catch (e) {
-      console.warn("Gagal membuat base64 PDF, mengirim tanpa PDF base64", e);
     }
     
     if (f.type === 'daily' && f.kebersihan && f.kebersihan.length > 0) {
@@ -401,32 +420,40 @@ async function submitReport() {
     
     const payloadStr = JSON.stringify(f);
     const res = await Server.call('submitFullReport', payloadStr);
-    if (res.success) {
+    
+    if (res && res.success) {
       StorageHelper.remove('zc_draft_daily');
       StorageHelper.remove('zc_draft_weekly');
       StorageHelper.remove('zc_draft_monthly');
-      const currentType = window.form.type;
-      resetFormData(currentType);
-      const body = document.getElementById('previewModalBody');
-      const modalFooter = document.getElementById('previewModalFooter');
-      if (body) {
-        body.innerHTML = `<div class="text-center py-6">
-          <h4 class="text-xl font-bold text-gray-900 mb-2">Laporan Berhasil Dikirim!</h4>
-          <p class="text-gray-600 mb-4">Laporan Anda telah disimpan ke database dan file PDF telah dibuat.</p>
-          <div class="bg-gray-100 p-3 rounded-lg mb-6 text-sm text-left">
-            <span class="font-bold text-gray-700">Lokasi Google Drive:</span><br/>
-            <span class="text-gray-600 text-xs">${res.folderPath || 'Zero Cafe Workspace Drive'}</span>
-          </div>
-          <a href="${res.url}" target="_blank" class="inline-block px-6 py-3 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all">Buka File PDF</a>
-        </div>`;
-      }
-      if (modalFooter) {
-        modalFooter.innerHTML = `<button onclick="closeSuccessModal()" class="px-6 py-2.5 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all">Selesai</button>`;
-      }
-    } else if (res.isDuplicate) {
-      // Special handling for duplicate reports
-      showToast("DATA GANDA: " + res.message, "error");
       
+      showToast("Laporan berhasil dikirim!", "success");
+      
+      // Jika Fase 1, kembali ke dashboard. Jika normal/Fase 2, buka PDF.
+      if (f.type === 'daily' && f.fase === 1) {
+         setTimeout(function() {
+           window.location.reload();
+         }, 1500);
+      } else {
+         const body = document.getElementById('previewModalBody');
+         const modalFooter = document.getElementById('previewModalFooter');
+         if (body) {
+           body.innerHTML = `<div class="text-center py-6">
+             <h4 class="text-xl font-bold text-gray-900 mb-2">Laporan Berhasil Dikirim!</h4>
+             <p class="text-gray-600 mb-4">Laporan Anda telah disimpan ke database dan file PDF telah dibuat.</p>
+             <div class="bg-gray-100 p-3 rounded-lg mb-6 text-sm text-left">
+               <span class="font-bold text-gray-700">Lokasi Google Drive:</span><br/>
+               <span class="text-gray-600 text-xs">${res.folderPath || 'Zero Cafe Workspace Drive'}</span>
+             </div>
+             <a href="${res.url}" target="_blank" class="inline-block px-6 py-3 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all">Buka File PDF</a>
+           </div>`;
+         }
+         if (modalFooter) {
+           modalFooter.innerHTML = `<button onclick="closeSuccessModal()" class="px-6 py-2.5 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all">Selesai</button>`;
+         }
+      }
+      
+    } else if (res && res.isDuplicate) {
+      showToast("DATA GANDA: " + res.message, "error");
       const body = document.getElementById('previewModalBody');
       const modalFooter = document.getElementById('previewModalFooter');
       if (body) {
@@ -441,8 +468,18 @@ async function submitReport() {
       if (modalFooter) {
         modalFooter.innerHTML = `<button onclick="closePreviewModal()" class="px-6 py-2.5 bg-gray-200 text-gray-700 font-bold rounded-2xl hover:bg-gray-300 transition-all">Tutup</button>`;
       }
+    } else if (res && res.isDangling) {
+      window.form = {}; // Destroy the form in memory so auto-save cannot resurrect it
+      StorageHelper.remove('zc_draft_daily');
+      showToast(res.message, "error");
+      setTimeout(function() {
+        AppState.allPendingLaporan = null;
+        transitionToMenu("select_report");
+        checkPendingReports();
+      }, 3500);
+      closePreviewModal();
     } else {
-      showToast("Gagal mengirim laporan: " + res.error, "error");
+      showToast("Gagal mengirim laporan: " + (res ? (res.error || res.message) : "Unknown error"), "error");
       closePreviewModal();
     }
   } catch (err) {

@@ -138,9 +138,22 @@ Always provide **data-based reasoning** when rejecting. Never reject without an 
 ### Rule 9: Always Use `window.form` in Inline Handlers
 In all `onchange`, `oninput`, `onclick` attributes inside template literals:
 - ✅ `window.form.penjualan.target`
-- ❌ `form.penjualan.target`
+- ❌ `form.penjualan.target` (never leave it bare inside string interpolation; do not rely on local `let/const` variables inside string attributes because they won't exist when the user clicks).
 
-The bare `form` reference can be captured by an HTML `<form>` element's scope chain, causing silent data loss.
+---
+
+### Rule 10: HtmlService Escaping Bug (Syntax Errors in HTML Partials)
+Google Apps Script's `HtmlService.createHtmlOutputFromFile()` parses `<script>` blocks inside partials verbatim.
+- **DO NOT** use unescaped backslashes before backticks (e.g. `\``) or before dollar signs (`\$`) inside Javascript template literals if they are inside an HTML partial. 
+- Doing so will result in an invalid escape sequence when the browser interprets the HTML string, causing `Uncaught SyntaxError: Invalid or unexpected token`.
+- This syntax error will kill the entire `<script>` block, causing functions inside it to become `undefined`.
+
+---
+
+### Rule 11: Silent Routing Fallbacks & Redeclaration (`let/const`)
+- In `JS-App1.html`, the core `renderApp()` function is wrapped in a `try...catch` block.
+- If a fatal Javascript error occurs during rendering (for example, re-declaring a `let` variable like `let summaryColor` in `Partial-Dashboard-GM.html`), the `catch` block will silently trap it and execute a **fallback route** (e.g., routing back to `select_report` or SPV Dashboard).
+- **Debugging Tip:** If the user complains that "login GM goes to SPV", **DO NOT** assume the routing button is broken. Assume the `getDashboardGMTemplate()` crashed due to a syntax error and triggered the silent fallback. Always look for pure JS bugs first (like `let` redeclarations or undefined properties).
 
 ---
 

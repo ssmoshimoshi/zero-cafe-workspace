@@ -135,32 +135,21 @@ function initializeSystem() {
   scriptProperties.setProperty("SPREADSHEET_ID", ssId);
   
   // Set up root folder in Drive
-  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
+  var rootFolderId = "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
   var rootFolder;
-  if (rootFolderId) {
-    try {
-      rootFolder = DriveApp.getFolderById(rootFolderId);
-    } catch(e) {
-      rootFolderId = null;
-    }
-  }
-  
-  if (!rootFolderId) {
+  try {
+    rootFolder = DriveApp.getFolderById(rootFolderId);
+  } catch(e) {
+    // Fallback if the user's specific folder is somehow completely inaccessible
     var folderName = "Zero Cafe Workspace Drive";
-    var specificId = "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
-    try {
-      rootFolder = DriveApp.getFolderById(specificId);
-    } catch(e) {
-      // Fallback
-      var folders = DriveApp.getFoldersByName(folderName);
-      if (folders.hasNext()) {
-        rootFolder = folders.next();
-      } else {
-        rootFolder = DriveApp.createFolder(folderName);
-      }
+    var folders = DriveApp.getFoldersByName(folderName);
+    if (folders.hasNext()) {
+      rootFolder = folders.next();
+    } else {
+      rootFolder = DriveApp.createFolder(folderName);
     }
-    scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
+  scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   
   return {
     status: "success",
@@ -383,9 +372,9 @@ function getStructuredFolder(year, monthName, category) {
  * Creates dynamic folder hierarchy based on report type.
  */
 function getDynamicFolder(year, monthName, data) {
-  // [A3] Centralize: selalu baca ROOT_FOLDER_ID dari ScriptProperties
+  // [A3] Centralize: selalu gunakan ROOT_FOLDER_ID yang diminta user
   var scriptProperties = PropertiesService.getScriptProperties();
-  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID") || "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
+  var rootFolderId = "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
   var rootFolder;
   
   try {

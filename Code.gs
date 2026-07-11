@@ -3122,3 +3122,11 @@ function trigger_NightlyCache(targetDateStr) {
     }
   }
 }
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Zero Cafe Admin')
+    .addItem('Initialize System', 'initializeSystem')
+    .addItem('Run All Mocks', 'runAllMocks')
+    .addToUi();
+}

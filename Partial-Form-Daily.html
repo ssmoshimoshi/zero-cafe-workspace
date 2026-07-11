@@ -624,7 +624,6 @@ function getDailyTabContent() {
                               <option value="Kotor" ${item.status === 'Kotor' ? 'selected' : ''}>Kotor</option>
                             </select>
                             <input type="number" value="${item.skor}" onchange="handleKebersihanSkorChange(this, ${item.originalIdx})" placeholder="Skor" class="w-14 px-2 py-1 text-xs text-center border border-gray-200 rounded focus:outline-none font-bold">
-                          </div>
                           <div class="mt-2 space-y-1">
                             ${(() => {
                               const opts = getKebersihanChecklistOptions(item.area, item.point);
@@ -633,7 +632,7 @@ function getDailyTabContent() {
                               let html = '';
                               ['Bersih', 'Cukup Bersih', 'Kotor'].forEach(stat => {
                                 const isHidden = stat !== currentStatus ? 'hidden' : '';
-                                html += `<div class="checklist-group-${stat.replace(/\s+/g, '')} ${isHidden}">`;
+                                html += `<div class="checklist-group-${stat.replace(' ', '')} ${isHidden}">`;
                                 if (opts[stat]) {
                                   opts[stat].forEach(opt => {
                                     const isChecked = (item.ket || '').includes(opt);
@@ -876,7 +875,7 @@ function handleKebersihanCheckboxChange(checkboxEl, idx) {
   const stat = sel.value || 'Bersih'; // fallback
   
   // Ambil semua checkbox di dalam grup status tersebut yang dicentang
-  const groupClass = `.checklist-group-${stat.replace(/\\s+/g, '')}`;
+  const groupClass = `.checklist-group-${stat.replace(' ', '')}`;
   const group = r.querySelector(groupClass);
   if (!group) return;
   
@@ -963,7 +962,7 @@ function updateKebersihanDOM(rowEl, selEl, stat) {
   groups.forEach(g => {
     const div = rowEl.querySelector(`.checklist-group-${g}`);
     if (div) {
-      if (stat.replace(/\s+/g, '') === g) {
+      if (stat.replace(' ', '') === g) {
         div.classList.remove('hidden');
       } else {
         div.classList.add('hidden');

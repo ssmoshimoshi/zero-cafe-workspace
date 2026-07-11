@@ -400,25 +400,23 @@ function getDynamicFolder(year, monthName, data) {
   var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
   var outletFolder = getOrCreateSubFolder(monthFolder, data.outlet || "Perintis");
   
+  // A1: Ensure the base subfolders exist for this outlet
+  getOrCreateSubFolder(outletFolder, "Checklist Kebersihan");
+  getOrCreateSubFolder(outletFolder, "Fasilitas");
+  getOrCreateSubFolder(outletFolder, "Pengeluaran");
+  
   if (data.type === "daily") {
-    // Format folder struktur (Bulan/Outlet/Hari)
-    var dateParts = (data.tanggal || "").split("-");
-    var day = dateParts.length === 3 ? dateParts[2] : new Date().getDate(); 
-    var dayFolderName = day + " " + monthName;
-    return getOrCreateSubFolder(outletFolder, dayFolderName);
+    return getOrCreateSubFolder(outletFolder, "Daily Reports");
   } else if (data.type === "weekly") {
-    // Mingguan folder format: <start_day>-<end_day>-<month>-<year>
-    var pStart = data.periodeStart ? data.periodeStart.split("-") : [];
-    var pEnd = data.periodeEnd ? data.periodeEnd.split("-") : [];
-    
-    var startDay = pStart.length === 3 ? parseInt(pStart[2], 10) : "1";
-    var endDay = pEnd.length === 3 ? parseInt(pEnd[2], 10) : "7";
-    
-    var folderName = startDay + "-" + endDay + "-" + monthName.toLowerCase() + "-" + year;
-    return getOrCreateSubFolder(outletFolder, folderName);
+    return getOrCreateSubFolder(outletFolder, "Laporan Mingguan");
   } else if (data.type === "monthly") {
-    // Bulanan folder: "Laporan Bulanan"
     return getOrCreateSubFolder(outletFolder, "Laporan Bulanan");
+  } else if (data.type === "kebersihan") {
+    return getOrCreateSubFolder(outletFolder, "Checklist Kebersihan");
+  } else if (data.type === "pengeluaran") {
+    return getOrCreateSubFolder(outletFolder, "Pengeluaran");
+  } else if (data.type === "fasilitas") {
+    return getOrCreateSubFolder(outletFolder, "Fasilitas");
   }
   
   return outletFolder;
@@ -638,14 +636,14 @@ function submitFullReport(payloadStr) {
     
     // Save Kebersihan PDF to its specific folder
     if (kbPdfBlob) {
-      // Find or create "Checklist Kebersihan" folder inside the current MONTH folder
+      // Find or create "Checklist Kebersihan" folder inside the current OUTLET folder
       var kbFolder;
-      var parentMonthFolder = (data.type === "daily" && folder.getParents().hasNext()) ? folder.getParents().next() : folder;
-      var kbFolders = parentMonthFolder.getFoldersByName("Checklist Kebersihan");
+      var parentOutletFolder = (data.type === "daily" && folder.getParents().hasNext()) ? folder.getParents().next() : folder;
+      var kbFolders = parentOutletFolder.getFoldersByName("Checklist Kebersihan");
       if (kbFolders.hasNext()) {
         kbFolder = kbFolders.next();
       } else {
-        kbFolder = parentMonthFolder.createFolder("Checklist Kebersihan");
+        kbFolder = parentOutletFolder.createFolder("Checklist Kebersihan");
       }
       kbFolder.createFile(kbPdfBlob);
     }

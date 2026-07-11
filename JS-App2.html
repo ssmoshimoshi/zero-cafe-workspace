@@ -554,14 +554,14 @@ window.addStaffSubmit = async function() {
   if (!name) return;
   
   try {
-    const res = await Server.call('api_addMasterStaff', name, pos);
+    const res = await Server.call('api_addMasterStaff', name, pos, window.form.outlet);
     if (res.success) {
       // Add to local master list
-      AppState.masterStaff.push({ nama: name, posisi: pos });
+      AppState.masterStaff.push({ id: res.id, nama: name, posisi: pos, status: 'Aktif', outlet: window.form.outlet });
       
       // Auto-add to current form based on type
       if (window.form.type === 'daily') {
-        window.form.staff.push({ nama: name, posisi: pos, status: "Hadir", keramahan: false, keterangan: "" });
+        window.form.staff.push({ nama: name, posisi: pos, status: "Hadir", keramahan: false, keterangan: "", outletAsal: window.form.outlet });
       } else if (window.form.type === 'weekly') {
         window.form.weekly.staff.push({ nama: name, posisi: pos, status: "Berkembang", alasan: "" });
       }

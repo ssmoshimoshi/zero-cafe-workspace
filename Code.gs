@@ -281,6 +281,92 @@ function api_getMasterStaff() {
   }
 }
 
+function api_getAllMasterStaff() {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("MasterStaff");
+    if (!sheet) return [];
+    
+    var data = sheet.getDataRange().getValues();
+    var staffList = [];
+    
+    // Skip headers
+    for (var i = 1; i < data.length; i++) {
+      staffList.push({
+        id: data[i][0],
+        nama: data[i][1],
+        posisi: data[i][2],
+        status: data[i][3],
+        outlet: data[i][4] || ""
+      });
+    }
+    return staffList;
+  } catch (err) {
+    Logger.log("Error in api_getAllMasterStaff: " + err.toString());
+    return [];
+  }
+}
+
+/**
+ * Adds a new master staff record.
+ */
+function api_addMasterStaff(nama, posisi, outlet) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("MasterStaff");
+    if (!sheet) {
+      sheet = ss.insertSheet("MasterStaff");
+      sheet.appendRow(["ID", "Nama Staff", "Posisi", "Status", "Outlet Asal"]);
+    }
+    
+    var id = "STF-" + new Date().getTime();
+    var status = "Aktif";
+    var outletAsal = outlet || "";
+    
+    sheet.appendRow([id, nama, posisi, status, outletAsal]);
+    
+    return {success: true, id: id};
+  } catch (err) {
+    Logger.log("Error in api_addMasterStaff: " + err.toString());
+    return {success: false, error: err.toString()};
+  }
+}
+
+/**
+ * Updates a master staff record.
+ */
+function api_updateMasterStaff(id, nama, posisi, status, outlet) {
+  try {
+    var ss = getSpreadsheet();
+    var sheet = ss.getSheetByName("MasterStaff");
+    if (!sheet) return {success: false, error: "Sheet MasterStaff tidak ditemukan"};
+    
+    var data = sheet.getDataRange().getValues();
+    
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0] == id) {
+        // Found the row
+        var row = i + 1;
+        // Col 2: Nama
+        sheet.getRange(row, 2).setValue(nama);
+        // Col 3: Posisi
+        sheet.getRange(row, 3).setValue(posisi);
+        // Col 4: Status
+        sheet.getRange(row, 4).setValue(status);
+        // Col 5: Outlet
+        sheet.getRange(row, 5).setValue(outlet);
+        
+        return {success: true};
+      }
+    }
+    
+    return {success: false, error: "Staff dengan ID tersebut tidak ditemukan"};
+  } catch (err) {
+    Logger.log("Error in api_updateMasterStaff: " + err.toString());
+    return {success: false, error: err.toString()};
+  }
+}
+
 function api_getMasterMenu() {
   try {
     var ss = getSpreadsheet();

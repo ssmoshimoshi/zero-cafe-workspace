@@ -1493,7 +1493,6 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           }
         }
       }
-    }
 
     var operasionalData = null;
     var mData = getAggregatedData(ss, "Monthly");

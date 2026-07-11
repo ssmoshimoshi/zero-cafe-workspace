@@ -2,6 +2,7 @@
 
 ## Workflow & Efisiensi Token
 - **Pendekatan Bertahap (Incremental):** Selalu pengerjaan fitur secara bertahap (satu atau dua fitur per sesi). Jangan memproses terlalu banyak permintaan besar sekaligus untuk menjaga *context window* tetap kecil dan menghemat penggunaan token, serta memudahkan pelacakan *bug*.
+- **Eksekusi Bertahap (Sequential Execution):** Jika membuat tugas (*task*) yang memiliki beberapa tahapan, jangan mengeksekusi tahapan-tahapan tersebut sekaligus. Selesaikan tahapan satu per satu secara berurutan sesuai dengan rencana (*plan*) tahapan yang telah disusun sendiri sebelum berlanjut ke tahap berikutnya.
 - **Pemilihan Model (High vs Low):** 
   - Utamakan model **Pro High** (atau model dengan tingkat nalar tertinggi) untuk merancang arsitektur, mengubah logika backend yang krusial, atau menyusun *Implementation Plan*. Ini mencegah regresi dan bug struktural.
   - Model **Low / Flash** sebaiknya hanya digunakan untuk tugas modifikasi UI yang sederhana atau *boilerplate code*.
@@ -9,7 +10,7 @@
 - **Direct to Production:** Setiap kali bug kritis diperbaiki, selalu jalankan `clasp push -f && clasp deploy -i [ID] -d "Pesan"` agar pengguna bisa langsung mengetes versi terbarunya via link *Web App*.
 
 ## Arsitektur Data & Etika UI (Zero Cafe)
-- **Single Source of Truth (Hierarki Data):** Jangan pernah menjumlahkan data harian (Daily) untuk analitik tingkat eksekutif (GM Dashboard). Selalu gunakan laporan Mingguan (Weekly) atau Bulanan (Monthly) yang telah direkonsiliasi dengan POS Zero oleh SPV. Data Harian murni digunakan SPV untuk memantau performa staf instan.
+- **Daily as The Absolute Center (Hierarki Data):** Seluruh arsitektur agregasi Laporan GM Dasbor WAJIB merujuk pada rekaman **Harian (Daily)** sebagai fondasi utama (Center Data). Laporan Mingguan/Bulanan milik SPV sejatinya hanyalah hasil *auto-fill* dari data harian. Jika SPV berhalangan (sakit/off/cuti), SPV wajib melakukan *backfill* data harian (terutama finansial dari POS Zero) di lain waktu. Tidak boleh ada sistem kompensasi target; dasbor harus murni menggunakan perbandingan target kalender absolut agar SPV bertanggung jawab melengkapi data hariannya.
 - **Resilience & Graceful Fallback:** Sistem harus kebal terhadap *human error* (misal: SPV lupa *set* Folder ID, lupa isi skor, dll). 
   - Selalu siapkan *fallback* nilai *default*.
   - Selalu siapkan *fallback* pembuatan folder otomatis (misal: di *Root Drive*) agar sistem tidak pernah *crash* secara diam-diam.
@@ -29,3 +30,23 @@
 - **Core Brand "The Zero Vibe":** Nilai inti Zero Cafe adalah **Kenyamanan Individu** (Mahasiswa, Pekerja WFC, Freelancer). Vibe yang dijaga adalah ketenangan, audio yang tidak keras, keramahan staf (*"Teman Dari Zero"*), dan desain minimalis.
 - **Larangan Strategi Pemasaran:** DILARANG KERAS menyarankan strategi yang mendatangkan keramaian massal bising (seperti *live music* keras, acara komunitas besar, atau kumpul-kumpul turnamen *game*) yang berpotensi merusak *vibe* ketenangan pengunjung *solo*. Strategi harus berpusat pada loyalitas individu, *upselling* personal, kenyamanan, atau *bundling* produk.
 - **Desentralisasi Tanggung Jawab:** Sistem dan *marketing* berjalan beriringan. SPV di lapangan bertanggung jawab menyuplai konteks eksternal (Kalender, Cuaca), sedangkan GM memantau agregasi cerdas dari "AI Summary". Semua ide analitik harus mampu dikonversi menjadi fitur sederhana yang mudah dipakai SPV di lapangan.
+
+## Jam Operasional & Batasan Gamifikasi (Streak System)
+- **Jam Buka Tutup Outlet:** 
+  - **Perintis:** Buka 08:00 - Tutup 04:00 (Setiap hari).
+  - **Dg Tata:** Buka 08:00 - Tutup 24:00 (Minggu - Kamis) | Buka 08:00 - Tutup 01:00 (Jumat - Sabtu).
+- **Jam Kerja SPV:** SPV di kedua outlet memiliki jadwal yang sama yaitu jam 12:00 siang - 21:00 malam.
+- **Batas Waktu Laporan (Streak Cut-off):** Untuk mendorong kedisiplinan pengisian Laporan Harian melalui sistem "Streak/Gamification", batas akhir (*cut-off*) pengiriman laporan untuk hari kerja sebelumnya adalah **Maksimal Jam 13:00 (1 Siang) keesokan harinya**. Laporan yang dikirim setelah jam ini akan memutus rantai *streak*.
+- **Desain UI Gamifikasi Profesional:** DILARANG menggunakan Emoji (seperti api, piala, dll) pada fitur gamifikasi atau *streak*. Gunakan desain vektor murni, tipografi, atau badge yang tegas, bersih, dan estetik sesuai *vibe* Zero Cafe.
+
+## Integritas Data & Penanganan Race Condition
+- **Mekanisme Anti Double-Submit:** Pencegahan *spam klik* (Race Condition Lock) harus difokuskan di sisi *backend* (GAS). Di sisi *frontend*, saat tombol Submit ditekan, UI hanya boleh di- *disable* dengan status *loading*. 
+- **Dilarang Auto-Reset Prematur:** Sistem **TIDAK BOLEH** me- *reset* atau membersihkan *input/checkbox* form SPV sebelum *backend* secara eksplisit mengembalikan respons `success: true` dan PDF telah dipastikan tersimpan. Jika terjadi kegagalan jaringan atau terdeteksi duplikat, semua data yang sudah diketik/dicentang SPV harus dipertahankan utuh agar SPV bisa mencoba ulang tanpa menginput dari awal.
+
+## Algoritma Analisis Kesalahan Kasir (Petty Fraud / Cash Discrepancy)
+- **Pendekatan Frekuensi Kehadiran:** Dalam menganalisis selisih kas (uang minus), sistem DILARANG menunjuk satu staf atau SPV secara langsung dari satu laporan tunggal.
+- **Logika Agregasi GM Dasbor:** Saat GM memilih rentang waktu, AI harus:
+  1. Menjumlahkan total nominal selisih kas minus (contoh: Total minus Rp 200.000).
+  2. Mengidentifikasi seluruh shift/hari yang mengalami selisih minus.
+  3. Menghitung frekuensi (berapa kali) setiap nama staf muncul/bertugas pada shift-shift yang bermasalah tersebut.
+  4. Menampilkan nama-nama staf dengan frekuensi tertinggi sebagai "Indikator Potensi Evaluasi" (Contoh output: "Total Minus Rp 200rb. Terjadi saat Amel bertugas 26 kali, Eko 17 kali"). Hal ini memberikan wawasan objektif bagi GM untuk melakukan *follow-up*.

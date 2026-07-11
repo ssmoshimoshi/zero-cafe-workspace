@@ -50,8 +50,14 @@
   <div id="app-root" class="max-w-md mx-auto bg-white min-h-screen relative overflow-x-hidden border-x border-gray-100 shadow-sm opacity-0 transition-opacity duration-500 ease-out"></div>
 
   <!-- Global Loading Spinner overlay -->
-  <div id="loadingSpinner" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden">
-    <span class="text-sm font-bold text-white tracking-widest uppercase">Memproses data...</span>
+  <div id="loadingSpinner" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/70 backdrop-blur-md hidden transition-opacity duration-300">
+    <l-newtons-cradle size="78" speed="1.4" color="black"></l-newtons-cradle>
+  </div>
+
+  <!-- Upload Progress Spinner overlay -->
+  <div id="uploadSpinner" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-white/70 backdrop-blur-md hidden transition-opacity duration-300">
+    <div class="upload-loader mb-4"></div>
+    <span class="text-[10px] font-bold text-zero-black tracking-widest uppercase">Mengunggah Laporan...</span>
   </div>
 
   <!-- Toast Notification -->
@@ -71,7 +77,7 @@
       </div>
       <div id="previewModalFooter" class="px-6 py-4 bg-gray-50 dark:bg-[#1a1a1a] border-t border-gray-200 dark:border-gray-800 flex justify-end space-x-3">
         <button onclick="closePreviewModal()" class="px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Batal</button>
-        <button onclick="submitReport()" class="px-6 py-2.5 bg-zero-gray hover:bg-gray-400 text-zero-white font-bold rounded-2xl hover: transition-all duration-200">Kirim Laporan</button>
+        <button id="btnSubmitReport" onclick="submitReport()" class="px-6 py-2.5 bg-zero-gray hover:bg-gray-400 text-zero-white font-bold rounded-2xl hover: transition-all duration-200">Kirim Laporan</button>
       </div>
     </div>
   </div>

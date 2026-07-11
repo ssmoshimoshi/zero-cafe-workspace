@@ -1,4 +1,13 @@
 <script>
+// Utilities
+function formatToDDMMYYYY(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert YYYY-MM-DD to DD-MM-YYYY
+  }
+  return dateStr;
+}
 
 function updateWeeklyStaff(idx, field, value) { window.form.weekly.staff[idx][field] = value; }
 function addWeeklyArrayItem(arrName) { window.form.weekly[arrName].push(""); renderApp(); }
@@ -199,9 +208,12 @@ async function fetchGMAnalytics() {
     return;
   }
   
+  const formattedStart = formatToDDMMYYYY(AppState.activeFilters.startDate);
+  const formattedEnd = formatToDDMMYYYY(AppState.activeFilters.endDate);
+  
   showLoading(true);
   try {
-    const rawRes = await Server.call('api_gm_fetchReports', AppState.activeFilters.startDate, AppState.activeFilters.endDate, AppState.activeFilters.outlet);
+    const rawRes = await Server.call('api_gm_fetchReports', formattedStart, formattedEnd, AppState.activeFilters.outlet);
     const res = typeof rawRes === 'string' ? JSON.parse(rawRes) : rawRes;
     
     if (res && res.status === 'success') {
@@ -358,7 +370,7 @@ function openPreviewModal() {
   if (modalFooter) {
     modalFooter.innerHTML = `
       <button onclick="closePreviewModal()" class="px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Batal</button>
-      <button onclick="submitReport()" class="px-6 py-2.5 bg-zero-gray hover:bg-gray-400 text-zero-white font-bold rounded-2xl hover: transition-all duration-200">Kirim Laporan</button>
+      <button id="btnSubmitReport" onclick="submitReport()" class="px-6 py-2.5 bg-zero-gray hover:bg-gray-400 text-zero-white font-bold rounded-2xl hover: transition-all duration-200">Kirim Laporan</button>
     `;
   }
   
@@ -371,7 +383,20 @@ function closePreviewModal() {
 }
 
 async function submitReport() {
-  showLoading(true);
+  if (AppState.isSubmitting) return;
+  AppState.isSubmitting = true;
+  
+  const btn = document.getElementById('btnSubmitReport');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'Mengirim...';
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+  }
+  showUploadLoading(true);
+  
+  // Beri waktu 50ms agar browser sempat me-render animasi loader sebelum thread diblokir oleh html2pdf
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
   try {
     // Force save draft synchronously to capture last-millisecond checkbox changes
     if (typeof saveDraft === 'function') {
@@ -431,6 +456,8 @@ async function submitReport() {
       // Jika Fase 1, kembali ke dashboard. Jika normal/Fase 2, buka PDF.
       if (f.type === 'daily' && f.fase === 1) {
          setTimeout(function() {
+           showUploadLoading(false);
+           AppState.isSubmitting = false;
            window.location.reload();
          }, 1500);
       } else {
@@ -450,10 +477,14 @@ async function submitReport() {
          if (modalFooter) {
            modalFooter.innerHTML = `<button onclick="closeSuccessModal()" class="px-6 py-2.5 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all">Selesai</button>`;
          }
+         showUploadLoading(false);
+         AppState.isSubmitting = false;
       }
       
     } else if (res && res.isDuplicate) {
       showToast("DATA GANDA: " + res.message, "error");
+      showUploadLoading(false);
+      AppState.isSubmitting = false;
       const body = document.getElementById('previewModalBody');
       const modalFooter = document.getElementById('previewModalFooter');
       if (body) {
@@ -472,6 +503,8 @@ async function submitReport() {
       window.form = {}; // Destroy the form in memory so auto-save cannot resurrect it
       StorageHelper.remove('zc_draft_daily');
       showToast(res.message, "error");
+      showUploadLoading(false);
+      AppState.isSubmitting = false;
       setTimeout(function() {
         AppState.allPendingLaporan = null;
         transitionToMenu("select_report");
@@ -480,12 +513,20 @@ async function submitReport() {
       closePreviewModal();
     } else {
       showToast("Gagal mengirim laporan: " + (res ? (res.error || res.message) : "Unknown error"), "error");
+      showUploadLoading(false);
+      AppState.isSubmitting = false;
       closePreviewModal();
     }
   } catch (err) {
     showToast("Error sistem: " + err.toString(), "error");
-    closePreviewModal();
-  } finally {
+    showUploadLoading(false);
+    AppState.isSubmitting = false;
+    const btn = document.getElementById('btnSubmitReport');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Kirim Laporan';
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
     showLoading(false);
   }
 }

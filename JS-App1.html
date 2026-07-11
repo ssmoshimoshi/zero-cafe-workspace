@@ -288,6 +288,18 @@ function showLoading(show) {
   }
 }
 
+function showUploadLoading(show) {
+  AppState.isLoading = show;
+  const spinner = document.getElementById('uploadSpinner');
+  if (!spinner) return;
+  
+  if (show) {
+    spinner.classList.remove('hidden');
+  } else {
+    spinner.classList.add('hidden');
+  }
+}
+
 /*  === TEMPLATE RENDERING & ROUTER === */
 function renderApp() {
   const root = document.getElementById('app-root');
@@ -884,7 +896,7 @@ setInterval(() => {
   if (AppState.menu && AppState.menu.startsWith('form_')) {
     saveDraft(true);
   }
-}, 30000);
+}, 3000);
 
 /*  === UTILS: PHOTO UPLOAD & COMPRESSION === */
 async function uploadPhoto(fileInput, category, customFilename) {

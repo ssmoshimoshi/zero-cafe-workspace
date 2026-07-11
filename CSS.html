@@ -178,4 +178,36 @@
   .dark .text-cafe-700, .dark .text-cafe-800, .dark .text-cafe-900 {
     color: #F0EFEF !important;
   }
+  
+  /* Upload Progress Loader */
+  .upload-loader {
+    width: 40px;
+    height: 26px;
+    --c:no-repeat linear-gradient(#171717 0 0); /* Zero Black */
+    background:
+      var(--c) 0    100%,
+      var(--c) 50%  100%,
+      var(--c) 100% 100%;
+    background-size:8px calc(100% - 4px);
+    position: relative;
+  }
+  .upload-loader:before {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #171717; /* Zero Black */
+    left: 0;
+    top: 0;
+    animation: 
+      l3-1 1.5s  linear infinite alternate,
+      l3-2 0.75s cubic-bezier(0,200,.8,200) infinite;
+  }
+  @keyframes l3-1 {
+    100% {left:calc(100% - 8px)}
+  }
+  @keyframes l3-2 {
+    100% {top:-0.1px}
+  }
 </style>

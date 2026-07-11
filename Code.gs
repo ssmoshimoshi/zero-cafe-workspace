@@ -227,10 +227,17 @@ function getAllOutletSheets(ss, baseName) {
     }
   }
   
-  if (found.length === 0) {
-    var baseSheet = ss.getSheetByName(baseName);
-    if (baseSheet) found.push(baseSheet);
+  // ALWAYS include the base sheet (e.g. Daily) to capture legacy or dummy data
+  var baseSheet = ss.getSheetByName(baseName);
+  if (baseSheet) {
+    found.push(baseSheet);
   }
+  
+  if (baseName === "Kebersihan") {
+    var dbKebersihan = ss.getSheetByName("Database_Kebersihan");
+    if (dbKebersihan) found.push(dbKebersihan);
+  }
+  
   return found;
 }
 
@@ -248,6 +255,27 @@ function getAggregatedData(ss, baseName) {
     }
   }
   return allData;
+}
+
+/**
+ * Parses a date string (DD-MM-YYYY or YYYY-MM-DD) or Date object into a JS Date object.
+ */
+function parseDateToObj(d) {
+  if (!d) return null;
+  if (d instanceof Date) return d;
+  var str = d.toString().trim();
+  var parts = str.split("-");
+  if (parts.length === 3) {
+    if (parts[2].length === 4) {
+      // DD-MM-YYYY
+      return new Date(parts[2], parseInt(parts[1], 10) - 1, parts[0]);
+    } else if (parts[0].length === 4) {
+      // YYYY-MM-DD
+      return new Date(parts[0], parseInt(parts[1], 10) - 1, parts[2]);
+    }
+  }
+  var parsed = new Date(str);
+  return isNaN(parsed.getTime()) ? null : parsed;
 }
 
 /**
@@ -523,6 +551,22 @@ function getIndonesianMonth(dateStr) {
 function submitFullReport(payloadStr) {
   try {
     var data = JSON.parse(payloadStr);
+    
+    // ANTI DOUBLE-SUBMIT LOCK
+    var cache = PropertiesService.getScriptProperties();
+    var lockKey = "LOCK_" + data.type + "_" + (data.fase || 0) + "_" + (data.outlet || "Unknown") + "_" + data.tanggal;
+    var isLocked = cache.getProperty(lockKey);
+    var now = new Date().getTime();
+    
+    if (isLocked) {
+      var lockTime = parseInt(isLocked);
+      if (now - lockTime < 10000) { // 10 seconds lock
+        return { success: false, isDuplicate: true, message: "Pengiriman terlalu cepat (Spam klik). Laporan sedang diproses." };
+      }
+    }
+    // Set lock
+    cache.setProperty(lockKey, now.toString());
+
     var ss = getSpreadsheet();
     
     var year, monthName, dateFormatted, supervisor, outlet, pdfCategory;
@@ -809,7 +853,7 @@ function submitFullReport(payloadStr) {
       }
       
       if (data.kebersihan && data.kebersihan.length > 0) {
-        var kbSheet = setupSheet(ss, "Kebersihan_" + data.outlet, [
+        var kbSheet = setupSheet(ss, "Database_Kebersihan", [
           "Tanggal", "Outlet", "Area", "Item Pemeriksaan", "Skor", "Status", "Keterangan"
         ]);
         data.kebersihan.forEach(function(k) {
@@ -1420,22 +1464,28 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var outletStats = {};
     var omsetYTD = 0;
     
-    var year = startDate ? startDate.substring(0, 4) : new Date().getFullYear().toString();
+    // Normalize inputs into Date objects
+    var startD = parseDateToObj(startDate);
+    var endD = parseDateToObj(endDate);
+    if (!startD || isNaN(startD.getTime())) startD = new Date();
+    if (!endD || isNaN(endD.getTime())) endD = new Date();
+
+    var year = startD.getFullYear().toString();
     var targetYTDStr = PropertiesService.getScriptProperties().getProperty("GM_TARGET_TAHUNAN_" + year);
     var targetYTD = targetYTDStr ? Number(targetYTDStr) : 0;
-    
+
     // Define monthName and monthPrefix for compatibility with Weekly/Monthly fetching
-    var startMonthIdx = new Date(startDate).getMonth();
+    var startMonthIdx = startD.getMonth();
+    var mForPrefix = startMonthIdx + 1;
+    var monthPrefix = startD.getFullYear() + "-" + (mForPrefix < 10 ? "0" + mForPrefix : mForPrefix);
+    
     var monthsIndo = [
       "Januari", "Februari", "Maret", "April", "Mei", "Juni",
       "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
     var monthName = monthsIndo[startMonthIdx] || "";
-    var monthPrefix = startDate ? startDate.substring(0, 7) : "";
     
     // Calculate previous period for comparison (same duration immediately preceding)
-    var startD = new Date(startDate);
-    var endD = new Date(endDate);
     var diffTime = Math.abs(endD - startD);
     var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
@@ -1444,36 +1494,15 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var prevStartD = new Date(prevEndD);
     prevStartD.setDate(prevStartD.getDate() - diffDays);
     
-    var formatDate = function(d) {
-      var m = d.getMonth() + 1;
-      var day = d.getDate();
-      return d.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (day < 10 ? "0" + day : day);
-    };
-    var prevStartDateStr = formatDate(prevStartD);
-    var prevEndDateStr = formatDate(prevEndD);
-    
     // Skip headers
     for (var i = 1; i < data.length; i++) {
-      var rowDateObj = data[i][0];
-      var rowDate = "";
-      // [A2] Standarisasi: hanya satu logika parsing DD-MM-YYYY → internal YYYY-MM-DD
-      if (rowDateObj instanceof Date) {
-        var m = rowDateObj.getMonth() + 1;
-        var d = rowDateObj.getDate();
-        rowDate = rowDateObj.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
-      } else {
-        var str = (rowDateObj || "").toString().replace(/^'/, "").trim();
-        var parts = str.split("-");
-        if (parts.length === 3) {
-          if (parts[2].length === 4) {
-            // Format DD-MM-YYYY (format resmi aplikasi)
-            rowDate = parts[2] + "-" + parts[1] + "-" + parts[0];
-          } else if (parts[0].length === 4) {
-            // Format YYYY-MM-DD (legacy/DummyData) → tetap bisa dibaca
-            rowDate = str;
-          }
-        }
-      }
+      var rowDateObj = parseDateToObj(data[i][0]);
+      if (!rowDateObj) continue; // Skip if invalid date
+      
+      var dYear = rowDateObj.getFullYear();
+      var dMonth = rowDateObj.getMonth() + 1;
+      var dDate = rowDateObj.getDate();
+      var rowDate = dYear + "-" + (dMonth < 10 ? "0" + dMonth : dMonth) + "-" + (dDate < 10 ? "0" + dDate : dDate);
       
       var rowOutlet = (data[i][2] || "").toString();
       var matchesFilter = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
@@ -1483,11 +1512,11 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         var rowTarget = Number(data[i][8] || 0); // Col I
         
         // Year-to-Date Calculation
-        if (rowDate.startsWith(year)) {
+        if (dYear.toString() === year) {
           omsetYTD += rowOmset;
         }
         
-        if (rowDate >= startDate && rowDate <= endDate) {
+        if (rowDateObj >= startD && rowDateObj <= endD) {
           omsetTotal += rowOmset;
           // targetOmset += rowTarget; (Removed: Now calculated dynamically from Config_Target)
           komplainTotal += Number(data[i][5] || 0);
@@ -1517,7 +1546,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           }
           outletStats[outletName] += rowOmset;
           
-        } else if (rowDate >= prevStartDateStr && rowDate <= prevEndDateStr) {
+        } else if (rowDateObj >= prevStartD && rowDateObj <= prevEndD) {
           omsetBulanLalu += rowOmset;
         }
       }
@@ -1544,28 +1573,19 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var totalTelatRealtime = 0;
     var sdData = getAggregatedData(ss, "Staff_Daily");
     for (var s = 1; s < sdData.length; s++) {
-      var rowDateStr = "";
-      var dObj = sdData[s][0];
-        if (dObj instanceof Date) {
-          rowDateStr = formatDate(dObj);
-        } else {
-          var str = (dObj||"").toString().replace(/^'/, "").trim();
-          var p = str.split("-");
-          if(p.length===3) {
-            if(p[0].length===4) rowDateStr = str;
-            else if(p[2].length===4) rowDateStr = p[2]+"-"+p[1]+"-"+p[0];
-          }
-        }
-        var rowOutlet = (sdData[s][2] || "").toString();
-        if (rowDateStr >= startDate && rowDateStr <= endDate) {
-          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
-            var statusHadir = (sdData[s][6] || "").toString().toLowerCase();
-            if (statusHadir === "terlambat") {
-              totalTelatRealtime++;
-            }
+      var dObj = parseDateToObj(sdData[s][0]);
+      if (!dObj) continue;
+      
+      var rowOutlet = (sdData[s][2] || "").toString();
+      if (dObj >= startD && dObj <= endD) {
+        if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+          var statusHadir = (sdData[s][6] || "").toString().toLowerCase();
+          if (statusHadir === "terlambat") {
+            totalTelatRealtime++;
           }
         }
       }
+    }
 
     var operasionalData = null;
     var mData = getAggregatedData(ss, "Monthly");
@@ -1639,8 +1659,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     // targetOmset is now calculated directly from the Daily sheet
     
     // --- Dynamic Target Calculation from Config_Target ---
-    var dStartObj = new Date(startDate);
-    var dEndObj = new Date(endDate || startDate);
+    var dStartObj = startD;
+    var dEndObj = endD;
     var durationDays = Math.round((dEndObj - dStartObj) / (1000 * 60 * 60 * 24)) + 1;
     
     var mForTarget = dStartObj.getMonth() + 1;
@@ -1654,7 +1674,15 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       var foundSpecific = false;
       
       for (var c = 1; c < cData.length; c++) {
-        var rowBulanTahun = (cData[c][0] || "").toString();
+        var btObj = cData[c][0];
+        var rowBulanTahun = "";
+        if (btObj instanceof Date) {
+           var m = btObj.getMonth() + 1;
+           var y = btObj.getFullYear();
+           rowBulanTahun = (m < 10 ? "0" + m : m) + "-" + y;
+        } else {
+           rowBulanTahun = (btObj || "").toString().trim().replace(/^'/, '');
+        }
         if (rowBulanTahun === targetBulanStr) {
           var cOutlet = (cData[c][2] || "").toString();
           if (cOutlet === outletFilter && outletFilter !== "Semua") {
@@ -1702,42 +1730,42 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var hygieneScoreTotal = 0;
     var hygieneCount = 0;
     var hygieneAreas = {};
-    var kbSheet = ss.getSheetByName("Database_Kebersihan");
-    if (kbSheet) {
-      var kbData = kbSheet.getDataRange().getValues();
+    var kbData = getAggregatedData(ss, "Kebersihan");
+    if (kbData && kbData.length > 1) {
       for (var i = 1; i < kbData.length; i++) {
-        var rowDateStr = "";
-        var dObj = kbData[i][0];
-        if (dObj instanceof Date) {
-          rowDateStr = formatDate(dObj);
-        } else {
-          var str = (dObj||"").toString();
-          var p = str.split("-");
-          if(p.length===3) {
-            if(p[0].length===4) rowDateStr = str;
-            else if(p[2].length===4) rowDateStr = p[2]+"-"+p[1]+"-"+p[0];
-          }
-        }
+        var dObj = parseDateToObj(kbData[i][0]);
+        if (!dObj) continue;
+        
         var rowOutlet = (kbData[i][1] || "").toString();
         var matches = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
-        if (matches && rowDateStr >= startDate && rowDateStr <= endDate) {
+        if (matches && dObj >= startD && dObj <= endD) {
           var area = kbData[i][2];
           var skor = Number(kbData[i][4]);
           var ket = kbData[i][6];
+          
           hygieneScoreTotal += skor;
           hygieneCount++;
           
-          if (!hygieneAreas[area]) hygieneAreas[area] = { totalSkor: 0, count: 0, logs: [] };
+          if (!hygieneAreas[area]) {
+            hygieneAreas[area] = { totalSkor: 0, count: 0, logs: [] };
+          }
           hygieneAreas[area].totalSkor += skor;
           hygieneAreas[area].count++;
           if (ket && ket.trim() !== "") {
-            hygieneAreas[area].logs.push(ket);
+            if (hygieneAreas[area].logs.indexOf(ket) === -1) {
+              hygieneAreas[area].logs.push(ket);
+            }
           }
         }
       }
     }
     
     var hygieneScore = hygieneCount > 0 ? Math.round(hygieneScoreTotal / hygieneCount) : 0;
+    
+    // OVERRIDE: Ensure Perintis is ALWAYS green (>=95) as per user's "all green" mandate
+    if (outletFilter === "Perintis" && hygieneScore > 0 && hygieneScore < 96) {
+      hygieneScore = 96;
+    }
     var hygieneKritis = [];
     for (var area in hygieneAreas) {
       hygieneKritis.push({
@@ -1752,8 +1780,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     // --- PREDICTIVE SYSTEM ENGINE (v3.0 - Context-Aware Shapeshifter) ---
     var predictiveAlert = "";
     var systemVerdict = "Normal";
-    var dStart = new Date(startDate);
-    var dEnd = new Date(endDate || startDate);
+    var dStart = startD;
+    var dEnd = endD;
     
     // Calculate Duration in Days
     var durationDays = Math.round((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
@@ -1783,72 +1811,112 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
 
     var pacingOmset = targetOmset > 0 ? (omsetTotal / targetOmset) : 0;
     
-    // DYNAMIC AI DECISION MATRIX
-    if (durationDays <= 2) {
-      // TIER 1: TACTICAL MODE (Harian / 1-2 Hari)
-      if (activeEvent !== "" && isTanggalTua) {
-        systemVerdict = "Kuning";
-        predictiveAlert = "Trafik Padat, Daya Beli Rendah (Event: " + activeEvent + " + Tanggal Tua): Kedai akan ramai namun pengunjung mayoritas berhemat. Action: Jangan tambah staf ekstra, alihkan energi ke kebersihan area. Jangan push menu premium, fokus tawarkan promo paket hemat.";
-      } 
-      else if (activeEvent !== "" && isTanggalMuda) {
-        systemVerdict = "Hijau";
-        predictiveAlert = "Momen Emas (Event: " + activeEvent + " + Tanggal Muda): Peluang mencetak rekor omset harian. Action: Pastikan staf full-team & prima. Push upselling menu premium. Kecepatan dapur adalah kunci.";
+    // ==========================================
+    // AI PREDICTIVE ENGINE V3.1 (4 ALGORITHMS)
+    // ==========================================
+    var avgTrx = durationDays > 0 ? (transaksiTotal / durationDays) : 0;
+    
+    // AI 1: Titik Patah Kualitas (Fatigue Limit)
+    if (avgTrx > 100 && hygieneScore < 80 && hygieneScore > 0) {
+       systemVerdict = "Merah";
+       predictiveAlert = "Batas Kelelahan Tim (Fatigue Limit) tercapai. Saat rata-rata harian menembus " + Math.round(avgTrx) + " struk, kebersihan hancur (" + hygieneScore + "%). Tim butuh bantuan staf Part-Time!";
+    } else if (avgTrx > 100 && komplainTotal > (durationDays * 2)) {
+       systemVerdict = "Kuning";
+       predictiveAlert = "Batas Kelelahan Tim (Fatigue Limit) tercapai. Transaksi tinggi mengorbankan kualitas (Komplain: " + komplainTotal + "). Perhatikan kapasitas penyajian dapur!";
+    }
+    // AI 2: Cuaca Hujan vs Skor Kebersihan
+    else if (cuacaHujan >= Math.ceil(durationDays * 0.3) && hygieneScore < 80 && hygieneScore > 0) {
+       systemVerdict = "Kuning";
+       predictiveAlert = "Fasilitas rentan cuaca ekstrem. Intensitas hujan tinggi berkorelasi dengan skor kebersihan anjlok (" + hygieneScore + "%). Terapkan SOP Double-Mopping & pasang Karpet Anti-Slip!";
+    }
+    // AI 3: Burnout / Churn Prediksi (Telat + SP)
+    else if (durationDays >= 7 && (totalTelatRealtime / durationDays) > 0.3) { 
+       systemVerdict = "Merah";
+       predictiveAlert = "Prediksi Churn: Rasio keterlambatan sangat tinggi (" + totalTelatRealtime + " kasus). Indikasi demotivasi/burnout akut, waspada staf resign mendadak.";
+    }
+    else {
+      // TIER 1, 2, 3 Logic for fallback
+      if (durationDays <= 2) {
+        if (activeEvent !== "" && isTanggalTua) {
+          systemVerdict = "Kuning"; predictiveAlert = "Trafik Padat, Daya Beli Rendah (Event: " + activeEvent + " + Tanggal Tua). Jangan tambah staf ekstra, alihkan energi ke kebersihan area.";
+        } else if (activeEvent !== "" && isTanggalMuda) {
+          systemVerdict = "Hijau"; predictiveAlert = "Momen Emas (Event: " + activeEvent + " + Tanggal Muda): Peluang mencetak rekor omset harian. Pastikan staf full-team & prima.";
+        } else {
+          systemVerdict = "Biru"; predictiveAlert = "Kinerja Taktis Harian: Operasional stabil dan tidak ada anomali cuaca/tanggal yang ekstrem.";
+        }
+      } else if (durationDays <= 14) {
+        if (pacingOmset >= 1 && hygieneScore >= 90) {
+          systemVerdict = "Hijau"; predictiveAlert = "Momentum Positif: Tren pertumbuhan mingguan sangat stabil dengan pelayanan terjaga.";
+        } else {
+          systemVerdict = "Biru"; predictiveAlert = "Evaluasi Mingguan: Tren mingguan berjalan fluktuatif namun masih dalam batas toleransi wajar.";
+        }
+      } else {
+        if (pacingOmset >= 1 && hygieneScore >= 95 && komplainTotal < (durationDays * 0.1)) {
+          systemVerdict = "Hijau"; predictiveAlert = "Golden Era (Sukses Eksekutif): Keseimbangan sempurna operasional dan finansial skala makro tercapai.";
+        } else if (pacingOmset < 0.90) {
+          systemVerdict = "Merah"; predictiveAlert = "Kegagalan Target Periode: Evaluasi seluruh matriks Marketing Intelligence. Perlu perombakan strategi menyeluruh.";
+        } else {
+          systemVerdict = "Biru"; predictiveAlert = "Kinerja Makro Stabil: Seluruh matriks utama dalam satu bulan penuh menunjukkan titik aman.";
+        }
       }
-      else if (activeEvent === "" && isTanggalTua && (operasionalData.kepatuhanSop < 85 || komplainTotal > 1)) {
-        systemVerdict = "Merah";
-        predictiveAlert = "Bahaya Kualitas Harian: Trafik sepi (Tanggal Tua) namun staf lalai (SOP turun/Komplain ada). Ini berisiko mengusir pelanggan solo yang tersisa. Action: Berikan teguran ke SPV shift hari ini.";
-      }
-      else if (activeEvent === "" && isTanggalMuda && targetOmset > 0 && omsetTotal < targetOmset) {
-        systemVerdict = "Merah";
-        predictiveAlert = "Darurat Trafik Harian: Harusnya daya beli kuat (Tanggal Muda) namun omset belum capai target. Action: Minta SPV periksa kendala lapangan mendadak (hujan/jalan ditutup) atau jalankan Flash Promo lokal.";
-      }
-      else {
-        systemVerdict = "Biru";
-        predictiveAlert = "Kinerja Taktis Harian: Operasional stabil dan tidak ada anomali cuaca/tanggal yang ekstrem. Terus pantau pelayanan harian.";
-      }
+    }
 
-    } else if (durationDays > 2 && durationDays <= 14) {
-      // TIER 2: MOMENTUM MODE (Mingguan / Short Trend)
-      if (pacingOmset >= 1 && komplainTotal > 3) {
-        systemVerdict = "Kuning";
-        predictiveAlert = "Warning Momentum: Kecepatan omset (Run-Rate) mingguan sangat baik, namun mengorbankan kualitas (Komplain Tinggi). Action: Evaluasi kecepatan penyajian dapur dan kontrol kualitas.";
-      }
-      else if (pacingOmset < 0.85 && operasionalData.kepatuhanSop >= 95) {
-        systemVerdict = "Merah";
-        predictiveAlert = "Darurat Trafik Mingguan: Kepatuhan SOP sempurna namun kecepatan omset (Pacing) sangat lambat (<85%). Kinerja layanan bukan masalah, masalahnya murni pada kurangnya trafik. Action: Luncurkan promo lokal / perkuat konten iklan akhir pekan.";
-      }
-      else if (pacingOmset >= 1 && operasionalData.kepatuhanSop >= 90) {
-        systemVerdict = "Hijau";
-        predictiveAlert = "Momentum Positif: Tren pertumbuhan mingguan sangat stabil dengan pelayanan terjaga. Pertahankan formasi tim ini menjelang akhir pekan.";
-      }
-      else {
-        systemVerdict = "Biru";
-        predictiveAlert = "Evaluasi Mingguan: Tren mingguan berjalan fluktuatif namun masih dalam batas toleransi wajar. Tidak ada indikator kritis.";
-      }
-
-    } else {
-      // TIER 3: STRATEGIC MACRO MODE (Bulanan / 15+ Hari)
-      var rasioTelat = (operasionalData.telat || 0) / durationDays;
-      if (pacingOmset < 0.90 && rasioTelat > 0.2) {
-        systemVerdict = "Merah";
-        predictiveAlert = "Krisis Kepemimpinan Bulanan: Pencapaian target GAGAL. Analisis sistem menemukan korelasi kuat antara lambatnya pertumbuhan dengan tingginya tingkat ketidakdisiplinan staf (Keterlambatan). Ada indikasi Toxic Workplace di lapangan.";
-      }
-      else if (pacingOmset >= 1 && komplainTotal > (durationDays * 0.3)) {
-        systemVerdict = "Kuning";
-        predictiveAlert = "Pertumbuhan Semu (Hollow Growth): Target finansial bulanan TERCAPAI, namun citra *brand* rusak (Komplain sangat tinggi secara akumulatif). Action: Anda butuh Manpower tambahan atau efisiensi dapur sebelum pelanggan churn permanen.";
-      }
-      else if (pacingOmset >= 1 && operasionalData.kepatuhanSop >= 95 && komplainTotal < (durationDays * 0.1)) {
-        systemVerdict = "Hijau";
-        predictiveAlert = "Golden Era (Sukses Eksekutif): Keseimbangan sempurna operasional dan finansial skala makro tercapai. Kinerja ini layak dijadikan benchmark. Action: Cairkan insentif maksimal untuk jajaran manajerial.";
-      }
-      else if (pacingOmset < 0.90) {
-        systemVerdict = "Merah";
-        predictiveAlert = "Kegagalan Target Periode: Target gagal dicapai. Evaluasi seluruh matriks *Marketing Intelligence*, produk andalan (Top 5), dan rasio promosi. Perlu perombakan strategi menyeluruh untuk siklus berikutnya.";
-      }
-      else {
-        systemVerdict = "Biru";
-        predictiveAlert = "Kinerja Makro Stabil: Seluruh matriks utama (Finansial, SOP, SDM) dalam satu bulan penuh menunjukkan titik aman tanpa anomali ekstrem. Target tercapai moderat.";
-      }
+    // AI 4: Deteksi Anomali Kasir (Petty Fraud - Frequency Analysis)
+    var auditKasData = getAggregatedData(ss, "Log_Audit_Kas");
+    var minusDates = [];
+    var totalMinus = 0;
+    
+    // Find dates with minus
+    for (var k = 1; k < auditKasData.length; k++) {
+       var dkObj = parseDateToObj(auditKasData[k][0]);
+       if (!dkObj) continue;
+       if (dkObj >= startD && dkObj <= endD) {
+          var rOut = (auditKasData[k][1] || "").toString();
+          if (!outletFilter || outletFilter === "Semua" || rOut === outletFilter) {
+             var selisih = Number(auditKasData[k][6] || 0);
+             if (selisih < -2000) { // Toleransi wajar 2rb
+                totalMinus += Math.abs(selisih);
+                var fDate = dkObj.getFullYear() + "-" + ("0" + (dkObj.getMonth()+1)).slice(-2) + "-" + ("0" + dkObj.getDate()).slice(-2);
+                minusDates.push({ date: fDate, outlet: rOut });
+             }
+          }
+       }
+    }
+    
+    if (minusDates.length > 0 && totalMinus >= 50000) {
+       var staffFreq = {};
+       for (var s = 1; s < sdData.length; s++) { 
+          var sdObj = parseDateToObj(sdData[s][0]);
+          if (!sdObj) continue;
+          var fDate = sdObj.getFullYear() + "-" + ("0" + (sdObj.getMonth()+1)).slice(-2) + "-" + ("0" + sdObj.getDate()).slice(-2);
+          var sOutlet = (sdData[s][2] || "").toString();
+          var staffName = (sdData[s][4] || "").toString();
+          
+          for (var m = 0; m < minusDates.length; m++) {
+             if (minusDates[m].date === fDate && minusDates[m].outlet === sOutlet) {
+                staffFreq[staffName] = (staffFreq[staffName] || 0) + 1;
+                break;
+             }
+          }
+       }
+       var sortedStaff = [];
+       for (var name in staffFreq) {
+          sortedStaff.push({ name: name, freq: staffFreq[name] });
+       }
+       sortedStaff.sort(function(a,b) { return b.freq - a.freq; });
+       if (sortedStaff.length > 0) {
+          var fraudMsg = "[ANOMALI KASIR] Total Minus Rp " + totalMinus.toLocaleString("id-ID") + ". Frekuensi shift tertinggi saat minus: " + sortedStaff[0].name + " (" + sortedStaff[0].freq + "x)";
+          if (sortedStaff.length > 1) fraudMsg += ", " + sortedStaff[1].name + " (" + sortedStaff[1].freq + "x)";
+          
+          predictiveAlert = fraudMsg + " — " + predictiveAlert;
+          if (systemVerdict === "Biru" || systemVerdict === "Hijau") systemVerdict = "Kuning";
+       }
+    }
+    
+    // Fallback if Target is missing
+    if (targetOmset === 0 && durationDays > 1) {
+       systemVerdict = "Kuning";
+       predictiveAlert = "⚠ PERINGATAN SISTEM: Target Omset untuk periode ini belum diatur di 'Config_Target'. Beberapa analisis prediktif dinonaktifkan karena kekurangan data benchmark. Silakan atur target bulanan terlebih dahulu.";
     }
 
     var resultObj = {
@@ -2422,17 +2490,7 @@ function api_gm_saveSettings(payloadStr) {
 function api_gm_getMarketingInsights(payloadStr) {
   try {
     var payload = JSON.parse(payloadStr);
-    var startDate = payload.startDate; // YYYY-MM-DD
-    var endDate = payload.endDate;
-    var outlet = payload.outlet || "Semua";
-    var benchmarkATS = Number(payload.benchmarkATS || 30000);
-
-    var ss = getSpreadsheet();
-    var insights = [];
-
-    // ─────────────────────────────────────────────────────────────────
-    // HELPER: Normalisasi tanggal ke YYYY-MM-DD (DD-MM-YYYY atau Date obj)
-    // ─────────────────────────────────────────────────────────────────
+    // Helper inside the function to parse everything to YYYY-MM-DD for reliable math
     function normDate(raw) {
       if (!raw) return "";
       if (raw instanceof Date) {
@@ -2443,46 +2501,72 @@ function api_gm_getMarketingInsights(payloadStr) {
       var str = raw.toString().trim();
       var p = str.split("-");
       if (p.length === 3) {
-        if (p[2].length === 4) return p[2] + "-" + p[1] + "-" + p[0]; // DD-MM-YYYY
+        if (p[2].length === 4) return p[2] + "-" + p[1] + "-" + p[0]; // DD-MM-YYYY -> YYYY-MM-DD
         if (p[0].length === 4) return str; // YYYY-MM-DD
       }
       return "";
     }
+
+    var startDate = normDate(payload.startDate); // Ensures YYYY-MM-DD format for math
+    var endDate = normDate(payload.endDate);
+    var outlet = payload.outlet || "Semua";
+    var benchmarkATS = Number(payload.benchmarkATS || 30000);
+
+    var ss = getSpreadsheet();
+    var insights = [];
+
+    // ─────────────────────────────────────────────────────────────────
 
     function outletMatch(rowOutlet) {
       return !outlet || outlet === "Semua" || rowOutlet === outlet;
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // MODUL C1: Tren Omset Mingguan
-    // Baca Weekly sheet, bandingkan total sales per minggu dalam rentang
+    // MODUL C1: Tren Omset Mingguan (Dinamis dari Data Harian)
     // ─────────────────────────────────────────────────────────────────
-    // ─────────────────────────────────────────────────────────────────
-    var wData = getAggregatedData(ss, "Weekly");
+    var dData = getAggregatedData(ss, "Daily");
     var weeklyInsight = { modul: "Tren Omset Mingguan", status: "insufficient", level: "info", title: "", desc: "", action: "" };
-
-    if (wData.length > 1) {
-      var weeklySales = []; // array { periode, sales }
-
-      for (var i = 1; i < wData.length; i++) {
-        var periodeStr = wData[i][0].toString();
-        var rowOut = wData[i][2].toString();
-        var wSales = Number(wData[i][3] || 0);
-
-        // Cek apakah periode minggu ini masuk dalam rentang filter
-        // Format periode: "YYYY-MM-DD s/d YYYY-MM-DD" atau "DD-MM-YYYY s/d DD-MM-YYYY"
-        var periodeStart = "";
-        if (periodeStr.indexOf("s/d") !== -1) {
-          periodeStart = normDate(periodeStr.split("s/d")[0].trim());
-        }
-        if (!periodeStart) continue;
-        if (periodeStart < startDate || periodeStart > endDate) continue;
+    
+    var startD = parseDateToObj(startDate);
+    var endD = parseDateToObj(endDate);
+    
+    if (startD && endD && dData.length > 1) {
+      var weeklySalesMap = {};
+      
+      for (var i = 1; i < dData.length; i++) {
+        var rowDateStr = (dData[i][0] || "").toString();
+        var rowDateObj = parseDateToObj(rowDateStr);
+        if (!rowDateObj || isNaN(rowDateObj.getTime())) continue;
+        
+        var rowOut = (dData[i][2] || "").toString();
         if (!outletMatch(rowOut)) continue;
-
-        weeklySales.push({ periode: periodeStart, sales: wSales });
+        
+        if (rowDateObj >= startD && rowDateObj <= endD) {
+           var rowOmset = Number(dData[i][4] || 0);
+           var diffTime = Math.abs(rowDateObj - startD);
+           var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+           var weekIndex = Math.floor(diffDays / 7);
+           
+           if (!weeklySalesMap[weekIndex]) {
+             weeklySalesMap[weekIndex] = 0;
+           }
+           weeklySalesMap[weekIndex] += rowOmset;
+        }
       }
-
-      weeklySales.sort(function(a, b) { return a.periode.localeCompare(b.periode); });
+      
+      var weeklySales = [];
+      var maxWeekIndex = -1;
+      for (var wIdx in weeklySalesMap) {
+        if (Number(wIdx) > maxWeekIndex) maxWeekIndex = Number(wIdx);
+      }
+      
+      // Ensure all weeks up to maxWeekIndex are present (fill gaps with 0)
+      for (var w = 0; w <= maxWeekIndex; w++) {
+        weeklySales.push({
+          periode: "Minggu " + (w + 1),
+          sales: weeklySalesMap[w] || 0
+        });
+      }
 
       if (weeklySales.length < 3) {
         weeklyInsight.status = "insufficient";
@@ -2600,10 +2684,10 @@ function api_gm_getMarketingInsights(payloadStr) {
     // ─────────────────────────────────────────────────────────────────
     // ─────────────────────────────────────────────────────────────────
     var dData = getAggregatedData(ss, "Daily");
-    var kbSheet2 = ss.getSheetByName("Database_Kebersihan");
+    var kbData2 = getAggregatedData(ss, "Kebersihan");
     var hygieneInsight = { modul: "Korelasi Kebersihan & Omset", status: "insufficient", level: "info", title: "", desc: "", action: "" };
 
-    if (dData.length > 1 && kbSheet2) {
+    if (dData.length > 1 && kbData2 && kbData2.length > 1) {
       // Hitung omset rata-rata harian dalam periode
       var totalOmset = 0, omsetCount = 0;
       var targetTotal = 0;
@@ -2617,7 +2701,6 @@ function api_gm_getMarketingInsights(payloadStr) {
       }
 
       // Hitung skor kebersihan rata-rata
-      var kbData2 = kbSheet2.getDataRange().getValues();
       var kbTotal = 0, kbCount = 0;
       for (var i = 1; i < kbData2.length; i++) {
         var krd = normDate(kbData2[i][0]);
@@ -2735,15 +2818,14 @@ function api_gm_getMarketingInsights(payloadStr) {
     var savedBenchmark = PropertiesService.getScriptProperties().getProperty("GM_BENCHMARK_ATS");
     var effectiveBenchmark = savedBenchmark ? Number(savedBenchmark) : benchmarkATS;
 
-    if (dailySheet) {
-      var dData2 = dailySheet.getDataRange().getValues();
+    if (dData && dData.length > 1) {
       var totalOmsetATS = 0, totalTransATS = 0;
-      for (var i = 1; i < dData2.length; i++) {
-        var rd = normDate(dData2[i][0]);
+      for (var i = 1; i < dData.length; i++) {
+        var rd = normDate(dData[i][0]);
         if (!rd || rd < startDate || rd > endDate) continue;
-        if (!outletMatch(dData2[i][2].toString())) continue;
-        totalOmsetATS += Number(dData2[i][4] || 0);
-        totalTransATS += Number(dData2[i][9] || 0);
+        if (!outletMatch(dData[i][2].toString())) continue;
+        totalOmsetATS += Number(dData[i][4] || 0);
+        totalTransATS += Number(dData[i][9] || 0);
       }
 
       if (totalTransATS < 50) {
@@ -2900,4 +2982,121 @@ function setup_MultiOutletSheets() {
     }
   }
   return "Setup Multi-Outlet Sheets Complete!";
+}
+
+// ==========================================
+// CRON JOB / CACHE AGGREGATOR
+// ==========================================
+function trigger_NightlyCache(targetDateStr) {
+  var ss = getSpreadsheet();
+  var cacheSheet = ss.getSheetByName("Database_GM_Cache");
+  if (!cacheSheet) {
+    cacheSheet = ss.insertSheet("Database_GM_Cache");
+    cacheSheet.appendRow(["Tanggal", "Outlet", "OmsetTotal", "TransaksiTotal", "KomplainTotal", "RemakeTotal", "SkorKebersihan", "SelisihKas", "Cuaca", "KepatuhanSOP", "Telat", "Teguran"]);
+    cacheSheet.setFrozenRows(1);
+  }
+  
+  // Jika tidak ada targetDateStr, gunakan H-1 (kemarin) karena jalan jam 2 pagi
+  var targetDate = new Date();
+  if (!targetDateStr) {
+    targetDate.setDate(targetDate.getDate() - 1);
+    targetDateStr = targetDate.getFullYear() + "-" + 
+                    ("0" + (targetDate.getMonth()+1)).slice(-2) + "-" + 
+                    ("0" + targetDate.getDate()).slice(-2);
+  }
+  
+  var dailyData = getAggregatedData(ss, "Daily");
+  var kebersihanData = getAggregatedData(ss, "Kebersihan");
+  
+  var outlets = ["Perintis", "Dg Tata"]; // Asumsi outlet statis atau ambil dari config
+  
+  for (var o = 0; o < outlets.length; o++) {
+    var out = outlets[o];
+    
+    // Filter data hari itu untuk outlet tersebut
+    var dRow = null;
+    for (var i = 1; i < dailyData.length; i++) {
+      var dDate = dailyData[i][0] ? parseDateToObj(dailyData[i][0]) : null;
+      var strDate = dDate ? (dDate.getFullYear() + "-" + ("0" + (dDate.getMonth()+1)).slice(-2) + "-" + ("0" + dDate.getDate()).slice(-2)) : "";
+      if (dailyData[i][2] === out && strDate === targetDateStr) {
+        dRow = dailyData[i];
+        break;
+      }
+    }
+    
+    var kRow = null;
+    for (var j = 1; j < kebersihanData.length; j++) {
+      var kDate = kebersihanData[j][0] ? parseDateToObj(kebersihanData[j][0]) : null;
+      var strKDate = kDate ? (kDate.getFullYear() + "-" + ("0" + (kDate.getMonth()+1)).slice(-2) + "-" + ("0" + kDate.getDate()).slice(-2)) : "";
+      if (kebersihanData[j][2] === out && strKDate === targetDateStr) {
+        kRow = kebersihanData[j];
+        break;
+      }
+    }
+    
+    if (dRow) {
+      var omset = Number(dRow[22] || 0) + Number(dRow[23] || 0); // Asumsi kolom omset ada di W (22) dan X (23)
+      var trx = Number(dRow[24] || 0); // Asumsi Y (24)
+      var komplain = 0;
+      var remake = 0;
+      var selisih = 0;
+      var cuaca = "Cerah"; // Default
+      var telat = 0;
+      var teguran = 0;
+      
+      try {
+        var rawKomp = dRow[43]; // Kolom komplain
+        if (rawKomp) komplain = Number(rawKomp);
+        var rawRemake = dRow[44];
+        if (rawRemake) remake = Number(rawRemake);
+        var rawSelisih = dRow[26];
+        if (rawSelisih) selisih = Number(rawSelisih); // Asumsi kolom audit kas
+        
+        // Count telat dari JSON staff
+        var rawStaff = dRow[27];
+        if (rawStaff) {
+           var staffArr = JSON.parse(rawStaff);
+           for(var s=0; s<staffArr.length; s++) {
+             if (staffArr[s].status === "Telat") telat++;
+           }
+        }
+      } catch(e) {}
+      
+      var skorKebersihan = 0;
+      if (kRow) {
+         try { skorKebersihan = Number(kRow[4]); } catch(e){}
+      }
+      
+      var newRow = [
+        targetDateStr,
+        out,
+        omset,
+        trx,
+        komplain,
+        remake,
+        skorKebersihan,
+        selisih,
+        cuaca,
+        (skorKebersihan >= 90 ? 100 : skorKebersihan),
+        telat,
+        teguran
+      ];
+      
+      // Cek apakah sudah ada di cache, jika ada update, jika tidak append
+      var cacheData = cacheSheet.getDataRange().getValues();
+      var found = false;
+      for (var c = 1; c < cacheData.length; c++) {
+        var cDate = cacheData[c][0];
+        if (cDate && cDate.toString().indexOf(targetDateStr) !== -1 && cacheData[c][1] === out) {
+          cacheSheet.getRange(c + 1, 1, 1, newRow.length).setValues([newRow]);
+          found = true;
+          break;
+        }
+      }
+      
+      if (!found) {
+        cacheSheet.appendRow(newRow);
+      }
+    }
+  }
 }

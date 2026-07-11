@@ -457,7 +457,13 @@ function getDailyTabContent() {
             <div class="flex-1">
               <select id="staffSelectDropdown" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black bg-white mb-2">
                 <option value="">PILIH STAFF</option>
-                ${AppState.masterStaff.map(s => `<option value="${s.nama}">${s.nama}</option>`).join('')}
+                ${AppState.masterStaff.map(s => {
+                  let label = s.nama;
+                  if (s.outlet && s.outlet !== window.form.outlet) {
+                    label += ' (Pinjaman: ' + s.outlet + ')';
+                  }
+                  return `<option value="${s.nama}">${label}</option>`;
+                }).join('')}
               </select>
               <button type="button" onclick="openAddStaffModal()" class="text-[10px] font-bold text-gray-500 hover:text-zero-black">+ STAFF BARU</button>
             </div>

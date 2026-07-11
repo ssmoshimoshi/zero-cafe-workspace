@@ -111,6 +111,29 @@
     </div>
   </div>
 
+  <!-- 2b. Borrow Staff Modal -->
+  <div id="borrowStaffModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4">
+    <div class="absolute inset-0 bg-[#0f0f0f]/60 backdrop-blur-sm" onclick="closeBorrowStaffModal()"></div>
+    <div class="relative bg-zero-white dark:bg-zero-black max-w-sm w-full rounded-t-3xl sm:rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 p-6 pb-8 sm:pb-6 animate-slide-up">
+      <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6 sm:hidden"></div>
+      <h3 class="font-bold text-lg text-gray-900 dark:text-zero-white mb-4">
+        Pinjam Staf Outlet Lain
+      </h3>
+      <div class="space-y-4">
+        <div>
+          <label id="borrowStaffTargetLabel" class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">Pilih Staf</label>
+          <select id="borrowStaffSelect" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-zero-gray bg-white/50 dark:bg-gray-800 dark:text-zero-white">
+            <!-- options will be injected dynamically -->
+          </select>
+        </div>
+      </div>
+      <div class="mt-6 flex gap-3">
+        <button onclick="closeBorrowStaffModal()" class="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Batal</button>
+        <button onclick="borrowStaffSubmit()" class="flex-1 px-4 py-3 bg-zero-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-colors">Tambah</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 3. Confirm Reset Modal -->
   <div id="confirmResetModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4">
     <div class="absolute inset-0 bg-[#0f0f0f]/60 backdrop-blur-sm" onclick="closeResetModal()"></div>

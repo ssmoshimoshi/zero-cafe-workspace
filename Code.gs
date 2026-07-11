@@ -276,6 +276,23 @@ function parseDateToObj(d) {
   }
   var parsed = new Date(str);
   return isNaN(parsed.getTime()) ? null : parsed;
+}function getStaffFromRow(row, headers, rowIndex) {
+  var idIdx = headers.indexOf("ID");
+  var namaIdx = headers.indexOf("Nama");
+  if (namaIdx === -1) namaIdx = headers.indexOf("Nama Staff");
+  var posisiIdx = headers.indexOf("Posisi");
+  var statusIdx = headers.indexOf("Status");
+  var outletIdx = headers.indexOf("Outlet");
+  if (outletIdx === -1) outletIdx = headers.indexOf("Outlet Asal");
+  
+  var name = namaIdx !== -1 ? row[namaIdx] : "";
+  return {
+    id: (idIdx !== -1 && row[idIdx]) ? row[idIdx].toString() : (name || "STF-" + rowIndex),
+    nama: name,
+    posisi: posisiIdx !== -1 ? row[posisiIdx] : "",
+    status: statusIdx !== -1 ? row[statusIdx] : "Aktif",
+    outlet: (outletIdx !== -1 ? row[outletIdx] : "")
+  };
 }
 
 /**
@@ -288,18 +305,15 @@ function api_getMasterStaff() {
     if (!sheet) return [];
     
     var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return [];
+    
+    var headers = data[0];
     var staffList = [];
     
-    // Skip headers
     for (var i = 1; i < data.length; i++) {
-      var status = data[i][3];
-      if (status === "Aktif") {
-        staffList.push({
-          id: data[i][0],
-          nama: data[i][1],
-          posisi: data[i][2],
-          outlet: data[i][4] || ""
-        });
+      var staff = getStaffFromRow(data[i], headers, i);
+      if (staff.status === "Aktif") {
+        staffList.push(staff);
       }
     }
     return staffList;
@@ -316,17 +330,13 @@ function api_getAllMasterStaff() {
     if (!sheet) return [];
     
     var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return [];
+    
+    var headers = data[0];
     var staffList = [];
     
-    // Skip headers
     for (var i = 1; i < data.length; i++) {
-      staffList.push({
-        id: data[i][0],
-        nama: data[i][1],
-        posisi: data[i][2],
-        status: data[i][3],
-        outlet: data[i][4] || ""
-      });
+      staffList.push(getStaffFromRow(data[i], headers, i));
     }
     return staffList;
   } catch (err) {
@@ -344,7 +354,7 @@ function api_addMasterStaff(nama, posisi, outlet) {
     var sheet = ss.getSheetByName("MasterStaff");
     if (!sheet) {
       sheet = ss.insertSheet("MasterStaff");
-      sheet.appendRow(["ID", "Nama Staff", "Posisi", "Status", "Outlet Asal"]);
+      sheet.appendRow(["ID", "Nama", "Posisi", "Status", "Outlet"]);
     }
     
     var id = "STF-" + new Date().getTime();

@@ -623,6 +623,73 @@ window.addStaffSubmit = async function() {
   }
 };
 
+window.openBorrowStaffModal = function() {
+  const currentOutlet = window.form.outlet || 'Perintis';
+  const otherOutlet = currentOutlet === 'Perintis' ? 'Dg Tata' : 'Perintis';
+  
+  const select = document.getElementById('borrowStaffSelect');
+  const label = document.getElementById('borrowStaffTargetLabel');
+  const modal = document.getElementById('borrowStaffModal');
+  
+  if (!select || !modal) return;
+  
+  if (label) label.innerText = `Pilih Staf dari ${otherOutlet}`;
+  
+  const existingNames = (window.form.staff || []).map(s => s.nama);
+  const otherStaff = AppState.masterStaff.filter(s => 
+    s.outlet === otherOutlet && 
+    s.status === 'Aktif' && 
+    !existingNames.includes(s.nama)
+  );
+  
+  let html = '<option value="">PILIH STAF PINJAMAN</option>';
+  otherStaff.forEach(s => {
+    html += `<option value="${s.nama}">${s.nama} (${s.posisi})</option>`;
+  });
+  select.innerHTML = html;
+  
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+};
+
+window.closeBorrowStaffModal = function() {
+  const modal = document.getElementById('borrowStaffModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+};
+
+window.borrowStaffSubmit = function() {
+  const select = document.getElementById('borrowStaffSelect');
+  if (!select) return;
+  
+  const nama = select.value;
+  if (!nama) {
+    showToast("Silakan pilih staf terlebih dahulu", "error");
+    return;
+  }
+  
+  const master = AppState.masterStaff.find(s => s.nama === nama);
+  if (master) {
+    if (window.form.type === 'daily') {
+      window.form.staff.push({
+        nama: master.nama,
+        posisi: master.posisi,
+        outletAsal: master.outlet,
+        status: "Hadir",
+        keramahan: false,
+        keterangan: ""
+      });
+    }
+    
+    renderApp();
+    showToast(`Berhasil meminjam ${master.nama}`, "success");
+  }
+  
+  window.closeBorrowStaffModal();
+};
+
 /*  === DARK MODE INIT === */
 (function() {
   try {

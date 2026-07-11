@@ -26,20 +26,20 @@ function deleteLegacySheets(ss) {
 
 function mock_MasterData(ss) {
   // 1. MasterStaff
-  var staffSheet = setupSheet(ss, "MasterStaff", ["Nama", "Posisi", "Outlet", "Status", "Gaji Pokok", "Nomor Rekening", "Shift Default", "Tanggal Bergabung"]);
-  if (staffSheet.getLastRow() > 1) staffSheet.getRange(2, 1, staffSheet.getLastRow() - 1, 8).clearContent();
+  var staffSheet = setupSheet(ss, "MasterStaff", ["ID", "Nama", "Posisi", "Status", "Outlet"]);
+  if (staffSheet.getLastRow() > 1) staffSheet.getRange(2, 1, staffSheet.getLastRow() - 1, 5).clearContent();
   
   var staffs = [
-    ["Nathan", "Supervisor", "Perintis", "Aktif", 3000000, "123", "Siang", "2026-01-01"],
-    ["Eko", "Barista", "Perintis", "Aktif", 2000000, "123", "Pagi", "2026-01-01"],
-    ["Amel", "Kasir", "Perintis", "Aktif", 2000000, "123", "Siang", "2026-01-01"],
-    ["Joko", "Server", "Perintis", "Aktif", 1500000, "123", "Sore", "2026-01-01"],
-    ["Sela", "Supervisor", "Dg Tata", "Aktif", 3000000, "123", "Siang", "2026-01-01"],
-    ["Budi", "Barista", "Dg Tata", "Aktif", 2000000, "123", "Malam", "2026-01-01"], // Suspect Kasir Minus
-    ["Siti", "Kasir", "Dg Tata", "Aktif", 2000000, "123", "Pagi", "2026-01-01"],
-    ["Anton", "Server", "Dg Tata", "Aktif", 1500000, "123", "Malam", "2026-01-01"]
+    ["1", "Nathan", "Supervisor", "Aktif", "Perintis"],
+    ["2", "Eko", "Barista", "Aktif", "Perintis"],
+    ["3", "Amel", "Kasir", "Aktif", "Perintis"],
+    ["4", "Joko", "Server", "Aktif", "Perintis"],
+    ["5", "Sela", "Supervisor", "Aktif", "Dg Tata"],
+    ["6", "Budi", "Barista", "Aktif", "Dg Tata"],
+    ["7", "Siti", "Kasir", "Aktif", "Dg Tata"],
+    ["8", "Anton", "Server", "Aktif", "Dg Tata"]
   ];
-  staffSheet.getRange(2, 1, staffs.length, 8).setValues(staffs);
+  staffSheet.getRange(2, 1, staffs.length, 5).setValues(staffs);
 
   // 2. MasterProduk (45 products)
   var prodSheet = setupSheet(ss, "MasterProduk", ["Kategori", "Nama Produk", "Harga Jual", "HPP Estimasi", "Status", "Outlet Khusus"]);

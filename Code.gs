@@ -147,11 +147,17 @@ function initializeSystem() {
   
   if (!rootFolderId) {
     var folderName = "Zero Cafe Workspace Drive";
-    var folders = DriveApp.getFoldersByName(folderName);
-    if (folders.hasNext()) {
-      rootFolder = folders.next();
-    } else {
-      rootFolder = DriveApp.createFolder(folderName);
+    var specificId = "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
+    try {
+      rootFolder = DriveApp.getFolderById(specificId);
+    } catch(e) {
+      // Fallback
+      var folders = DriveApp.getFoldersByName(folderName);
+      if (folders.hasNext()) {
+        rootFolder = folders.next();
+      } else {
+        rootFolder = DriveApp.createFolder(folderName);
+      }
     }
     scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
@@ -379,21 +385,15 @@ function getStructuredFolder(year, monthName, category) {
 function getDynamicFolder(year, monthName, data) {
   // [A3] Centralize: selalu baca ROOT_FOLDER_ID dari ScriptProperties
   var scriptProperties = PropertiesService.getScriptProperties();
-  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
+  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID") || "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
   var rootFolder;
   
-  if (!rootFolderId) {
-    Logger.log("ROOT_FOLDER_ID belum diset. Menggunakan fallback ke 'Zero Cafe Database'.");
+  try {
+    rootFolder = DriveApp.getFolderById(rootFolderId);
+  } catch(e) {
+    Logger.log("Folder root tidak ditemukan: " + e.toString() + ". Menggunakan fallback.");
     rootFolder = getOrCreateSubFolder(DriveApp.getRootFolder(), "Zero Cafe Database");
     scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
-  } else {
-    try {
-      rootFolder = DriveApp.getFolderById(rootFolderId);
-    } catch(e) {
-      Logger.log("Folder root tidak ditemukan: " + e.toString() + ". Menggunakan fallback.");
-      rootFolder = getOrCreateSubFolder(DriveApp.getRootFolder(), "Zero Cafe Database");
-      scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
-    }
   }
   
   var yearFolder = getOrCreateSubFolder(rootFolder, year);

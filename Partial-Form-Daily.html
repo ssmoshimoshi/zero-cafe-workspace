@@ -624,6 +624,7 @@ function getDailyTabContent() {
                               <option value="Kotor" ${item.status === 'Kotor' ? 'selected' : ''}>Kotor</option>
                             </select>
                             <input type="number" value="${item.skor}" onchange="handleKebersihanSkorChange(this, ${item.originalIdx})" placeholder="Skor" class="w-14 px-2 py-1 text-xs text-center border border-gray-200 rounded focus:outline-none font-bold">
+                          </div>
                           <div class="mt-2 space-y-1">
                             ${(() => {
                               const opts = getKebersihanChecklistOptions(item.area, item.point);

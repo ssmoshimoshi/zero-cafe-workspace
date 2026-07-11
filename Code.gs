@@ -53,7 +53,7 @@ function initializeSystem() {
   ]);
   
   setupSheet(activeSpreadsheet, "Staff_Daily", [
-    "Tanggal", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"
+    "Tanggal", "Bulan Laporan", "Outlet Tugas", "Outlet Asal", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"
   ]);
 
   setupSheet(activeSpreadsheet, "Staff_Weekly", [
@@ -964,7 +964,7 @@ function submitFullReport(payloadStr) {
       ]);
       
       if (data.weekly.staff && data.weekly.staff.length > 0) {
-        var swSheet = setupSheet(ss, "Staff_Weekly_" + (data.outlet || "Perintis"), [
+        var swSheet = setupSheet(ss, "Staff_Weekly", [
           "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
         ]);
         var bulanLaporan = "";
@@ -1031,7 +1031,7 @@ function submitFullReport(payloadStr) {
       }
       
       if (data.monthly.staff && Array.isArray(data.monthly.staff)) {
-        var smSheet = setupSheet(ss, "Staff_Monthly_" + (data.outlet || "Perintis"), [
+        var smSheet = setupSheet(ss, "Staff_Monthly", [
           "Bulan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
         ]);
         data.monthly.staff.forEach(function(s) {
@@ -1334,9 +1334,9 @@ function api_getMonthlyData(monthStr, outlet) {
       for (var s = 1; s < stData.length; s++) {
         var sRow = stData[s];
         if (String(sRow[1]) === monthStr && String(sRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
-          var posisi = String(sRow[5]);
-          var statusHadir = String(sRow[6]);
-          var keramahanMiss = String(sRow[7]);
+          var posisi = String(sRow[6]);
+          var statusHadir = String(sRow[7]);
+          var keramahanMiss = String(sRow[8]);
           
           if (statusHadir === 'Terlambat') {
             totalTelat++;
@@ -1641,7 +1641,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       var rowOutlet = (sdData[s][2] || "").toString();
       if (dObj >= startD && dObj <= endD) {
         if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
-          var statusHadir = (sdData[s][6] || "").toString().toLowerCase();
+          var statusHadir = (sdData[s][7] || "").toString().toLowerCase();
           if (statusHadir === "terlambat") {
             totalTelatRealtime++;
           }

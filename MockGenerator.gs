@@ -26,8 +26,11 @@ function deleteLegacySheets(ss) {
 
 function mock_MasterData(ss) {
   // 1. MasterStaff
-  var staffSheet = setupSheet(ss, "MasterStaff", ["ID", "Nama", "Posisi", "Status", "Outlet"]);
-  if (staffSheet.getLastRow() > 1) staffSheet.getRange(2, 1, staffSheet.getLastRow() - 1, 5).clearContent();
+  var staffSheet = ss.getSheetByName("MasterStaff") || ss.insertSheet("MasterStaff");
+  staffSheet.clear();
+  staffSheet.appendRow(["ID", "Nama", "Posisi", "Status", "Outlet"]);
+  staffSheet.getRange("A1:E1").setFontWeight("bold");
+  staffSheet.setFrozenRows(1);
   
   var staffs = [
     ["1", "Nathan", "Supervisor", "Aktif", "Perintis"],
@@ -124,9 +127,9 @@ function mock_DailyLoop_AllOutlets(ss) {
     ]);
 
     // Staff Daily Perintis (Tidak ada telat)
-    staffDaily.push([dateStr, blnLaporan, "Perintis", "Nathan", "Eko", "Barista", "Hadir", "", ""]);
-    staffDaily.push([dateStr, blnLaporan, "Perintis", "Nathan", "Amel", "Kasir", "Hadir", "", ""]);
-    staffDaily.push([dateStr, blnLaporan, "Perintis", "Nathan", "Joko", "Server", "Hadir", "", ""]);
+    staffDaily.push([dateStr, blnLaporan, "Perintis", "Perintis", "Nathan", "Eko", "Barista", "Hadir", "", ""]);
+    staffDaily.push([dateStr, blnLaporan, "Perintis", "Perintis", "Nathan", "Amel", "Kasir", "Hadir", "", ""]);
+    staffDaily.push([dateStr, blnLaporan, "Perintis", "Perintis", "Nathan", "Joko", "Server", "Hadir", "", ""]);
 
     // Audit Kas Perintis (3x sehari, 0 selisih)
     auditKas.push([dateStr, "Perintis", "Pagi", 1000000, 500000, 1500000, 0, "Aman"]);
@@ -160,9 +163,9 @@ function mock_DailyLoop_AllOutlets(ss) {
     var budiStatus = (Math.random() < 0.4) ? "Terlambat" : "Hadir"; // Budi sering telat
     var sitiStatus = (Math.random() < 0.2) ? "Terlambat" : "Hadir";
     
-    if (isBudiMasuk) staffDaily.push([dateStr, blnLaporan, "Dg Tata", "Sela", "Budi", "Barista", budiStatus, "", "Sering istirahat"]);
-    staffDaily.push([dateStr, blnLaporan, "Dg Tata", "Sela", "Siti", "Kasir", sitiStatus, "", ""]);
-    staffDaily.push([dateStr, blnLaporan, "Dg Tata", "Sela", "Anton", "Server", "Hadir", "", ""]);
+    if (isBudiMasuk) staffDaily.push([dateStr, blnLaporan, "Dg Tata", "Dg Tata", "Sela", "Budi", "Barista", budiStatus, "", "Sering istirahat"]);
+    staffDaily.push([dateStr, blnLaporan, "Dg Tata", "Dg Tata", "Sela", "Siti", "Kasir", sitiStatus, "", ""]);
+    staffDaily.push([dateStr, blnLaporan, "Dg Tata", "Dg Tata", "Sela", "Anton", "Server", "Hadir", "", ""]);
 
     // Audit Kas Dg Tata (3x sehari)
     // Target Total Minus Sebulan = -300k. Dengan 30 hari x peluang 30% Budi minus = ~10 hari minus. 
@@ -197,7 +200,7 @@ function mock_DailyLoop_AllOutlets(ss) {
   writeArrayToSheet(ss, "Daily_Perintis", ["Tanggal","Supervisor","Outlet","Shift","Total Omset","Total Komplain","Kendala","URL PDF","Target Penjualan","Total Transaksi","Status Laporan","Cuaca"], dailyP);
   writeArrayToSheet(ss, "Daily_Dg Tata", ["Tanggal","Supervisor","Outlet","Shift","Total Omset","Total Komplain","Kendala","URL PDF","Target Penjualan","Total Transaksi","Status Laporan","Cuaca"], dailyD);
   
-  writeArrayToSheet(ss, "Staff_Daily", ["Tanggal","Bulan Laporan","Outlet","Supervisor","Nama Staff","Posisi","Status Kehadiran","Keramahan Terlewat","Catatan Khusus"], staffDaily);
+  writeArrayToSheet(ss, "Staff_Daily", ["Tanggal","Bulan Laporan","Outlet Tugas","Outlet Asal","Supervisor","Nama Staff","Posisi","Status Kehadiran","Keramahan Terlewat","Catatan Khusus"], staffDaily);
   writeArrayToSheet(ss, "Log_Audit_Kas", ["Tanggal","Outlet","Shift/Jam","Total QRIS","Total Tunai","Aktual Sistem","Selisih","Keterangan"], auditKas);
   
   writeArrayToSheet(ss, "Kebersihan_Perintis", ["Tanggal","Outlet","Area Kebersihan","Waktu Inspeksi","Skor Kebersihan","Status Checklist","Keterangan Tambahan","URL Foto"], kebersihanP);
@@ -219,32 +222,41 @@ function mock_WeeklyMonthly(ss) {
    for (var p=0; p<periods.length; p++) {
       var pd = periods[p];
       
-      // PERINTIS MONTHLY (ALL GREEN)
-      m.push([pd, "Nathan", "Perintis", 185000000, 180000000, "TERCAPAI", "https://dummy_pdf", "https://dummy_sheet", 95, 2, 0, "Aman, Tim Solid", "-", "Pertahankan", "Tidak Ada", "Target terlampaui", "-", "Baik", 0]);
+      // PERINTIS MONTHLY (ALL GREEN) - 26 Columns
+      m.push([
+        pd, "Nathan", "Perintis", 185000000, 180000000, 103, 5, "https://dummy-url.com/pdf_monthly",
+        95, 2, 0, "Aman, Tim Solid", "-", "Pertahankan", "Tidak Ada", "Target terlampaui", "-", "Baik", 0,
+        "Aman", "Pertahankan kinerja", 0, 0, "Sangat Baik", "Pertahankan", 0
+      ]);
       sm.push([pd, "Perintis", "Nathan", "Eko", "Barista", "Sangat Baik", "Rajin"]);
       sm.push([pd, "Perintis", "Nathan", "Amel", "Kasir", "Baik", "Teliti"]);
       
-      // DG TATA MONTHLY (ALL RED)
-      m.push([pd, "Sela", "Dg Tata", 125000000, 160000000, "TIDAK TERCAPAI", "https://dummy_pdf", "https://dummy_sheet", 68, 45, 4, "Banyak mesin rusak, kelelahan", "Mesin Espresso & Atap", "Rotasi Karyawan", "Butuh Teknisi & Part Time", "-", "Banyak Komplain Pelanggan", "Kurang", 1]);
+      // DG TATA MONTHLY (ALL RED) - 26 Columns
+      m.push([
+        pd, "Sela", "Dg Tata", 125000000, 160000000, 78, 2, "https://dummy-url.com/pdf_monthly",
+        68, 45, 4, "Banyak mesin rusak, kelelahan", "Mesin Espresso & Atap", "Rotasi Karyawan", "Butuh Teknisi & Part Time", "-", "Banyak Komplain Pelanggan", "Kurang", 1,
+        "Mesin espresso bocor dan toilet kotor", "Perlu evaluasi sdm", 15, 10, "Kurang Baik", "Kalibrasi ulang", 1500000
+      ]);
       sm.push([pd, "Dg Tata", "Sela", "Budi", "Barista", "Buruk", "Sering telat dan diduga curang"]);
       sm.push([pd, "Dg Tata", "Sela", "Siti", "Kasir", "Kurang", "Kurang ramah saat lelah"]);
 
       // WEEKLY (4 weeks per month)
       for (var wk=1; wk<=4; wk++) {
          var wp = "Week " + wk + " " + pd;
-         w.push([wp, "Nathan", "Perintis", 46000000, 45000000, "TERCAPAI", "https://dummy_pdf", "https://dummy_sheet"]);
-         w.push([wp, "Sela", "Dg Tata", 31000000, 40000000, "TIDAK TERCAPAI", "https://dummy_pdf", "https://dummy_sheet"]);
+         w.push([wp, "Nathan", "Perintis", 46000000, 45000000, 0, "Aman", "https://dummy-url.com/pdf_weekly"]);
+         w.push([wp, "Sela", "Dg Tata", 31000000, 40000000, 4, "Mesin espresso bocor", "https://dummy-url.com/pdf_weekly"]);
          
          sw.push([wp, pd, "Perintis", "Nathan", "Eko", "Barista", "Sangat Baik", "-"]);
          sw.push([wp, pd, "Dg Tata", "Sela", "Budi", "Barista", "Buruk (SP1)", "Telat 3x berturut-turut"]);
       }
    }
 
-   writeArrayToSheet(ss, "Weekly", ["Periode", "Supervisor", "Outlet", "Omset Aktual", "Omset Target", "Status", "URL PDF", "URL Spreadsheet Tambahan"], w);
+   writeArrayToSheet(ss, "Weekly", ["Periode", "Supervisor", "Outlet", "Total Real Sales", "Total Target", "Komplain", "Kendala Utama", "URL PDF"], w);
    writeArrayToSheet(ss, "Monthly", [
-      "Bulan", "Supervisor", "Outlet", "Omset Aktual", "Omset Target", "Status Pencapaian", "URL PDF", "URL Dokumen", 
-      "Rata-rata Skor Kepatuhan", "Total Telat", "Teguran", "Kendala Utama", "Eskalasi Fasilitas",
-      "Strategi", "Kebutuhan GM", "Pencapaian", "Tantangan", "Skill", "Turnover Barista"
+      "Bulan", "Supervisor", "Outlet", "Total Sales", "Target Sales", "Persen Tercapai", "Rating Kerja", "URL PDF",
+      "Kepatuhan SOP", "Total Telat", "Teguran", "Kendala Utama", "Eskalasi Fasilitas", "Strategi", "Kebutuhan GM",
+      "Pencapaian", "Tantangan", "Skill", "Turnover Barista",
+      "Ringkasan Masalah", "Kesimpulan", "QC Komplain", "QC Remake", "QC Espresso", "QC Rekomendasi", "Pengeluaran Fasilitas"
    ], m);
    
    writeArrayToSheet(ss, "Staff_Weekly", ["Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"], sw);

@@ -118,7 +118,7 @@ function generateDummyData2Bulan() {
       shiftStaff.forEach(function(nama) {
         var telat = Math.random() > 0.9 ? "Terlambat" : "Tepat Waktu";
         var noSenyum = Math.random() > 0.95 ? "YA" : "TIDAK";
-        stDailyRows.push([dateStr, monthStr, outlet, spv, nama, "Barista", telat, noSenyum, ""]);
+        stDailyRows.push([dateStr, monthStr, outlet, outlet, spv, nama, "Barista", telat, noSenyum, ""]);
       });
       
       // Weekly
@@ -162,7 +162,7 @@ function seedMasterStaff() {
   var sheet = ss.getSheetByName("MasterStaff") || ss.insertSheet("MasterStaff");
   
   sheet.clear();
-  sheet.appendRow(["ID", "Nama Staff", "Posisi", "Status", "Outlet Tugas"]);
+  sheet.appendRow(["ID", "Nama", "Posisi", "Status", "Outlet"]);
   sheet.getRange("A1:E1").setFontWeight("bold");
   
   var staff = [

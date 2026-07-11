@@ -1447,7 +1447,7 @@ function api_checkPendingLaporan() {
 function api_gm_fetchReports(startDate, endDate, outletFilter) {
   try {
     var ss = getSpreadsheet();
-    var data = getAggregatedData(ss, "Daily");
+    var data = getAggregatedData(ss, "DB_Laporan_Harian");
     if (data.length <= 1) throw new Error("Belum ada data laporan harian.");
     
     var omsetTotal = 0;
@@ -1494,7 +1494,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     
     // Skip headers
     for (var i = 1; i < data.length; i++) {
-      var rowDateObj = parseDateToObj(data[i][0]);
+      var rowDateObj = parseDateToObj(data[i][1]);
       if (!rowDateObj) continue; // Skip if invalid date
       
       var dYear = rowDateObj.getFullYear();
@@ -1502,12 +1502,12 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       var dDate = rowDateObj.getDate();
       var rowDate = dYear + "-" + (dMonth < 10 ? "0" + dMonth : dMonth) + "-" + (dDate < 10 ? "0" + dDate : dDate);
       
-      var rowOutlet = (data[i][2] || "").toString();
+      var rowOutlet = (data[i][3] || "").toString();
       var matchesFilter = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
       
       if (matchesFilter) {
-        var rowOmset = Number(data[i][4] || 0);
-        var rowTarget = Number(data[i][8] || 0); // Col I
+        var rowOmset = Number(data[i][6] || 0);
+        var rowTarget = Number(data[i][7] || 0); // Col H
         
         // Year-to-Date Calculation
         if (dYear.toString() === year) {
@@ -1517,10 +1517,10 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         if (rowDateObj >= startD && rowDateObj <= endD) {
           omsetTotal += rowOmset;
           // targetOmset += rowTarget; (Removed: Now calculated dynamically from Config_Target)
-          komplainTotal += Number(data[i][5] || 0);
-          transaksiTotal += Number(data[i][9] || 0); // Read real transaction data from col 10
+          komplainTotal += 0; // Komplain data now saved elsewhere or calculated from feedback table
+          transaksiTotal += Number(data[i][8] || 0); // Read real transaction data from col 9 (Index 8)
           
-          var rowCuaca = (data[i][11] || "Cerah / Panas").toString().toLowerCase();
+          var rowCuaca = (data[i][5] || "Cerah / Panas").toString().toLowerCase();
           if (rowCuaca.indexOf("hujan") !== -1 || rowCuaca.indexOf("mendung") !== -1) {
             cuacaHujan++;
           } else {
@@ -1528,8 +1528,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           }
           
           listLaporan.push({
-            name: "Daily Report - " + rowDate + " (" + data[i][1] + ")",
-            url: data[i][7],
+            name: "Daily Report - " + rowDate + " (" + data[i][4] + ")",
+            url: data[i][11],
             dateCreated: rowDate
           });
           chartData.push({

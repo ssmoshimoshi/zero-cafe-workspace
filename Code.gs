@@ -7,7 +7,6 @@
  * Serves the HTML frontend interface.
  */
 function doGet(e) {
-  seedMasterStaff();
   var template = HtmlService.createTemplateFromFile('index');
   template.scriptUrl = ScriptApp.getService().getUrl();
   return template

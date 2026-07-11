@@ -7,7 +7,7 @@ function generateDummyData2Bulan() {
   if (staffSheet) {
     var sData = staffSheet.getDataRange().getValues();
     for (var i = 1; i < sData.length; i++) {
-      if (sData[i][0]) staffList.push(sData[i][0]);
+      if (sData[i][1]) staffList.push(sData[i][1]); // Use nama
     }
   }
   if (staffList.length === 0) staffList = ["Andi", "Budi", "Citra", "Dewi"];
@@ -155,4 +155,28 @@ function generateDummyData2Bulan() {
   if (stDailyRows.length > 0) stDailySheet.getRange(stDailySheet.getLastRow() + 1, 1, stDailyRows.length, stDailyRows[0].length).setValues(stDailyRows);
   if (weeklyRows.length > 0) weeklySheet.getRange(weeklySheet.getLastRow() + 1, 1, weeklyRows.length, weeklyRows[0].length).setValues(weeklyRows);
   if (monthlyRows.length > 0) monthlySheet.getRange(monthlySheet.getLastRow() + 1, 1, monthlyRows.length, monthlyRows[0].length).setValues(monthlyRows);
+}
+
+function seedMasterStaff() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("MasterStaff") || ss.insertSheet("MasterStaff");
+  
+  sheet.clear();
+  sheet.appendRow(["ID", "Nama Staff", "Posisi", "Status", "Outlet Tugas"]);
+  sheet.getRange("A1:E1").setFontWeight("bold");
+  
+  var staff = [
+    ["STF-001", "Amel", "Barista", "Aktif", "Perintis"],
+    ["STF-002", "Budi", "Kasir", "Aktif", "Perintis"],
+    ["STF-003", "Citra", "Kitchen", "Aktif", "Perintis"],
+    ["STF-004", "Dewi", "Barista", "Aktif", "Dg Tata"],
+    ["STF-005", "Eko", "Kasir", "Aktif", "Dg Tata"],
+    ["STF-006", "Fajar", "Kitchen", "Aktif", "Dg Tata"],
+    ["STF-007", "Gita", "Barista", "Aktif", "Perintis"],
+    ["STF-008", "Hadi", "Barista", "Aktif", "Dg Tata"]
+  ];
+  
+  staff.forEach(function(s) {
+    sheet.appendRow(s);
+  });
 }

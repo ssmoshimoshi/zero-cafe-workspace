@@ -404,7 +404,7 @@ function getLoginTemplate() {
         </button>
         
         <!-- GM -->
-        <button onclick="handleLogin('GM')" class="w-full max-w-[260px] bg-white border border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md hover:bg-gray-50 active:scale-[0.97] transition-all duration-300">
+        <button onclick="showGMPasswordModal()" class="w-full max-w-[260px] bg-white border border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md hover:bg-gray-50 active:scale-[0.97] transition-all duration-300">
           General Manager
         </button>
       </div>
@@ -420,6 +420,21 @@ function getLoginTemplate() {
           <div class="flex gap-4 justify-center">
             <button onclick="hidePINModal()" class="px-6 py-3 border border-gray-200 text-gray-500 text-xs font-bold rounded-full hover:bg-gray-50 transition-colors">BATAL</button>
             <button id="btnSubmitPIN" onclick="submitPIN()" class="px-8 py-3 bg-gray-500 text-white text-xs font-bold rounded-full transition-colors flex items-center justify-center">MASUK</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- GM PASSWORD MODAL (Hidden by default) -->
+      <div id="gmModal" class="fixed inset-0 z-50 hidden bg-white/90 backdrop-blur-sm flex-col items-center justify-center animate-fade-in">
+        <div class="w-full max-w-sm px-8 text-center">
+          <h2 class="text-xl font-black text-zero-black tracking-widest mb-2 uppercase">Kunci Eksekutif</h2>
+          <p class="text-xs text-gray-500 mb-8 font-medium">Masukkan kata sandi GM.</p>
+          
+          <input type="password" id="inputGMPassword" placeholder="Sandi..." class="w-full text-center text-xl font-bold tracking-widest pb-2 border-b-2 border-zero-black bg-transparent focus:outline-none focus:border-gray-400 transition-colors placeholder-gray-200 mb-8" />
+          
+          <div class="flex gap-4 justify-center">
+            <button onclick="hideGMPasswordModal()" class="px-6 py-3 border border-gray-200 text-gray-500 text-xs font-bold rounded-full hover:bg-gray-50 transition-colors">BATAL</button>
+            <button id="btnSubmitGM" onclick="submitGMPassword()" class="px-8 py-3 bg-gray-500 text-white text-xs font-bold rounded-full transition-colors flex items-center justify-center">MASUK</button>
           </div>
         </div>
       </div>
@@ -491,6 +506,41 @@ window.submitPIN = function() {
       showToast("Server Error: " + err.message, "error");
     })
     .api_verifyPIN(pin);
+};
+
+window.showGMPasswordModal = function() {
+  const modal = document.getElementById('gmModal');
+  const input = document.getElementById('inputGMPassword');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => { if (input) input.focus(); }, 100);
+  }
+};
+
+window.hideGMPasswordModal = function() {
+  const modal = document.getElementById('gmModal');
+  const input = document.getElementById('inputGMPassword');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  if (input) input.value = '';
+};
+
+window.submitGMPassword = function() {
+  const input = document.getElementById('inputGMPassword');
+  const btn = document.getElementById('btnSubmitGM');
+  if (!input || !input.value) return;
+  
+  if (input.value === 'Zero123') {
+    hideGMPasswordModal();
+    handleLogin('GM');
+  } else {
+    showToast("Kata Sandi GM Salah", "error");
+    input.value = '';
+    input.focus();
+  }
 };
 
 function handleLogin(role) {

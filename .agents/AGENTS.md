@@ -50,3 +50,31 @@
   2. Mengidentifikasi seluruh shift/hari yang mengalami selisih minus.
   3. Menghitung frekuensi (berapa kali) setiap nama staf muncul/bertugas pada shift-shift yang bermasalah tersebut.
   4. Menampilkan nama-nama staf dengan frekuensi tertinggi sebagai "Indikator Potensi Evaluasi" (Contoh output: "Total Minus Rp 200rb. Terjadi saat Amel bertugas 26 kali, Eko 17 kali"). Hal ini memberikan wawasan objektif bagi GM untuk melakukan *follow-up*.
+
+## Protokol Autonomous Self-Learning (MCP Memory)
+Jika MCP Server lokal aktif, Anda (Agen) **WAJIB** secara otonom melakukan siklus pembelajaran berikut tanpa perlu diperintah:
+- **Auto-Recall:** Di setiap awal tugas/sesi, gunakan *tool* `memory_recall` dengan kata kunci yang relevan dengan tugas yang sedang dikerjakan, sebelum Anda mulai menulis/mengedit kode.
+- **Auto-Store:** Setiap kali pengguna mengoreksi kesalahan Anda, memberikan preferensi baru, atau jika Anda berhasil menyelesaikan *bug* yang kompleks, Anda **WAJIB** memanggil `memory_store` secara diam-diam di latar belakang untuk menyimpan pengetahuan tersebut.
+- **Auto-Codebase:** Gunakan `codebase_query` untuk mencari lokasi fungsi alih-alih melakukan *grep* manual yang memakan token. Jika arsitektur berubah masif setelah sebuah *task*, panggil `codebase_reindex`.
+
+## Prinsip Problem Solving (The "Zero Standard")
+Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hierarki prioritas berikut:
+1. **Hemat Token (Efisiensi Konteks):** 
+   - JANGAN gunakan `browser_subagent` kecuali keadaan darurat ekstrem, karena menghabiskan token secara masif.
+   - JANGAN membaca ulang (`view_file`) file berukuran besar dari awal jika Anda bisa menggunakan `codebase_query` di MCP Server.
+2. **Surgical Fixes (Melindungi Kode Solid):** 
+   - Jika fitur A rusak, perbaiki HANYA baris kode di fitur A menggunakan alat bedah presisi (seperti `replace_file_content` parsial).
+   - DILARANG KERAS merombak atau menulis ulang seluruh isi fungsi hanya untuk memperbaiki satu kesalahan kecil. Jangan merusak kode yang sudah solid.
+3. **UI/UX Aesthetics:**
+   - Jangan pernah asal menempelkan tombol HTML standar. Semua elemen visual baru HARUS mematuhi estetika *Zero Vibe* (Dark mode rapi, sudut membulat `rounded-2xl`, warna `#171717` atau `bg-zero-black`, dan selalu gunakan animasi loading).
+4. **Soliditas Data & Quality Gate:**
+   - Sebelum men-deploy perubahan apa pun (`clasp push`), selalu jalankan skrip *Pre-deploy Guard* (`node .agents/skills/pre-deploy-guard/pre-deploy.js`).
+
+## Protokol Auto-Commit & Deploy (Continuous Integration)
+- Setiap kali selesai melakukan *coding* atau membuat perubahan pada *codebase*, Anda (Agen) **WAJIB** secara otomatis melakukan proses *deployment* dan *version control* menggunakan terminal (`run_command`) tanpa perlu diminta.
+- Jalankan perintah berurutan berikut setelah memastikan *Pre-deploy Guard* bersih:
+  ```bash
+  git add . && git commit -m "Deskripsi perubahan yang terjadi"
+  clasp push -f && clasp deploy -i [ID] -d "Deskripsi"
+  ```
+- Laporkan status keberhasilan commit dan push kepada pengguna setelahnya.

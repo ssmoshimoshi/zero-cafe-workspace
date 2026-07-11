@@ -488,14 +488,26 @@ function getStructuredFolder(year, monthName, category) {
 function getDynamicFolder(year, monthName, data) {
   // [A3] Centralize: selalu gunakan ROOT_FOLDER_ID yang diminta user
   var scriptProperties = PropertiesService.getScriptProperties();
-  var rootFolderId = "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
+  var rootFolderId = scriptProperties.getProperty("ROOT_FOLDER_ID");
   var rootFolder;
   
-  try {
-    rootFolder = DriveApp.getFolderById(rootFolderId);
-  } catch(e) {
-    Logger.log("Folder root tidak ditemukan: " + e.toString() + ". Menggunakan fallback.");
-    rootFolder = getOrCreateSubFolder(DriveApp.getRootFolder(), "Zero Cafe Database");
+  if (rootFolderId) {
+    try {
+      rootFolder = DriveApp.getFolderById(rootFolderId);
+    } catch(e) {
+      Logger.log("Folder root tidak valid/dihapus: " + e.toString());
+      rootFolderId = null;
+    }
+  }
+  
+  if (!rootFolderId) {
+    Logger.log("Menggunakan fallback pembuatan folder root.");
+    var folders = DriveApp.getFoldersByName("Zero Cafe Workspace Drive");
+    if (folders.hasNext()) {
+      rootFolder = folders.next();
+    } else {
+      rootFolder = DriveApp.createFolder("Zero Cafe Workspace Drive");
+    }
     scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
   }
   

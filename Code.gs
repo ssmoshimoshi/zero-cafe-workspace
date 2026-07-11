@@ -32,115 +32,105 @@ function include(filename) {
  * Initializes the entire spreadsheet structure, headers, and Drive folders.
  * Can be run from the Apps Script editor to auto-setup the project.
  */
-function initializeSystem() {
-  var activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  var ssId = activeSpreadsheet.getId();
+function hardResetDatabase() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
   
-  // Set up Sheets
-  setupSheet(activeSpreadsheet, "Daily", [
-    "Tanggal", "Supervisor", "Outlet", "Shift", "Total Omset", "Komplain", "Kendala", "URL PDF", "Target Omset", "Transaksi", "Status Laporan", "Cuaca"
-  ]);
+  // 1. Buat sheet sementara agar Spreadsheet tidak error (minimal harus ada 1 sheet)
+  var tempSheet = ss.insertSheet("TEMP_WIPE_" + new Date().getTime());
   
-  setupSheet(activeSpreadsheet, "Weekly", [
-    "Periode", "Supervisor", "Outlet", "Total Real Sales", "Total Target", "Komplain", "Kendala Utama", "URL PDF"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Monthly", [
-    "Bulan", "Supervisor", "Outlet", "Total Sales", "Target Sales", "Persen Tercapai", "Rating Kerja", "URL PDF",
-    "Kepatuhan SOP", "Total Telat", "Teguran", "Kendala Utama", "Eskalasi Fasilitas", "Strategi", "Kebutuhan GM",
-    "Pencapaian", "Tantangan", "Skill", "Turnover Barista",
-    "Ringkasan Masalah", "Kesimpulan", "QC Komplain", "QC Remake", "QC Espresso", "QC Rekomendasi", "Pengeluaran Fasilitas"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Staff_Daily", [
-    "Tanggal", "Bulan Laporan", "Outlet Tugas", "Outlet Asal", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"
-  ]);
-
-  setupSheet(activeSpreadsheet, "Staff_Weekly", [
-    "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Staff_Monthly", [
-    "Bulan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Log_Audit_Kas", [
-    "Tanggal", "Outlet", "Shift/Jam", "Total QRIS", "Total Tunai", "Aktual Sistem", "Selisih", "Keterangan"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Log_QC", [
-    "Tanggal", "Outlet", "Kategori", "Item/Menu", "Status", "Keterangan"
-  ]);
-
-  setupSheet(activeSpreadsheet, "Database_QC", [
-    "Tanggal Laporan", "Jam Cek", "Outlet", "Shift", "Supervisor",
-    "Produk Random", "Cek Rasa", "Suhu", "Visual", "Catatan",
-    "Timestamp", "Action Taken"
-  ]);
-
-  // Daily Form data structure (Menambahkan Cuaca)
-  setupSheet(activeSpreadsheet, "Daily", [
-    "Tanggal Laporan", "Nama Supervisor", "Outlet", "Shift", "Omset Total", 
-    "Komplain", "Kinerja Kritis", "Foto Rekap", "Target", "Transaksi", "Status", "Cuaca"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Log_Fasilitas_Bahan", [
-    "Tanggal", "Outlet", "Tipe", "Nama Item", "Status/Ketersediaan", "Biaya Estimasi", "URL Foto", "Eskalasi"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Config_Target", [
-    "Tahun", "Outlet", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-  ]);
-  
-  setupSheet(activeSpreadsheet, "Config_Parameter", [
-    "Outlet", "Kategori", "Nama Event", "Tanggal Mulai", "Tanggal Selesai", "Status"
-  ]);
-  
-  var staffSheet = setupSheet(activeSpreadsheet, "MasterStaff", [
-    "ID", "Nama", "Posisi", "Status", "Outlet"
-  ]);
-  
-  // Populate default staff if empty
-  if (staffSheet.getLastRow() <= 1) {
-    var defaultStaff = [
-      [1, "Amel", "Barista", "Aktif", "Perintis"],
-      [2, "Irma", "Waitres", "Aktif", "Perintis"],
-      [3, "Fitri", "Kitchen", "Aktif", "Perintis"],
-      [4, "Syarif", "Barista", "Aktif", "Dg Tata"],
-      [5, "Reni", "Kitchen", "Aktif", "Dg Tata"],
-      [6, "Gita", "Barista", "Aktif", "Dg Tata"]
-    ];
-    staffSheet.getRange(2, 1, defaultStaff.length, 5).setValues(defaultStaff);
-  }
-
-  var menuSheet = setupSheet(activeSpreadsheet, "MasterMenu", [
-    "Kategori", "Nama Menu"
-  ]);
-  
-  // Populate default menu if empty
-  if (menuSheet.getLastRow() <= 1) {
-    var defaultMenu = [
-      ["minuman", "Espresso"], ["minuman", "Americano"], ["minuman", "Kopi Susu Gula Aren"], ["minuman", "Kopi Susu Pandan"],
-      ["minuman", "Cappuccino"], ["minuman", "Cafe Latte"], ["minuman", "Vanilla Latte"], ["minuman", "Matcha Latte"],
-      ["minuman", "Red Velvet Latte"], ["minuman", "Chocolate"], ["minuman", "Taro Latte"], ["minuman", "Lemon Tea"], ["minuman", "Lychee Tea"],
-      ["makanan", "Nasi Goreng Spesial"], ["makanan", "Nasi Goreng Seafood"], ["makanan", "Mie Goreng Jawa"], ["makanan", "Mie Kuah Spesial"],
-      ["makanan", "Ricebowl Chicken Katsu"], ["makanan", "Ricebowl Chicken Teriyaki"], ["makanan", "Spaghetti Bolognese"], ["makanan", "Spaghetti Carbonara"],
-      ["snack", "Kentang Goreng"], ["snack", "Roti Bakar Coklat"], ["snack", "Roti Bakar Keju"], ["snack", "Pisang Goreng Keju"],
-      ["snack", "Dimsum"], ["snack", "Cireng Bumbu Rujak"], ["snack", "Tahu Walik"], ["snack", "Churros"]
-    ];
-    menuSheet.getRange(2, 1, defaultMenu.length, 2).setValues(defaultMenu);
+  // 2. Hapus seluruh sheet lama
+  for (var i = 0; i < sheets.length; i++) {
+    ss.deleteSheet(sheets[i]);
   }
   
+  // Script akan berhenti di sini untuk Tahap 1.
+  SpreadsheetApp.getUi().alert("Hard Reset Berhasil", "Seluruh sheet lama telah dihapus. Hanya tersisa sheet sementara. Silakan jalankan 'Build New Architecture' untuk membuat sheet baru.", SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+/**
+ * Tahap 2: Re-build 9 Sheet Architecture
+ */
+function buildNewArchitecture() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ssId = ss.getId();
+  
+  // 1. Transactional Sheets (Daily)
+  setupSheet(ss, "DB_Laporan_Harian", [
+    "ID_Laporan", "Tanggal", "Bulan_Laporan", "Outlet", "Supervisor", "Cuaca", 
+    "Omset_Total", "Target_Omset", "Total_Transaksi", "Kendala_Operasional", "Rekomendasi", "URL_PDF"
+  ]);
+  
+  setupSheet(ss, "DB_Briefing_Shift", [
+    "ID_Laporan", "Target_Harian", "Fokus_Briefing", "Kendala_Sebelumnya", "Solusi_Eksekusi"
+  ]);
+  
+  setupSheet(ss, "DB_Kehadiran_Staf", [
+    "ID_Laporan", "Nama_Staf", "Posisi", "Outlet_Tugas", "Outlet_Asal", 
+    "Status_Kehadiran", "SOP_Keramahan_Miss", "Catatan_Kinerja"
+  ]);
+  
+  setupSheet(ss, "DB_Audit_Kas", [
+    "ID_Laporan", "Waktu_Audit", "Kasir_Bertugas", "Modal_Awal", 
+    "Total_QRIS", "Total_Tunai", "Aktual_Sistem", "Selisih", "Keterangan"
+  ]);
+  
+  setupSheet(ss, "DB_Kinerja_Produk", [
+    "ID_Laporan", "Kategori", "Peringkat", "Nama_Produk", "Qty_Terjual", "Keterangan_Promo"
+  ]);
+  
+  setupSheet(ss, "DB_Inspeksi_Operasional", [
+    "ID_Laporan", "Tipe_Inspeksi", "Objek_Dicek", "Skor_Kondisi", "Estimasi_Biaya", "Tindakan_Catatan"
+  ]);
+  
+  // 2. Evaluasi & Agregasi Sheets (Weekly & Monthly)
+  setupSheet(ss, "DB_Laporan_Mingguan", [
+    "ID_Laporan_Mingguan", "Periode_Tanggal", "Outlet", "Supervisor", 
+    "Omset_Aktual", "Omset_Target", "Komplain_Utama", "URL_PDF"
+  ]);
+  
+  setupSheet(ss, "DB_Laporan_Bulanan", [
+    "ID_Laporan_Bulanan", "Bulan_Laporan", "Outlet", "Supervisor", 
+    "Omset_Aktual", "Omset_Target", "Persen_Tercapai", "Rating_Kerja", 
+    "Kepatuhan_SOP", "Total_Telat", "Pencapaian", "Tantangan", "Total_Pengeluaran_Ekstra", "URL_PDF"
+  ]);
+  
+  setupSheet(ss, "DB_Evaluasi_Staf", [
+    "ID_Laporan_Evaluasi", "Nama_Staf", "Posisi", "Outlet", "Status_Evaluasi", "Catatan_Kinerja"
+  ]);
+  
+  // 3. Master Data
+  var masterStaff = setupSheet(ss, "Master_Staff", [
+    "ID_Staff", "Nama", "Posisi", "Status_Aktif", "Outlet_Utama"
+  ]);
+  if (masterStaff.getLastRow() <= 1) {
+    masterStaff.appendRow(["STF-001", "Nathan", "Supervisor", "Aktif", "Perintis"]);
+    masterStaff.appendRow(["STF-002", "Sela", "Supervisor", "Aktif", "Dg Tata"]);
+    masterStaff.appendRow(["STF-003", "Eko", "Barista", "Aktif", "Perintis"]);
+    masterStaff.appendRow(["STF-004", "Amel", "Kasir", "Aktif", "Perintis"]);
+    masterStaff.appendRow(["STF-005", "Budi", "Barista", "Aktif", "Dg Tata"]);
+    masterStaff.appendRow(["STF-006", "Siti", "Kasir", "Aktif", "Dg Tata"]);
+    masterStaff.appendRow(["STF-007", "Anton", "Server", "Aktif", "Dg Tata"]);
+  }
+  
+  var masterProduk = setupSheet(ss, "Master_Produk", [
+    "ID_Menu", "Kategori", "Nama_Menu", "Harga_Jual", "Status"
+  ]);
+  if (masterProduk.getLastRow() <= 1) {
+    masterProduk.appendRow(["MNU-001", "Minuman", "Kopi Susu Zero", 18000, "Aktif"]);
+    masterProduk.appendRow(["MNU-002", "Minuman", "Americano", 15000, "Aktif"]);
+    masterProduk.appendRow(["MNU-003", "Makanan", "Nasi Goreng Spesial", 25000, "Aktif"]);
+    masterProduk.appendRow(["MNU-004", "Snack", "Kentang Goreng", 15000, "Aktif"]);
+  }
+  
+  // 4. Drive Folder Init
   var scriptProperties = PropertiesService.getScriptProperties();
   scriptProperties.setProperty("SPREADSHEET_ID", ssId);
-  
-  // Set up root folder in Drive
   var rootFolderId = "1S6qbhiWtyPri63fK4caO2gXz1ZJ0yNqa";
   var rootFolder;
   try {
     rootFolder = DriveApp.getFolderById(rootFolderId);
   } catch(e) {
-    // Fallback if the user's specific folder is somehow completely inaccessible
     var folderName = "Zero Cafe Workspace Drive";
     var folders = DriveApp.getFoldersByName(folderName);
     if (folders.hasNext()) {
@@ -150,13 +140,17 @@ function initializeSystem() {
     }
   }
   scriptProperties.setProperty("ROOT_FOLDER_ID", rootFolder.getId());
+
+  // 5. Delete Temporary Sheets created by hardResetDatabase
+  var allSheets = ss.getSheets();
+  for (var i = 0; i < allSheets.length; i++) {
+    var sName = allSheets[i].getName();
+    if (sName.indexOf("TEMP_WIPE_") === 0) {
+      ss.deleteSheet(allSheets[i]);
+    }
+  }
   
-  return {
-    status: "success",
-    spreadsheetId: ssId,
-    rootFolderId: rootFolder.getId(),
-    message: "Inisialisasi sistem berhasil! Struktur spreadsheet dan folder Drive telah disiapkan."
-  };
+  SpreadsheetApp.getUi().alert("Re-build Berhasil", "Sistem berhasil membangun 9 Sheet baru sesuai arsitektur PRD.", SpreadsheetApp.getUi().ButtonSet.OK);
 }
 
 /**
@@ -831,198 +825,187 @@ function submitFullReport(payloadStr) {
     
     // 4. Append row to corresponding Sheet tab
     if (data.type === "daily") {
-      var sheet;
-      if (isFase2 && data.sheetName) {
-        // FASE 2: Gunakan sheet spesifik tempat laporan Fase 1 berada
-        sheet = ss.getSheetByName(data.sheetName);
-        if (!sheet) throw new Error("Tab data historis (" + data.sheetName + ") tidak ditemukan.");
-      } else {
-        // FASE 1: Gunakan routing standar (buat tab baru jika perlu)
-        sheet = getSheetForOutlet(ss, "Daily", data.outlet);
-      }
+      var idLaporan = data.tanggal + "-" + (data.outlet || "Perintis").replace(/\s+/g, "_");
+      var bulanLaporan = String(data.tanggal).substring(3, 10); // from DD-MM-YYYY
+      var sheetUtama = ss.getSheetByName("DB_Laporan_Harian");
       
       if (isFase2) {
         // FASE 2: Update baris yang sudah ada
-        if (data.rowIdx) {
-          var totalOmset = Number(data.penjualan.shift1 || 0) + Number(data.penjualan.shift2 || 0);
-          sheet.getRange(data.rowIdx, 5).setValue(totalOmset); // Col 5: Total Omset
-          sheet.getRange(data.rowIdx, 8).setValue(fileUrl);    // Col 8: URL PDF
-          sheet.getRange(data.rowIdx, 10).setValue(Number(data.penjualan.transaksi || 0)); // Col 10: Transaksi
-          sheet.getRange(data.rowIdx, 11).setValue("Lengkap"); // Col 11: Status Fase
+        if (sheetUtama) {
+          var allData = sheetUtama.getDataRange().getValues();
+          for (var r = 1; r < allData.length; r++) {
+            if (allData[r][0] === idLaporan) {
+              var totalOmset = Number(data.penjualan.shift1 || 0) + Number(data.penjualan.shift2 || 0);
+              sheetUtama.getRange(r + 1, 7).setValue(totalOmset); // Col G
+              sheetUtama.getRange(r + 1, 9).setValue(Number(data.penjualan.transaksi || 0)); // Col I
+              sheetUtama.getRange(r + 1, 12).setValue(fileUrl);    // Col L
+              break;
+            }
+          }
         }
-        
-        // Return success langsung, tidak perlu catat log audit/QC lagi karena sudah dicatat di Fase 1
         return { success: true, url: fileUrl };
       }
       
-      // [A1] Anti-Duplikat: cek kombinasi Tanggal + Outlet sebelum appendRow
-      var existingData = sheet.getDataRange().getValues();
+      // [A1] Anti-Duplikat: cek kombinasi ID Laporan
+      var existingData = sheetUtama.getDataRange().getValues();
       for (var di = 1; di < existingData.length; di++) {
-        var existTgl = existingData[di][0].toString();
-        var existOutlet = existingData[di][2].toString();
-        if (existTgl === data.tanggal && existOutlet === (data.outlet || "Perintis")) {
+        if (existingData[di][0].toString() === idLaporan) {
           return {
             success: false,
             isDuplicate: true,
-            message: "Laporan harian untuk " + data.tanggal + " di outlet " + data.outlet + " sudah pernah dikirim. Pengiriman ganda dicegah!"
+            message: "Laporan harian " + idLaporan + " sudah pernah dikirim. Pengiriman ganda dicegah!"
           };
         }
       }
       
-      var statusFase = isFase1 ? "Fase 1" : "Lengkap";
-      sheet.appendRow([
-        data.tanggal,
-        data.supervisor,
-        data.outlet,
-        data.shift,
+      // Insert DB_Laporan_Harian
+      sheetUtama.appendRow([
+        idLaporan, data.tanggal, bulanLaporan, data.outlet, data.supervisor, data.cuaca || "",
         Number(data.penjualan.shift1 || 0) + Number(data.penjualan.shift2 || 0),
-        Number(data.feedback.totalKomplain || 0),
-        data.penutup.kendala || "",
-        fileUrl,
         Number(data.penjualan.target || 0),
         Number(data.penjualan.transaksi || 0),
-        statusFase,
-        data.cuaca || ""
+        data.penutup.kendala || "",
+        data.penutup.saran || "",
+        fileUrl
       ]);
       
-      if (data.kas && data.kas.audit && data.kas.audit.length > 0) {
-        var auditSheet = setupSheet(ss, "Log_Audit_Kas", ["Tanggal", "Outlet", "Shift/Jam", "Total QRIS", "Total Tunai", "Aktual Sistem", "Selisih", "Keterangan"]);
-        data.kas.audit.forEach(function(a) {
-          auditSheet.appendRow([data.tanggal, data.outlet, a.jam, Number(a.qris||0), Number(a.tunai||0), Number(a.aktual||0), Number(a.selisih||0), a.keterangan||""]);
-        });
-      }
-      
-      var qcSheet = setupSheet(ss, "Log_QC", ["Tanggal", "Outlet", "Kategori", "Item/Menu", "Status", "Keterangan"]);
-      if (data.qc && data.qc.espresso) {
-        qcSheet.appendRow([data.tanggal, data.outlet, "Espresso", "Kalibrasi Espresso", data.qc.espresso.status || "", data.qc.espresso.keterangan || ""]);
-      }
-      if (data.qc && data.qc.items && data.qc.items.length > 0) {
-        data.qc.items.forEach(function(q) {
-          qcSheet.appendRow([data.tanggal, data.outlet, "Menu", q.nama, q.status, q.keterangan || ""]);
-        });
-      }
-      
-      var fbSheet = setupSheet(ss, "Log_Fasilitas_Bahan", ["Tanggal", "Outlet", "Tipe", "Nama Item", "Status/Ketersediaan", "Biaya Estimasi", "URL Foto", "Eskalasi"]);
-      if (data.fasilitas && data.fasilitas.length > 0) {
-        data.fasilitas.forEach(function(f) {
-          fbSheet.appendRow([data.tanggal, data.outlet, "Fasilitas", f.item, f.status, 0, f.photoUrl || "", f.eskalasi ? "YA" : "TIDAK"]);
-        });
-      }
-      if (data.bahan && data.bahan.length > 0) {
-        data.bahan.forEach(function(b) {
-          fbSheet.appendRow([data.tanggal, data.outlet, "Bahan", b.nama, b.ketersediaan, Number(b.harga||0), b.photoUrl || "", "TIDAK"]);
-        });
-      }
-      
-      if (data.kebersihan && data.kebersihan.length > 0) {
-        var kbSheet = setupSheet(ss, "Database_Kebersihan", [
-          "Tanggal", "Outlet", "Area", "Item Pemeriksaan", "Skor", "Status", "Keterangan"
+      // Insert DB_Briefing_Shift
+      if (data.evaluasiShift) {
+        var bsSheet = ss.getSheetByName("DB_Briefing_Shift");
+        if (bsSheet) bsSheet.appendRow([
+          idLaporan, data.evaluasiShift.target || "", data.evaluasiShift.fokus || "", 
+          data.evaluasiShift.masalah || "", data.evaluasiShift.solusi || ""
         ]);
-        data.kebersihan.forEach(function(k) {
-          kbSheet.appendRow([data.tanggal, data.outlet, k.area, k.point, Number(k.skor || 0), k.status || "", k.ket || ""]);
-        });
       }
       
+      // Insert DB_Kehadiran_Staf
       if (data.staff && data.staff.length > 0) {
-        var stSheet = getSheetForOutlet(ss, "Staff_Daily", data.outlet);
-        if (stSheet.getLastRow() === 0) stSheet.appendRow(["Tanggal", "Bulan Laporan", "Outlet Tugas", "Outlet Asal", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"]);
-        var bulanLaporan = "";
-        if (data.tanggal) {
-          // data.tanggal is DD-MM-YYYY, we want MM-YYYY
-          bulanLaporan = String(data.tanggal).substring(3, 10);
-        }
+        var ksSheet = ss.getSheetByName("DB_Kehadiran_Staf");
         data.staff.forEach(function(s) {
-          var outletAsal = s.outletAsal || data.outlet; // Fallback jika undefined (staff lama)
-          stSheet.appendRow([
-            data.tanggal, bulanLaporan, data.outlet, outletAsal, data.supervisor, s.nama, s.posisi, s.status, s.keramahan ? "YA" : "TIDAK", s.keterangan || ""
+          var outletAsal = s.outletAsal || data.outlet;
+          if (ksSheet) ksSheet.appendRow([
+            idLaporan, s.nama, s.posisi, data.outlet, outletAsal, 
+            s.status, s.keramahan ? "YA" : "TIDAK", s.keterangan || ""
           ]);
         });
       }
-    } else if (data.type === "weekly") {
-      var sheet = getSheetForOutlet(ss, "Weekly", data.outlet);
       
-      var totalRealSales = 0;
-      var totalTargetSales = 0;
+      // Insert DB_Audit_Kas
+      if (data.kas && data.kas.audit && data.kas.audit.length > 0) {
+        var akSheet = ss.getSheetByName("DB_Audit_Kas");
+        data.kas.audit.forEach(function(a) {
+          if (akSheet) akSheet.appendRow([
+            idLaporan, a.jam, a.kasir || "", Number(a.modal||0), Number(a.qris||0), 
+            Number(a.tunai||0), Number(a.aktual||0), Number(a.selisih||0), a.keterangan||""
+          ]);
+        });
+      }
+      
+      // Insert DB_Kinerja_Produk
+      var kpSheet = ss.getSheetByName("DB_Kinerja_Produk");
+      if (kpSheet && data.produk) {
+        var categories = [
+          { keyTop: "topMinuman", keyBottom: "bottomMinuman", label: "Minuman" },
+          { keyTop: "topMakanan", keyBottom: "bottomMakanan", label: "Makanan" },
+          { keyTop: "topSnack", keyBottom: "bottomSnack", label: "Snack" }
+        ];
+        categories.forEach(function(cat) {
+          if (data.produk[cat.keyTop] && Array.isArray(data.produk[cat.keyTop])) {
+            data.produk[cat.keyTop].forEach(function(item) {
+              if (item && item.nama && item.nama.trim() !== "") {
+                kpSheet.appendRow([idLaporan, cat.label, "Top", item.nama, item.terjual || 0, ""]);
+              }
+            });
+          }
+          if (data.produk[cat.keyBottom] && Array.isArray(data.produk[cat.keyBottom])) {
+            data.produk[cat.keyBottom].forEach(function(item) {
+              if (item && item.nama && item.nama.trim() !== "") {
+                kpSheet.appendRow([idLaporan, cat.label, "Bottom", item.nama, item.terjual || 0, item.rencana || item.tindakan || ""]);
+              }
+            });
+          }
+        });
+      }
+      
+      // Insert DB_Inspeksi_Operasional
+      var ioSheet = ss.getSheetByName("DB_Inspeksi_Operasional");
+      if (ioSheet) {
+        if (data.kebersihan && data.kebersihan.length > 0) {
+          data.kebersihan.forEach(function(k) {
+            ioSheet.appendRow([idLaporan, "Kebersihan", k.area, Number(k.skor || 0), 0, k.ket || k.status || ""]);
+          });
+        }
+        if (data.fasilitas && data.fasilitas.length > 0) {
+          data.fasilitas.forEach(function(f) {
+            ioSheet.appendRow([idLaporan, "Fasilitas", f.item, f.status, 0, f.eskalasi ? "Eskalasi GM" : "TIDAK"]);
+          });
+        }
+        if (data.bahan && data.bahan.length > 0) {
+          data.bahan.forEach(function(b) {
+            ioSheet.appendRow([idLaporan, "Bahan", b.nama, b.ketersediaan, Number(b.harga||0), ""]);
+          });
+        }
+        if (data.qc && data.qc.espresso) {
+          ioSheet.appendRow([idLaporan, "QC Espresso", "Kalibrasi", data.qc.espresso.status || "", 0, data.qc.espresso.keterangan || ""]);
+        }
+        if (data.qc && data.qc.items && data.qc.items.length > 0) {
+          data.qc.items.forEach(function(q) {
+            ioSheet.appendRow([idLaporan, "QC Menu", q.nama, q.status, 0, q.keterangan || ""]);
+          });
+        }
+      }
+      
+    } else if (data.type === "weekly") {
+      var idLaporanWeekly = data.periodeStart + "_to_" + data.periodeEnd + "-" + (data.outlet || "Perintis").replace(/\s+/g, "_");
+      var wSheet = ss.getSheetByName("DB_Laporan_Mingguan");
+      var totalRealSales = 0, totalTargetSales = 0;
       if (data.weekly && data.weekly.salesHarian) {
         data.weekly.salesHarian.forEach(function(s) {
           totalRealSales += Number(s.real || 0);
           totalTargetSales += Number(s.target || 0);
         });
       }
-      
       var computedPeriode = data.periode || (data.periodeStart + " s/d " + data.periodeEnd);
       
-      sheet.appendRow([
-        computedPeriode,
-        data.supervisor,
-        data.outlet,
-        totalRealSales,
-        totalTargetSales,
-        Number(data.weekly.komplain.total || 0),
-        data.weekly.kendalaUtama || "",
-        fileUrl
+      if (wSheet) wSheet.appendRow([
+        idLaporanWeekly, computedPeriode, data.outlet, data.supervisor,
+        totalRealSales, totalTargetSales, data.weekly.kendalaUtama || "", fileUrl
       ]);
       
       if (data.weekly.staff && data.weekly.staff.length > 0) {
-        var swSheet = setupSheet(ss, "Staff_Weekly", [
-          "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
-        ]);
-        var bulanLaporan = "";
-        if (data.periodeStart) {
-          bulanLaporan = String(data.periodeStart).substring(0, 7);
-        }
+        var swSheet = ss.getSheetByName("DB_Evaluasi_Staf");
         data.weekly.staff.forEach(function(s) {
-          swSheet.appendRow([
-            computedPeriode, bulanLaporan, data.outlet, data.supervisor, s.nama || "", s.posisi || "", s.status || "", s.alasan || ""
+          if (swSheet) swSheet.appendRow([
+            idLaporanWeekly, s.nama || "", s.posisi || "", data.outlet, s.status || "", s.alasan || ""
           ]);
         });
       }
     } else if (data.type === "monthly") {
-      var sheet = getSheetForOutlet(ss, "Monthly", data.outlet);
+      var idLaporanMonthly = (data.bulan || "XX-XXXX") + "-" + (data.outlet || "Perintis").replace(/\s+/g, "_");
+      var mSheet = ss.getSheetByName("DB_Laporan_Bulanan");
       var bulanFormatted = data.bulan;
       if (bulanFormatted && bulanFormatted.indexOf("-") !== -1) {
         var p = bulanFormatted.split("-");
-        bulanFormatted = p[1] + "-" + p[0]; // MM-YYYY
+        bulanFormatted = p[1] + "-" + p[0]; // MM-YYYY from YYYY-MM
       }
-      sheet.appendRow([
-        bulanFormatted,
-        data.supervisor,
-        data.outlet,
-        Number(data.monthly.sales.total || 0),
-        Number(data.monthly.sales.target || 0),
-        Number(data.monthly.sales.persen || 0),
-        Number(data.monthly.evaluasi.ratingKerja || 0),
-        fileUrl,
-        Number(data.monthly.operasional.kepatuhanSop || 0),
-        Number(data.monthly.operasional.telat || 0),
-        Number(data.monthly.operasional.teguran || 0),
-        data.monthly.operasional.penyebab || "",
-        data.monthly.fasilitas.eskalasi || "",
-        data.monthly.rencana.strategi || "",
-        data.monthly.rencana.gm || "",
-        data.monthly.evaluasi.berhasil || "",
-        data.monthly.evaluasi.sulit || "",
-        data.monthly.evaluasi.skill || "",
-        data.monthly.operasional.resignList ? data.monthly.operasional.resignList.length : 0, // Jumlah Resign
-        data.monthly.ringkasan.masalah || "",
-        data.monthly.ringkasan.kesimpulan || "",
-        Number(data.monthly.qc.komplain || 0),
-        Number(data.monthly.qc.remake || 0),
-        data.monthly.qc.espresso || "",
-        data.monthly.qc.rekomendasi || "",
-        Number(data.monthly.fasilitas.pengeluaran || 0)
+      
+      if (mSheet) mSheet.appendRow([
+        idLaporanMonthly, bulanFormatted, data.outlet, data.supervisor,
+        Number(data.monthly.sales.total || 0), Number(data.monthly.sales.target || 0), Number(data.monthly.sales.persen || 0),
+        data.monthly.evaluasi.ratingKerja || "", Number(data.monthly.operasional.kepatuhanSop || 0), Number(data.monthly.operasional.telat || 0),
+        data.monthly.evaluasi.berhasil || "", data.monthly.evaluasi.sulit || "", Number(data.monthly.fasilitas.pengeluaran || 0), fileUrl
       ]);
       
       // Auto-Sync Turnover Barista to MasterStaff
       if (data.monthly.operasional.resignList && data.monthly.operasional.resignList.length > 0) {
-        var masterSheet = ss.getSheetByName("MasterStaff");
+        var masterSheet = ss.getSheetByName("Master_Staff");
         if (masterSheet) {
           var mData = masterSheet.getDataRange().getValues();
           data.monthly.operasional.resignList.forEach(function(resignItem) {
             if (!resignItem.id) return;
             for (var i = 1; i < mData.length; i++) {
               if (mData[i][0].toString() === resignItem.id.toString()) {
-                masterSheet.getRange(i + 1, 4).setValue("Resign"); // Kolom D (Status)
+                masterSheet.getRange(i + 1, 4).setValue("Resign");
                 break;
               }
             }
@@ -1031,66 +1014,19 @@ function submitFullReport(payloadStr) {
       }
       
       if (data.monthly.staff && Array.isArray(data.monthly.staff)) {
-        var smSheet = setupSheet(ss, "Staff_Monthly", [
-          "Bulan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
-        ]);
+        var smSheet = ss.getSheetByName("DB_Evaluasi_Staf");
         data.monthly.staff.forEach(function(s) {
-          smSheet.appendRow([
-            bulanFormatted, data.outlet, data.supervisor, s.nama || "", s.posisi || "", s.status || "", s.alasan || ""
+          if (smSheet) smSheet.appendRow([
+            idLaporanMonthly, s.nama || "", s.posisi || "", data.outlet, s.status || "", s.alasan || ""
           ]);
         });
       }
     }
-    
-    // 5. Database Produk Terpusat
-    var produkSheet = setupSheet(ss, "Database_Produk", [
-      "Periode", "Tipe Laporan", "Outlet", "Kategori", "Peringkat", "Nama Produk", "Terjual", "Rencana/Action"
-    ]);
-    
-    var periodeValue = data.tanggal || data.periode || data.bulan || "";
-    if (data.type === "weekly" && !data.periode) {
-      periodeValue = (data.periodeStart || "") + " s/d " + (data.periodeEnd || "");
-    }
-    var produkObj = data.produk || (data.weekly && data.weekly.produk) || (data.monthly && data.monthly.produk);
-    
-    if (produkObj) {
-      var categories = [
-        { keyTop: "topMinuman", keyBottom: "bottomMinuman", label: "Minuman" },
-        { keyTop: "topMakanan", keyBottom: "bottomMakanan", label: "Makanan" },
-        { keyTop: "topSnack", keyBottom: "bottomSnack", label: "Snack" }
-      ];
-      
-      categories.forEach(function(cat) {
-        if (produkObj[cat.keyTop] && Array.isArray(produkObj[cat.keyTop])) {
-          produkObj[cat.keyTop].forEach(function(item) {
-            if (item && item.nama && item.nama.trim() !== "") {
-              produkSheet.appendRow([periodeValue, data.type, data.outlet || "Perintis", cat.label, "Top", item.nama, item.terjual || 0, ""]);
-            }
-          });
-        }
-        if (produkObj[cat.keyBottom] && Array.isArray(produkObj[cat.keyBottom])) {
-          produkObj[cat.keyBottom].forEach(function(item) {
-            if (item && item.nama && item.nama.trim() !== "") {
-              produkSheet.appendRow([periodeValue, data.type, data.outlet || "Perintis", cat.label, "Bottom", item.nama, item.terjual || 0, item.rencana || item.tindakan || ""]);
-            }
-          });
-        }
-      });
-    }
 
-    // We can just construct a more accurate path string or just use the folder's name.
     var folderPath = "";
-    try {
-      folderPath = folder.getName();
-    } catch(e) {
-      folderPath = year + " / " + monthName;
-    }
-
-    return { 
-      success: true, 
-      url: fileUrl,
-      folderPath: folderPath
-    };
+    try { folderPath = folder.getName(); } catch(e) { folderPath = year + " / " + monthName; }
+    
+    return { success: true, url: fileUrl, folderPath: folderPath };
   } catch (err) {
     Logger.log("Error in submitFullReport: " + err.toString());
     return { success: false, error: err.toString() };
@@ -2083,15 +2019,21 @@ function generateHtmlReport(data) {
   <html>
   <head>
     <style>
-      body { font-family: Arial, sans-serif; font-size: 11pt; color: #333; margin: 20px; }
-      h1 { text-align: center; color: #1f2937; border-bottom: 2px solid #374151; padding-bottom: 10px; margin-bottom: 20px; }
-      h2 { color: #111827; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; margin-top: 25px; margin-bottom: 10px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
-      th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
-      th { backgroundColor: #f3f4f6; color: #111827; fontWeight: bold; }
-      .meta-table td { border: none; padding: 4px; }
+      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11pt; color: #171717; margin: 25px; line-height: 1.5; }
+      h1 { text-align: center; color: #171717; border-bottom: 3px solid #171717; padding-bottom: 12px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; font-size: 18pt; }
+      h2 { color: #171717; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-top: 30px; margin-bottom: 15px; font-size: 14pt; page-break-after: avoid; }
+      h3 { color: #374151; margin-top: 20px; margin-bottom: 10px; font-size: 12pt; page-break-after: avoid; }
+      p { margin-bottom: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; page-break-inside: avoid; }
+      th, td { border: 1px solid #d1d5db; padding: 10px; text-align: left; vertical-align: top; }
+      th { background-color: #f9fafb; color: #171717; font-weight: bold; text-transform: uppercase; font-size: 9pt; letter-spacing: 0.5px; }
+      td { font-size: 10pt; }
+      .meta-table { border: 2px solid #171717; background-color: #fafafa; border-radius: 8px; margin-bottom: 25px; page-break-inside: avoid; }
+      .meta-table td { border: none; padding: 8px 12px; font-size: 11pt; }
       .text-right { text-align: right; }
-      .highlight { font-weight: bold; color: #1e3a8a; }
+      .highlight { font-weight: bold; color: #10b981; }
+      .section-box { page-break-inside: avoid; margin-bottom: 20px; }
+      .badge-pinjaman { font-size: 8pt; background-color: #fef08a; color: #854d0e; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
     </style>
   </head>
   <body>
@@ -2150,8 +2092,9 @@ function generateHtmlReport(data) {
       <tr><th>Nama Staff</th><th>Posisi</th><th>Status Kehadiran</th><th>Keramahan Terlewat</th><th>Keterangan</th></tr>`;
     if (data.staff && data.staff.length > 0) {
       data.staff.forEach(function(row) {
+        var badge = (row.outletAsal && row.outletAsal.toLowerCase() !== data.outlet.toLowerCase()) ? ' <span class="badge-pinjaman">(Pinjaman)</span>' : '';
         html += `<tr>
-          <td>${row.nama || '-'}</td>
+          <td>${row.nama || '-'}${badge}</td>
           <td>${row.posisi || '-'}</td>
           <td>${row.status || '-'}</td>
           <td>${row.keramahan ? 'Ya' : 'Tidak'}</td>
@@ -2378,10 +2321,23 @@ function generateHtmlReport(data) {
     html += `</table>`;
     
     html += `<h2>D. Staff & QC (Operasional)</h2>`;
+    html += `<div class="section-box">`;
     html += `<p>Kepatuhan SOP: <strong>${data.monthly.operasional.kepatuhanSop || 0}%</strong></p>`;
     html += `<p>Staff Terlambat: <strong>${data.monthly.operasional.telat || 0} kali</strong></p>`;
     html += `<p>Surat Teguran: <strong>${data.monthly.operasional.teguran || 0} kali</strong></p>`;
     html += `<p><strong>Penyebab Utama Masalah Staff:</strong> ${data.monthly.operasional.penyebab || '-'}</p>`;
+    
+    if (data.monthly.operasional.resignList && data.monthly.operasional.resignList.length > 0) {
+      html += `<h3>Karyawan Resign / Turnover</h3>`;
+      html += `<table>
+        <tr><th>Nama</th><th>Alasan</th></tr>`;
+      data.monthly.operasional.resignList.forEach(function(s) {
+        html += `<tr><td>${s.nama || '-'}</td><td>${s.alasan || '-'}</td></tr>`;
+      });
+      html += `</table>`;
+    }
+    
+    html += `</div>`;
     
     html += `<h3>Evaluasi Performa Staf</h3>`;
     html += `<table>
@@ -3166,7 +3122,8 @@ function trigger_NightlyCache(targetDateStr) {
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Zero Cafe Admin')
-    .addItem('Initialize System', 'initializeSystem')
+    .addItem('Hard Reset Database', 'hardResetDatabase')
+    .addItem('Build New Architecture', 'buildNewArchitecture')
     .addItem('Run All Mocks', 'runAllMocks')
     .addToUi();
 }

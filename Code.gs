@@ -652,7 +652,15 @@ function submitFullReport(payloadStr) {
     
     // 4. Append row to corresponding Sheet tab
     if (data.type === "daily") {
-      var sheet = getSheetForOutlet(ss, "Daily", data.outlet);
+      var sheet;
+      if (isFase2 && data.sheetName) {
+        // FASE 2: Gunakan sheet spesifik tempat laporan Fase 1 berada
+        sheet = ss.getSheetByName(data.sheetName);
+        if (!sheet) throw new Error("Tab data historis (" + data.sheetName + ") tidak ditemukan.");
+      } else {
+        // FASE 1: Gunakan routing standar (buat tab baru jika perlu)
+        sheet = getSheetForOutlet(ss, "Daily", data.outlet);
+      }
       
       if (isFase2) {
         // FASE 2: Update baris yang sudah ada
@@ -1305,7 +1313,8 @@ function api_checkPendingLaporan() {
             tanggal: formattedDate,
             supervisor: data[i][1].toString(),
             shift1: data[i][4] ? Number(data[i][4]) : 0,
-            rowIdx: i + 1 // Row index is relative to this specific sheet
+            rowIdx: i + 1, // Row index is relative to this specific sheet
+            sheetName: sheet.getName() // Critical for Fase 2 target identification
           });
         }
       }
@@ -1484,6 +1493,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           }
         }
       }
+    }
 
     var operasionalData = null;
     var mData = getAggregatedData(ss, "Monthly");

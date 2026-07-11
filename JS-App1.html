@@ -627,6 +627,7 @@ function _startNormalForm(type) {
         window.form.supervisor = pending.supervisor;
         window.form.penjualan.shift1 = pending.shift1;
         window.form.rowIdx = pending.rowIdx;
+        window.form.sheetName = pending.sheetName;
       }
     }
     transitionToMenu(`form_${type}`, () => {
@@ -647,6 +648,7 @@ function _startNormalForm(type) {
       window.form.supervisor = pending.supervisor;
       window.form.penjualan.shift1 = pending.shift1;
       window.form.rowIdx = pending.rowIdx;
+      window.form.sheetName = pending.sheetName;
     }
     window.fetchDailyTarget();
   } else if (type === 'weekly') {
@@ -716,6 +718,7 @@ window.changeOutlet = function(newOutlet) {
       window.form.supervisor = pending.supervisor;
       window.form.penjualan.shift1 = pending.shift1;
       window.form.rowIdx = pending.rowIdx;
+      window.form.sheetName = pending.sheetName;
     } else {
       window.form.fase = 1;
       window.form.tanggal = new Date().toISOString().split('T')[0];

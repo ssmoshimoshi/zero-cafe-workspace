@@ -472,6 +472,7 @@ function getDailyTabContent() {
                   <div>
                     <span class="text-sm font-bold text-zero-black">${s.nama}</span>
                     <span class="text-[10px] text-gray-500 ml-1">(${s.posisi})</span>
+                    ${s.outletAsal && s.outletAsal !== window.form.outlet ? `<span class="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[8px] font-bold border border-yellow-200">PINJAMAN DARI ${s.outletAsal.toUpperCase()}</span>` : ''}
                   </div>
                   <button type="button" onclick="removeStaffRow(${idx})" class="text-[10px] font-bold text-red-400 hover:text-red-600">HAPUS</button>
                 </div>

@@ -723,7 +723,7 @@ function submitFullReport(payloadStr) {
       }
       
       if (data.kebersihan && data.kebersihan.length > 0) {
-        var kbSheet = setupSheet(ss, "Database_Kebersihan", [
+        var kbSheet = setupSheet(ss, "Kebersihan_" + data.outlet, [
           "Tanggal", "Outlet", "Area", "Item Pemeriksaan", "Skor", "Status", "Keterangan"
         ]);
         data.kebersihan.forEach(function(k) {
@@ -733,15 +733,16 @@ function submitFullReport(payloadStr) {
       
       if (data.staff && data.staff.length > 0) {
         var stSheet = getSheetForOutlet(ss, "Staff_Daily", data.outlet);
-        if (stSheet.getLastRow() === 0) stSheet.appendRow(["Tanggal", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"]);
+        if (stSheet.getLastRow() === 0) stSheet.appendRow(["Tanggal", "Bulan Laporan", "Outlet Tugas", "Outlet Asal", "Supervisor", "Nama Staff", "Posisi", "Status Kehadiran", "Keramahan Terlewat", "Catatan Khusus"]);
         var bulanLaporan = "";
         if (data.tanggal) {
           // data.tanggal is DD-MM-YYYY, we want MM-YYYY
           bulanLaporan = String(data.tanggal).substring(3, 10);
         }
         data.staff.forEach(function(s) {
+          var outletAsal = s.outletAsal || data.outlet; // Fallback jika undefined (staff lama)
           stSheet.appendRow([
-            data.tanggal, bulanLaporan, data.outlet, data.supervisor, s.nama, s.posisi, s.status, s.keramahan ? "YA" : "TIDAK", s.keterangan || ""
+            data.tanggal, bulanLaporan, data.outlet, outletAsal, data.supervisor, s.nama, s.posisi, s.status, s.keramahan ? "YA" : "TIDAK", s.keterangan || ""
           ]);
         });
       }
@@ -771,8 +772,7 @@ function submitFullReport(payloadStr) {
       ]);
       
       if (data.weekly.staff && data.weekly.staff.length > 0) {
-        var swSheetName = "Staff_Weekly_" + (data.outlet || "Perintis").replace(/\s+/g, "_");
-        var swSheet = setupSheet(ss, swSheetName, [
+        var swSheet = setupSheet(ss, "Staff_Weekly_" + (data.outlet || "Perintis"), [
           "Periode", "Bulan Laporan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
         ]);
         var bulanLaporan = "";
@@ -839,7 +839,7 @@ function submitFullReport(payloadStr) {
       }
       
       if (data.monthly.staff && Array.isArray(data.monthly.staff)) {
-        var smSheet = setupSheet(ss, "Staff_Monthly", [
+        var smSheet = setupSheet(ss, "Staff_Monthly_" + (data.outlet || "Perintis"), [
           "Bulan", "Outlet", "Supervisor", "Nama Staff", "Posisi", "Status Evaluasi", "Catatan/Alasan"
         ]);
         data.monthly.staff.forEach(function(s) {

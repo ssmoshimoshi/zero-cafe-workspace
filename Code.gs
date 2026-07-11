@@ -277,21 +277,50 @@ function parseDateToObj(d) {
   var parsed = new Date(str);
   return isNaN(parsed.getTime()) ? null : parsed;
 }function getStaffFromRow(row, headers, rowIndex) {
-  var idIdx = headers.indexOf("ID");
-  var namaIdx = headers.indexOf("Nama");
-  if (namaIdx === -1) namaIdx = headers.indexOf("Nama Staff");
-  var posisiIdx = headers.indexOf("Posisi");
-  var statusIdx = headers.indexOf("Status");
-  var outletIdx = headers.indexOf("Outlet");
-  if (outletIdx === -1) outletIdx = headers.indexOf("Outlet Asal");
+  if (!row || !headers) {
+    return { id: "STF-" + rowIndex, nama: "", posisi: "", status: "Aktif", outlet: "" };
+  }
   
-  var name = namaIdx !== -1 ? row[namaIdx] : "";
+  var lowerHeaders = headers.map(function(h) {
+    return h ? h.toString().toLowerCase().trim() : "";
+  });
+  
+  var idIdx = lowerHeaders.indexOf("id");
+  var namaIdx = lowerHeaders.indexOf("nama");
+  if (namaIdx === -1) namaIdx = lowerHeaders.indexOf("nama staff");
+  if (namaIdx === -1) namaIdx = lowerHeaders.indexOf("nama staf");
+  
+  var posisiIdx = lowerHeaders.indexOf("posisi");
+  var statusIdx = lowerHeaders.indexOf("status");
+  var outletIdx = lowerHeaders.indexOf("outlet");
+  if (outletIdx === -1) outletIdx = lowerHeaders.indexOf("outlet asal");
+  
+  // Fallbacks if not found (using standard indices of Zero Cafe MasterStaff)
+  if (namaIdx === -1 && row.length > 0) {
+    namaIdx = row.length > 1 ? 1 : 0;
+  }
+  if (posisiIdx === -1 && row.length > 1) {
+    posisiIdx = row.length > 2 ? 2 : 1;
+  }
+  if (statusIdx === -1 && row.length > 2) {
+    statusIdx = row.length > 3 ? 3 : -1;
+  }
+  if (outletIdx === -1 && row.length > 3) {
+    outletIdx = row.length > 4 ? 4 : -1;
+  }
+  
+  var name = (namaIdx !== -1 && namaIdx < row.length && row[namaIdx] !== undefined) ? row[namaIdx].toString().trim() : "";
+  var posisi = (posisiIdx !== -1 && posisiIdx < row.length && row[posisiIdx] !== undefined) ? row[posisiIdx].toString().trim() : "";
+  var status = (statusIdx !== -1 && statusIdx < row.length && row[statusIdx] !== undefined && row[statusIdx] !== "") ? row[statusIdx].toString().trim() : "Aktif";
+  var outlet = (outletIdx !== -1 && outletIdx < row.length && row[outletIdx] !== undefined) ? row[outletIdx].toString().trim() : "";
+  var id = (idIdx !== -1 && idIdx < row.length && row[idIdx] !== undefined && row[idIdx] !== "") ? row[idIdx].toString().trim() : (name || "STF-" + rowIndex);
+  
   return {
-    id: (idIdx !== -1 && row[idIdx]) ? row[idIdx].toString() : (name || "STF-" + rowIndex),
+    id: id,
     nama: name,
-    posisi: posisiIdx !== -1 ? row[posisiIdx] : "",
-    status: statusIdx !== -1 ? row[statusIdx] : "Aktif",
-    outlet: (outletIdx !== -1 ? row[outletIdx] : "")
+    posisi: posisi,
+    status: status,
+    outlet: outlet
   };
 }
 

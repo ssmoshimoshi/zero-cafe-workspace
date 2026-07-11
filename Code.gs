@@ -285,15 +285,26 @@ function parseDateToObj(d) {
     return h ? h.toString().toLowerCase().trim() : "";
   });
   
-  var idIdx = lowerHeaders.indexOf("id");
-  var namaIdx = lowerHeaders.indexOf("nama");
-  if (namaIdx === -1) namaIdx = lowerHeaders.indexOf("nama staff");
-  if (namaIdx === -1) namaIdx = lowerHeaders.indexOf("nama staf");
+  var idIdx = -1;
+  var namaIdx = -1;
+  var posisiIdx = -1;
+  var statusIdx = -1;
+  var outletIdx = -1;
   
-  var posisiIdx = lowerHeaders.indexOf("posisi");
-  var statusIdx = lowerHeaders.indexOf("status");
-  var outletIdx = lowerHeaders.indexOf("outlet");
-  if (outletIdx === -1) outletIdx = lowerHeaders.indexOf("outlet asal");
+  for (var k = 0; k < lowerHeaders.length; k++) {
+    var h = lowerHeaders[k];
+    if (h === "id") {
+      idIdx = k;
+    } else if (h.indexOf("nama") !== -1) {
+      namaIdx = k;
+    } else if (h.indexOf("posisi") !== -1 || h.indexOf("jabatan") !== -1) {
+      posisiIdx = k;
+    } else if (h.indexOf("status") !== -1) {
+      statusIdx = k;
+    } else if (h.indexOf("outlet") !== -1) {
+      outletIdx = k;
+    }
+  }
   
   // Fallbacks if not found (using standard indices of Zero Cafe MasterStaff)
   if (namaIdx === -1 && row.length > 0) {

@@ -94,8 +94,7 @@ async function fetchMonthlyData() {
       f.monthly.operasional.telat = res.totalTelat || 0;
       // f.monthly.operasional.teguran = res.totalTeguran || 0; // DISABLED: SP/Teguran is now input manually by SPV
       f.monthly.operasional.kepatuhanSop = res.kepatuhanSop || 0;
-      
-      const filteredStaff = AppState.masterStaff.filter(s => s.outlet === (f.outlet || 'Perintis') && s.status === 'Aktif');
+      const filteredStaff = AppState.masterStaff.filter(s => s.outlet && s.outlet.toLowerCase().trim() === (f.outlet || 'Perintis').toLowerCase().trim() && s.status === 'Aktif');
       f.monthly.staff = filteredStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
       
       if (res.staffEvaluations && res.staffEvaluations.length > 0) {
@@ -562,7 +561,7 @@ function executeResetForm() {
   if (currentType === 'daily') {
     window.form.staff = [];
   } else {
-    const filteredStaff = AppState.masterStaff.filter(s => s.outlet === (window.form.outlet || 'Perintis') && s.status === 'Aktif');
+    const filteredStaff = AppState.masterStaff.filter(s => s.outlet && s.outlet.toLowerCase().trim() === (window.form.outlet || 'Perintis').toLowerCase().trim() && s.status === 'Aktif');
     if (currentType === 'weekly') {
       window.form.weekly.staff = filteredStaff.map(s => ({ nama: s.nama, kpi: "", kendala: "" }));
     } else if (currentType === 'monthly') {
@@ -637,7 +636,7 @@ window.openBorrowStaffModal = function() {
   
   const existingNames = (window.form.staff || []).map(s => s.nama);
   const otherStaff = AppState.masterStaff.filter(s => 
-    s.outlet === otherOutlet && 
+    s.outlet && s.outlet.toLowerCase().trim() === otherOutlet.toLowerCase().trim() && 
     s.status === 'Aktif' && 
     !existingNames.includes(s.nama)
   );

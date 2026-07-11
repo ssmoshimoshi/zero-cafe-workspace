@@ -7,18 +7,6 @@
  * Serves the HTML frontend interface.
  */
 function doGet(e) {
-  if (e && e.parameter && e.parameter.debug === "1") {
-    var ss = getSpreadsheet();
-    var sheets = ss.getSheets();
-    var schema = {};
-    for (var i = 0; i < sheets.length; i++) {
-      var name = sheets[i].getName();
-      var data = sheets[i].getDataRange().getValues();
-      schema[name] = data.slice(0, 5);
-    }
-    return ContentService.createTextOutput(JSON.stringify(schema, null, 2)).setMimeType(ContentService.MimeType.JSON);
-  }
-
   var template = HtmlService.createTemplateFromFile('index');
   template.scriptUrl = ScriptApp.getService().getUrl();
   return template

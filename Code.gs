@@ -2886,9 +2886,10 @@ function api_gm_getMarketingInsights(payloadStr) {
     var hygieneInsight = { modul: "Korelasi Kebersihan & Omset", status: "insufficient", level: "info", title: "", desc: "", action: "" };
 
     if (dData.length > 1 && kbData2 && kbData2.length > 1) {
-      // Hitung omset rata-rata harian dalam periode
       var totalOmset = 0, omsetCount = 0;
       var targetTotal = 0;
+      var dailyOmsetMap = {};
+      
       for (var i = 1; i < dData.length; i++) {
         var rowDateStr = (dData[i][1] || "").toString(); // Col B (Index 1): Tanggal
         var rd = normDate(rowDateStr);
@@ -2896,13 +2897,18 @@ function api_gm_getMarketingInsights(payloadStr) {
         var rowOut = (dData[i][3] || "").toString(); // Col D (Index 3): Outlet
         if (!outletMatch(rowOut)) continue;
         
-        totalOmset += Number(dData[i][6] || 0); // Col G (Index 6): Omset
+        var omset = Number(dData[i][6] || 0); // Col G (Index 6): Omset
+        totalOmset += omset;
         targetTotal += rowOut.toLowerCase() === "perintis" ? 6000000 : 5300000;
         omsetCount++;
+        
+        dailyOmsetMap[rd] = (dailyOmsetMap[rd] || 0) + omset;
       }
 
       // Hitung skor kebersihan rata-rata
       var kbTotal = 0, kbCount = 0;
+      var dailyHygieneMap = {};
+      
       for (var i = 1; i < kbData2.length; i++) {
         var idLaporan = String(kbData2[i][0] || "");
         if (!idLaporan) continue;
@@ -2918,8 +2924,13 @@ function api_gm_getMarketingInsights(payloadStr) {
         
         var kategori = String(kbData2[i][1] || "");
         if (kategori.toLowerCase() === "kebersihan") {
-          kbTotal += Number(kbData2[i][3] || 0); // Col D (Index 3): Skor
+          var score = Number(kbData2[i][3] || 0); // Col D (Index 3): Skor
+          kbTotal += score;
           kbCount++;
+          
+          if (!dailyHygieneMap[krd]) dailyHygieneMap[krd] = { sum: 0, count: 0 };
+          dailyHygieneMap[krd].sum += score;
+          dailyHygieneMap[krd].count++;
         }
       }
 
@@ -2958,6 +2969,24 @@ function api_gm_getMarketingInsights(payloadStr) {
           hygieneInsight.title = "Operasional Normal";
           hygieneInsight.desc = "Omset " + Math.round(targetPct) + "% target, Hygiene " + Math.round(avgHygiene) + "%. Tidak ada korelasi anomali yang perlu diwaspadai.";
           hygieneInsight.action = "Pantau tren kebersihan tiap minggu untuk mencegah degradasi bertahap.";
+        }
+        
+        var chartData = [];
+        var sortedDates = Object.keys(dailyOmsetMap).sort();
+        for (var i = 0; i < sortedDates.length; i++) {
+          var d = sortedDates[i];
+          if (dailyHygieneMap[d]) {
+            var dateParts = d.split("-");
+            var displayDate = dateParts[2] + "/" + dateParts[1];
+            chartData.push({
+              date: displayDate, // "DD/MM" format for chart label
+              omset: dailyOmsetMap[d],
+              hygiene: Math.round(dailyHygieneMap[d].sum / dailyHygieneMap[d].count)
+            });
+          }
+        }
+        if (chartData.length > 0) {
+          hygieneInsight.chartData = chartData;
         }
       }
     }

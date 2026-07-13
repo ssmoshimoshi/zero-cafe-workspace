@@ -416,6 +416,95 @@ window.renderInsightCharts = function(insights) {
           }
         });
       }
+    } else if (ins.modul === 'Korelasi Kebersihan & Omset' && ins.chartData) {
+      const labels = ins.chartData.map(d => d.date);
+      const omsetData = ins.chartData.map(d => d.omset);
+      const hygieneData = ins.chartData.map(d => d.hygiene);
+      
+      insightChartInstances[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Skor Kebersihan (%)',
+              data: hygieneData,
+              borderColor: '#10B981', // Emerald 500
+              backgroundColor: '#10B981',
+              borderWidth: 2,
+              tension: 0.3,
+              yAxisID: 'y1',
+              pointRadius: 4,
+              pointBackgroundColor: '#fff'
+            },
+            {
+              type: 'bar',
+              label: 'Omset Harian (Rp)',
+              data: omsetData,
+              backgroundColor: 'rgba(23, 23, 23, 0.1)', // Light Zero Black
+              borderColor: 'rgba(23, 23, 23, 0.2)',
+              borderWidth: 1,
+              borderRadius: 4,
+              yAxisID: 'y'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              display: true, 
+              position: 'top', 
+              labels: { boxWidth: 10, font: { size: 9, weight: 'bold' } } 
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  if (context.dataset.yAxisID === 'y') {
+                    return 'Omset: Rp ' + context.raw.toLocaleString('id-ID');
+                  } else {
+                    return 'Kebersihan: ' + context.raw + '%';
+                  }
+                }
+              }
+            }
+          },
+          scales: {
+            x: { 
+              grid: { display: false },
+              ticks: { font: { size: 9 } }
+            },
+            y: { 
+              type: 'linear',
+              display: true,
+              position: 'left',
+              beginAtZero: true,
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { 
+                callback: function(value) { return 'Rp ' + (value/1000000).toFixed(1) + 'M'; },
+                font: { size: 9 }
+              }
+            },
+            y1: {
+              type: 'linear',
+              display: true,
+              position: 'right',
+              beginAtZero: true,
+              max: 100,
+              grid: { drawOnChartArea: false },
+              ticks: { 
+                callback: function(value) { return value + '%'; },
+                font: { size: 9 }
+              }
+            }
+          }
+        }
+      });
+    }
     }
   });
 };

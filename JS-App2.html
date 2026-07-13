@@ -361,24 +361,105 @@ function renderGMChart() {
     dayOfWeekContainer.innerHTML = dayOfWeekHtml;
   }
 
+  // --- Phase 4A: Forecasting (Linear Regression) ---
+  let forecastData = [];
+  let forecastLabels = [];
+  let forecastInfoHtml = '';
+  
+  if (data.length >= 7) {
+    const n = data.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    
+    for (let k = 0; k < n; k++) {
+      let x = k;
+      let y = data[k];
+      sumX += x;
+      sumY += y;
+      sumXY += x * y;
+      sumXX += x * x;
+    }
+    
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    let lastDateStr = cData[n-1].date;
+    let lastDateObj = new Date(lastDateStr);
+    let projectedTotal = 0;
+    
+    for (let f = 1; f <= 7; f++) {
+      let nextDateObj = new Date(lastDateObj);
+      nextDateObj.setDate(nextDateObj.getDate() + f);
+      
+      let fMonth = nextDateObj.getMonth() + 1;
+      let fDate = nextDateObj.getDate();
+      let fLabel = `${fDate < 10 ? '0'+fDate : fDate}/${fMonth < 10 ? '0'+fMonth : fMonth}`;
+      
+      let predictedOmset = Math.max(0, slope * (n - 1 + f) + intercept);
+      projectedTotal += predictedOmset;
+      
+      forecastLabels.push(fLabel);
+      forecastData.push(Math.round(predictedOmset));
+    }
+    
+    forecastInfoHtml = `<div class="p-3 bg-gray-50 border border-gray-200 rounded-xl text-[10px] text-gray-700 leading-relaxed shadow-sm">
+      <strong class="text-gray-900 block mb-1">🔮 PROYEKSI 7 HARI KE DEPAN (LINEAR REGRESSION):</strong>
+      Estimasi Total Minggu Depan: <span class="font-black text-emerald-600 text-sm">Rp ${Math.round(projectedTotal).toLocaleString('id-ID')}</span> <span class="text-[9px] text-gray-400 font-bold block mt-1">Berdasarkan tren ${n} hari terakhir.</span>
+    </div>`;
+  }
+  
+  const forecastContainer = document.getElementById('forecastContainer');
+  if (forecastContainer) {
+    forecastContainer.innerHTML = forecastInfoHtml;
+  }
+
+  // Combine labels for chart
+  const allLabels = [...labels, ...forecastLabels];
+  
+  // Dataset 1: Actual Data (padded with nulls for the forecast part)
+  const actualDataset = {
+    label: 'Omset Aktual',
+    data: [...data, ...Array(7).fill(null)],
+    borderColor: '#10b981', // emerald-500
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderWidth: 2,
+    tension: 0.3,
+    fill: true,
+    pointRadius: [...pointRadii, ...Array(7).fill(0)],
+    pointHoverRadius: 6,
+    pointBackgroundColor: [...pointBgColors, ...Array(7).fill('#10b981')],
+    pointBorderColor: [...pointBorderColors, ...Array(7).fill('#ffffff')],
+    pointBorderWidth: 1.5,
+  };
+  
+  const datasetsToRender = [actualDataset];
+  
+  // Dataset 2: Forecast Data
+  if (forecastData.length > 0) {
+    const n = data.length;
+    let forecastArray = Array(n - 1).fill(null);
+    forecastArray.push(data[n - 1]); // connection point
+    forecastArray = forecastArray.concat(forecastData);
+    
+    const forecastDataset = {
+      label: 'Proyeksi (Trend)',
+      data: forecastArray,
+      borderColor: '#9ca3af', // gray-400
+      borderDash: [5, 5], // putus-putus
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      tension: 0.3,
+      fill: false,
+      pointRadius: Array(n).fill(0).concat(Array(7).fill(0)),
+      pointHoverRadius: 4,
+    };
+    datasetsToRender.push(forecastDataset);
+  }
+
   gmChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels,
-      datasets: [{
-        label: 'Omset Harian',
-        data: data,
-        borderColor: '#10b981', // emerald-500
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        borderWidth: 2,
-        tension: 0.3,
-        fill: true,
-        pointRadius: pointRadii.length ? pointRadii : 0,
-        pointHoverRadius: 6,
-        pointBackgroundColor: pointBgColors.length ? pointBgColors : '#10b981',
-        pointBorderColor: pointBorderColors.length ? pointBorderColors : '#ffffff',
-        pointBorderWidth: 1.5,
-      }]
+      labels: allLabels,
+      datasets: datasetsToRender
     },
     options: {
       animation: {
@@ -416,6 +497,54 @@ function renderGMChart() {
       }
     }
   });
+  
+  // Render Fraud Chart
+  const fraudCanvas = document.getElementById('fraudFreqChart');
+  if (fraudCanvas && AppState.dashboardData.fraudStaff && AppState.dashboardData.fraudStaff.length > 0) {
+    if (insightChartInstances['fraudFreqChart']) {
+      insightChartInstances['fraudFreqChart'].destroy();
+    }
+    const fLabels = AppState.dashboardData.fraudStaff.map(s => s.name);
+    const fData = AppState.dashboardData.fraudStaff.map(s => s.freq);
+    
+    insightChartInstances['fraudFreqChart'] = new Chart(fraudCanvas, {
+      type: 'bar',
+      data: {
+        labels: fLabels,
+        datasets: [{
+          label: 'Frekuensi Muncul di Shift Minus',
+          data: fData,
+          backgroundColor: 'rgba(239, 68, 68, 0.8)', // red-500
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y', // Horizontal bar chart
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.raw + ' kali di shift minus';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { 
+            beginAtZero: true,
+            ticks: { stepSize: 1, font: { size: 10 } }
+          },
+          y: {
+            grid: { display: false },
+            ticks: { font: { size: 10, weight: 'bold' }, color: '#171717' }
+          }
+        }
+      }
+    });
+  }
 }
 
 // Global variable to store insight chart instances

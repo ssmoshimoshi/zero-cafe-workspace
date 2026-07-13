@@ -2151,7 +2151,9 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         topBriefingKeywords: top5BriefingKeywords,
         totalBriefings: totalBriefings,
         predictiveAlert: predictiveAlert,
-        systemVerdict: systemVerdict
+        systemVerdict: systemVerdict,
+        fraudStaff: typeof sortedStaff !== 'undefined' ? sortedStaff : [],
+        fraudTotalMinus: typeof totalMinus !== 'undefined' ? totalMinus : 0
       }
     };
     return JSON.stringify(resultObj);

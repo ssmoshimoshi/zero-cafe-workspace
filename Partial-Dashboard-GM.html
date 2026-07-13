@@ -479,6 +479,32 @@ window.getDashboardGMTemplate = function() {
           </details>
         `;
       }
+
+      let fraudHtml = "";
+      // Hitung durasi hari
+      const diffTime = Math.abs(new Date(endDate) - new Date(startDate));
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays <= 90 && data.fraudStaff && data.fraudStaff.length > 0) {
+        fraudHtml = `
+          <details class="group bg-white rounded-2xl border border-red-200 mb-4 overflow-hidden shadow-sm" open>
+            <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-red-800 uppercase tracking-widest cursor-pointer group-open:bg-red-50 group-open:border-b border-red-100 transition-colors">
+              CASH DISCREPANCY FINGERPRINT (MINUS KAS)
+              <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </summary>
+            <div class="p-5 bg-white">
+              <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl mb-4">
+                <span class="text-[9px] font-bold text-red-800 uppercase tracking-widest block mb-1">Total Akumulasi Selisih Minus</span>
+                <span class="text-xl font-black text-red-700 block">Rp ${data.fraudTotalMinus.toLocaleString('id-ID')}</span>
+                <p class="text-[10px] text-red-900 mt-2 font-medium">Algoritma menghitung frekuensi kehadiran setiap staf <strong>tepat pada shift</strong> saat terjadinya selisih minus. Jika seorang staf memiliki frekuensi dominan, staf tersebut menjadi indikator potensi evaluasi.</p>
+              </div>
+              <div class="relative h-48 w-full">
+                <canvas id="fraudFreqChart"></canvas>
+              </div>
+            </div>
+          </details>
+        `;
+      }
     
     if (data.listLaporan.length === 0) {
       reportsHtml = `
@@ -789,6 +815,7 @@ window.getDashboardGMTemplate = function() {
             </button>
           </div>
           ${AppState.dashboardData ? kesehatanHtml : ''}
+          ${AppState.dashboardData ? fraudHtml : ''}
           ${AppState.dashboardData ? spvRevenueHtml : ''}
           ${AppState.dashboardData ? spvBriefingHtml : ''}
           ${AppState.dashboardData ? strategiHtml : ''}

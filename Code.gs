@@ -256,7 +256,20 @@ function parseDateToObj(d) {
   }
   var parsed = new Date(str);
   return isNaN(parsed.getTime()) ? null : parsed;
-}function getStaffFromRow(row, headers, rowIndex) {
+}
+
+/**
+ * Helper to match outlet names in a case-insensitive, space-trimmed, dot-and-underscore resilient way.
+ */
+function matchesOutlet(rowOutlet, filter) {
+  if (!filter || filter === "Semua") return true;
+  if (!rowOutlet) return false;
+  var cleanRow = rowOutlet.toString().trim().toLowerCase().replace(/[\._\s]+/g, '');
+  var cleanFilter = filter.toString().trim().toLowerCase().replace(/[\._\s]+/g, '');
+  return cleanRow === cleanFilter;
+}
+
+function getStaffFromRow(row, headers, rowIndex) {
   if (!row || !headers) {
     return { id: "STF-" + rowIndex, nama: "", posisi: "", status: "Aktif", outlet: "" };
   }
@@ -1506,7 +1519,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       var rowDate = dYear + "-" + (dMonth < 10 ? "0" + dMonth : dMonth) + "-" + (dDate < 10 ? "0" + dDate : dDate);
       
       var rowOutlet = (data[i][3] || "").toString();
-      var matchesFilter = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
+      var matchesFilter = matchesOutlet(rowOutlet, outletFilter);
       
       if (matchesFilter) {
         var rowOmset = Number(data[i][6] || 0);
@@ -1560,7 +1573,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       // If the period matches our target month
       if (period.indexOf(monthName) !== -1) {
         var rowOutlet = (wData[i][2] || "").toString(); // Col C
-        if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+        if (matchesOutlet(rowOutlet, outletFilter)) {
           listLaporan.push({
             name: "Weekly Report - " + period + " (" + (wData[i][3] || "") + ")", // Col D is SPV
             url: wData[i][7], // Col H
@@ -1586,7 +1599,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         var rowOutlet = idParts.slice(3).join("-").trim().replace(/_/g, " ");
         
         if (dObj >= startD && dObj <= endD) {
-          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+          if (matchesOutlet(rowOutlet, outletFilter)) {
             var statusHadir = (sdData[s][5] || "").toString().toLowerCase(); // Col F
             if (statusHadir === "terlambat") {
               totalTelatRealtime++;
@@ -1633,7 +1646,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         }
         
         if (inRange) {
-          if (!outletFilter || outletFilter === "Semua" || evOutlet === outletFilter) {
+          if (matchesOutlet(evOutlet, outletFilter)) {
             var catatan = (evData[e][5] || "").toString().toLowerCase(); // Col F: Catatan_Kinerja
 
             if (catatan.indexOf("sp") !== -1 || catatan.indexOf("teguran") !== -1 || catatan.indexOf("peringatan") !== -1) {
@@ -1665,7 +1678,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         
         if (bul === targetBul) {
           var rowOutlet = (mData[i][2] || "").toString();
-          if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
+          if (matchesOutlet(rowOutlet, outletFilter)) {
             listLaporan.push({
               name: "Monthly Report - " + bul + " (" + (mData[i][3] || "") + ")", // Col D is SPV
               url: mData[i][16], // Col Q (URL_PDF — now index 16 after adding 3 new columns)
@@ -1745,7 +1758,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         }
         if (rowBulanTahun === targetBulanStr) {
           var cOutlet = (cData[c][2] || "").toString();
-          if (cOutlet === outletFilter && outletFilter !== "Semua") {
+          if (matchesOutlet(cOutlet, outletFilter) && outletFilter !== "Semua") {
             monthlyTarget = Number(cData[c][3] || 0);
             foundSpecific = true;
             break;
@@ -1809,7 +1822,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           var dObj = new Date(y, m, d);
           var rowOutlet = idParts.slice(3).join("-").trim().replace(/_/g, " ");
           
-          var matches = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
+          var matches = matchesOutlet(rowOutlet, outletFilter);
           if (matches && dObj >= startD && dObj <= endD) {
             var kategori = (kbData[i][1] || "").toString(); // Col B: Tipe_Inspeksi
             // Only process "Kebersihan" rows — "Fasilitas" rows have text scores, not numbers
@@ -1880,7 +1893,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       for (var pIdx = 1; pIdx < pData.length; pIdx++) {
         var pStatus = (pData[pIdx][5] || "").toString();
         var pOutlet = (pData[pIdx][0] || "").toString();
-        if (pStatus === "Aktif" && (!outletFilter || outletFilter === "Semua" || pOutlet === "Semua" || pOutlet === outletFilter)) {
+        if (pStatus === "Aktif" && (pOutlet === "Semua" || matchesOutlet(pOutlet, outletFilter))) {
           var pMulai = (pData[pIdx][3] || "").toString();
           var pSelesai = (pData[pIdx][4] || "").toString();
           if (startDate >= pMulai && startDate <= pSelesai) {
@@ -1961,14 +1974,14 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
        
        if (dkObj >= startD && dkObj <= endD) {
           var rOut = akParts.slice(3).join("-").trim().replace(/_/g, " ");
-          if (!outletFilter || outletFilter === "Semua" || rOut.toLowerCase() === outletFilter.toLowerCase()) {
-             var selisih = Number(auditKasData[k][7] || 0); // Col H (Index 7): Selisih
-             if (selisih < -2000) { // Toleransi wajar 2rb
-                totalMinus += Math.abs(selisih);
-                var fDate = dkObj.getFullYear() + "-" + ("0" + (dkObj.getMonth()+1)).slice(-2) + "-" + ("0" + dkObj.getDate()).slice(-2);
-                minusDates.push({ date: fDate, outlet: rOut });
-             }
-          }
+          if (matchesOutlet(rOut, outletFilter)) {
+              var selisih = Number(auditKasData[k][7] || 0); // Col H (Index 7): Selisih
+              if (selisih < -2000) { // Toleransi wajar 2rb
+                 totalMinus += Math.abs(selisih);
+                 var fDate = dkObj.getFullYear() + "-" + ("0" + (dkObj.getMonth()+1)).slice(-2) + "-" + ("0" + dkObj.getDate()).slice(-2);
+                 minusDates.push({ date: fDate, outlet: rOut });
+              }
+           }
        }
     }
     
@@ -1989,7 +2002,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           var staffName = (sdData[s][1] || "").toString(); // Col B (Index 1): Nama Staf
           
           for (var m = 0; m < minusDates.length; m++) {
-             if (minusDates[m].date === fDate && minusDates[m].outlet.toLowerCase() === sOutlet.toLowerCase()) {
+             if (minusDates[m].date === fDate && matchesOutlet(sOutlet, minusDates[m].outlet)) {
                 staffFreq[staffName] = (staffFreq[staffName] || 0) + 1;
                 break;
              }

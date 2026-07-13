@@ -44,9 +44,16 @@ function checkFile(filePath) {
   // 2. Cek Hardcode URL (Praktek buruk di GAS jika bukan App URL)
   // Ini opsional, bisa dilewati
 
-  // 3. Cek Redeclaration SPA yang umum
-  // Jika ini bukan index.html tapi ada deklarasi let/const global yang sama di beberapa file.
-  // Untuk script sederhana, kita setidaknya memastikan file berhasil dibaca.
+  // 3. Cek Sanitasi Input (The Zero Standard)
+  if (fileName === 'Code.gs') {
+    if (content.includes('api_submitLaporan')) {
+      // Very basic static check to see if Number() or parseInt() is used
+      const hasNumberCast = content.match(/Number\(|parseInt\(|parseFloat\(/g);
+      if (!hasNumberCast) {
+        console.warn(`[WARNING] Code.gs: Fungsi submit Laporan terdeteksi tetapi tidak ada fungsi Number() atau parseInt() untuk sanitasi data! Periksa Aturan AGENTS.md.`);
+      }
+    }
+  }
 }
 
 console.log("========================================");

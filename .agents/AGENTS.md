@@ -69,6 +69,7 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
 3. **UI/UX Aesthetics:**
    - Jangan pernah asal menempelkan tombol HTML standar. Semua elemen visual baru HARUS mematuhi estetika *Zero Vibe* (Dark mode rapi, sudut membulat `rounded-2xl`, warna `#171717` atau `bg-zero-black`, dan selalu gunakan animasi loading).
 4. **Soliditas Data & Quality Gate:**
+   - **(NEW) Sanitasi Input Mutlak:** Semua data kuantitatif dari input pengguna/form (misal: omset, target, pengeluaran, turnover) WAJIB di-*cast* secara eksplisit menjadi Angka (menggunakan `Number()`, `parseInt()`, atau `parseFloat()`) di sisi backend (`Code.gs`) SEBELUM disimpan ke Google Sheets. Jika kosong, tuliskan angka `0`. DILARANG KERAS menyimpan *string* kosong (`""`) atau strip (`"-"`) pada kolom numerik.
    - Sebelum men-deploy perubahan apa pun (`clasp push`), selalu jalankan skrip *Pre-deploy Guard* (`node .agents/skills/pre-deploy-guard/pre-deploy.js`).
 
 ## Protokol Auto-Commit & Deploy (Continuous Integration)

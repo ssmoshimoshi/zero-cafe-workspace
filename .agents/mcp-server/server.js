@@ -51,6 +51,10 @@ async function main() {
                 type: 'string',
                 description: 'The detailed content of the memory to store',
               },
+              tags: {
+                type: 'string',
+                description: 'Comma-separated tags for GraphRAG/relational links (e.g., feature:dashboard, fix:bug)',
+              },
             },
             required: ['category', 'content'],
           },
@@ -98,11 +102,11 @@ async function main() {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (request.params.name) {
       case 'memory_store': {
-        const { category, content } = request.params.arguments;
+        const { category, content, tags } = request.params.arguments;
         try {
-          const id = await storeMemory(category, content);
+          const id = await storeMemory(category, content, tags || '');
           return {
-            content: [{ type: 'text', text: `Memory stored successfully with ID: ${id}. Category: ${category}` }],
+            content: [{ type: 'text', text: `Memory stored successfully with ID: ${id}. Category: ${category}. Tags: ${tags || 'none'}` }],
           };
         } catch (error) {
           return { content: [{ type: 'text', text: `Failed to store memory: ${error.message}` }], isError: true };
@@ -118,7 +122,7 @@ async function main() {
           }
           let resultText = `Found ${rows.length} memory entries:\n`;
           rows.forEach((row) => {
-            resultText += `\n[ID: ${row.id} | Date: ${row.created_at} | Category: ${row.category}]\n${row.content}\n`;
+            resultText += `\n[ID: ${row.id} | Date: ${row.created_at} | Category: ${row.category} | Tags: ${row.tags || 'none'}]\n${row.content}\n`;
           });
           return { content: [{ type: 'text', text: resultText }] };
         } catch (error) {

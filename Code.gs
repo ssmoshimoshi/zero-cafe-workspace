@@ -1697,14 +1697,14 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         kepatuhanSop: null,
         totalTelat: totalTelatRealtime,
         totalTeguran: totalTeguranDinamis, // Still show SP count even without monthly report
-        kendalaUtama: "Menunggu Laporan Bulanan (Snapshot Sementara)",
+        kendalaUtama: "Belum ada laporan bulanan",
         eskalasiFasilitas: "-",
-        strategiDepan: "-",
-        kebutuhanGM: "-",
-        pencapaian: "-",
-        tantangan: "-",
+        strategiDepan: "Belum ada laporan bulanan",
+        kebutuhanGM: "Belum ada laporan bulanan",
+        pencapaian: "Belum ada laporan",
+        tantangan: "Belum ada laporan",
         skill: "-",
-        turnoverBarista: null
+        turnoverBarista: 0
       };
     }
 
@@ -1843,11 +1843,14 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     }
     var hygieneKritis = [];
     for (var area in hygieneAreas) {
-      hygieneKritis.push({
-        area: area,
-        avg: Math.round(hygieneAreas[area].totalSkor / hygieneAreas[area].count),
-        ket: hygieneAreas[area].logs.length > 0 ? hygieneAreas[area].logs[0] : "-"
-      });
+      var avgScore = Math.round(hygieneAreas[area].totalSkor / hygieneAreas[area].count);
+      if (avgScore < 80) {
+        hygieneKritis.push({
+          area: area,
+          avg: avgScore,
+          ket: hygieneAreas[area].logs.length > 0 ? hygieneAreas[area].logs[0] : "-"
+        });
+      }
     }
     hygieneKritis.sort(function(a,b) { return a.avg - b.avg; });
     hygieneKritis = hygieneKritis.slice(0, 3);

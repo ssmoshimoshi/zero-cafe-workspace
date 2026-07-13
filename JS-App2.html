@@ -504,6 +504,48 @@ window.renderInsightCharts = function(insights) {
           }
         }
       });
+    } else if (ins.modul === 'SDM & Risiko Operasional' && ins.chartData) {
+      const labels = ['Tepat Waktu', 'Terlambat', 'Izin/Alfa'];
+      const data = [ins.chartData.tepatWaktu, ins.chartData.terlambat, ins.chartData.lainnya];
+      const colors = ['#10B981', '#EF4444', '#6B7280']; // Emerald, Red, Gray
+
+      insightChartInstances[canvasId] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right',
+              labels: {
+                boxWidth: 10,
+                font: { size: 9, weight: 'bold' },
+                color: '#171717'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const total = data.reduce((a, b) => a + b, 0);
+                  const val = context.raw;
+                  const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                  return context.label + ': ' + val + ' shift (' + pct + '%)';
+                }
+              }
+            }
+          },
+          cutout: '70%' // Donut style
+        }
+      });
     }
   });
 };

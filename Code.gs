@@ -3064,6 +3064,7 @@ function api_gm_getMarketingInsights(payloadStr) {
     if (hadirSheet) {
       var hData = hadirSheet.getDataRange().getValues();
       var telatCount = 0;
+      var tepatWaktuCount = 0;
       var totalHadir = 0;
 
       for (var i = 1; i < hData.length; i++) {
@@ -3078,12 +3079,14 @@ function api_gm_getMarketingInsights(payloadStr) {
         var rowOut = idParts.slice(3).join("-").trim();
         var statusHadir = hData[i][5].toString().toLowerCase();
 
-        if (!rowDate || rowDate < startDate || rowDate > endDate) continue;
+        if (!rowDate || rowDate < startD.getTime() || rowDate > endD.getTime()) continue;
         if (!outletMatch(rowOut)) continue;
 
         totalHadir++;
         if (statusHadir.indexOf("terlambat") !== -1) {
           telatCount++;
+        } else if (statusHadir.indexOf("tepat") !== -1 || statusHadir === "hadir") {
+          tepatWaktuCount++;
         }
       }
       
@@ -3092,21 +3095,29 @@ function api_gm_getMarketingInsights(payloadStr) {
       sdmInsight.status = totalHadir < 5 ? "insufficient" : "ok";
       if (sdmInsight.status === "insufficient") {
         sdmInsight.desc = "Dibutuhkan lebih banyak data kehadiran staf untuk menganalisis pola kedisiplinan.";
-      } else if (telatRate > 15) {
-        sdmInsight.level = "critical";
-        sdmInsight.title = "Krisis Kedisiplinan: " + Math.round(telatRate) + "% Shift Terlambat";
-        sdmInsight.desc = "Tingkat keterlambatan sangat tinggi. Ini berisiko merusak The Zero Vibe karena pelayanan lambat atau tidak siap saat buka.";
-        sdmInsight.action = "Panggil SPV untuk evaluasi tegas. Jika staf terus melanggar, pertimbangkan Surat Peringatan (SP).";
-      } else if (telatRate > 5) {
-        sdmInsight.level = "warning";
-        sdmInsight.title = "Warning: Mulai Ada Pola Keterlambatan";
-        sdmInsight.desc = Math.round(telatRate) + "% shift mengalami keterlambatan staf.";
-        sdmInsight.action = "Minta SPV mengingatkan staf soal SOP kehadiran di briefing berikutnya.";
       } else {
-        sdmInsight.level = "positive";
-        sdmInsight.title = "Kedisiplinan Sangat Baik";
-        sdmInsight.desc = "Tingkat keterlambatan hanya " + Math.round(telatRate) + "%. Tim bekerja dengan komitmen tinggi terhadap jadwal operasional.";
-        sdmInsight.action = "Beri apresiasi (reward lisan/bonus) ke tim untuk mempertahankan moral kerja positif.";
+        sdmInsight.chartData = {
+          tepatWaktu: tepatWaktuCount,
+          terlambat: telatCount,
+          lainnya: Math.max(0, totalHadir - (tepatWaktuCount + telatCount))
+        };
+        
+        if (telatRate > 15) {
+          sdmInsight.level = "critical";
+          sdmInsight.title = "Krisis Kedisiplinan: " + Math.round(telatRate) + "% Shift Terlambat";
+          sdmInsight.desc = "Tingkat keterlambatan sangat tinggi. Ini berisiko merusak The Zero Vibe karena pelayanan lambat atau tidak siap saat buka.";
+          sdmInsight.action = "Panggil SPV untuk evaluasi tegas. Jika staf terus melanggar, pertimbangkan Surat Peringatan (SP).";
+        } else if (telatRate > 5) {
+          sdmInsight.level = "warning";
+          sdmInsight.title = "Warning: Mulai Ada Pola Keterlambatan";
+          sdmInsight.desc = Math.round(telatRate) + "% shift mengalami keterlambatan staf.";
+          sdmInsight.action = "Minta SPV mengingatkan staf soal SOP kehadiran di briefing berikutnya.";
+        } else {
+          sdmInsight.level = "positive";
+          sdmInsight.title = "Kedisiplinan Sangat Baik";
+          sdmInsight.desc = "Tingkat keterlambatan hanya " + Math.round(telatRate) + "%. Tim bekerja dengan komitmen tinggi terhadap jadwal operasional.";
+          sdmInsight.action = "Beri apresiasi (reward lisan/bonus) ke tim untuk mempertahankan moral kerja positif.";
+        }
       }
     }
     insights.push(sdmInsight);

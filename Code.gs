@@ -1642,6 +1642,51 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     if (sopTotalStaff > 0) {
       kepatuhanSopValue = Math.round((sopCompliantStaff / sopTotalStaff) * 100);
     }
+    
+    // --- Phase 3C: SPV Briefing Quality Score (Keyword Frequency Analysis) ---
+    var briefingKeywords = {};
+    var briefingData = getAggregatedData(ss, "DB_Briefing_Shift");
+    var totalBriefings = 0;
+    var stopWords = ["dan", "di", "ke", "dari", "yang", "untuk", "pada", "adalah", "ini", "itu", "dengan", "akan", "bisa", "ada", "tidak", "belum", "sudah", "buat", "juga", "atau", "dalam", "kita", "agar", "supaya", "karena", "sehingga", "kalau", "biar", "lebih", "terus", "terus", "lagi", "biar", "nya", "biar", "terus", "saja"];
+    
+    for (var b = 1; b < briefingData.length; b++) {
+      var idLaporan = (briefingData[b][0] || "").toString();
+      if (!idLaporan) continue;
+      
+      var idParts = idLaporan.split("-");
+      if (idParts.length >= 4) {
+        var d = parseInt(idParts[0], 10);
+        var m = parseInt(idParts[1], 10) - 1;
+        var y = parseInt(idParts[2], 10);
+        var dObj = new Date(y, m, d);
+        var rowOutlet = idParts.slice(3).join("-").trim().replace(/_/g, " ");
+        
+        if (dObj >= startD && dObj <= endD) {
+          if (matchesOutlet(rowOutlet, outletFilter)) {
+            totalBriefings++;
+            var fokus = (briefingData[b][2] || "").toString().toLowerCase(); 
+            var kendala = (briefingData[b][3] || "").toString().toLowerCase(); 
+            
+            var fullText = fokus + " " + kendala;
+            var words = fullText.replace(/[^\w\s]/g, " ").split(/\s+/);
+            
+            for (var w = 0; w < words.length; w++) {
+              var word = words[w].trim();
+              if (word.length > 3 && stopWords.indexOf(word) === -1) { 
+                briefingKeywords[word] = (briefingKeywords[word] || 0) + 1;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    var topKeywords = [];
+    for (var kw in briefingKeywords) {
+      topKeywords.push({ word: kw, count: briefingKeywords[kw] });
+    }
+    topKeywords.sort(function(a, b) { return b.count - a.count; });
+    var top5BriefingKeywords = topKeywords.slice(0, 5);
 
     var operasionalData = null;
 
@@ -2103,6 +2148,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         hygieneKritis: hygieneKritis,
         cuacaHujan: cuacaHujan,
         cuacaCerah: cuacaCerah,
+        topBriefingKeywords: top5BriefingKeywords,
+        totalBriefings: totalBriefings,
         predictiveAlert: predictiveAlert,
         systemVerdict: systemVerdict
       }

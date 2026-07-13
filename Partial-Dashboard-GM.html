@@ -435,6 +435,50 @@ window.getDashboardGMTemplate = function() {
           </details>
         `;
       }
+      
+      let spvBriefingHtml = "";
+      if (data.topBriefingKeywords && data.topBriefingKeywords.length > 0) {
+        let kwCards = data.topBriefingKeywords.map((kw, i) => `
+          <div class="inline-block bg-gray-100 text-zero-black font-bold px-3 py-1.5 rounded-full text-[10px] mr-2 mb-2 border border-gray-200">
+            ${kw.word.toUpperCase()} 
+            <span class="bg-white text-gray-500 rounded-full px-1.5 py-0.5 ml-1 text-[8px]">${kw.count}x</span>
+          </div>
+        `).join('');
+        
+        let insightText = "";
+        let topWord = data.topBriefingKeywords[0].word.toLowerCase();
+        let hygiene = data.hygieneScore || 0;
+        
+        // Simple correlation insight
+        if ((topWord.includes("bersih") || topWord.includes("kotor")) && hygiene < 90) {
+           insightText = \`Kata kunci "\${topWord}" mendominasi briefing SPV. Hal ini selaras dengan Hygiene Score Anda yang di bawah standar (\${hygiene}%). SPV sudah menyadari masalah kebersihan di lapangan namun butuh intervensi eksekusi.\`;
+        } else if ((topWord.includes("bersih") || topWord.includes("kotor")) && hygiene >= 90) {
+           insightText = \`Kata kunci "\${topWord}" mendominasi briefing SPV. Fokus ini membuahkan hasil karena Hygiene Score Anda sangat baik (\${hygiene}%).\`;
+        } else if (topWord.includes("telat") || topWord.includes("jam")) {
+           insightText = \`Kata kunci "\${topWord}" mendominasi briefing SPV. Isu kedisiplinan waktu tampaknya menjadi fokus utama di lapangan bulan ini.\`;
+        } else {
+           insightText = \`Kata "\${topWord}" paling sering disebut (\${data.topBriefingKeywords[0].count}x) dalam \${data.totalBriefings} laporan briefing. Fokus operasional SPV saat ini berpusat pada topik tersebut.\`;
+        }
+        
+        spvBriefingHtml = `
+          <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm" open>
+            <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
+              SPV BRIEFING QUALITY SCORE
+              <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </summary>
+            <div class="p-5 bg-white">
+              <span class="block text-[9px] font-bold text-gray-400 uppercase mb-3 tracking-widest">Top Keywords (Fokus & Kendala)</span>
+              <div class="mb-4">
+                ${kwCards}
+              </div>
+              <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                <span class="text-[9px] font-bold text-blue-800 uppercase tracking-widest block mb-1">AI Correlation Insight</span>
+                <p class="text-xs text-blue-900 leading-relaxed font-medium">${insightText}</p>
+              </div>
+            </div>
+          </details>
+        `;
+      }
     
     if (data.listLaporan.length === 0) {
       reportsHtml = `
@@ -746,6 +790,7 @@ window.getDashboardGMTemplate = function() {
           </div>
           ${AppState.dashboardData ? kesehatanHtml : ''}
           ${AppState.dashboardData ? spvRevenueHtml : ''}
+          ${AppState.dashboardData ? spvBriefingHtml : ''}
           ${AppState.dashboardData ? strategiHtml : ''}
         </div>
 

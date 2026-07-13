@@ -2964,8 +2964,8 @@ function api_gm_getMarketingInsights(payloadStr) {
     // ─────────────────────────────────────────────────────────────────
     var atsInsight = { modul: "Benchmarking ATS Industri", status: "insufficient", level: "info", title: "", desc: "", action: "" };
     
-    var savedBenchmark = PropertiesService.getScriptProperties().getProperty("GM_BENCHMARK_ATS");
-    var effectiveBenchmark = savedBenchmark ? Number(savedBenchmark) : benchmarkATS;
+    // Gunakan benchmarkATS langsung dari payload UI (menghindari lag 1 langkah)
+    var effectiveBenchmark = benchmarkATS;
 
     if (dData && dData.length > 1) {
       var totalOmsetATS = 0, totalTransATS = 0;

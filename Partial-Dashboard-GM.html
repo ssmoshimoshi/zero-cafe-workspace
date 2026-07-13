@@ -451,13 +451,13 @@ window.getDashboardGMTemplate = function() {
         
         // Simple correlation insight
         if ((topWord.includes("bersih") || topWord.includes("kotor")) && hygiene < 90) {
-           insightText = \`Kata kunci "\${topWord}" mendominasi briefing SPV. Hal ini selaras dengan Hygiene Score Anda yang di bawah standar (\${hygiene}%). SPV sudah menyadari masalah kebersihan di lapangan namun butuh intervensi eksekusi.\`;
+           insightText = `Kata kunci "${topWord}" mendominasi briefing SPV. Hal ini selaras dengan Hygiene Score Anda yang di bawah standar (${hygiene}%). SPV sudah menyadari masalah kebersihan di lapangan namun butuh intervensi eksekusi.`;
         } else if ((topWord.includes("bersih") || topWord.includes("kotor")) && hygiene >= 90) {
-           insightText = \`Kata kunci "\${topWord}" mendominasi briefing SPV. Fokus ini membuahkan hasil karena Hygiene Score Anda sangat baik (\${hygiene}%).\`;
+           insightText = `Kata kunci "${topWord}" mendominasi briefing SPV. Fokus ini membuahkan hasil karena Hygiene Score Anda sangat baik (${hygiene}%).`;
         } else if (topWord.includes("telat") || topWord.includes("jam")) {
-           insightText = \`Kata kunci "\${topWord}" mendominasi briefing SPV. Isu kedisiplinan waktu tampaknya menjadi fokus utama di lapangan bulan ini.\`;
+           insightText = `Kata kunci "${topWord}" mendominasi briefing SPV. Isu kedisiplinan waktu tampaknya menjadi fokus utama di lapangan bulan ini.`;
         } else {
-           insightText = \`Kata "\${topWord}" paling sering disebut (\${data.topBriefingKeywords[0].count}x) dalam \${data.totalBriefings} laporan briefing. Fokus operasional SPV saat ini berpusat pada topik tersebut.\`;
+           insightText = `Kata "${topWord}" paling sering disebut (${data.topBriefingKeywords[0].count}x) dalam ${data.totalBriefings} laporan briefing. Fokus operasional SPV saat ini berpusat pada topik tersebut.`;
         }
         
         spvBriefingHtml = `
@@ -481,11 +481,10 @@ window.getDashboardGMTemplate = function() {
       }
 
       let fraudHtml = "";
-      // Hitung durasi hari
-      const diffTime = Math.abs(new Date(endDate) - new Date(startDate));
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // Gunakan diffDays yang sudah dihitung di atas (line 48)
+      let isFraudEligible = diffDays <= 90;
       
-      if (diffDays <= 90 && data.fraudStaff && data.fraudStaff.length > 0) {
+      if (isFraudEligible && data.fraudStaff && data.fraudStaff.length > 0) {
         fraudHtml = `
           <details class="group bg-white rounded-2xl border border-red-200 mb-4 overflow-hidden shadow-sm" open>
             <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-red-800 uppercase tracking-widest cursor-pointer group-open:bg-red-50 group-open:border-b border-red-100 transition-colors">

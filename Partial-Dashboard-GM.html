@@ -283,17 +283,21 @@ window.getDashboardGMTemplate = function() {
             </div>
             
             <div class="grid grid-cols-3 gap-3 mb-4">
-              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 flex flex-col justify-between">
                 <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Total Telat</span>
                 <span class="text-lg font-black ${op.totalTelat >= 3 ? 'text-red-500' : 'text-green-500'}">${op.totalTelat} <span class="text-[9px] font-normal text-gray-400">kali</span></span>
               </div>
-              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 flex flex-col justify-between">
                 <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Teguran (SP)</span>
                 <span class="text-lg font-black ${op.totalTeguran !== null ? (op.totalTeguran >= 5 ? 'text-red-500' : 'text-green-500') : 'text-gray-400'}">${op.totalTeguran !== null ? op.totalTeguran + ' <span class="text-[9px] font-normal text-gray-400">kali</span>' : '-'}</span>
               </div>
-              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
-                <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Turnover</span>
-                <span class="text-lg font-black ${(op.turnoverBarista || 0) > 0 ? 'text-red-500' : 'text-green-500'}">${op.turnoverBarista || 0} <span class="text-[9px] font-normal text-gray-400">org</span></span>
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 flex flex-col justify-between">
+                <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Turnover (Max 1)</span>
+                ${(() => {
+                  const t = op.turnoverBarista || 0;
+                  const color = t === 0 ? 'text-emerald-500' : (t === 1 ? 'text-amber-500' : 'text-red-500');
+                  return `<span class="text-lg font-black ${color}">${t} <span class="text-[9px] font-normal text-gray-400">/ 1 org</span></span>`;
+                })()}
               </div>
             </div>
             
@@ -592,10 +596,27 @@ window.getDashboardGMTemplate = function() {
           <div class="bg-white p-5 rounded-2xl border border-gray-200 mb-6 shadow-sm">
             <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">STATISTIK KOMPLAIN & QC</h3>
             <div class="flex flex-col items-center justify-center py-6 text-center">
-              <span class="text-4xl font-black ${AppState.dashboardData && AppState.dashboardData.komplainTotal <= 2 ? 'text-green-500' : 'text-red-500'} mb-2">
-                ${AppState.dashboardData ? AppState.dashboardData.komplainTotal : 0}
-              </span>
-              <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Total Komplain / Retur</span>
+              ${(() => {
+                const k = AppState.dashboardData ? AppState.dashboardData.komplainTotal : 0;
+                let color = "text-emerald-500";
+                let status = "AMAN";
+                let badgeColor = "bg-emerald-100 text-emerald-800";
+                if (k === 1) { color = "text-amber-500"; status = "WASPADA"; badgeColor = "bg-amber-100 text-amber-800"; }
+                else if (k === 2) { color = "text-orange-500"; status = "BATAS MAKSIMAL"; badgeColor = "bg-orange-100 text-orange-800"; }
+                else if (k > 2) { color = "text-red-500"; status = "KRITIS - KPI DILANGGAR"; badgeColor = "bg-red-100 text-red-800"; }
+                
+                return `
+                  <div class="flex items-center justify-center gap-2 mb-3">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Total Komplain</span>
+                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-md ${badgeColor}">${status}</span>
+                  </div>
+                  <div class="flex items-end justify-center gap-2 mb-2">
+                    <span class="text-5xl font-black ${color} leading-none">${k}</span>
+                    <span class="text-2xl font-bold text-gray-300 mb-1">/ 2</span>
+                  </div>
+                  <span class="text-[10px] font-medium text-gray-400 mt-2">Batas maksimal: 2 komplain serius per bulan</span>
+                `;
+              })()}
             </div>
           </div>
           

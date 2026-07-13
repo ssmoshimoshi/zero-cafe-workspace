@@ -1686,20 +1686,22 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
             });
             
               var tVal = parseInt(mData[i][13], 10);
-              var sDepan = (mData[i][14] || "").toString();
-              var kGM = (mData[i][15] || "").toString();
+              var sDepan = (mData[i][14] || "").toString().trim();
+              var kGM = (mData[i][15] || "").toString().trim();
+              var pencapaianData = (mData[i][10] || "").toString().trim();
+              var tantanganData = (mData[i][11] || "").toString().trim();
 
               operasionalData = {
                 isFallback: false,
                 kepatuhanSop: null, // UI will use hygieneScore instead
                 totalTelat: totalTelatRealtime, // Real-time from DB_Kehadiran_Staf
                 totalTeguran: totalTeguranDinamis, // Dynamically calculated from DB_Evaluasi_Staf
-                kendalaUtama: (mData[i][11] || "").toString() || "Tidak ada kendala", // Tantangan (Col L / Index 11)
+                kendalaUtama: tantanganData || "-", // Tantangan (Col L / Index 11)
                 eskalasiFasilitas: "-", 
-                strategiDepan: (sDepan && sDepan !== "-") ? sDepan : "Tidak ada catatan strategi", // Strategi_Bulan_Depan (Index 14)
-                kebutuhanGM: (kGM && kGM !== "-") ? kGM : "Tidak ada kebutuhan khusus",   // Kebutuhan_Approval_GM (Index 15)
-                pencapaian: (mData[i][10] || "").toString() || "Belum ada pencapaian",    // Pencapaian (Col K / Index 10)
-                tantangan: (mData[i][11] || "").toString() || "Tidak ada tantangan",     // Tantangan (Col L / Index 11)
+                strategiDepan: (sDepan && sDepan !== "-") ? sDepan : "-", // Strategi_Bulan_Depan (Index 14)
+                kebutuhanGM: (kGM && kGM !== "-") ? kGM : "-",   // Kebutuhan_Approval_GM (Index 15)
+                pencapaian: pencapaianData || "-",    // Pencapaian (Col K / Index 10)
+                tantangan: tantanganData || "-",     // Tantangan (Col L / Index 11)
                 skill: "-",
                 turnoverBarista: isNaN(tVal) ? 0 : tVal      // Total_Turnover (Index 13)
               };
@@ -1714,12 +1716,12 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         kepatuhanSop: null,
         totalTelat: totalTelatRealtime,
         totalTeguran: totalTeguranDinamis, // Still show SP count even without monthly report
-        kendalaUtama: "Belum ada laporan bulanan",
+        kendalaUtama: "-",
         eskalasiFasilitas: "-",
-        strategiDepan: "Belum ada laporan bulanan",
-        kebutuhanGM: "Belum ada laporan bulanan",
-        pencapaian: "Belum ada laporan",
-        tantangan: "Belum ada laporan",
+        strategiDepan: "-",
+        kebutuhanGM: "-",
+        pencapaian: "-",
+        tantangan: "-",
         skill: "-",
         turnoverBarista: 0
       };
@@ -1854,14 +1856,10 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     
     var hygieneScore = hygieneCount > 0 ? Math.round(hygieneScoreTotal / hygieneCount) : 0;
     
-    // OVERRIDE: Ensure Perintis is ALWAYS green (>=95) as per user's "all green" mandate
-    if (outletFilter === "Perintis" && hygieneScore > 0 && hygieneScore < 96) {
-      hygieneScore = 96;
-    }
     var hygieneKritis = [];
     for (var area in hygieneAreas) {
       var avgScore = Math.round(hygieneAreas[area].totalSkor / hygieneAreas[area].count);
-      if (avgScore < 80) {
+      if (avgScore < 95) {
         hygieneKritis.push({
           area: area,
           avg: avgScore,
@@ -2647,7 +2645,7 @@ function api_gm_getMarketingInsights(payloadStr) {
     // ─────────────────────────────────────────────────────────────────
 
     function outletMatch(rowOutlet) {
-      return !outlet || outlet === "Semua" || rowOutlet === outlet;
+      return matchesOutlet(rowOutlet, outlet);
     }
 
     // ─────────────────────────────────────────────────────────────────

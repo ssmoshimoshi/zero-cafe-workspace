@@ -222,25 +222,29 @@ window.getDashboardGMTemplate = function() {
         
         let targetPercent = (data.omsetTotal / data.targetOmset) * 100;
         
-        if (targetPercent >= 90 && data.hygieneScore < 80) {
-          aiTitle = "The Perfect Storm (Ramai & Kotor)";
-          aiDesc = "Volume transaksi membludak sehingga staf mengorbankan kebersihan. Rawan komplain tamu dine-in. Segera evaluasi perlunya staf Part-time (Bantuan) di jam sibuk.";
-          aiColor = "bg-orange-50 border-orange-200 text-orange-800";
-        } else if (targetPercent < 70 && data.hygieneScore < 80) {
-          aiTitle = "The Lazy Shift (Sepi & Kotor)";
-          aiDesc = "Kafe sedang sepi pengunjung, namun kebersihan tetap buruk. Ini adalah indikator kuat kemalasan/kurang disiplin. Berikan SP atau lakukan sidak mendadak.";
+        if (targetPercent >= 90 && data.hygieneScore < 95) {
+          aiTitle = "Sales Naik, SOP Turun";
+          aiDesc = "Target omset tercapai, namun skor kebersihan di bawah standar (95%). Pastikan tim tidak mengabaikan kualitas operasional saat ramai pengunjung.";
+          aiColor = "bg-yellow-50 border-yellow-200 text-yellow-800";
+        } else if (targetPercent < 70 && data.hygieneScore < 95) {
+          aiTitle = "Peringatan Ganda (Omset & SOP)";
+          aiDesc = "Omset jauh di bawah target dan standar kebersihan tidak tercapai (Kritis). Dibutuhkan intervensi langsung dari Supervisor atau GM.";
           aiColor = "bg-red-50 border-red-200 text-red-800";
-        } else if (data.hygieneScore >= 90) {
+        } else if (data.hygieneScore >= 95) {
           aiTitle = "The Good Standard (Ideal)";
           aiDesc = "Standar kebersihan dan sanitasi terjaga dengan sangat baik. Kinerja tim lapangan memuaskan, pertahankan untuk audit eksternal.";
           aiColor = "bg-emerald-50 border-emerald-200 text-emerald-800";
         } else if (data.hygieneKritis && data.hygieneKritis.length > 0) {
           aiTitle = "Spot Warning (Area Kritis)";
-          aiDesc = "Beberapa area dilaporkan kotor. Cek ketersediaan bahan pembersih atau fasilitas yang mungkin rusak di area tersebut.";
-          aiColor = "bg-yellow-50 border-yellow-200 text-yellow-800";
+          aiDesc = `Ditemukan ${data.hygieneKritis.length} area dengan skor kebersihan di bawah standar (95%). Mohon periksa dan tindak lanjuti segera.`;
+          aiColor = "bg-red-50 border-red-200 text-red-800";
+        } else if (data.hygieneScore < 95) {
+          aiTitle = "Perhatian Kepatuhan SOP";
+          aiDesc = "Skor kebersihan di bawah batas aman (95%). Evaluasi ulang pelaksanaan SOP.";
+          aiColor = "bg-red-50 border-red-200 text-red-800";
         } else {
           aiTitle = "Dalam Batas Standar";
-          aiDesc = "Kebersihan cukup terjaga, namun belum mencapai tingkat ideal (>90%). Tetap perhatikan area-area yang rentan.";
+          aiDesc = "Kebersihan cukup terjaga, namun belum mencapai tingkat ideal (>95%). Tetap perhatikan area-area yang rentan.";
           aiColor = "bg-gray-50 border-gray-200 text-gray-700";
         }
         
@@ -252,7 +256,7 @@ window.getDashboardGMTemplate = function() {
             </h3>
             
             <div class="flex items-center gap-4 mb-4">
-              <div class="flex-shrink-0 w-16 h-16 rounded-full border-4 ${data.hygieneScore >= 80 ? 'border-emerald-400 text-emerald-600' : 'border-red-400 text-red-600'} flex items-center justify-center text-xl font-black bg-white shadow-inner">
+              <div class="flex-shrink-0 w-16 h-16 rounded-full border-4 ${data.hygieneScore >= 95 ? 'border-emerald-400 text-emerald-600' : 'border-red-400 text-red-600'} flex items-center justify-center text-xl font-black bg-white shadow-inner">
                 ${data.hygieneScore}%
               </div>
               <div class="${aiColor} p-3 rounded-xl border flex-1">
@@ -275,7 +279,7 @@ window.getDashboardGMTemplate = function() {
           <div class="p-5 bg-white">
             <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-[1.01] mb-4">
               <span class="text-[9px] text-gray-500 uppercase tracking-widest block font-bold mb-1">Kepatuhan SOP (Real-Time)</span>
-              <span class="text-3xl font-black ${data.hygieneScore >= 90 ? 'text-emerald-500' : (data.hygieneScore >= 80 ? 'text-yellow-500' : 'text-red-500')}">${data.hygieneScore || 0}%</span>
+              <span class="text-3xl font-black ${data.hygieneScore >= 95 ? 'text-emerald-500' : 'text-red-500'}">${data.hygieneScore || 0}%</span>
             </div>
             
             <div class="grid grid-cols-3 gap-3 mb-4">
@@ -289,7 +293,7 @@ window.getDashboardGMTemplate = function() {
               </div>
               <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center transform transition-transform duration-300 hover:scale-105">
                 <span class="block text-[8px] font-bold text-gray-400 uppercase mb-1">Turnover</span>
-                <span class="text-lg font-black ${op.turnoverBarista !== null ? (op.turnoverBarista > 0 ? 'text-red-500' : 'text-green-500') : 'text-gray-400'}">${op.turnoverBarista !== null ? op.turnoverBarista + ' <span class="text-[9px] font-normal text-gray-400">org</span>' : '-'}</span>
+                <span class="text-lg font-black ${(op.turnoverBarista || 0) > 0 ? 'text-red-500' : 'text-green-500'}">${op.turnoverBarista || 0} <span class="text-[9px] font-normal text-gray-400">org</span></span>
               </div>
             </div>
             

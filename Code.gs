@@ -2685,8 +2685,7 @@ function api_gm_getMarketingInsights(payloadStr) {
       }
       
       for (var i = 1; i < dData.length; i++) {
-        var rowDateStr = (dData[i][1] || "").toString();
-        var rowDateObj = parseDateToObj(rowDateStr);
+        var rowDateObj = parseDateToObj(dData[i][1]);
         if (!rowDateObj || isNaN(rowDateObj.getTime())) continue;
         
         var rowOut = (dData[i][3] || "").toString();
@@ -2741,24 +2740,11 @@ function api_gm_getMarketingInsights(payloadStr) {
         });
       }
 
-      // Generate trend description
-      var debugMsg = " [DEBUG: totalRangeDays=" + totalRangeDays + ", startD=" + startD.toDateString() + ", endD=" + endD.toDateString() + ", salesMapKeys=" + Object.keys(salesMap).length;
-      var sampleDates = [];
-      var matchedCount = 0;
-      for (var i = 1; i < Math.min(20, dData.length); i++) {
-        var rowDateStr = (dData[i][1] || "").toString();
-        var rowDateObj = parseDateToObj(rowDateStr);
-        var inRange = (rowDateObj >= startD && rowDateObj <= endD);
-        if (inRange) matchedCount++;
-        sampleDates.push(rowDateStr + "->parsed:" + (rowDateObj ? rowDateObj.toDateString() : "null") + "->inRange:" + inRange);
-      }
-      debugMsg += ", samples=" + JSON.stringify(sampleDates) + ", matchedCount=" + matchedCount + "]";
-
       if (salesData.length < (isDailyMode ? 3 : 2)) {
         weeklyInsight.status = "insufficient";
         weeklyInsight.level = "info";
         weeklyInsight.title = "Data Kurang";
-        weeklyInsight.desc = "Data harian tidak cukup untuk menganalisis tren omset mingguan." + debugMsg;
+        weeklyInsight.desc = "Data harian tidak cukup untuk menganalisis tren omset mingguan.";
         weeklyInsight.action = "Pastikan data harian terisi minimal untuk 2 periode.";
       } else {
         var n = salesData.length;
@@ -2774,24 +2760,20 @@ function api_gm_getMarketingInsights(payloadStr) {
           weeklyInsight.status = "sehat";
           weeklyInsight.level = "success";
           weeklyInsight.title = "Omset Naik (" + (pct > 0 ? "+" : "") + pct + "%)";
-          weeklyInsight.desc = "Rata-rata penjualan harian naik dibanding periode sebelumnya, didorong oleh peningkatan volume transaksi." + debugMsg;
+          weeklyInsight.desc = "Rata-rata penjualan harian naik dibanding periode sebelumnya, didorong oleh peningkatan volume transaksi.";
           weeklyInsight.action = "Pertahankan konsistensi kualitas produk dan pelayanan.";
         } else if (pct <= -5) {
           weeklyInsight.status = "kritis";
           weeklyInsight.level = "danger";
           weeklyInsight.title = "Omset Turun (" + pct + "%)";
-          weeklyInsight.desc = "Rata-rata penjualan harian menurun signifikan dibanding periode sebelumnya." + debugMsg;
+          weeklyInsight.desc = "Rata-rata penjualan harian menurun signifikan dibanding periode sebelumnya.";
           weeklyInsight.action = "Evaluasi promosi, cek kendala operasional, dan tingkatkan upselling.";
         } else {
           weeklyInsight.status = "perhatian";
           weeklyInsight.level = "warning";
           weeklyInsight.title = "Omset Stagnan (Flat)";
-          weeklyInsight.desc = "Perubahan omset sangat kecil (" + (pct >= 0 ? "+" : "") + pct + "%). Bisnis tidak tumbuh — stagnansi adalah sinyal bahaya jangka panjang." + debugMsg;
+          weeklyInsight.desc = "Perubahan omset sangat kecil (" + (pct >= 0 ? "+" : "") + pct + "%). Bisnis tidak tumbuh — stagnansi adalah sinyal bahaya jangka panjang.";
           weeklyInsight.action = "Coba strategi baru: promo limited-time, konten sosmed, atau bundling produk.";
-          weeklyInsight.level = "info";
-          weeklyInsight.title = "Omset Fluktuatif Normal";
-          weeklyInsight.desc = "Omset bergerak " + (growthPct > 0 ? "naik" : "turun") + " " + Math.abs(growthPct) + "%. Fluktuasi rata-rata harian masih dalam batas wajar.";
-          weeklyInsight.action = "Pantau tren periode ke depan untuk deteksi pola lebih kuat.";
         }
       }
     }

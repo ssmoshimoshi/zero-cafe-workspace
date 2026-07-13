@@ -401,6 +401,40 @@ window.getDashboardGMTemplate = function() {
           </div>
         </details>
       `;
+
+      let spvRevenueHtml = "";
+      if (data.spvRevenue && data.spvRevenue.length > 0) {
+        let spvCards = data.spvRevenue.map(spv => `
+          <div class="flex justify-between items-center bg-gray-50 border border-gray-100 p-3 rounded-xl mb-2 hover:bg-gray-100 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-zero-black text-white flex justify-center items-center font-bold text-[10px]">
+                ${spv.name.replace("SPV ", "")}
+              </div>
+              <div>
+                <div class="text-[10px] font-bold text-zero-black uppercase tracking-widest">${spv.name}</div>
+                <div class="text-[9px] text-gray-500">${spv.shifts} Shift Terpimpin</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs font-black text-emerald-600">Rp ${spv.avgOmset.toLocaleString('id-ID')}</div>
+              <div class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Rata-rata/Shift</div>
+            </div>
+          </div>
+        `).join('');
+        
+        spvRevenueHtml = `
+          <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm" open>
+            <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
+              REVENUE PER SPV SHIFT (BENCHMARK)
+              <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </summary>
+            <div class="p-5 bg-white">
+              <p class="text-[10px] text-gray-500 mb-4 italic leading-relaxed">Benchmark anonim ini membandingkan kemampuan mencetak omset per shift antar SPV.</p>
+              ${spvCards}
+            </div>
+          </details>
+        `;
+      }
     
     if (data.listLaporan.length === 0) {
       reportsHtml = `
@@ -711,6 +745,7 @@ window.getDashboardGMTemplate = function() {
             </button>
           </div>
           ${AppState.dashboardData ? kesehatanHtml : ''}
+          ${AppState.dashboardData ? spvRevenueHtml : ''}
           ${AppState.dashboardData ? strategiHtml : ''}
         </div>
 

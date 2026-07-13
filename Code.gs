@@ -1486,6 +1486,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var cuacaHujan = 0;
     var cuacaCerah = 0;
     var outletStats = {};
+    var spvStats = {};
     
     // Normalize inputs into Date objects
     var startD = parseDateToObj(startDate);
@@ -1568,6 +1569,14 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
             outletStats[outletName] = 0;
           }
           outletStats[outletName] += rowOmset;
+
+          // Revenue per SPV Shift
+          var spvName = (data[i][4] || "Unknown").toString();
+          if (!spvStats[spvName]) {
+            spvStats[spvName] = { shifts: 0, omset: 0 };
+          }
+          spvStats[spvName].shifts++;
+          spvStats[spvName].omset += rowOmset;
           
         } else if (rowDateObj >= prevStartD && rowDateObj <= prevEndD) {
           omsetBulanLalu += rowOmset;
@@ -1750,6 +1759,28 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         skill: "-",
         turnoverBarista: 0
       };
+    }
+    if (!operasionalData.komplainMingguan) operasionalData.komplainMingguan = [];
+
+    // --- Prepare Revenue per SPV Shift ---
+    var spvRevenue = [];
+    var tempSpvRev = [];
+    for (var spv in spvStats) {
+      if (spvStats[spv].shifts > 0) {
+        tempSpvRev.push({
+          originalName: spv,
+          avgOmset: Math.round(spvStats[spv].omset / spvStats[spv].shifts),
+          shifts: spvStats[spv].shifts
+        });
+      }
+    }
+    tempSpvRev.sort(function(a, b) { return b.avgOmset - a.avgOmset; });
+    for (var st = 0; st < tempSpvRev.length; st++) {
+      spvRevenue.push({
+        name: "SPV " + String.fromCharCode(65 + st),
+        avgOmset: tempSpvRev[st].avgOmset,
+        shifts: tempSpvRev[st].shifts
+      });
     }
 
     // Transaction total is now calculated inside the main loop
@@ -2067,6 +2098,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         productsData: productsData,
         operasionalData: operasionalData,
         leaderboard: leaderboard,
+        spvRevenue: spvRevenue,
         hygieneScore: hygieneScore,
         hygieneKritis: hygieneKritis,
         cuacaHujan: cuacaHujan,

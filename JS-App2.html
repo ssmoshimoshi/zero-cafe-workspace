@@ -309,6 +309,59 @@ function renderGMChart() {
   });
 }
 
+// Global variable to store insight chart instances
+let insightChartInstances = {};
+
+window.renderInsightCharts = function(insights) {
+  insights.forEach((ins, idx) => {
+    const canvasId = 'insight-chart-' + idx;
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    
+    // Destroy previous instance if exists
+    if (insightChartInstances[canvasId]) {
+      insightChartInstances[canvasId].destroy();
+    }
+    
+    if (ins.modul === 'Tren Omset Mingguan' && ins.chartData) {
+      const labels = ins.chartData.map(d => d.periode);
+      const data = ins.chartData.map(d => d.avgSales);
+      
+      insightChartInstances[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Rata-rata Omset Harian',
+            data: data,
+            backgroundColor: '#171717',
+            borderRadius: 4,
+            barPercentage: 0.6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Rp ' + context.raw.toLocaleString('id-ID');
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: { display: false, beginAtZero: true }
+          }
+        }
+      });
+    }
+  });
+};
+
 async function updateFolderId() {
   const input = document.getElementById('targetFolderId');
   if (!input) return;

@@ -1099,7 +1099,7 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
       var mMonth = parseInt(idParts[0], 10) - 1;
       var mYear = parseInt(idParts[1], 10);
       var mOutlet = idParts[2].trim();
-      var isOutletMatch = (!outlet || String(outlet).toLowerCase() === "semua" || mOutlet.toLowerCase() === String(outlet).toLowerCase());
+      var isOutletMatch = matchesOutlet(mOutlet, outlet);
       
       // Check if monthly record falls in range (using first day of month)
       var mDate = new Date(mYear, mMonth, 1).getTime();
@@ -1129,7 +1129,7 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
     // Daily ID format: DD-MM-YYYY-Outlet (4+ parts)
     else if (idParts.length >= 4) {
       var rowOutlet = idParts.slice(3).join("-").trim();
-      var isOutletMatch = (!outlet || String(outlet).toLowerCase() === "semua" || rowOutlet.toLowerCase() === String(outlet).toLowerCase());
+      var isOutletMatch = matchesOutlet(rowOutlet, outlet);
       
       if (isOutletMatch) {
         var d = parseInt(idParts[0], 10);

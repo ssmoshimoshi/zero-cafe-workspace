@@ -357,7 +357,64 @@ window.renderInsightCharts = function(insights) {
             y: { display: false, beginAtZero: true }
           }
         }
+    } else if (ins.modul === 'Analisis Menu' && ins.chartData) {
+      const topData = ins.chartData.top.slice(0, 5);
+      const bottomData = ins.chartData.bottom.slice(0, 5);
+      
+      const labels = [];
+      const data = [];
+      const colors = [];
+
+      topData.forEach(d => {
+        labels.push(d.nama);
+        data.push(d.count);
+        colors.push('#10B981'); // Emerald 500
       });
+      bottomData.forEach(d => {
+        labels.push(d.nama);
+        data.push(d.count);
+        colors.push('#F59E0B'); // Amber 500
+      });
+
+      if (labels.length > 0) {
+        ctx.parentElement.style.height = (labels.length * 35 + 40) + 'px';
+        
+        insightChartInstances[canvasId] = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Frekuensi Muncul',
+              data: data,
+              backgroundColor: colors,
+              borderRadius: 4,
+              barPercentage: 0.6
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return context.raw + ' kali muncul (' + Math.round((context.raw / ins.chartData.totalDays) * 100) + '%)';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { display: false, beginAtZero: true },
+              y: { 
+                grid: { display: false },
+                ticks: { font: { size: 10, weight: 'bold' }, color: '#171717' }
+              }
+            }
+          }
+        });
+      }
     }
   });
 };

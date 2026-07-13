@@ -2817,7 +2817,7 @@ function api_gm_getMarketingInsights(payloadStr) {
         var peringkat = pData[i][2].toString(); // Index 2 is Peringkat
         var nama = pData[i][3].toString(); // Index 3 is Nama_Produk
 
-        if (!rowDate || rowDate < startDate || rowDate > endDate) continue;
+        if (!rowDate || rowDate < startD.getTime() || rowDate > endD.getTime()) continue;
         if (!outletMatch(rowOut)) continue;
         if (!nama) continue;
 
@@ -2841,29 +2841,38 @@ function api_gm_getMarketingInsights(payloadStr) {
         if (topCount[nm] >= dayThreshold) heroMenus.push({ nama: nm, count: topCount[nm] });
       }
 
+      deadMenus.sort(function(a,b) { return b.count - a.count; });
+      heroMenus.sort(function(a,b) { return b.count - a.count; });
+
+      produkInsight.chartData = {
+        top: heroMenus,
+        bottom: deadMenus,
+        totalDays: totalDays
+      };
+
       produkInsight.status = totalDays < 4 ? "insufficient" : "ok";
       if (produkInsight.status === "insufficient") {
         produkInsight.desc = "Dibutuhkan minimal 4 hari data produk untuk mendeteksi pola konsisten.";
       } else if (deadMenus.length > 0 && heroMenus.length > 0) {
         produkInsight.level = "warning";
-        produkInsight.title = "Produk Mati & Produk Andalan Terdeteksi";
-        produkInsight.desc = "MATI: " + deadMenus.map(function(x){ return x.nama; }).join(", ") + ". ANDALAN: " + heroMenus.map(function(x){ return x.nama; }).join(", ") + ".";
-        produkInsight.action = "Pertimbangkan discontinue produk mati atau rebranding. Pastikan stok produk andalan tidak pernah habis.";
+        produkInsight.title = "Produk Andalan & Slow-Moving Terdeteksi";
+        produkInsight.desc = "SLOW-MOVING: " + deadMenus.map(function(x){ return x.nama; }).join(", ") + ". ANDALAN: " + heroMenus.map(function(x){ return x.nama; }).join(", ") + ".";
+        produkInsight.action = "Pertimbangkan bundling slow-moving produk dengan produk andalan, atau lakukan penyesuaian resep.";
       } else if (deadMenus.length > 0) {
-        produkInsight.level = "critical";
-        produkInsight.title = "Dead Menu Alert: " + deadMenus.length + " Produk Tidak Bergerak";
-        produkInsight.desc = "Produk yang konsisten di Bottom: " + deadMenus.map(function(x){ return x.nama + " (" + x.count + "x)"; }).join(", ") + ". Ini membuang slot menu dan stok bahan baku.";
-        produkInsight.action = "Evaluasi menu ini: discontinue, ganti resep, atau bundling dengan produk lain agar lebih menarik.";
+        produkInsight.level = "warning";
+        produkInsight.title = "Produk Perlu Perhatian: " + deadMenus.length + " Menu Slow-Moving";
+        produkInsight.desc = "Produk yang konsisten di urutan terbawah: " + deadMenus.map(function(x){ return x.nama + " (" + x.count + "x)"; }).join(", ") + ". Ini menahan perputaran stok bahan baku.";
+        produkInsight.action = "Evaluasi menu ini: pertimbangkan promo spesial, bundling, atau rekayasa menu.";
       } else if (heroMenus.length > 0) {
         produkInsight.level = "positive";
-        produkInsight.title = "Hero Product: " + heroMenus.map(function(x){ return x.nama; }).join(", ");
-        produkInsight.desc = "Produk ini konsisten jadi terlaris. Mesin pendapatan kafe Anda yang sesungguhnya.";
-        produkInsight.action = "Jadikan produk ini focal point promosi. Pastikan bahannya selalu tersedia dan barista mahir membuatnya.";
+        produkInsight.title = "Produk Andalan: " + heroMenus.map(function(x){ return x.nama; }).join(", ");
+        produkInsight.desc = "Produk ini konsisten menjadi daya tarik utama dan mesin pendapatan outlet Anda.";
+        produkInsight.action = "Jadikan produk ini focal point promosi. Pastikan stok bahan baku aman.";
       } else {
         produkInsight.level = "info";
-        produkInsight.title = "Penjualan Produk Seimbang";
-        produkInsight.desc = "Tidak ada produk yang dominan sebagai terlaris atau terendah secara konsisten. Penjualan relatif merata.";
-        produkInsight.action = "Lakukan A/B testing promo pada beberapa produk untuk mulai membentuk 'Hero Product'.";
+        produkInsight.title = "Penjualan Produk Merata";
+        produkInsight.desc = "Tidak ada produk yang dominan menduduki puncak atau dasar secara konsisten. Penjualan relatif merata.";
+        produkInsight.action = "Lakukan A/B testing promo pada beberapa produk potensial untuk membentuk Produk Andalan.";
       }
     }
     insights.push(produkInsight);

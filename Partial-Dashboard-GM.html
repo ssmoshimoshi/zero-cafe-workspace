@@ -149,7 +149,7 @@ window.getDashboardGMTemplate = function() {
       `;
 
       // --- TRAFFIC LIGHT KPI CARDS ---
-      const tlSopColor = data.hygieneScore >= 95 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
+      const tlSopColor = op.kepatuhanSop >= 90 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
       const tlSalesColor = data.omsetTotal >= data.targetOmset && data.targetOmset > 0 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
       const tlKomplainColor = data.komplainTotal <= 2 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
       const tlTurnoverColor = op.turnoverBarista <= 1 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
@@ -157,8 +157,8 @@ window.getDashboardGMTemplate = function() {
       let trafficLightHtml = `
         <div class="grid grid-cols-4 gap-2 mb-6">
           <div class="${tlSopColor} border p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
-            <span class="text-[8px] uppercase tracking-widest font-bold opacity-80 mb-1">SOP &gt;= 95%</span>
-            <span class="text-sm font-black">${data.hygieneScore || 0}%</span>
+            <span class="text-[8px] uppercase tracking-widest font-bold opacity-80 mb-1">SOP &gt;= 90%</span>
+            <span class="text-sm font-black">${op.kepatuhanSop || 0}%</span>
           </div>
           <div class="${tlSalesColor} border p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
             <span class="text-[8px] uppercase tracking-widest font-bold opacity-80 mb-1">Target Penj.</span>

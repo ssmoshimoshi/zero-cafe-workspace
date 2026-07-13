@@ -1672,20 +1672,24 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
               dateCreated: bul
             });
             
-            operasionalData = {
-              isFallback: false,
-              kepatuhanSop: null, // UI will use hygieneScore instead
-              totalTelat: totalTelatRealtime, // Real-time from DB_Kehadiran_Staf
-              totalTeguran: totalTeguranDinamis, // Dynamically calculated from DB_Evaluasi_Staf
-              kendalaUtama: (mData[i][11] || "").toString(), // Tantangan (Col L / Index 11)
-              eskalasiFasilitas: "-", 
-              strategiDepan: (mData[i][14] || "").toString(), // Strategi_Bulan_Depan (Index 14)
-              kebutuhanGM: (mData[i][15] || "").toString(),   // Kebutuhan_Approval_GM (Index 15)
-              pencapaian: (mData[i][10] || "").toString(),    // Pencapaian (Col K / Index 10)
-              tantangan: (mData[i][11] || "").toString(),     // Tantangan (Col L / Index 11)
-              skill: "-",
-              turnoverBarista: Number(mData[i][13] || 0)      // Total_Turnover (Index 13)
-            };
+              var tVal = parseInt(mData[i][13], 10);
+              var sDepan = (mData[i][14] || "").toString();
+              var kGM = (mData[i][15] || "").toString();
+
+              operasionalData = {
+                isFallback: false,
+                kepatuhanSop: null, // UI will use hygieneScore instead
+                totalTelat: totalTelatRealtime, // Real-time from DB_Kehadiran_Staf
+                totalTeguran: totalTeguranDinamis, // Dynamically calculated from DB_Evaluasi_Staf
+                kendalaUtama: (mData[i][11] || "").toString() || "Tidak ada kendala", // Tantangan (Col L / Index 11)
+                eskalasiFasilitas: "-", 
+                strategiDepan: (sDepan && sDepan !== "-") ? sDepan : "Tidak ada catatan strategi", // Strategi_Bulan_Depan (Index 14)
+                kebutuhanGM: (kGM && kGM !== "-") ? kGM : "Tidak ada kebutuhan khusus",   // Kebutuhan_Approval_GM (Index 15)
+                pencapaian: (mData[i][10] || "").toString() || "Belum ada pencapaian",    // Pencapaian (Col K / Index 10)
+                tantangan: (mData[i][11] || "").toString() || "Tidak ada tantangan",     // Tantangan (Col L / Index 11)
+                skill: "-",
+                turnoverBarista: isNaN(tVal) ? 0 : tVal      // Total_Turnover (Index 13)
+              };
           }
         }
       }

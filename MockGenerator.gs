@@ -202,7 +202,8 @@ function writeArrayToSheet(ss, sheetName, dataArray) {
   var sheet = ss.getSheetByName(sheetName);
   if (sheet && dataArray.length > 0) {
     if (sheet.getLastRow() > 1) {
-      sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
+      // Clear exactly as many columns as we have in the new data to prevent errors
+      sheet.getRange(2, 1, sheet.getLastRow() - 1, Math.max(sheet.getLastColumn(), dataArray[0].length)).clearContent();
     }
     sheet.getRange(2, 1, dataArray.length, dataArray[0].length).setValues(dataArray);
   }

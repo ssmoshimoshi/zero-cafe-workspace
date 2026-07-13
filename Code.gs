@@ -2662,6 +2662,28 @@ function api_gm_getMarketingInsights(payloadStr) {
       var isDailyMode = totalRangeDays < 7;
       var salesMap = {};
       
+      // Pre-populate salesMap to ensure ALL periods in the range exist, even if empty
+      var tempD = new Date(startD.getTime());
+      while (tempD <= endD) {
+         var key;
+         if (isDailyMode) {
+             key = tempD.getTime();
+         } else {
+             var dayOfWeek = tempD.getDay();
+             var adjustedDay = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // Mon=0, Sun=6
+             var mondayDate = new Date(tempD.getFullYear(), tempD.getMonth(), tempD.getDate() - adjustedDay);
+             key = mondayDate.getTime();
+         }
+         
+         if (!salesMap[key]) {
+             salesMap[key] = { sales: 0, daysCount: 0, minDate: new Date(tempD.getTime()), maxDate: new Date(tempD.getTime()) };
+         } else {
+             if (tempD < salesMap[key].minDate) salesMap[key].minDate = new Date(tempD.getTime());
+             if (tempD > salesMap[key].maxDate) salesMap[key].maxDate = new Date(tempD.getTime());
+         }
+         tempD.setDate(tempD.getDate() + 1);
+      }
+      
       for (var i = 1; i < dData.length; i++) {
         var rowDateStr = (dData[i][1] || "").toString();
         var rowDateObj = parseDateToObj(rowDateStr);
@@ -2677,20 +2699,16 @@ function api_gm_getMarketingInsights(payloadStr) {
            if (isDailyMode) {
              groupKey = rowDateObj.getTime();
            } else {
-             var dayOfWeek = rowDateObj.getDay();
-             var adjustedDay = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // Mon=0, Sun=6
-             var mondayDate = new Date(rowDateObj.getFullYear(), rowDateObj.getMonth(), rowDateObj.getDate() - adjustedDay);
-             groupKey = mondayDate.getTime();
+             var rDayOfWeek = rowDateObj.getDay();
+             var rAdjustedDay = (rDayOfWeek === 0) ? 6 : rDayOfWeek - 1;
+             var rMondayDate = new Date(rowDateObj.getFullYear(), rowDateObj.getMonth(), rowDateObj.getDate() - rAdjustedDay);
+             groupKey = rMondayDate.getTime();
            }
            
-           if (!salesMap[groupKey]) {
-             salesMap[groupKey] = { sales: 0, daysCount: 0, minDate: rowDateObj, maxDate: rowDateObj };
+           if (salesMap[groupKey]) {
+             salesMap[groupKey].sales += rowOmset;
+             salesMap[groupKey].daysCount += 1;
            }
-           salesMap[groupKey].sales += rowOmset;
-           salesMap[groupKey].daysCount += 1;
-           
-           if (rowDateObj < salesMap[groupKey].minDate) salesMap[groupKey].minDate = rowDateObj;
-           if (rowDateObj > salesMap[groupKey].maxDate) salesMap[groupKey].maxDate = rowDateObj;
         }
       }
       

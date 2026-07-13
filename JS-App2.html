@@ -546,6 +546,50 @@ window.renderInsightCharts = function(insights) {
           cutout: '70%' // Donut style
         }
       });
+    } else if (ins.modul === 'Benchmarking ATS Industri' && ins.chartData) {
+      const labels = ['Aktual ATS', 'Benchmark ATS'];
+      const data = [ins.chartData.actual, ins.chartData.benchmark];
+      const colors = ['#171717', '#9CA3AF']; // Zero Black, Gray 400
+
+      insightChartInstances[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors,
+            borderRadius: 4,
+            barPercentage: 0.5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': Rp ' + context.raw.toLocaleString('id-ID');
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: {
+                callback: function(value) {
+                  return 'Rp ' + (value / 1000).toLocaleString('id-ID') + 'rb';
+                },
+                font: { size: 9 }
+              }
+            }
+          }
+        }
+      });
     }
   });
 };

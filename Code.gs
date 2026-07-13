@@ -3150,6 +3150,11 @@ function api_gm_getMarketingInsights(payloadStr) {
         var atsDiff = actualATS - effectiveBenchmark;
         var atsPct = effectiveBenchmark > 0 ? Math.round((atsDiff / effectiveBenchmark) * 100) : 0;
 
+        atsInsight.chartData = {
+          actual: actualATS,
+          benchmark: effectiveBenchmark
+        };
+        
         if (actualATS < effectiveBenchmark * 0.8) {
           atsInsight.level = "critical";
           atsInsight.title = "ATS Jauh di Bawah Benchmark (" + atsPct + "%)";

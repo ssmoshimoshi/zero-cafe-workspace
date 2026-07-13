@@ -81,12 +81,12 @@ function mock_DailyLoop(ss) {
       
       // Kehadiran (Perintis: Aman, Dg Tata: Sering Telat)
       if (outlet === "Perintis") {
-        kehadiran.push([idLaporan, "Eko", "Barista", "Perintis", "Perintis", "Tepat Waktu", "TIDAK", "-"]);
-        kehadiran.push([idLaporan, "Amel", "Kasir", "Perintis", "Perintis", "Tepat Waktu", "TIDAK", "-"]);
+        kehadiran.push([idLaporan, "Eko", "Barista", "Perintis", "Perintis", "Hadir", "TIDAK", "-"]);
+        kehadiran.push([idLaporan, "Amel", "Kasir", "Perintis", "Perintis", "Hadir", "TIDAK", "-"]);
       } else {
-        var telatBudi = Math.random() > 0.5 ? "Terlambat" : "Tepat Waktu";
+        var telatBudi = Math.random() > 0.5 ? "Terlambat" : "Hadir";
         kehadiran.push([idLaporan, "Budi", "Barista", "Dg Tata", "Dg Tata", telatBudi, "YA", telatBudi === "Terlambat" ? "Sering telat" : "-"]);
-        kehadiran.push([idLaporan, "Siti", "Kasir", "Dg Tata", "Dg Tata", "Tepat Waktu", "TIDAK", "-"]);
+        kehadiran.push([idLaporan, "Siti", "Kasir", "Dg Tata", "Dg Tata", "Hadir", "TIDAK", "-"]);
       }
       
       // Kas

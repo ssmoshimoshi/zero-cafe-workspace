@@ -2672,45 +2672,54 @@ function api_gm_getMarketingInsights(payloadStr) {
         
         if (rowDateObj >= startD && rowDateObj <= endD) {
            var rowOmset = Number(dData[i][6] || 0);
-           var diffTime = Math.abs(rowDateObj - startD);
-           var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
            
-           var groupIndex = isDailyMode ? diffDays : Math.floor(diffDays / 7);
-           
-           if (!salesMap[groupIndex]) {
-             salesMap[groupIndex] = { sales: 0, daysCount: 0, dateLabel: (isDailyMode ? (rowDateObj.getDate() + "/" + (rowDateObj.getMonth()+1)) : "Minggu " + (groupIndex + 1)) };
+           var groupKey;
+           if (isDailyMode) {
+             groupKey = rowDateObj.getTime();
+           } else {
+             var dayOfWeek = rowDateObj.getDay();
+             var adjustedDay = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // Mon=0, Sun=6
+             var mondayDate = new Date(rowDateObj.getFullYear(), rowDateObj.getMonth(), rowDateObj.getDate() - adjustedDay);
+             groupKey = mondayDate.getTime();
            }
-           salesMap[groupIndex].sales += rowOmset;
-           salesMap[groupIndex].daysCount += 1;
+           
+           if (!salesMap[groupKey]) {
+             salesMap[groupKey] = { sales: 0, daysCount: 0, minDate: rowDateObj, maxDate: rowDateObj };
+           }
+           salesMap[groupKey].sales += rowOmset;
+           salesMap[groupKey].daysCount += 1;
+           
+           if (rowDateObj < salesMap[groupKey].minDate) salesMap[groupKey].minDate = rowDateObj;
+           if (rowDateObj > salesMap[groupKey].maxDate) salesMap[groupKey].maxDate = rowDateObj;
         }
       }
       
       var salesData = [];
-      var maxGroupIndex = -1;
-      for (var gIdx in salesMap) {
-        if (Number(gIdx) > maxGroupIndex) maxGroupIndex = Number(gIdx);
-      }
+      var months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+      var sortedKeys = Object.keys(salesMap).map(Number).sort(function(a, b) { return a - b; });
       
-      // Ensure all groups are present
-      for (var g = 0; g <= maxGroupIndex; g++) {
-        var sVal = 0, dCount = 0, aVal = 0;
-        var label = isDailyMode ? ("H+" + g) : ("Minggu " + (g + 1));
-        if (salesMap[g]) {
-          sVal = salesMap[g].sales;
-          dCount = salesMap[g].daysCount;
-          aVal = dCount > 0 ? (sVal / dCount) : 0;
-          label = salesMap[g].dateLabel;
+      for (var k = 0; k < sortedKeys.length; k++) {
+        var key = sortedKeys[k];
+        var grp = salesMap[key];
+        var minD = grp.minDate;
+        var maxD = grp.maxDate;
+        var label = "";
+        
+        if (isDailyMode || minD.getTime() === maxD.getTime()) {
+           label = minD.getDate() + " " + months[minD.getMonth()];
         } else {
-           if (isDailyMode) {
-             var tempD = new Date(startD.getTime() + (g * 24 * 60 * 60 * 1000));
-             label = tempD.getDate() + "/" + (tempD.getMonth()+1);
+           if (minD.getMonth() === maxD.getMonth()) {
+               label = minD.getDate() + "-" + maxD.getDate() + " " + months[minD.getMonth()];
+           } else {
+               label = minD.getDate() + " " + months[minD.getMonth()] + " - " + maxD.getDate() + " " + months[maxD.getMonth()];
            }
         }
+        
         salesData.push({
           periode: label,
-          sales: sVal,
-          avgSales: aVal,
-          daysCount: dCount
+          sales: grp.sales,
+          avgSales: grp.daysCount > 0 ? (grp.sales / grp.daysCount) : 0,
+          daysCount: grp.daysCount
         });
       }
 

@@ -347,7 +347,7 @@ window.renderInsightCharts = function(insights) {
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return 'Rp ' + context.raw.toLocaleString('id-ID');
+                  return 'Rata-rata: Rp ' + Math.round(context.raw).toLocaleString('id-ID');
                 }
               }
             }

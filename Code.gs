@@ -1594,6 +1594,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     
     // --- Real-Time SDM Aggregation ---
     var totalTelatRealtime = 0;
+    var sopTotalStaff = 0;
+    var sopCompliantStaff = 0;
     var sdData = getAggregatedData(ss, "DB_Kehadiran_Staf");
     for (var s = 1; s < sdData.length; s++) {
       var idLaporan = (sdData[s][0] || "").toString();
@@ -1609,13 +1611,27 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         
         if (dObj >= startD && dObj <= endD) {
           if (matchesOutlet(rowOutlet, outletFilter)) {
+            var posisi = (sdData[s][2] || "").toString().toLowerCase(); // Col C
             var statusHadir = (sdData[s][5] || "").toString().toLowerCase(); // Col F
+            var lengkapSOP = (sdData[s][6] || "").toString().toLowerCase(); // Col G
+            
             if (statusHadir === "terlambat") {
               totalTelatRealtime++;
+            }
+            if (posisi !== "kitchen" && (statusHadir === "hadir" || statusHadir === "terlambat")) {
+              sopTotalStaff++;
+              if (lengkapSOP === "tidak") {
+                sopCompliantStaff++;
+              }
             }
           }
         }
       }
+    }
+    
+    var kepatuhanSopValue = 0;
+    if (sopTotalStaff > 0) {
+      kepatuhanSopValue = Math.round((sopCompliantStaff / sopTotalStaff) * 100);
     }
 
     var operasionalData = null;
@@ -1702,7 +1718,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
 
               operasionalData = {
                 isFallback: false,
-                kepatuhanSop: null, // UI will use hygieneScore instead
+                kepatuhanSop: kepatuhanSopValue,
                 totalTelat: totalTelatRealtime, // Real-time from DB_Kehadiran_Staf
                 totalTeguran: totalTeguranDinamis, // Dynamically calculated from DB_Evaluasi_Staf
                 kendalaUtama: tantanganData || "-", // Tantangan (Col L / Index 11)
@@ -1722,7 +1738,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     if (!operasionalData) {
       operasionalData = {
         isFallback: true,
-        kepatuhanSop: null,
+        kepatuhanSop: kepatuhanSopValue,
         totalTelat: totalTelatRealtime,
         totalTeguran: totalTeguranDinamis, // Still show SP count even without monthly report
         kendalaUtama: "-",

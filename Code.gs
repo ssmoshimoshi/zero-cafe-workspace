@@ -1583,7 +1583,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         var m = parseInt(idParts[1], 10) - 1;
         var y = parseInt(idParts[2], 10);
         var dObj = new Date(y, m, d);
-        var rowOutlet = idParts.slice(3).join("-").trim();
+        var rowOutlet = idParts.slice(3).join("-").trim().replace(/_/g, " ");
         
         if (dObj >= startD && dObj <= endD) {
           if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
@@ -1613,7 +1613,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         var evM = parseInt(evIdParts[1], 10) - 1;
         var evY = parseInt(evIdParts[2], 10);
         var evDate = new Date(evY, evM, evD);
-        var evOutlet = evIdParts.slice(3).join("-").trim();
+        var evOutlet = evIdParts.slice(3).join("-").trim().replace(/_/g, " ");
 
         if (evDate >= startD && evDate <= endD) {
           if (!outletFilter || outletFilter === "Semua" || evOutlet === outletFilter) {
@@ -1785,7 +1785,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           var m = parseInt(idParts[1], 10) - 1;
           var y = parseInt(idParts[2], 10);
           var dObj = new Date(y, m, d);
-          var rowOutlet = idParts.slice(3).join("-").trim();
+          var rowOutlet = idParts.slice(3).join("-").trim().replace(/_/g, " ");
           
           var matches = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
           if (matches && dObj >= startD && dObj <= endD) {

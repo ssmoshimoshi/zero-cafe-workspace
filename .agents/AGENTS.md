@@ -19,6 +19,11 @@
 - **Data-Driven UI (Vanilla JS):** Selalu manfaatkan rendering dinamis (misalnya `.map()`). Jika ukuran input berubah (contoh: Top 3 menjadi Top 5), cukup ubah inisialisasi state awal (array) di `resetFormData` dan batasan potong (*slice*) di backend. Jangan pernah men-hardcode indeks HTML secara statis.
 - **Format Tanggal Global (Indonesia - DD-MM-YYYY):** Semua format tanggal, baik yang ditampilkan di UI (teks, alert, modal) maupun yang disimpan di dalam DATABASE (Google Sheets) dan pembuatan `ID_Laporan` WAJIB menggunakan format `DD-MM-YYYY`. Hal ini mutlak untuk memudahkan GM saat membaca data di spreadsheet. 
 - *Pengecualian teknis:* Hanya elemen HTML `<input type="date">` yang boleh menggunakan `YYYY-MM-DD` secara internal di browser agar sistem kalender tidak *error*, namun nilai tersebut WAJIB dikonversi ke `DD-MM-YYYY` oleh Javascript sebelum dikirim ke backend / GAS.
+- **Self-Explanatory GM Dashboard & Visual Storytelling:** 
+  - Data di level GM harus bisa langsung dipahami tanpa perlu melacak logika *backend*.
+  - Utamakan visualisasi grafis (Diagram Batang, Donut, Scatter Plot, Dual-Axis) dibandingkan dengan *accordion* berisi teks padat.
+  - Setiap wawasan data (AI Insight) harus dengan jelas menyebutkan basis data yang digunakan (misalnya, "Berdasarkan rata-rata harian..." atau "Membandingkan omset terhadap Skor Kebersihan...").
+  - Hindari diksi kasar/negatif pada UI presentasi. Gunakan istilah bisnis profesional (contoh: ganti "Produk Mati" menjadi "Slow-Moving Product", atau "Produk Perlu Perhatian").
 
 ## Kebiasaan Kolaborasi & Aturan Eksekusi (The "NO CODING" / "BRAINSTORMING" Rule)
 - **Review Sebelum Eksekusi (Anti Sok Pintar):** Setelah membuat *Implementation Plan* atau *Task List*, DILARANG KERAS untuk langsung mengeksekusi *coding* atau bertindak sendiri. Berhenti memanggil *tools* dan beri waktu pengguna untuk mencermati daftar tugas tersebut. Tunggu *approval* (persetujuan) dan arahan spesifik dari pengguna mengenai tugas mana yang harus diprioritaskan terlebih dahulu.

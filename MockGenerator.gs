@@ -143,8 +143,11 @@ function mock_WeeklyMonthly(ss) {
       var teguran = outlet === "Perintis" ? 0 : 3;
       var tantangan = outlet === "Perintis" ? "Mempertahankan omset" : "Mesin sering rusak, SDM telat";
       var biayaEkstra = outlet === "Perintis" ? 0 : 1500000;
+      var turnoverDummy = outlet === "Perintis" ? 0 : 1;
+      var strategiDummy = outlet === "Perintis" ? "Tingkatkan promosi" : "Perbaikan alat & rekrutmen";
+      var kebutuhanGMDummy = outlet === "Perintis" ? "-" : "Approval budget teknisi";
       
-      bulan.push([idBulan, pd, outlet, spv, actualSales, targetSales, persen, rating, rating, telat, "Sesuai Target", tantangan, biayaEkstra, "-"]);
+      bulan.push([idBulan, pd, outlet, spv, actualSales, targetSales, persen, rating, rating, telat, "Sesuai Target", tantangan, biayaEkstra, turnoverDummy, strategiDummy, kebutuhanGMDummy, "-"]);
       
       // Evaluasi Staf Bulanan
       if (outlet === "Perintis") {

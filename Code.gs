@@ -1601,23 +1601,41 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     // --- Hitung Teguran (SP) dinamis dari DB_Evaluasi_Staf ---
     var totalTeguranDinamis = 0;
     var evSheet = ss.getSheetByName("DB_Evaluasi_Staf");
+    
+    // We need targetBul (MM-YYYY) for parsing monthly IDs
+    var targetBul = monthPrefix;
+    if (monthPrefix.indexOf("-") !== -1) {
+      var p = monthPrefix.split("-");
+      targetBul = p[1] + "-" + p[0]; // e.g., 07-2026
+    }
+    
     if (evSheet) {
       var evData = evSheet.getDataRange().getValues();
       for (var e = 1; e < evData.length; e++) {
         var evId = (evData[e][0] || "").toString();
         var evIdParts = evId.split("-");
-        // Only read daily-format IDs (DD-MM-YYYY-Outlet), skip monthly IDs
-        if (evIdParts.length < 4) continue;
-
-        var evD = parseInt(evIdParts[0], 10);
-        var evM = parseInt(evIdParts[1], 10) - 1;
-        var evY = parseInt(evIdParts[2], 10);
-        var evDate = new Date(evY, evM, evD);
-        var evOutlet = evIdParts.slice(3).join("-").trim().replace(/_/g, " ");
-
-        if (evDate >= startD && evDate <= endD) {
+        var evOutlet = "";
+        var inRange = false;
+        
+        if (evIdParts.length >= 4) {
+          // Format Harian: DD-MM-YYYY-Outlet
+          var evD = parseInt(evIdParts[0], 10);
+          var evM = parseInt(evIdParts[1], 10) - 1;
+          var evY = parseInt(evIdParts[2], 10);
+          var evDate = new Date(evY, evM, evD);
+          evOutlet = evIdParts.slice(3).join("-").trim().replace(/_/g, " ");
+          if (evDate >= startD && evDate <= endD) inRange = true;
+        } else if (evIdParts.length === 3) {
+          // Format Bulanan/Mingguan: MM-YYYY-Outlet (atau MM-YYYY-Outlet)
+          var mmyyyy = evIdParts[0] + "-" + evIdParts[1];
+          evOutlet = evIdParts[2].trim().replace(/_/g, " ");
+          if (mmyyyy === targetBul) inRange = true;
+        }
+        
+        if (inRange) {
           if (!outletFilter || outletFilter === "Semua" || evOutlet === outletFilter) {
             var catatan = (evData[e][5] || "").toString().toLowerCase(); // Col F: Catatan_Kinerja
+
             if (catatan.indexOf("sp") !== -1 || catatan.indexOf("teguran") !== -1 || catatan.indexOf("peringatan") !== -1) {
               totalTeguranDinamis++;
             }

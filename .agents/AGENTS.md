@@ -1,8 +1,8 @@
 # Zero Cafe Workspace Rules
 
 ## Workflow & Efisiensi Token
-- **Pendekatan Bertahap (Incremental):** Selalu pengerjaan fitur secara bertahap (satu atau dua fitur per sesi). Jangan memproses terlalu banyak permintaan besar sekaligus untuk menjaga *context window* tetap kecil dan menghemat penggunaan token, serta memudahkan pelacakan *bug*.
-- **Eksekusi Bertahap (Sequential Execution):** Jika membuat tugas (*task*) yang memiliki beberapa tahapan, jangan mengeksekusi tahapan-tahapan tersebut sekaligus. Selesaikan tahapan satu per satu secara berurutan sesuai dengan rencana (*plan*) tahapan yang telah disusun sendiri sebelum berlanjut ke tahap berikutnya.
+- **Pendekatan Bertahap Mutlak (Strict Incremental):** DILARANG KERAS memproses lebih dari 1 (satu) perbaikan bug, 1 tab, atau 1 fitur dalam satu giliran jika pengguna meminta pengerjaan bertahap. Selesaikan tepat 1 item kecil, lalu SEGERA berhenti memanggil tools dan kembalikan kendali ke pengguna untuk melakukan pengujian/validasi.
+- **Jeda Konfirmasi Wajib (Mandatory Pause & Confirm):** Setelah menyelesaikan satu langkah mikro (misalnya: memodifikasi satu file untuk 1 bug), agen wajib berhenti berpikir/memanggil tool, melaporkan perubahannya secara ringkas, dan menunggu respons "Lanjut" atau persetujuan pengguna sebelum melangkah ke masalah berikutnya. Jangan pernah berasumsi untuk melanjutkan otomatis.
 - **Pemilihan Model (High vs Low):** 
   - Utamakan model **Pro High** (atau model dengan tingkat nalar tertinggi) untuk merancang arsitektur, mengubah logika backend yang krusial, atau menyusun *Implementation Plan*. Ini mencegah regresi dan bug struktural.
   - Model **Low / Flash** sebaiknya hanya digunakan untuk tugas modifikasi UI yang sederhana atau *boilerplate code*.

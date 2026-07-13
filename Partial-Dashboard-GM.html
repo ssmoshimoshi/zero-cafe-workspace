@@ -15,6 +15,30 @@ window.getDashboardGMTemplate = function() {
   let strategiHtml = "";
   let hygieneAiHtml = "";
   
+  // Smart Briefing Mode Detection (harus dieksekusi selalu, meski data belum ditarik)
+  let diffDays = 1;
+  if (AppState.activeFilters && AppState.activeFilters.startDate && AppState.activeFilters.endDate) {
+    const start = new Date(AppState.activeFilters.startDate);
+    const end = new Date(AppState.activeFilters.endDate);
+    diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+  }
+  const isStrategis = diffDays > 90;
+  const isTaktis = diffDays > 7 && diffDays <= 90;
+  const isOperasional = diffDays <= 7;
+  
+  let modeTitle = "MODE OPERASIONAL";
+  let modeDesc = "Harian (≤7 Hari)";
+  let modeBadge = "bg-blue-100 text-blue-800 border-blue-200";
+  if (isStrategis) {
+    modeTitle = "MODE STRATEGIS";
+    modeDesc = "Jangka Panjang (>90 Hari)";
+    modeBadge = "bg-purple-100 text-purple-800 border-purple-200";
+  } else if (isTaktis) {
+    modeTitle = "MODE TAKTIS";
+    modeDesc = "Mingguan/Bulanan (8-90 Hari)";
+    modeBadge = "bg-indigo-100 text-indigo-800 border-indigo-200";
+  }
+  
   if (AppState.dashboardData) {
     const data = AppState.dashboardData;
       const op = data.operasionalData || {
@@ -44,29 +68,7 @@ window.getDashboardGMTemplate = function() {
         tenses = "History";
       }
       
-      // Smart Briefing Mode Detection
-      let diffDays = 1;
-      if (AppState.activeFilters && AppState.activeFilters.startDate && AppState.activeFilters.endDate) {
-        const start = new Date(AppState.activeFilters.startDate);
-        const end = new Date(AppState.activeFilters.endDate);
-        diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
-      }
-      const isStrategis = diffDays > 90;
-      const isTaktis = diffDays > 7 && diffDays <= 90;
-      const isOperasional = diffDays <= 7;
-      
-      let modeTitle = "MODE OPERASIONAL";
-      let modeDesc = "Harian (≤7 Hari)";
-      let modeBadge = "bg-blue-100 text-blue-800 border-blue-200";
-      if (isStrategis) {
-        modeTitle = "MODE STRATEGIS";
-        modeDesc = "Jangka Panjang (>90 Hari)";
-        modeBadge = "bg-purple-100 text-purple-800 border-purple-200";
-      } else if (isTaktis) {
-        modeTitle = "MODE TAKTIS";
-        modeDesc = "Mingguan/Bulanan (8-90 Hari)";
-        modeBadge = "bg-indigo-100 text-indigo-800 border-indigo-200";
-      }
+      // Blok filter pindah ke atas
 
       let summaryTitle = "";
       let summaryText = "";

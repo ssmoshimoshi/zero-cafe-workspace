@@ -92,7 +92,8 @@ function buildNewArchitecture() {
   setupSheet(ss, "DB_Laporan_Bulanan", [
     "ID_Laporan_Bulanan", "Bulan_Laporan", "Outlet", "Supervisor", 
     "Omset_Aktual", "Omset_Target", "Persen_Tercapai", "Rating_Kerja", 
-    "Kepatuhan_SOP", "Total_Telat", "Pencapaian", "Tantangan", "Total_Pengeluaran_Ekstra", "URL_PDF"
+    "Kepatuhan_SOP", "Total_Telat", "Pencapaian", "Tantangan", "Total_Pengeluaran_Ekstra",
+    "Total_Turnover", "Strategi_Bulan_Depan", "Kebutuhan_Approval_GM", "URL_PDF"
   ]);
   
   setupSheet(ss, "DB_Evaluasi_Staf", [
@@ -212,26 +213,11 @@ function getSheetForOutlet(ss, baseName, outlet) {
  * If none found, returns the base sheet (e.g. Daily) as a fallback.
  */
 function getAllOutletSheets(ss, baseName) {
-  var sheets = ss.getSheets();
   var found = [];
-  for (var i = 0; i < sheets.length; i++) {
-    var name = sheets[i].getName();
-    if (name.indexOf(baseName + "_") === 0) {
-      found.push(sheets[i]);
-    }
-  }
-  
-  // ALWAYS include the base sheet (e.g. Daily) to capture legacy or dummy data
   var baseSheet = ss.getSheetByName(baseName);
   if (baseSheet) {
     found.push(baseSheet);
   }
-  
-  if (baseName === "Kebersihan") {
-    var dbKebersihan = ss.getSheetByName("Database_Kebersihan");
-    if (dbKebersihan) found.push(dbKebersihan);
-  }
-  
   return found;
 }
 
@@ -335,7 +321,7 @@ function parseDateToObj(d) {
 function api_getMasterStaff() {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("MasterStaff");
+    var sheet = ss.getSheetByName("Master_Staff");
     if (!sheet) return [];
     
     var data = sheet.getDataRange().getValues();
@@ -360,7 +346,7 @@ function api_getMasterStaff() {
 function api_getAllMasterStaff() {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("MasterStaff");
+    var sheet = ss.getSheetByName("Master_Staff");
     if (!sheet) return [];
     
     var data = sheet.getDataRange().getValues();
@@ -385,9 +371,9 @@ function api_getAllMasterStaff() {
 function api_addMasterStaff(nama, posisi, outlet) {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("MasterStaff");
+    var sheet = ss.getSheetByName("Master_Staff");
     if (!sheet) {
-      sheet = ss.insertSheet("MasterStaff");
+      sheet = ss.insertSheet("Master_Staff");
       sheet.appendRow(["ID", "Nama", "Posisi", "Status", "Outlet"]);
     }
     
@@ -410,8 +396,8 @@ function api_addMasterStaff(nama, posisi, outlet) {
 function api_updateMasterStaff(id, nama, posisi, status, outlet) {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("MasterStaff");
-    if (!sheet) return {success: false, error: "Sheet MasterStaff tidak ditemukan"};
+    var sheet = ss.getSheetByName("Master_Staff");
+    if (!sheet) return {success: false, error: "Sheet Master_Staff tidak ditemukan"};
     
     var data = sheet.getDataRange().getValues();
     
@@ -442,15 +428,18 @@ function api_updateMasterStaff(id, nama, posisi, status, outlet) {
 function api_getMasterMenu() {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("Database_Produk");
+    var sheet = ss.getSheetByName("Master_Produk");
     if (!sheet) return { success: false, data: { minuman: [], makanan: [], snack: [] } };
     
     var data = sheet.getDataRange().getValues();
     var menuData = { minuman: [], makanan: [], snack: [] };
     
     for (var i = 1; i < data.length; i++) {
-      var cat = (data[i][3] || "").toString().toLowerCase(); // Kategori is in Column D (index 3)
-      var name = (data[i][5] || "").toString(); // Nama Produk is in Column F (index 5)
+      var status = (data[i][4] || "").toString().toLowerCase(); // Col E (index 4): Status
+      if (status !== "aktif") continue;
+      
+      var cat = (data[i][1] || "").toString().toLowerCase(); // Col B (index 1): Kategori
+      var name = (data[i][2] || "").toString(); // Col C (index 2): Nama Produk
       
       if (cat && name) {
         if (!menuData[cat]) menuData[cat] = [];
@@ -477,8 +466,8 @@ function api_getMasterMenu() {
 function api_addStaff(nama, posisi) {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("MasterStaff");
-    if (!sheet) throw new Error("Tab MasterStaff tidak ditemukan.");
+    var sheet = ss.getSheetByName("Master_Staff");
+    if (!sheet) throw new Error("Tab Master_Staff tidak ditemukan.");
     
     var lastRow = sheet.getLastRow();
     var nextId = 1;
@@ -641,11 +630,11 @@ function submitFullReport(payloadStr) {
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
       
       var ss = getSpreadsheet();
-      var sheet = getSheetForOutlet(ss, "Daily", data.outlet);
+      var sheet = ss.getSheetByName("DB_Laporan_Harian");
       var draftFileId = "";
       if (sheet && data.rowIdx) {
-        // Ambil File ID yang kita simpan di Kolom 8 saat submit Fase 1
-        draftFileId = sheet.getRange(data.rowIdx, 8).getValue();
+        // Ambil File ID yang kita simpan di Kolom 12 (URL_PDF) saat submit Fase 1
+        draftFileId = sheet.getRange(data.rowIdx, 12).getValue();
       }
       
       var draftData = null;
@@ -668,8 +657,8 @@ function submitFullReport(payloadStr) {
               var allData = sheet.getDataRange().getValues();
               var rowsToDelete = [];
               for (var i = allData.length - 1; i >= 1; i--) {
-                var rowStatus = allData[i][10] ? allData[i][10].toString() : "";
-                var rowOutlet = allData[i][2] ? allData[i][2].toString() : "";
+                var rowStatus = allData[i][5] ? allData[i][5].toString() : "";
+                var rowOutlet = allData[i][3] ? allData[i][3].toString() : "";
                 if (rowStatus === "Fase 1" && rowOutlet === (data.outlet || "Perintis").replace(/_/g, " ")) {
                    rowsToDelete.push(i + 1);
                 }
@@ -993,7 +982,11 @@ function submitFullReport(payloadStr) {
         idLaporanMonthly, bulanFormatted, data.outlet, data.supervisor,
         Number(data.monthly.sales.total || 0), Number(data.monthly.sales.target || 0), Number(data.monthly.sales.persen || 0),
         data.monthly.evaluasi.ratingKerja || "", Number(data.monthly.operasional.kepatuhanSop || 0), Number(data.monthly.operasional.telat || 0),
-        data.monthly.evaluasi.berhasil || "", data.monthly.evaluasi.sulit || "", Number(data.monthly.fasilitas.pengeluaran || 0), fileUrl
+        data.monthly.evaluasi.berhasil || "", data.monthly.evaluasi.sulit || "", Number(data.monthly.fasilitas.pengeluaran || 0),
+        Number(data.monthly.operasional.turnover || 0),       // Index 13: Total_Turnover
+        data.monthly.operasional.strategi || "",              // Index 14: Strategi_Bulan_Depan
+        data.monthly.operasional.kebutuhanGM || "",           // Index 15: Kebutuhan_Approval_GM
+        fileUrl                                                // Index 16: URL_PDF
       ]);
       
       // Auto-Sync Turnover Barista to MasterStaff
@@ -1020,6 +1013,28 @@ function submitFullReport(payloadStr) {
             idLaporanMonthly, s.nama || "", s.posisi || "", data.outlet, s.status || "", s.alasan || ""
           ]);
         });
+      }
+      
+      // Save Monthly Product Suggestions to DB_Kinerja_Produk
+      if (data.monthly.produk) {
+        var kpSheet = ss.getSheetByName("DB_Kinerja_Produk");
+        if (kpSheet) {
+          var categories = [
+            { keyBottom: "bottomMinuman", label: "Minuman" },
+            { keyBottom: "bottomMakanan", label: "Makanan" },
+            { keyBottom: "bottomSnack", label: "Snack" }
+          ];
+          categories.forEach(function(cat) {
+            if (data.monthly.produk[cat.keyBottom] && Array.isArray(data.monthly.produk[cat.keyBottom])) {
+              data.monthly.produk[cat.keyBottom].forEach(function(item) {
+                if (item && item.nama && item.nama.trim() !== "") {
+                  // Monthly ID format: MM-YYYY-Outlet
+                  kpSheet.appendRow([idLaporanMonthly, cat.label, "Bottom", item.nama, item.terjual || 0, item.rencana || ""]);
+                }
+              });
+            }
+          });
+        }
       }
     }
 
@@ -1065,7 +1080,41 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
     if (!idLaporan) continue;
     
     var idParts = idLaporan.split("-");
-    if (idParts.length >= 4) {
+    
+    // Monthly ID format: MM-YYYY-Outlet (3 parts)
+    if (idParts.length === 3) {
+      var mMonth = parseInt(idParts[0], 10) - 1;
+      var mYear = parseInt(idParts[1], 10);
+      var mOutlet = idParts[2].trim();
+      var isOutletMatch = (!outlet || String(outlet).toLowerCase() === "semua" || mOutlet.toLowerCase() === String(outlet).toLowerCase());
+      
+      // Check if monthly record falls in range (using first day of month)
+      var mDate = new Date(mYear, mMonth, 1).getTime();
+      // Since it's a monthly suggestion, we loosely match if the month falls within the start-end range
+      if (isOutletMatch && mDate >= new Date(new Date(start).getFullYear(), new Date(start).getMonth(), 1).getTime() && mDate <= end) {
+        var kategori = String(row[1]).toLowerCase().trim();
+        var peringkat = String(row[2]).toLowerCase().trim();
+        var nama = String(row[3]);
+        var rencana = String(row[5]);
+        
+        var key = "";
+        if (peringkat.indexOf("bottom") !== -1) {
+          if (kategori === "minuman") key = "bottomMinuman";
+          else if (kategori === "makanan") key = "bottomMakanan";
+          else if (kategori === "snack") key = "bottomSnack";
+        }
+        
+        if (key && nama && rencana) {
+          if (!agg[key][nama]) {
+            agg[key][nama] = { nama: nama, terjual: 0, rencana: "" };
+          }
+          // Overwrite with monthly suggestion from SPV
+          agg[key][nama].rencana = rencana;
+        }
+      }
+    }
+    // Daily ID format: DD-MM-YYYY-Outlet (4+ parts)
+    else if (idParts.length >= 4) {
       var rowOutlet = idParts.slice(3).join("-").trim();
       var isOutletMatch = (!outlet || String(outlet).toLowerCase() === "semua" || rowOutlet.toLowerCase() === String(outlet).toLowerCase());
       
@@ -1098,7 +1147,8 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
               agg[key][nama] = { nama: nama, terjual: 0, rencana: "" };
             }
             agg[key][nama].terjual += terjual;
-            if (rencana) {
+            // Only use daily suggestion if we don't have one yet
+            if (rencana && !agg[key][nama].rencana) {
               agg[key][nama].rencana = rencana;
             }
           }
@@ -1136,8 +1186,8 @@ function calculateAggregatedProducts(startDate, endDate, outlet) {
 function api_getWeeklyData(startDateStr, endDateStr, outlet) {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("Daily");
-    if (!sheet) return { success: false, error: "Tab Daily tidak ditemukan" };
+    var sheet = ss.getSheetByName("DB_Laporan_Harian");
+    if (!sheet) return { success: false, error: "Tab DB_Laporan_Harian tidak ditemukan" };
     
     var data = sheet.getDataRange().getValues();
     var startD = new Date(startDateStr);
@@ -1161,10 +1211,11 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       var rowDate = null;
-      if (row[0] instanceof Date) {
-        rowDate = row[0];
+      var dateCol = row[1]; // Col B (Tanggal)
+      if (dateCol instanceof Date) {
+        rowDate = dateCol;
       } else {
-        var dateParts = String(row[0]).split("-");
+        var dateParts = String(dateCol).split("-");
         if (dateParts.length === 3) {
           var d = parseInt(dateParts[0], 10);
           var m = parseInt(dateParts[1], 10) - 1;
@@ -1180,11 +1231,16 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
       if (rowDate) {
         // Normalize the time to midnight for accurate comparison
         var t = new Date(rowDate.getFullYear(), rowDate.getMonth(), rowDate.getDate()).getTime();
+        var rowOutlet = String(row[3]); // Col D (Outlet)
         
-        if (t >= start && t <= end && String(row[2]).toLowerCase() === String(outlet).toLowerCase()) {
+        if (t >= start && t <= end && rowOutlet.toLowerCase() === String(outlet).toLowerCase()) {
           var dayName = daysMap[rowDate.getDay()];
-          dailyTotals[dayName].real += Number(row[4] || 0);
-          dailyTotals[dayName].target += Number(row[8] || 0); // target is column 9 (index 8)
+          var omset = Number(row[6] || 0); // Col G (Total_Omset)
+          // Hardcode daily target since it's no longer stored in the daily sheet
+          var target = rowOutlet.toLowerCase() === "perintis" ? 6000000 : 5300000;
+          
+          dailyTotals[dayName].real += omset;
+          dailyTotals[dayName].target += target;
         }
       }
     }
@@ -1214,10 +1270,7 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
 function api_getMonthlyData(monthStr, outlet) {
   try {
     var ss = getSpreadsheet();
-    var sheet = ss.getSheetByName("Daily");
-    if (!sheet) return { success: false, error: "Tab Daily tidak ditemukan" };
     
-    var data = sheet.getDataRange().getValues();
     var monthParts = monthStr.split("-"); // [YYYY, MM]
     var targetYear = parseInt(monthParts[0], 10);
     var targetMonth = parseInt(monthParts[1], 10) - 1; // JS months are 0-11
@@ -1226,56 +1279,67 @@ function api_getMonthlyData(monthStr, outlet) {
     var totalTarget = 0;
     var totalKomplain = 0;
     
-    var totalTelat = 0;
-    var sopTotalStaff = 0;
-    var sopCompliantStaff = 0;
-    
-    for (var i = 1; i < data.length; i++) {
-      var row = data[i];
-      var rowDate = null;
-      if (row[0] instanceof Date) {
-        rowDate = row[0];
-      } else {
-        var dateParts = String(row[0]).split("-");
-        if (dateParts.length === 3) {
-          var d = parseInt(dateParts[0], 10);
-          var m = parseInt(dateParts[1], 10) - 1;
-          var y = parseInt(dateParts[2], 10);
-          if (y < 2000) { // Format is likely YYYY-MM-DD
-            y = parseInt(dateParts[0], 10);
-            d = parseInt(dateParts[2], 10);
+    var hSheet = ss.getSheetByName("DB_Laporan_Harian");
+    if (hSheet) {
+      var hData = hSheet.getDataRange().getValues();
+      for (var i = 1; i < hData.length; i++) {
+        var rowDate = null;
+        var dateCol = hData[i][1]; // Col C (Tanggal)
+        if (dateCol instanceof Date) {
+          rowDate = dateCol;
+        } else {
+          var dateParts = String(dateCol).split("-");
+          if (dateParts.length === 3) {
+            var d = parseInt(dateParts[0], 10);
+            var m = parseInt(dateParts[1], 10) - 1;
+            var y = parseInt(dateParts[2], 10);
+            if (y < 2000) { y = parseInt(dateParts[0], 10); d = parseInt(dateParts[2], 10); }
+            rowDate = new Date(y, m, d);
           }
-          rowDate = new Date(y, m, d);
         }
-      }
-      
-      if (rowDate) {
-        if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(row[2]).toLowerCase() === String(outlet).toLowerCase()) {
-          totalReal += Number(row[4] || 0); // Col E: Total Omset (shift1+shift2)
-          totalKomplain += Number(row[5] || 0); // Col F: Komplain
-          totalTarget += Number(row[8] || 0); // Col I: Target
+        
+        if (rowDate) {
+          if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(hData[i][3]).toLowerCase() === String(outlet).toLowerCase()) {
+            totalReal += Number(hData[i][6] || 0); // Col G: Total Omset
+            totalTarget += String(outlet).toLowerCase() === "perintis" ? 6000000 : 5300000;
+          }
         }
       }
     }
     
-    var stSheet = ss.getSheetByName("Staff_Daily");
+    var totalTelat = 0;
+    var sopTotalStaff = 0;
+    var sopCompliantStaff = 0;
+    
+    var stSheet = ss.getSheetByName("DB_Kehadiran_Staf");
     if (stSheet) {
       var stData = stSheet.getDataRange().getValues();
       for (var s = 1; s < stData.length; s++) {
         var sRow = stData[s];
-        if (String(sRow[1]) === monthStr && String(sRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
-          var posisi = String(sRow[6]);
-          var statusHadir = String(sRow[7]);
-          var keramahanMiss = String(sRow[8]);
+        var idLaporan = String(sRow[0] || "");
+        if (!idLaporan) continue;
+        
+        var idParts = idLaporan.split("-");
+        if (idParts.length >= 4) {
+          var d = parseInt(idParts[0], 10);
+          var m = parseInt(idParts[1], 10) - 1;
+          var y = parseInt(idParts[2], 10);
+          var rowOutlet = idParts.slice(3).join("-").trim();
           
-          if (statusHadir === 'Terlambat') {
-            totalTelat++;
-          }
-          
-          if (posisi !== 'Kitchen' && (statusHadir === 'Hadir' || statusHadir === 'Terlambat')) {
-            sopTotalStaff++;
-            if (keramahanMiss === 'TIDAK') {
-              sopCompliantStaff++;
+          if (y === targetYear && m === targetMonth && rowOutlet.toLowerCase() === String(outlet).toLowerCase()) {
+            var posisi = String(sRow[2]); // Col C
+            var statusHadir = String(sRow[5]); // Col F
+            var lengkapSOP = String(sRow[6]); // Col G
+            
+            if (statusHadir.toLowerCase() === 'terlambat') {
+              totalTelat++;
+            }
+            
+            if (posisi.toLowerCase() !== 'kitchen' && (statusHadir.toLowerCase() === 'hadir' || statusHadir.toLowerCase() === 'terlambat')) {
+              sopTotalStaff++;
+              if (lengkapSOP.toLowerCase() === 'tidak') {
+                sopCompliantStaff++;
+              }
             }
           }
         }
@@ -1288,63 +1352,7 @@ function api_getMonthlyData(monthStr, outlet) {
     }
     
     var totalTeguran = 0;
-    var swSheet = ss.getSheetByName("Staff_Weekly");
-    var staffMap = {};
-
-    if (swSheet) {
-      var swData = swSheet.getDataRange().getValues();
-      for (var w = 1; w < swData.length; w++) {
-        var wRow = swData[w];
-        if (String(wRow[1]) === monthStr && String(wRow[2]).toLowerCase() === String(outlet).toLowerCase()) {
-          var nama = String(wRow[4]);
-          var posisi = String(wRow[5]);
-          var evalStatus = String(wRow[6]);
-          var catatan = String(wRow[7]);
-
-          if (evalStatus === 'Menurun' || evalStatus === 'Menurun / Perlu Evaluasi') {
-            totalTeguran++;
-          }
-          
-          if (!staffMap[nama]) {
-            staffMap[nama] = { posisi: posisi, evals: [], catatans: [] };
-          }
-          staffMap[nama].evals.push(evalStatus);
-          if (catatan) staffMap[nama].catatans.push(catatan);
-        }
-      }
-    }
-    
-    // Hitung Tren Performa per Staf (Mode / Mayoritas)
-    var staffEvaluations = [];
-    for (var nama in staffMap) {
-      var s = staffMap[nama];
-      var counts = {};
-      var maxCount = 0;
-      var modeEval = "Stagnan";
-      
-      s.evals.forEach(function(e) {
-        counts[e] = (counts[e] || 0) + 1;
-        if (counts[e] > maxCount) {
-          maxCount = counts[e];
-          modeEval = e;
-        }
-      });
-      
-      // Normalisasi status untuk UI Bulanan
-      var finalStatus = "Stagnan";
-      if (modeEval.indexOf("Berkembang") !== -1) finalStatus = "Berkembang";
-      else if (modeEval.indexOf("Stagnan") !== -1) finalStatus = "Stagnan";
-      else if (modeEval.indexOf("Menurun") !== -1) finalStatus = "Menurun";
-      
-      var finalCatatan = s.catatans.join("; ");
-      
-      staffEvaluations.push({
-        nama: nama,
-        posisi: s.posisi,
-        status: finalStatus,
-        alasan: finalCatatan
-      });
-    }
+    var staffPerformances = [];
     
     var startDateStr = targetYear + "-" + (targetMonth + 1 < 10 ? "0" + (targetMonth + 1) : (targetMonth + 1)) + "-01";
     var endDateStr = targetYear + "-" + (targetMonth + 1 < 10 ? "0" + (targetMonth + 1) : (targetMonth + 1)) + "-" + new Date(targetYear, targetMonth + 1, 0).getDate();
@@ -1445,7 +1453,9 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     if (data.length <= 1) throw new Error("Belum ada data laporan harian.");
     
     var omsetTotal = 0;
+    var omsetYTD = 0;
     var targetOmset = 0;
+    var targetOmsetFallback = 0; // Fallback variable for resilience
     var omsetBulanLalu = 0;
     var komplainTotal = 0;
     var transaksiTotal = 0;
@@ -1454,7 +1464,6 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var cuacaHujan = 0;
     var cuacaCerah = 0;
     var outletStats = {};
-    var omsetYTD = 0;
     
     // Normalize inputs into Date objects
     var startD = parseDateToObj(startDate);
@@ -1510,7 +1519,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         
         if (rowDateObj >= startD && rowDateObj <= endD) {
           omsetTotal += rowOmset;
-          // targetOmset += rowTarget; (Removed: Now calculated dynamically from Config_Target)
+          targetOmsetFallback += rowTarget; // Graceful Fallback accumulation
           komplainTotal += 0; // Komplain data now saved elsewhere or calculated from feedback table
           transaksiTotal += Number(data[i][8] || 0); // Read real transaction data from col 9 (Index 8)
           
@@ -1588,6 +1597,35 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     }
 
     var operasionalData = null;
+
+    // --- Hitung Teguran (SP) dinamis dari DB_Evaluasi_Staf ---
+    var totalTeguranDinamis = 0;
+    var evSheet = ss.getSheetByName("DB_Evaluasi_Staf");
+    if (evSheet) {
+      var evData = evSheet.getDataRange().getValues();
+      for (var e = 1; e < evData.length; e++) {
+        var evId = (evData[e][0] || "").toString();
+        var evIdParts = evId.split("-");
+        // Only read daily-format IDs (DD-MM-YYYY-Outlet), skip monthly IDs
+        if (evIdParts.length < 4) continue;
+
+        var evD = parseInt(evIdParts[0], 10);
+        var evM = parseInt(evIdParts[1], 10) - 1;
+        var evY = parseInt(evIdParts[2], 10);
+        var evDate = new Date(evY, evM, evD);
+        var evOutlet = evIdParts.slice(3).join("-").trim();
+
+        if (evDate >= startD && evDate <= endD) {
+          if (!outletFilter || outletFilter === "Semua" || evOutlet === outletFilter) {
+            var catatan = (evData[e][5] || "").toString().toLowerCase(); // Col F: Catatan_Kinerja
+            if (catatan.indexOf("sp") !== -1 || catatan.indexOf("teguran") !== -1 || catatan.indexOf("peringatan") !== -1) {
+              totalTeguranDinamis++;
+            }
+          }
+        }
+      }
+    }
+
     var mData = getAggregatedData(ss, "DB_Laporan_Bulanan");
     // We need to compare monthPrefix (YYYY-MM) with the sheet format (MM-YYYY)
     var targetBul = monthPrefix;
@@ -1612,23 +1650,23 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           if (!outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter) {
             listLaporan.push({
               name: "Monthly Report - " + bul + " (" + (mData[i][3] || "") + ")", // Col D is SPV
-              url: mData[i][13], // Col N
+              url: mData[i][16], // Col Q (URL_PDF — now index 16 after adding 3 new columns)
               dateCreated: bul
             });
             
             operasionalData = {
               isFallback: false,
               kepatuhanSop: null, // UI will use hygieneScore instead
-              totalTelat: totalTelatRealtime, // Override with real-time data
-              totalTeguran: null, // Not in new schema directly, skip
-              kendalaUtama: (mData[i][11] || "").toString(), // Tantangan (Col L)
+              totalTelat: totalTelatRealtime, // Real-time from DB_Kehadiran_Staf
+              totalTeguran: totalTeguranDinamis, // Dynamically calculated from DB_Evaluasi_Staf
+              kendalaUtama: (mData[i][11] || "").toString(), // Tantangan (Col L / Index 11)
               eskalasiFasilitas: "-", 
-              strategiDepan: "-",
-              kebutuhanGM: "-",
-              pencapaian: (mData[i][10] || "").toString(), // Pencapaian (Col K)
-              tantangan: (mData[i][11] || "").toString(), // Tantangan (Col L)
+              strategiDepan: (mData[i][14] || "").toString(), // Strategi_Bulan_Depan (Index 14)
+              kebutuhanGM: (mData[i][15] || "").toString(),   // Kebutuhan_Approval_GM (Index 15)
+              pencapaian: (mData[i][10] || "").toString(),    // Pencapaian (Col K / Index 10)
+              tantangan: (mData[i][11] || "").toString(),     // Tantangan (Col L / Index 11)
               skill: "-",
-              turnoverBarista: null
+              turnoverBarista: Number(mData[i][13] || 0)      // Total_Turnover (Index 13)
             };
           }
         }
@@ -1640,7 +1678,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         isFallback: true,
         kepatuhanSop: null,
         totalTelat: totalTelatRealtime,
-        totalTeguran: null,
+        totalTeguran: totalTeguranDinamis, // Still show SP count even without monthly report
         kendalaUtama: "Menunggu Laporan Bulanan (Snapshot Sementara)",
         eskalasiFasilitas: "-",
         strategiDepan: "-",
@@ -1704,6 +1742,11 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var dailyTarget = monthlyTarget / daysInMonth;
     targetOmset = dailyTarget * durationDays;
     
+    // Graceful Fallback: If no target in Config_Target, use sum of daily targets
+    if (targetOmset === 0) {
+      targetOmset = targetOmsetFallback;
+    }
+    
     var productsData = {
       minuman: { top: [], bottom: [] },
       makanan: { top: [], bottom: [] },
@@ -1746,9 +1789,15 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           
           var matches = !outletFilter || outletFilter === "Semua" || rowOutlet === outletFilter;
           if (matches && dObj >= startD && dObj <= endD) {
+            var kategori = (kbData[i][1] || "").toString(); // Col B: Tipe_Inspeksi
+            // Only process "Kebersihan" rows — "Fasilitas" rows have text scores, not numbers
+            if (kategori !== "Kebersihan") continue;
+
             var area = kbData[i][2]; // Col C: Objek_Dicek
             var skor = Number(kbData[i][3]); // Col D: Skor_Kondisi
             var ket = kbData[i][5]; // Col F: Tindakan_Catatan
+            
+            if (isNaN(skor)) continue; // Skip if score is not a valid number
             
             hygieneScoreTotal += skor;
             hygieneCount++;
@@ -1870,18 +1919,25 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     }
 
     // AI 4: Deteksi Anomali Kasir (Petty Fraud - Frequency Analysis)
-    var auditKasData = getAggregatedData(ss, "Log_Audit_Kas");
+    var auditKasData = getAggregatedData(ss, "DB_Audit_Kas");
     var minusDates = [];
     var totalMinus = 0;
     
     // Find dates with minus
     for (var k = 1; k < auditKasData.length; k++) {
-       var dkObj = parseDateToObj(auditKasData[k][0]);
+       var akIdLaporan = String(auditKasData[k][0] || "");
+       if (!akIdLaporan) continue;
+       var akParts = akIdLaporan.split("-");
+       if (akParts.length < 4) continue;
+       
+       var akDateStr = akParts[0] + "-" + akParts[1] + "-" + akParts[2];
+       var dkObj = parseDateToObj(akDateStr);
        if (!dkObj) continue;
+       
        if (dkObj >= startD && dkObj <= endD) {
-          var rOut = (auditKasData[k][1] || "").toString();
-          if (!outletFilter || outletFilter === "Semua" || rOut === outletFilter) {
-             var selisih = Number(auditKasData[k][6] || 0);
+          var rOut = akParts.slice(3).join("-").trim().replace(/_/g, " ");
+          if (!outletFilter || outletFilter === "Semua" || rOut.toLowerCase() === outletFilter.toLowerCase()) {
+             var selisih = Number(auditKasData[k][7] || 0); // Col H (Index 7): Selisih
              if (selisih < -2000) { // Toleransi wajar 2rb
                 totalMinus += Math.abs(selisih);
                 var fDate = dkObj.getFullYear() + "-" + ("0" + (dkObj.getMonth()+1)).slice(-2) + "-" + ("0" + dkObj.getDate()).slice(-2);
@@ -1894,14 +1950,21 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     if (minusDates.length > 0 && totalMinus >= 50000) {
        var staffFreq = {};
        for (var s = 1; s < sdData.length; s++) { 
-          var sdObj = parseDateToObj(sdData[s][0]);
+          var sdIdLaporan = String(sdData[s][0] || "");
+          if (!sdIdLaporan) continue;
+          var sdParts = sdIdLaporan.split("-");
+          if (sdParts.length < 4) continue;
+          
+          var sdDateStr = sdParts[0] + "-" + sdParts[1] + "-" + sdParts[2];
+          var sdObj = parseDateToObj(sdDateStr);
           if (!sdObj) continue;
+          
           var fDate = sdObj.getFullYear() + "-" + ("0" + (sdObj.getMonth()+1)).slice(-2) + "-" + ("0" + sdObj.getDate()).slice(-2);
-          var sOutlet = (sdData[s][2] || "").toString();
-          var staffName = (sdData[s][4] || "").toString();
+          var sOutlet = sdParts.slice(3).join("-").trim().replace(/_/g, " ");
+          var staffName = (sdData[s][1] || "").toString(); // Col B (Index 1): Nama Staf
           
           for (var m = 0; m < minusDates.length; m++) {
-             if (minusDates[m].date === fDate && minusDates[m].outlet === sOutlet) {
+             if (minusDates[m].date === fDate && minusDates[m].outlet.toLowerCase() === sOutlet.toLowerCase()) {
                 staffFreq[staffName] = (staffFreq[staffName] || 0) + 1;
                 break;
              }
@@ -2552,7 +2615,7 @@ function api_gm_getMarketingInsights(payloadStr) {
     // ─────────────────────────────────────────────────────────────────
     // MODUL C1: Tren Omset Mingguan (Dinamis dari Data Harian)
     // ─────────────────────────────────────────────────────────────────
-    var dData = getAggregatedData(ss, "Daily");
+    var dData = getAggregatedData(ss, "DB_Laporan_Harian");
     var weeklyInsight = { modul: "Tren Omset Mingguan", status: "insufficient", level: "info", title: "", desc: "", action: "" };
     
     var startD = parseDateToObj(startDate);
@@ -2562,15 +2625,15 @@ function api_gm_getMarketingInsights(payloadStr) {
       var weeklySalesMap = {};
       
       for (var i = 1; i < dData.length; i++) {
-        var rowDateStr = (dData[i][0] || "").toString();
+        var rowDateStr = (dData[i][1] || "").toString(); // Col B (Index 1): Tanggal
         var rowDateObj = parseDateToObj(rowDateStr);
         if (!rowDateObj || isNaN(rowDateObj.getTime())) continue;
         
-        var rowOut = (dData[i][2] || "").toString();
+        var rowOut = (dData[i][3] || "").toString(); // Col D (Index 3): Outlet
         if (!outletMatch(rowOut)) continue;
         
         if (rowDateObj >= startD && rowDateObj <= endD) {
-           var rowOmset = Number(dData[i][4] || 0);
+           var rowOmset = Number(dData[i][6] || 0); // Col G (Index 6): Omset
            var diffTime = Math.abs(rowDateObj - startD);
            var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
            var weekIndex = Math.floor(diffDays / 7);
@@ -2638,51 +2701,60 @@ function api_gm_getMarketingInsights(payloadStr) {
 
     // ─────────────────────────────────────────────────────────────────
     // MODUL C2: Dead Menu / Hero Product
-    // Baca Database_Produk, hitung konsistensi top/bottom per produk
+    // Baca DB_Kinerja_Produk, hitung konsistensi top/bottom per produk
     // ─────────────────────────────────────────────────────────────────
-    var produkSheet = ss.getSheetByName("Database_Produk");
+    var produkSheet = ss.getSheetByName("DB_Kinerja_Produk");
     var produkInsight = { modul: "Analisis Menu", status: "insufficient", level: "info", title: "", desc: "", action: "" };
 
     if (produkSheet) {
       var pData = produkSheet.getDataRange().getValues();
       var bottomCount = {}; // { nama: count }
       var topCount = {};
-      var totalWeeks = 0;
-      var seenWeeks = {};
+      var totalDays = 0;
+      var seenDays = {};
 
       for (var i = 1; i < pData.length; i++) {
-        var rowDate = normDate(pData[i][0]);
-        var rowOut = pData[i][2].toString();
-        var peringkat = pData[i][4].toString();
-        var nama = pData[i][5].toString();
+        var idLaporan = pData[i][0].toString();
+        var idParts = idLaporan.split("-");
+        if(idParts.length < 4) continue; // Skip monthly suggestions
+        
+        var d = parseInt(idParts[0], 10);
+        var m = parseInt(idParts[1], 10) - 1;
+        var y = parseInt(idParts[2], 10);
+        var rowDate = new Date(y, m, d).getTime();
+        var rowDateStr = idParts[0] + "-" + idParts[1] + "-" + idParts[2];
+        
+        var rowOut = idParts.slice(3).join("-").trim();
+        var peringkat = pData[i][2].toString(); // Index 2 is Peringkat
+        var nama = pData[i][3].toString(); // Index 3 is Nama_Produk
 
         if (!rowDate || rowDate < startDate || rowDate > endDate) continue;
         if (!outletMatch(rowOut)) continue;
         if (!nama) continue;
 
-        if (!seenWeeks[rowDate]) { seenWeeks[rowDate] = true; totalWeeks++; }
+        if (!seenDays[rowDateStr]) { seenDays[rowDateStr] = true; totalDays++; }
 
-        if (peringkat === "Bottom") {
+        if (peringkat.indexOf("Bottom") !== -1) {
           bottomCount[nama] = (bottomCount[nama] || 0) + 1;
-        } else if (peringkat === "Top") {
+        } else if (peringkat.indexOf("Top") !== -1) {
           topCount[nama] = (topCount[nama] || 0) + 1;
         }
       }
 
-      var weekThreshold = Math.max(2, Math.floor(totalWeeks * 0.6)); // 60% dari periode
+      var dayThreshold = Math.max(2, Math.floor(totalDays * 0.4)); // 40% dari hari
 
       var deadMenus = [];
       for (var nm in bottomCount) {
-        if (bottomCount[nm] >= weekThreshold) deadMenus.push({ nama: nm, count: bottomCount[nm] });
+        if (bottomCount[nm] >= dayThreshold) deadMenus.push({ nama: nm, count: bottomCount[nm] });
       }
       var heroMenus = [];
       for (var nm in topCount) {
-        if (topCount[nm] >= weekThreshold) heroMenus.push({ nama: nm, count: topCount[nm] });
+        if (topCount[nm] >= dayThreshold) heroMenus.push({ nama: nm, count: topCount[nm] });
       }
 
-      produkInsight.status = totalWeeks < 4 ? "insufficient" : "ok";
+      produkInsight.status = totalDays < 4 ? "insufficient" : "ok";
       if (produkInsight.status === "insufficient") {
-        produkInsight.desc = "Dibutuhkan minimal 4 minggu data produk untuk mendeteksi pola konsisten.";
+        produkInsight.desc = "Dibutuhkan minimal 4 hari data produk untuk mendeteksi pola konsisten.";
       } else if (deadMenus.length > 0 && heroMenus.length > 0) {
         produkInsight.level = "warning";
         produkInsight.title = "Produk Mati & Produk Andalan Terdeteksi";
@@ -2711,8 +2783,8 @@ function api_gm_getMarketingInsights(payloadStr) {
     // MODUL C3: Korelasi Kebersihan × Omset
     // ─────────────────────────────────────────────────────────────────
     // ─────────────────────────────────────────────────────────────────
-    var dData = getAggregatedData(ss, "Daily");
-    var kbData2 = getAggregatedData(ss, "Kebersihan");
+    var dData = getAggregatedData(ss, "DB_Laporan_Harian");
+    var kbData2 = getAggregatedData(ss, "DB_Inspeksi_Operasional");
     var hygieneInsight = { modul: "Korelasi Kebersihan & Omset", status: "insufficient", level: "info", title: "", desc: "", action: "" };
 
     if (dData.length > 1 && kbData2 && kbData2.length > 1) {
@@ -2720,22 +2792,37 @@ function api_gm_getMarketingInsights(payloadStr) {
       var totalOmset = 0, omsetCount = 0;
       var targetTotal = 0;
       for (var i = 1; i < dData.length; i++) {
-        var rd = normDate(dData[i][0]);
+        var rowDateStr = (dData[i][1] || "").toString(); // Col B (Index 1): Tanggal
+        var rd = normDate(rowDateStr);
         if (!rd || rd < startDate || rd > endDate) continue;
-        if (!outletMatch(dData[i][2].toString())) continue;
-        totalOmset += Number(dData[i][4] || 0);
-        targetTotal += Number(dData[i][8] || 0);
+        var rowOut = (dData[i][3] || "").toString(); // Col D (Index 3): Outlet
+        if (!outletMatch(rowOut)) continue;
+        
+        totalOmset += Number(dData[i][6] || 0); // Col G (Index 6): Omset
+        targetTotal += rowOut.toLowerCase() === "perintis" ? 6000000 : 5300000;
         omsetCount++;
       }
 
       // Hitung skor kebersihan rata-rata
       var kbTotal = 0, kbCount = 0;
       for (var i = 1; i < kbData2.length; i++) {
-        var krd = normDate(kbData2[i][0]);
+        var idLaporan = String(kbData2[i][0] || "");
+        if (!idLaporan) continue;
+        var parts = idLaporan.split("-");
+        if (parts.length < 4) continue;
+        
+        var kbDateStr = parts[0] + "-" + parts[1] + "-" + parts[2];
+        var krd = normDate(kbDateStr);
         if (!krd || krd < startDate || krd > endDate) continue;
-        if (!outletMatch(kbData2[i][1].toString())) continue;
-        kbTotal += Number(kbData2[i][4] || 0);
-        kbCount++;
+        
+        var kbOutlet = parts.slice(3).join("-").trim().replace(/_/g, " ");
+        if (!outletMatch(kbOutlet)) continue;
+        
+        var kategori = String(kbData2[i][1] || "");
+        if (kategori.toLowerCase() === "kebersihan") {
+          kbTotal += Number(kbData2[i][3] || 0); // Col D (Index 3): Skor
+          kbCount++;
+        }
       }
 
       if (omsetCount < 7 || kbCount < 7) {
@@ -2780,59 +2867,57 @@ function api_gm_getMarketingInsights(payloadStr) {
 
     // ─────────────────────────────────────────────────────────────────
     // MODUL C4: SDM & Risiko Operasional
-    // Baca Monthly sheet untuk tren telat dan resign
+    // Baca DB_Kehadiran_Staf untuk tren keterlambatan
     // ─────────────────────────────────────────────────────────────────
-    var monthlySheet2 = ss.getSheetByName("Monthly");
+    var hadirSheet = ss.getSheetByName("DB_Kehadiran_Staf");
     var sdmInsight = { modul: "SDM & Risiko Operasional", status: "insufficient", level: "info", title: "", desc: "", action: "" };
 
-    if (monthlySheet2) {
-      var mData = monthlySheet2.getDataRange().getValues();
-      var sdmRows = [];
+    if (hadirSheet) {
+      var hData = hadirSheet.getDataRange().getValues();
+      var telatCount = 0;
+      var totalHadir = 0;
 
-      for (var i = 1; i < mData.length; i++) {
-        var rowOut = mData[i][2].toString();
+      for (var i = 1; i < hData.length; i++) {
+        var idLaporan = hData[i][0].toString();
+        var idParts = idLaporan.split("-");
+        if(idParts.length < 4) continue;
+        
+        var d = parseInt(idParts[0], 10);
+        var m = parseInt(idParts[1], 10) - 1;
+        var y = parseInt(idParts[2], 10);
+        var rowDate = new Date(y, m, d).getTime();
+        var rowOut = idParts.slice(3).join("-").trim();
+        var statusHadir = hData[i][5].toString().toLowerCase();
+
+        if (!rowDate || rowDate < startDate || rowDate > endDate) continue;
         if (!outletMatch(rowOut)) continue;
-        // Col: [0]Bulan [9]Telat [10]Teguran [18]Resign [21]Komplain
-        sdmRows.push({
-          bulan: mData[i][0].toString(),
-          telat: Number(mData[i][9] || 0),
-          teguran: Number(mData[i][10] || 0),
-          resign: Number(mData[i][18] || 0),
-          komplain: Number(mData[i][21] || 0)
-        });
-      }
 
-      sdmRows.sort(function(a, b) { return a.bulan.localeCompare(b.bulan); });
-
-      if (sdmRows.length < 1) {
-        sdmInsight.status = "insufficient";
-        sdmInsight.desc = "Dibutuhkan minimal 1 Laporan Bulanan untuk analisis SDM.";
-      } else {
-        sdmInsight.status = "ok";
-        var latest = sdmRows[sdmRows.length - 1];
-        var issues = [];
-
-        if (latest.resign > 0 && latest.komplain > 5) {
-          sdmInsight.level = "critical";
-          sdmInsight.title = "Sinyal Bahaya: Resign + Komplain Naik Bersamaan";
-          sdmInsight.desc = latest.resign + " staf resign bulan ini dan komplain mencapai " + latest.komplain + " kasus. Kemungkinan besar kualitas layanan turun karena kekosongan SDM.";
-          sdmInsight.action = "Prioritas rekrutmen pengganti. Bagi tugas tim sisa secara merata dan awasi kualitas layanan ekstra ketat.";
-        } else if (latest.telat >= 5) {
-          sdmInsight.level = "warning";
-          sdmInsight.title = "Keterlambatan Staf Tinggi: " + latest.telat + " Kali";
-          sdmInsight.desc = "Jumlah keterlambatan " + latest.telat + " kali bulan ini melebihi batas toleransi. Ini biasanya sinyal jadwal shift tidak cocok atau masalah motivasi.";
-          sdmInsight.action = "Evaluasi jadwal shift. Pertimbangkan reward/punishment berbasis kehadiran yang lebih ketat.";
-        } else if (latest.teguran >= 3) {
-          sdmInsight.level = "warning";
-          sdmInsight.title = latest.teguran + " Teguran (SP) Bulan Ini";
-          sdmInsight.desc = "Jumlah SP (Surat Peringatan) yang dikeluarkan cukup tinggi. Jika ini berlanjut, ada risiko turnover yang tidak direncanakan.";
-          sdmInsight.action = "Review penyebab utama SP. Apakah ada pola berulang dari staf yang sama?";
-        } else {
-          sdmInsight.level = "positive";
-          sdmInsight.title = "Tim Stabil & Disiplin";
-          sdmInsight.desc = "Telat: " + latest.telat + ", Teguran: " + latest.teguran + ", Resign: " + latest.resign + ". Tidak ada indikator risiko SDM yang mengkhawatirkan.";
-          sdmInsight.action = "Pertahankan budaya kerja positif. Pertimbangkan program apresiasi (Employee of the Month).";
+        totalHadir++;
+        if (statusHadir.indexOf("terlambat") !== -1) {
+          telatCount++;
         }
+      }
+      
+      var telatRate = totalHadir > 0 ? (telatCount / totalHadir) * 100 : 0;
+      
+      sdmInsight.status = totalHadir < 5 ? "insufficient" : "ok";
+      if (sdmInsight.status === "insufficient") {
+        sdmInsight.desc = "Dibutuhkan lebih banyak data kehadiran staf untuk menganalisis pola kedisiplinan.";
+      } else if (telatRate > 15) {
+        sdmInsight.level = "critical";
+        sdmInsight.title = "Krisis Kedisiplinan: " + Math.round(telatRate) + "% Shift Terlambat";
+        sdmInsight.desc = "Tingkat keterlambatan sangat tinggi. Ini berisiko merusak The Zero Vibe karena pelayanan lambat atau tidak siap saat buka.";
+        sdmInsight.action = "Panggil SPV untuk evaluasi tegas. Jika staf terus melanggar, pertimbangkan Surat Peringatan (SP).";
+      } else if (telatRate > 5) {
+        sdmInsight.level = "warning";
+        sdmInsight.title = "Warning: Mulai Ada Pola Keterlambatan";
+        sdmInsight.desc = Math.round(telatRate) + "% shift mengalami keterlambatan staf.";
+        sdmInsight.action = "Minta SPV mengingatkan staf soal SOP kehadiran di briefing berikutnya.";
+      } else {
+        sdmInsight.level = "positive";
+        sdmInsight.title = "Kedisiplinan Sangat Baik";
+        sdmInsight.desc = "Tingkat keterlambatan hanya " + Math.round(telatRate) + "%. Tim bekerja dengan komitmen tinggi terhadap jadwal operasional.";
+        sdmInsight.action = "Beri apresiasi (reward lisan/bonus) ke tim untuk mempertahankan moral kerja positif.";
       }
     }
     insights.push(sdmInsight);
@@ -2849,11 +2934,11 @@ function api_gm_getMarketingInsights(payloadStr) {
     if (dData && dData.length > 1) {
       var totalOmsetATS = 0, totalTransATS = 0;
       for (var i = 1; i < dData.length; i++) {
-        var rd = normDate(dData[i][0]);
+        var rd = normDate(dData[i][1]);
         if (!rd || rd < startDate || rd > endDate) continue;
-        if (!outletMatch(dData[i][2].toString())) continue;
-        totalOmsetATS += Number(dData[i][4] || 0);
-        totalTransATS += Number(dData[i][9] || 0);
+        if (!outletMatch(dData[i][3].toString())) continue;
+        totalOmsetATS += Number(dData[i][6] || 0);
+        totalTransATS += Number(dData[i][8] || 0);
       }
 
       if (totalTransATS < 50) {
@@ -3033,8 +3118,8 @@ function trigger_NightlyCache(targetDateStr) {
                     ("0" + targetDate.getDate()).slice(-2);
   }
   
-  var dailyData = getAggregatedData(ss, "Daily");
-  var kebersihanData = getAggregatedData(ss, "Kebersihan");
+  var dailyData = getAggregatedData(ss, "DB_Laporan_Harian");
+  var kebersihanData = getAggregatedData(ss, "DB_Inspeksi_Operasional");
   
   var outlets = ["Perintis", "Dg Tata"]; // Asumsi outlet statis atau ambil dari config
   
@@ -3044,9 +3129,9 @@ function trigger_NightlyCache(targetDateStr) {
     // Filter data hari itu untuk outlet tersebut
     var dRow = null;
     for (var i = 1; i < dailyData.length; i++) {
-      var dDate = dailyData[i][0] ? parseDateToObj(dailyData[i][0]) : null;
+      var dDate = dailyData[i][2] ? parseDateToObj(dailyData[i][2]) : null;
       var strDate = dDate ? (dDate.getFullYear() + "-" + ("0" + (dDate.getMonth()+1)).slice(-2) + "-" + ("0" + dDate.getDate()).slice(-2)) : "";
-      if (dailyData[i][2] === out && strDate === targetDateStr) {
+      if (String(dailyData[i][3]).toLowerCase() === out.toLowerCase() && strDate === targetDateStr) {
         dRow = dailyData[i];
         break;
       }
@@ -3054,45 +3139,33 @@ function trigger_NightlyCache(targetDateStr) {
     
     var kRow = null;
     for (var j = 1; j < kebersihanData.length; j++) {
-      var kDate = kebersihanData[j][0] ? parseDateToObj(kebersihanData[j][0]) : null;
+      var kId = String(kebersihanData[j][0] || "");
+      if (!kId) continue;
+      var kParts = kId.split("-");
+      if (kParts.length < 4) continue;
+      var kbDateStr = kParts[0] + "-" + kParts[1] + "-" + kParts[2];
+      var kDate = parseDateToObj(kbDateStr);
       var strKDate = kDate ? (kDate.getFullYear() + "-" + ("0" + (kDate.getMonth()+1)).slice(-2) + "-" + ("0" + kDate.getDate()).slice(-2)) : "";
-      if (kebersihanData[j][2] === out && strKDate === targetDateStr) {
+      var kOutlet = kParts.slice(3).join("-").trim().replace(/_/g, " ");
+      if (kOutlet.toLowerCase() === out.toLowerCase() && strKDate === targetDateStr) {
         kRow = kebersihanData[j];
         break;
       }
     }
     
     if (dRow) {
-      var omset = Number(dRow[22] || 0) + Number(dRow[23] || 0); // Asumsi kolom omset ada di W (22) dan X (23)
-      var trx = Number(dRow[24] || 0); // Asumsi Y (24)
-      var komplain = 0;
-      var remake = 0;
-      var selisih = 0;
-      var cuaca = "Cerah"; // Default
+      var omset = Number(dRow[6] || 0); // Col G: Omset
+      var trx = Number(dRow[8] || 0); // Col I: Transaksi
+      var komplain = 0; // Not available in new daily schema directly
+      var remake = 0; 
+      var selisih = Number(dRow[9] || 0); // Col J: Selisih
+      var cuaca = "Cerah"; // Default, not tracked in daily schema anymore
       var telat = 0;
       var teguran = 0;
       
-      try {
-        var rawKomp = dRow[43]; // Kolom komplain
-        if (rawKomp) komplain = Number(rawKomp);
-        var rawRemake = dRow[44];
-        if (rawRemake) remake = Number(rawRemake);
-        var rawSelisih = dRow[26];
-        if (rawSelisih) selisih = Number(rawSelisih); // Asumsi kolom audit kas
-        
-        // Count telat dari JSON staff
-        var rawStaff = dRow[27];
-        if (rawStaff) {
-           var staffArr = JSON.parse(rawStaff);
-           for(var s=0; s<staffArr.length; s++) {
-             if (staffArr[s].status === "Telat") telat++;
-           }
-        }
-      } catch(e) {}
-      
       var skorKebersihan = 0;
       if (kRow) {
-         try { skorKebersihan = Number(kRow[4]); } catch(e){}
+         try { skorKebersihan = Number(kRow[3]); } catch(e){} // Col D: Skor
       }
       
       var newRow = [
@@ -3115,7 +3188,7 @@ function trigger_NightlyCache(targetDateStr) {
       var found = false;
       for (var c = 1; c < cacheData.length; c++) {
         var cDate = cacheData[c][0];
-        if (cDate && cDate.toString().indexOf(targetDateStr) !== -1 && cacheData[c][1] === out) {
+        if (cDate && cDate.toString().indexOf(targetDateStr) !== -1 && String(cacheData[c][1]).toLowerCase() === out.toLowerCase()) {
           cacheSheet.getRange(c + 1, 1, 1, newRow.length).setValues([newRow]);
           found = true;
           break;

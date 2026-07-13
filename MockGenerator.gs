@@ -94,10 +94,16 @@ function mock_DailyLoop(ss) {
       var selisih = outlet === "Dg Tata" && Math.random() > 0.8 ? -50000 : 0;
       kas.push([idLaporan, "Shift 2", outlet==="Perintis"?"Amel":"Siti", 1000000, 800000, 2000000, 2800000, selisih, selisih < 0 ? "Kurang kembalian" : "Aman"]);
       
-      // Produk
-      produk.push([idLaporan, "Minuman", "Top", "Kopi Varian 1", 40, "-"]);
-      produk.push([idLaporan, "Makanan", "Top", "Nasi Varian 2", 30, "-"]);
-      produk.push([idLaporan, "Snack", "Bottom", "Snack Varian 5", 2, "Perlu diskon"]);
+      // Produk (Generate 5 Top and 3 Bottom for each category)
+      var categories = ["Minuman", "Makanan", "Snack"];
+      categories.forEach(function(cat) {
+        for (var i = 1; i <= 5; i++) {
+          produk.push([idLaporan, cat, "Top", cat + " Unggulan " + i, Math.floor(Math.random() * 20) + 20, "-"]);
+        }
+        for (var j = 1; j <= 3; j++) {
+          produk.push([idLaporan, cat, "Bottom", cat + " Sepi " + j, Math.floor(Math.random() * 5) + 1, "-"]);
+        }
+      });
       
       // Inspeksi
       inspeksi.push([idLaporan, "Kebersihan", "Toilet", isHujan && outlet==="Dg Tata" ? 60 : 90, 0, isHujan && outlet==="Dg Tata" ? "Kotor bekas sepatu" : "Bersih"]);
@@ -146,6 +152,24 @@ function mock_WeeklyMonthly(ss) {
       } else {
         evStaf.push([idBulan, "Budi", "Barista", "Dg Tata", "C", "SP1 karena sering telat"]);
       }
+    }
+  }
+  
+  // Bulanan: Tambahkan Saran Produk dari SPV ke DB_Kinerja_Produk
+  var ss = getSpreadsheet();
+  var kpSheet = ss.getSheetByName("DB_Kinerja_Produk");
+  for (var p = 0; p < periods.length; p++) {
+    for (var o = 0; o < outlets.length; o++) {
+      var idBulan = periods[p] + "-" + outlets[o].replace(/\s+/g, "_");
+      var categories = ["Minuman", "Makanan", "Snack"];
+      categories.forEach(function(cat) {
+        for (var j = 1; j <= 3; j++) {
+          // Add Monthly ID mock suggestions
+          if (kpSheet) {
+            kpSheet.appendRow([idBulan, cat, "Bottom", cat + " Sepi " + j, 0, "Saran Laporan Bulanan: Diskon 50% atau hapus menu"]);
+          }
+        }
+      });
     }
   }
 

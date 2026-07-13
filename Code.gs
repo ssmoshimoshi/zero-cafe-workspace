@@ -2657,31 +2657,85 @@ function api_gm_getMarketingInsights(payloadStr) {
       return matchesOutlet(rowOutlet, outlet);
     }
 
+    var startD = parseDateToObj(startDate);
+    var endD = parseDateToObj(endDate);
+    var totalRangeDays = (startD && endD) ? Math.floor(Math.abs(endD - startD) / (1000 * 60 * 60 * 24)) + 1 : 0;
+    
+    var aggMode = "weekly";
+    if (totalRangeDays <= 10) {
+      aggMode = "daily";
+    } else if (totalRangeDays > 90) {
+      aggMode = "monthly";
+    }
+
+    function getGroupKeyStr(dateStr, mode) {
+      var parts = dateStr.split("-"); // YYYY-MM-DD
+      var y = parseInt(parts[0], 10);
+      var m = parseInt(parts[1], 10) - 1;
+      var d = parseInt(parts[2], 10);
+      var dateObj = new Date(y, m, d);
+      
+      if (mode === "daily") {
+        return dateStr;
+      } else if (mode === "weekly") {
+        var dayOfWeek = dateObj.getDay();
+        var adjustedDay = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+        var monday = new Date(y, m, d - adjustedDay);
+        var monD = monday.getDate();
+        var monM = monday.getMonth() + 1;
+        var monY = monday.getFullYear();
+        return monY + "-" + (monM < 10 ? "0" + monM : monM) + "-" + (monD < 10 ? "0" + monD : monD);
+      } else { // "monthly"
+        var monM = dateObj.getMonth() + 1;
+        return y + "-" + (monM < 10 ? "0" + monM : monM) + "-01";
+      }
+    }
+    
+    function getGroupLabel(groupKeyStr, mode) {
+      var parts = groupKeyStr.split("-"); // YYYY-MM-DD
+      var y = parseInt(parts[0], 10);
+      var m = parseInt(parts[1], 10) - 1;
+      var d = parseInt(parts[2], 10);
+      var months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+      
+      if (mode === "daily") {
+        return d + "/" + (m + 1);
+      } else if (mode === "weekly") {
+        var monday = new Date(y, m, d);
+        var sunday = new Date(y, m, d + 6);
+        if (monday.getMonth() === sunday.getMonth()) {
+          return monday.getDate() + "-" + sunday.getDate() + " " + months[monday.getMonth()];
+        } else {
+          return monday.getDate() + " " + months[monday.getMonth()] + "-" + sunday.getDate() + " " + months[sunday.getMonth()];
+        }
+      } else { // monthly
+        return months[m] + " " + y.toString().substring(2);
+      }
+    }
+
     // ─────────────────────────────────────────────────────────────────
     // MODUL C1: Tren Omset Mingguan (Dinamis dari Data Harian)
     // ─────────────────────────────────────────────────────────────────
     var dData = getAggregatedData(ss, "DB_Laporan_Harian");
     var weeklyInsight = { modul: "Tren Omset Mingguan", status: "insufficient", level: "info", title: "", desc: "", action: "" };
     
-    var startD = parseDateToObj(startDate);
-    var endD = parseDateToObj(endDate);
-    
     if (startD && endD && dData.length > 1) {
-      var totalRangeDays = Math.floor(Math.abs(endD - startD) / (1000 * 60 * 60 * 24)) + 1;
-      var isDailyMode = totalRangeDays < 7;
       var salesMap = {};
       
       // Pre-populate salesMap to ensure ALL periods in the range exist, even if empty
       var tempD = new Date(startD.getTime());
       while (tempD <= endD) {
          var key;
-         if (isDailyMode) {
+         if (aggMode === "daily") {
              key = tempD.getTime();
-         } else {
+         } else if (aggMode === "weekly") {
              var dayOfWeek = tempD.getDay();
              var adjustedDay = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // Mon=0, Sun=6
              var mondayDate = new Date(tempD.getFullYear(), tempD.getMonth(), tempD.getDate() - adjustedDay);
              key = mondayDate.getTime();
+         } else { // monthly
+             var monthStartDate = new Date(tempD.getFullYear(), tempD.getMonth(), 1);
+             key = monthStartDate.getTime();
          }
          
          if (!salesMap[key]) {
@@ -2704,13 +2758,16 @@ function api_gm_getMarketingInsights(payloadStr) {
            var rowOmset = Number(dData[i][6] || 0);
            
            var groupKey;
-           if (isDailyMode) {
+           if (aggMode === "daily") {
              groupKey = rowDateObj.getTime();
-           } else {
+           } else if (aggMode === "weekly") {
              var rDayOfWeek = rowDateObj.getDay();
              var rAdjustedDay = (rDayOfWeek === 0) ? 6 : rDayOfWeek - 1;
              var rMondayDate = new Date(rowDateObj.getFullYear(), rowDateObj.getMonth(), rowDateObj.getDate() - rAdjustedDay);
              groupKey = rMondayDate.getTime();
+           } else { // monthly
+             var rMonthStart = new Date(rowDateObj.getFullYear(), rowDateObj.getMonth(), 1);
+             groupKey = rMonthStart.getTime();
            }
            
            if (salesMap[groupKey]) {
@@ -2731,14 +2788,16 @@ function api_gm_getMarketingInsights(payloadStr) {
         var maxD = grp.maxDate;
         var label = "";
         
-        if (isDailyMode || minD.getTime() === maxD.getTime()) {
+        if (aggMode === "daily" || minD.getTime() === maxD.getTime()) {
            label = minD.getDate() + " " + months[minD.getMonth()];
-        } else {
+        } else if (aggMode === "weekly") {
            if (minD.getMonth() === maxD.getMonth()) {
                label = minD.getDate() + "-" + maxD.getDate() + " " + months[minD.getMonth()];
            } else {
                label = minD.getDate() + " " + months[minD.getMonth()] + " - " + maxD.getDate() + " " + months[maxD.getMonth()];
            }
+        } else { // monthly
+           label = months[minD.getMonth()] + " " + minD.getFullYear().toString().substring(2);
         }
         
         salesData.push({
@@ -2749,12 +2808,13 @@ function api_gm_getMarketingInsights(payloadStr) {
         });
       }
 
-      if (salesData.length < (isDailyMode ? 3 : 2)) {
+      var minDataCount = (aggMode === "daily" ? 3 : 2);
+      if (salesData.length < minDataCount) {
         weeklyInsight.status = "insufficient";
         weeklyInsight.level = "info";
         weeklyInsight.title = "Data Kurang";
-        weeklyInsight.desc = "Data harian tidak cukup untuk menganalisis tren omset mingguan.";
-        weeklyInsight.action = "Pastikan data harian terisi minimal untuk 2 periode.";
+        weeklyInsight.desc = "Data harian tidak cukup untuk menganalisis tren omset.";
+        weeklyInsight.action = "Pastikan data harian terisi minimal untuk " + minDataCount + " periode.";
       } else {
         var n = salesData.length;
         var lastAvg = salesData[n - 1].avgSales;
@@ -2902,7 +2962,8 @@ function api_gm_getMarketingInsights(payloadStr) {
         targetTotal += rowOut.toLowerCase() === "perintis" ? 6000000 : 5300000;
         omsetCount++;
         
-        dailyOmsetMap[rd] = (dailyOmsetMap[rd] || 0) + omset;
+        var gk = getGroupKeyStr(rd, aggMode);
+        dailyOmsetMap[gk] = (dailyOmsetMap[gk] || 0) + omset;
       }
 
       // Hitung skor kebersihan rata-rata
@@ -2928,15 +2989,18 @@ function api_gm_getMarketingInsights(payloadStr) {
           kbTotal += score;
           kbCount++;
           
-          if (!dailyHygieneMap[krd]) dailyHygieneMap[krd] = { sum: 0, count: 0 };
-          dailyHygieneMap[krd].sum += score;
-          dailyHygieneMap[krd].count++;
+          var gk = getGroupKeyStr(krd, aggMode);
+          if (!dailyHygieneMap[gk]) dailyHygieneMap[gk] = { sum: 0, count: 0 };
+          dailyHygieneMap[gk].sum += score;
+          dailyHygieneMap[gk].count++;
         }
       }
 
-      if (omsetCount < 7 || kbCount < 7) {
+      // We need enough grouped periods to make a valid correlation
+      var minC3Count = (aggMode === "daily" ? 7 : (aggMode === "weekly" ? 3 : 2));
+      if (omsetCount < 7 || kbCount < 7 || Object.keys(dailyOmsetMap).length < minC3Count) {
         hygieneInsight.status = "insufficient";
-        hygieneInsight.desc = "Dibutuhkan minimal 7 hari data harian dan kebersihan untuk korelasi yang valid.";
+        hygieneInsight.desc = "Dibutuhkan minimal " + (aggMode === "daily" ? "7" : "3") + " periode data untuk korelasi yang valid.";
       } else {
         hygieneInsight.status = "ok";
         var avgOmset = totalOmset / omsetCount;
@@ -2976,10 +3040,8 @@ function api_gm_getMarketingInsights(payloadStr) {
         for (var i = 0; i < sortedDates.length; i++) {
           var d = sortedDates[i];
           if (dailyHygieneMap[d]) {
-            var dateParts = d.split("-");
-            var displayDate = dateParts[2] + "/" + dateParts[1];
             chartData.push({
-              date: displayDate, // "DD/MM" format for chart label
+              date: getGroupLabel(d, aggMode),
               omset: dailyOmsetMap[d],
               hygiene: Math.round(dailyHygieneMap[d].sum / dailyHygieneMap[d].count)
             });

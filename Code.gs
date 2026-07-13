@@ -2862,6 +2862,7 @@ function api_gm_getMarketingInsights(payloadStr) {
       var totalDays = 0;
       var seenDays = {};
 
+      var validEntries = [];
       for (var i = 1; i < pData.length; i++) {
         var idLaporan = pData[i][0].toString();
         var idParts = idLaporan.split("-");
@@ -2881,24 +2882,69 @@ function api_gm_getMarketingInsights(payloadStr) {
         if (!outletMatch(rowOut)) continue;
         if (!nama) continue;
 
-        if (!seenDays[rowDateStr]) { seenDays[rowDateStr] = true; totalDays++; }
+        validEntries.push({ date: rowDate, dateStr: rowDateStr, peringkat: peringkat, nama: nama });
+      }
 
-        if (peringkat.indexOf("Bottom") !== -1) {
-          bottomCount[nama] = (bottomCount[nama] || 0) + 1;
-        } else if (peringkat.indexOf("Top") !== -1) {
-          topCount[nama] = (topCount[nama] || 0) + 1;
+      validEntries.sort(function(a, b) { return a.date - b.date; });
+
+      var uniqueDays = [];
+      var seenDaysMap = {};
+      for (var k = 0; k < validEntries.length; k++) {
+        var dStr = validEntries[k].dateStr;
+        if (!seenDaysMap[dStr]) {
+          seenDaysMap[dStr] = true;
+          uniqueDays.push(validEntries[k].date);
+        }
+      }
+      
+      var totalDays = uniqueDays.length;
+      var medianDate = totalDays > 0 ? uniqueDays[Math.floor(totalDays / 2)] : 0;
+
+      var bottomCount = {}; 
+      var topCount = {};
+      var topCountAwal = {};
+      var topCountAkhir = {};
+      var bottomCountAwal = {};
+      var bottomCountAkhir = {};
+
+      for (var j = 0; j < validEntries.length; j++) {
+        var entry = validEntries[j];
+        var isAwal = entry.date < medianDate;
+        
+        if (entry.peringkat.indexOf("Bottom") !== -1) {
+          bottomCount[entry.nama] = (bottomCount[entry.nama] || 0) + 1;
+          if (isAwal) bottomCountAwal[entry.nama] = (bottomCountAwal[entry.nama] || 0) + 1;
+          else bottomCountAkhir[entry.nama] = (bottomCountAkhir[entry.nama] || 0) + 1;
+        } else if (entry.peringkat.indexOf("Top") !== -1) {
+          topCount[entry.nama] = (topCount[entry.nama] || 0) + 1;
+          if (isAwal) topCountAwal[entry.nama] = (topCountAwal[entry.nama] || 0) + 1;
+          else topCountAkhir[entry.nama] = (topCountAkhir[entry.nama] || 0) + 1;
         }
       }
 
       var dayThreshold = Math.max(2, Math.floor(totalDays * 0.4)); // 40% dari hari
 
+      var getMomentum = function(awal, akhir, isTop) {
+        if (awal === 0 && akhir === 0) return "Stable";
+        var diff = akhir - awal;
+        if (diff > 0) return isTop ? "Rising Star" : "Worse";
+        if (diff < 0) return isTop ? "Fading" : "Improving";
+        return "Stable";
+      };
+
       var deadMenus = [];
       for (var nm in bottomCount) {
-        if (bottomCount[nm] >= dayThreshold) deadMenus.push({ nama: nm, count: bottomCount[nm] });
+        if (bottomCount[nm] >= dayThreshold) {
+          var momentum = getMomentum(bottomCountAwal[nm] || 0, bottomCountAkhir[nm] || 0, false);
+          deadMenus.push({ nama: nm, count: bottomCount[nm], momentum: momentum });
+        }
       }
       var heroMenus = [];
       for (var nm in topCount) {
-        if (topCount[nm] >= dayThreshold) heroMenus.push({ nama: nm, count: topCount[nm] });
+        if (topCount[nm] >= dayThreshold) {
+          var momentum = getMomentum(topCountAwal[nm] || 0, topCountAkhir[nm] || 0, true);
+          heroMenus.push({ nama: nm, count: topCount[nm], momentum: momentum });
+        }
       }
 
       deadMenus.sort(function(a,b) { return b.count - a.count; });

@@ -476,12 +476,12 @@ window.renderInsightCharts = function(insights) {
       const colors = [];
 
       topData.forEach(d => {
-        labels.push(d.nama);
+        labels.push(d.nama + (d.momentum ? ` [${d.momentum}]` : ''));
         data.push(d.count);
         colors.push('#10B981'); // Emerald 500
       });
       bottomData.forEach(d => {
-        labels.push(d.nama);
+        labels.push(d.nama + (d.momentum ? ` [${d.momentum}]` : ''));
         data.push(d.count);
         colors.push('#F59E0B'); // Amber 500
       });

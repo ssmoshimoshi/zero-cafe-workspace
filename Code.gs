@@ -2658,78 +2658,98 @@ function api_gm_getMarketingInsights(payloadStr) {
     var endD = parseDateToObj(endDate);
     
     if (startD && endD && dData.length > 1) {
-      var weeklySalesMap = {};
+      var totalRangeDays = Math.floor(Math.abs(endD - startD) / (1000 * 60 * 60 * 24)) + 1;
+      var isDailyMode = totalRangeDays < 7;
+      var salesMap = {};
       
       for (var i = 1; i < dData.length; i++) {
-        var rowDateStr = (dData[i][1] || "").toString(); // Col B (Index 1): Tanggal
+        var rowDateStr = (dData[i][1] || "").toString();
         var rowDateObj = parseDateToObj(rowDateStr);
         if (!rowDateObj || isNaN(rowDateObj.getTime())) continue;
         
-        var rowOut = (dData[i][3] || "").toString(); // Col D (Index 3): Outlet
+        var rowOut = (dData[i][3] || "").toString();
         if (!outletMatch(rowOut)) continue;
         
         if (rowDateObj >= startD && rowDateObj <= endD) {
-           var rowOmset = Number(dData[i][6] || 0); // Col G (Index 6): Omset
+           var rowOmset = Number(dData[i][6] || 0);
            var diffTime = Math.abs(rowDateObj - startD);
            var diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-           var weekIndex = Math.floor(diffDays / 7);
            
-           if (!weeklySalesMap[weekIndex]) {
-             weeklySalesMap[weekIndex] = 0;
+           var groupIndex = isDailyMode ? diffDays : Math.floor(diffDays / 7);
+           
+           if (!salesMap[groupIndex]) {
+             salesMap[groupIndex] = { sales: 0, daysCount: 0, dateLabel: (isDailyMode ? (rowDateObj.getDate() + "/" + (rowDateObj.getMonth()+1)) : "Minggu " + (groupIndex + 1)) };
            }
-           weeklySalesMap[weekIndex] += rowOmset;
+           salesMap[groupIndex].sales += rowOmset;
+           salesMap[groupIndex].daysCount += 1;
         }
       }
       
-      var weeklySales = [];
-      var maxWeekIndex = -1;
-      for (var wIdx in weeklySalesMap) {
-        if (Number(wIdx) > maxWeekIndex) maxWeekIndex = Number(wIdx);
+      var salesData = [];
+      var maxGroupIndex = -1;
+      for (var gIdx in salesMap) {
+        if (Number(gIdx) > maxGroupIndex) maxGroupIndex = Number(gIdx);
       }
       
-      // Ensure all weeks up to maxWeekIndex are present (fill gaps with 0)
-      for (var w = 0; w <= maxWeekIndex; w++) {
-        weeklySales.push({
-          periode: "Minggu " + (w + 1),
-          sales: weeklySalesMap[w] || 0
+      // Ensure all groups are present
+      for (var g = 0; g <= maxGroupIndex; g++) {
+        var sVal = 0, dCount = 0, aVal = 0;
+        var label = isDailyMode ? ("H+" + g) : ("Minggu " + (g + 1));
+        if (salesMap[g]) {
+          sVal = salesMap[g].sales;
+          dCount = salesMap[g].daysCount;
+          aVal = dCount > 0 ? (sVal / dCount) : 0;
+          label = salesMap[g].dateLabel;
+        } else {
+           if (isDailyMode) {
+             var tempD = new Date(startD.getTime() + (g * 24 * 60 * 60 * 1000));
+             label = tempD.getDate() + "/" + (tempD.getMonth()+1);
+           }
+        }
+        salesData.push({
+          periode: label,
+          sales: sVal,
+          avgSales: aVal,
+          daysCount: dCount
         });
       }
 
-      if (weeklySales.length < 3) {
-        weeklyInsight.status = "insufficient";
-        weeklyInsight.desc = "Dibutuhkan minimal 3 minggu data Weekly untuk mendeteksi tren.";
-      } else {
-        var n = weeklySales.length;
-        var last = weeklySales[n - 1].sales;
-        var prev = weeklySales[n - 2].sales;
-        var prev2 = weeklySales[n - 3].sales;
+      weeklyInsight.chartData = salesData; // Attach to insight for UI rendering
 
-        var isNaik3 = last > prev && prev > prev2;
-        var isTurun2 = last < prev && prev < prev2;
-        var isTurun3 = last < prev && prev < prev2;
-        var growthPct = prev > 0 ? Math.round(((last - prev) / prev) * 100) : 0;
+      if (salesData.length < (isDailyMode ? 3 : 2)) {
+        weeklyInsight.status = "insufficient";
+        weeklyInsight.desc = "Dibutuhkan minimal " + (isDailyMode ? "3 hari" : "2 minggu") + " data untuk mendeteksi tren secara akurat.";
+      } else {
+        var n = salesData.length;
+        var lastAvg = salesData[n - 1].avgSales;
+        var prevAvg = salesData[n - 2].avgSales;
+        var prev2Avg = n > 2 ? salesData[n - 3].avgSales : null;
+
+        var isNaik3 = prev2Avg !== null && (lastAvg > prevAvg && prevAvg > prev2Avg);
+        var isTurun2 = prev2Avg !== null && (lastAvg < prevAvg && prevAvg < prev2Avg);
+        var growthPct = prevAvg > 0 ? Math.round(((lastAvg - prevAvg) / prevAvg) * 100) : 0;
 
         weeklyInsight.status = "ok";
         if (isNaik3) {
           weeklyInsight.level = "positive";
-          weeklyInsight.title = "Tren Naik 3 Minggu Berturut";
-          weeklyInsight.desc = "Omset konsisten naik selama 3 minggu terakhir (" + (growthPct > 0 ? "+" : "") + growthPct + "% minggu ini). Momentum ini sangat ideal untuk memperkenalkan menu baru atau program bundling.";
-          weeklyInsight.action = "Manfaatkan momentum: luncurkan 1 promo baru minggu ini saat traffic sedang tinggi.";
-        } else if (isTurun2) {
+          weeklyInsight.title = "Tren Naik Beruntun";
+          weeklyInsight.desc = "Omset rata-rata konsisten naik (" + (growthPct > 0 ? "+" : "") + growthPct + "% terakhir). Momentum ini sangat ideal untuk memperkenalkan menu baru.";
+          weeklyInsight.action = "Manfaatkan momentum: luncurkan 1 promo baru saat traffic sedang tinggi.";
+        } else if (isTurun2 || (growthPct <= -15)) {
           weeklyInsight.level = "critical";
-          weeklyInsight.title = "Tren Turun 2–3 Minggu Berturut";
-          weeklyInsight.desc = "Omset turun " + Math.abs(growthPct) + "% dan sudah berlangsung lebih dari 2 minggu. Ini bukan fluktuasi biasa — ada sesuatu yang sistemik.";
-          weeklyInsight.action = "Tindakan segera: evaluasi apakah ada kompetitor baru, perubahan jam ramai, atau penurunan kualitas layanan.";
+          weeklyInsight.title = "Peringatan: Penurunan Omset (" + growthPct + "%)";
+          weeklyInsight.desc = "Rata-rata omset turun " + Math.abs(growthPct) + "%. " + (isTurun2 ? "Penurunan sudah berlangsung konsisten." : "Penurunan sangat tajam di periode terakhir.");
+          weeklyInsight.action = "Tindakan segera: evaluasi apakah ada kompetitor baru, faktor cuaca buruk, atau penurunan kualitas layanan.";
         } else if (Math.abs(growthPct) < 5) {
           weeklyInsight.level = "warning";
           weeklyInsight.title = "Omset Stagnan (Flat)";
-          weeklyInsight.desc = "Perubahan omset minggu ini sangat kecil (" + growthPct + "%). Bisnis tidak tumbuh dan tidak turun — tapi stagnansi adalah sinyal bahaya jangka panjang.";
-          weeklyInsight.action = "Coba strategi baru: promo limited-time, konten sosmed, atau bundling produk yang kurang laris.";
+          weeklyInsight.desc = "Perubahan omset sangat kecil (" + growthPct + "%). Bisnis tidak tumbuh — stagnansi adalah sinyal bahaya jangka panjang.";
+          weeklyInsight.action = "Coba strategi baru: promo limited-time, konten sosmed, atau bundling produk.";
         } else {
           weeklyInsight.level = "info";
           weeklyInsight.title = "Omset Fluktuatif Normal";
-          weeklyInsight.desc = "Omset bergerak " + (growthPct > 0 ? "naik" : "turun") + " " + Math.abs(growthPct) + "% minggu ini. Fluktuasi masih dalam batas wajar.";
-          weeklyInsight.action = "Pantau tren 2–3 minggu ke depan untuk deteksi pola lebih kuat.";
+          weeklyInsight.desc = "Omset bergerak " + (growthPct > 0 ? "naik" : "turun") + " " + Math.abs(growthPct) + "%. Fluktuasi rata-rata harian masih dalam batas wajar.";
+          weeklyInsight.action = "Pantau tren periode ke depan untuk deteksi pola lebih kuat.";
         }
       }
     }

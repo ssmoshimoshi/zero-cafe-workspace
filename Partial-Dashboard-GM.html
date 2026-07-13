@@ -889,6 +889,11 @@ window.renderInsights = function(insights, summary, badgesEl, containerEl) {
         </summary>
         <div class="bg-white px-4 py-3 border-t ${cfg.border}">
           <p class="text-[11px] text-gray-600 leading-relaxed mb-3">${ins.desc}</p>
+          ${ins.chartData ? `
+          <div class="w-full h-40 mb-3 relative">
+            <canvas id="insight-chart-${idx}"></canvas>
+          </div>
+          ` : ''}
           <div class="flex items-start gap-2 bg-zero-black/5 rounded-lg p-3">
             <span class="text-[8px] font-extrabold text-zero-black uppercase tracking-widest whitespace-nowrap mt-0.5">ACTION:</span>
             <p class="text-[10px] text-zero-black font-semibold leading-relaxed">${ins.action}</p>
@@ -898,6 +903,10 @@ window.renderInsights = function(insights, summary, badgesEl, containerEl) {
   });
 
   containerEl.innerHTML = html || '<p class="text-[10px] text-gray-400 text-center py-4">Tidak ada insight yang tersedia.</p>';
+  
+  if (typeof renderInsightCharts === 'function') {
+    setTimeout(() => renderInsightCharts(insights), 100);
+  }
 };
 
 window.openMasterStaffModal = function() {

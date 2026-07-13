@@ -85,3 +85,23 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
   clasp push -f && clasp deploy -i [ID] -d "Deskripsi"
   ```
 - Laporkan status keberhasilan commit dan push kepada pengguna setelahnya.
+
+## Konteks Bisnis Zero Cafe (Batasan & Tujuan Fundamental)
+
+- **LARANGAN KERAS — Saran Penambahan Stok:** Sistem ini TIDAK BOLEH memberikan saran atau membangun fitur apapun yang berkaitan dengan manajemen stok bahan baku (penambahan stok, perkiraan kebutuhan stok, peringatan stok habis, dll). Data stok dikelola oleh akuntan eksternal dan owner secara eksplisit menolak domain ini masuk ke dalam app. Jika agen secara tidak sengaja menyarankan ini, hentikan langsung dan koreksi.
+
+- **Tujuan Utama App = KPI Tracking:** Seluruh arsitektur, fitur baru, dan analisis yang diusulkan agen HARUS dapat dijawab dengan pertanyaan: *"Apakah fitur ini membantu owner mengukur atau mencapai KPI Zero Cafe?"* Jika tidak bisa dijawab — fitur tersebut tidak perlu dibangun saat ini.
+
+- **KPI Resmi Zero Cafe (Referensi Mutlak untuk Evaluasi Fitur):**
+  1. **SOP Compliance (Kepatuhan Operasional):** ≥90%
+  2. **Audit Acak Accuracy:** ≥95% (diukur lewat audit acak)
+  3. **Rata-rata Penjualan Harian:** Tidak boleh turun dari target yang ditetapkan
+  4. **Komplain Pelanggan Serius:** ≤2 per bulan
+  5. **Turnover Barista:** ≤1 orang per 3 bulan
+
+- **App = Indikator Kedisiplinan Staf:** Salah satu fungsi utama app ini adalah memberikan data objektif kepada owner tentang pola perilaku staf di lapangan (keterlambatan, kepatuhan SOP keramahan, kehadiran). Fitur apapun yang melemahkan atau menyembunyikan fungsi ini tidak boleh dihapus atau disimplifikasi.
+
+- **Omset & Target Berbasis SOP Zero:** Penggunaan target omset harian dalam sistem bukan sekadar angka finansial — ini adalah bagian dari Standard Operating Procedure Zero Cafe. Agen tidak boleh mempertanyakan relevansi target ini, menyarankan penghapusannya, atau menyarankan sistem kompensasi target apapun.
+
+- **GM = Owner Zero Cafe (Bukan Manajer Profesional):** Pengguna level "GM" di dalam app ini adalah owner langsung, bukan GM profesional berbayar. Implikasinya: (1) insight bisa lebih detail dan sensitif karena owner memiliki konteks operasional penuh, (2) tidak perlu "menyederhanakan" data secara berlebihan, (3) keputusan akhir ada sepenuhnya di tangan owner. Sistem ini adalah "mata dan telinga analitik" owner di outlet yang tidak bisa ia kunjungi setiap hari.
+

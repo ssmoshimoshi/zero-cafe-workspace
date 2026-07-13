@@ -254,6 +254,113 @@ function renderGMChart() {
   });
   const data = cData.map(d => d.omset);
   
+  // Deteksi Anomali (>2σ atau <-2σ)
+  let pointBgColors = [];
+  let pointRadii = [];
+  let pointBorderColors = [];
+  let anomalies = [];
+  let anomaliesHtml = '';
+  
+  if (data.length > 0) {
+    const mu = data.reduce((a, b) => a + b, 0) / data.length;
+    const variance = data.reduce((a, b) => a + Math.pow(b - mu, 2), 0) / data.length;
+    const sigma = Math.sqrt(variance);
+    
+    data.forEach((val, i) => {
+      if (val > mu + 2 * sigma && sigma > 0) {
+        pointBgColors.push('#3b82f6'); // blue
+        pointBorderColors.push('#ffffff');
+        pointRadii.push(5);
+        anomalies.push({ date: labels[i], type: 'positif', val: val });
+      } else if (val < Math.max(0, mu - 2 * sigma) && sigma > 0) {
+        pointBgColors.push('#ef4444'); // red
+        pointBorderColors.push('#ffffff');
+        pointRadii.push(5);
+        anomalies.push({ date: labels[i], type: 'negatif', val: val });
+      } else {
+        pointBgColors.push('#10b981');
+        pointBorderColors.push('#ffffff');
+        pointRadii.push(0);
+      }
+    });
+    
+    if (anomalies.length > 0) {
+      anomaliesHtml = `<div class="mt-3 p-3 bg-indigo-50 border-l-2 border-indigo-400 rounded-lg text-[9px] text-indigo-900 leading-relaxed shadow-sm">
+        <strong>⚡ DETEKSI ANOMALI (±2σ):</strong><br/>
+        ${anomalies.map(a => `<span class="${a.type === 'positif' ? 'text-blue-600' : 'text-red-600'} font-bold mt-1 block">● ${a.date} : Rp ${a.val.toLocaleString('id-ID')}</span><span class="block ml-3 opacity-80 text-[8px]">${a.type === 'positif' ? 'Lonjakan positif di luar batas kewajaran.' : 'Penurunan drastis di bawah rata-rata wajar.'}</span>`).join('')}
+      </div>`;
+    }
+  }
+  
+  const anomalyContainer = document.getElementById('anomalyContainer');
+  if (anomalyContainer) {
+    anomalyContainer.innerHTML = anomaliesHtml;
+  }
+
+  // Day-of-Week Intelligence
+  let dayStats = [
+    { name: 'Minggu', total: 0, count: 0 },
+    { name: 'Senin', total: 0, count: 0 },
+    { name: 'Selasa', total: 0, count: 0 },
+    { name: 'Rabu', total: 0, count: 0 },
+    { name: 'Kamis', total: 0, count: 0 },
+    { name: 'Jumat', total: 0, count: 0 },
+    { name: 'Sabtu', total: 0, count: 0 }
+  ];
+  
+  cData.forEach(d => {
+    // d.date is 'YYYY-MM-DD'
+    const dateObj = new Date(d.date);
+    if (!isNaN(dateObj.getTime())) {
+      const dayIdx = dateObj.getDay();
+      dayStats[dayIdx].total += d.omset;
+      dayStats[dayIdx].count += 1;
+    }
+  });
+  
+  const validDays = dayStats.filter(d => d.count > 0).map(d => ({
+    name: d.name,
+    avg: d.total / d.count
+  }));
+  
+  let dayOfWeekHtml = '';
+  if (validDays.length >= 3) {
+    validDays.sort((a, b) => b.avg - a.avg);
+    const bestDay = validDays[0];
+    const worstDay = validDays[validDays.length - 1];
+    
+    dayOfWeekHtml = `<div class="p-4 bg-gray-50 border border-gray-100 rounded-2xl shadow-sm text-[10px]">
+      <h4 class="font-bold text-zero-black uppercase tracking-widest mb-3 border-b border-gray-200 pb-2 flex items-center gap-2">
+        <svg class="w-4 h-4 text-zero-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Day-of-Week Intelligence
+      </h4>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white p-3 rounded-xl border border-emerald-100 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-8 h-8 bg-emerald-50 rounded-bl-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          </div>
+          <span class="block text-[8px] text-gray-400 uppercase tracking-widest mb-1">Hari Terkuat</span>
+          <span class="block text-emerald-600 font-black text-sm">${bestDay.name}</span>
+          <span class="block text-gray-500 font-bold mt-1">Rata: Rp ${Math.round(bestDay.avg).toLocaleString('id-ID')}</span>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-red-100 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-8 h-8 bg-red-50 rounded-bl-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+          </div>
+          <span class="block text-[8px] text-gray-400 uppercase tracking-widest mb-1">Hari Terlemah</span>
+          <span class="block text-red-600 font-black text-sm">${worstDay.name}</span>
+          <span class="block text-gray-500 font-bold mt-1">Rata: Rp ${Math.round(worstDay.avg).toLocaleString('id-ID')}</span>
+        </div>
+      </div>
+      <p class="text-[9px] text-gray-500 mt-3 italic leading-relaxed border-l-2 border-gray-300 pl-2">Insight: Alokasikan promosi agresif atau event khusus pada hari terlemah (${worstDay.name}) untuk menyeimbangkan revenue mingguan.</p>
+    </div>`;
+  }
+  
+  const dayOfWeekContainer = document.getElementById('dayOfWeekContainer');
+  if (dayOfWeekContainer) {
+    dayOfWeekContainer.innerHTML = dayOfWeekHtml;
+  }
+
   gmChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
@@ -266,9 +373,11 @@ function renderGMChart() {
         borderWidth: 2,
         tension: 0.3,
         fill: true,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        pointBackgroundColor: '#10b981',
+        pointRadius: pointRadii.length ? pointRadii : 0,
+        pointHoverRadius: 6,
+        pointBackgroundColor: pointBgColors.length ? pointBgColors : '#10b981',
+        pointBorderColor: pointBorderColors.length ? pointBorderColors : '#ffffff',
+        pointBorderWidth: 1.5,
       }]
     },
     options: {

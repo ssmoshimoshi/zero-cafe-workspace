@@ -34,7 +34,7 @@ window.getDashboardGMTemplate = function() {
         `<span class="text-[10px] font-bold ${trendColor} ml-2 ${trendBg} px-2 py-1 rounded-full flex items-center gap-1">${trendIcon} ${trendSign}${omsetTrendPercent.toFixed(1)}% bln lalu</span>` : 
         '';
 
-      const sopColor = op.kepatuhanSop >= 95 ? 'text-green-500' : (op.kepatuhanSop >= 80 ? 'text-yellow-500' : 'text-red-500');
+      const sopColor = op.kepatuhanSop >= 90 ? 'text-emerald-500' : (op.kepatuhanSop >= 70 ? 'text-yellow-500' : 'text-red-500');
       const qcColor = data.komplainTotal <= 2 ? 'text-green-500' : 'text-red-500';
 
       // Time-Awareness Detection
@@ -329,7 +329,7 @@ window.getDashboardGMTemplate = function() {
           <div class="p-5 bg-white">
             <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center shadow-sm transform transition-transform duration-300 hover:scale-[1.01] mb-4">
               <span class="text-[9px] text-gray-500 uppercase tracking-widest block font-bold mb-1">Kepatuhan SOP (Real-Time)</span>
-              <span class="text-3xl font-black ${data.hygieneScore >= 95 ? 'text-emerald-500' : 'text-red-500'}">${data.hygieneScore || 0}%</span>
+              <span class="text-3xl font-black ${op.kepatuhanSop >= 90 ? 'text-emerald-500' : (op.kepatuhanSop >= 70 ? 'text-yellow-500' : 'text-red-500')}">${op.kepatuhanSop || 0}%</span>
             </div>
             
             <div class="grid grid-cols-3 gap-3 mb-4">

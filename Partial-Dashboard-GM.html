@@ -14,6 +14,9 @@ window.getDashboardGMTemplate = function() {
   let kesehatanHtml = "";
   let strategiHtml = "";
   let hygieneAiHtml = "";
+  let fraudHtml = "";
+  let spvRevenueHtml = "";
+  let spvBriefingHtml = "";
   
   // Smart Briefing Mode Detection (harus dieksekusi selalu, meski data belum ditarik)
   let diffDays = 1;
@@ -482,8 +485,8 @@ window.getDashboardGMTemplate = function() {
         `;
       }
 
-      let fraudHtml = "";
-      // Gunakan diffDays yang sudah dihitung di atas (line 48)
+      let fraudHtml2 = "";
+      // Gunakan diffDays yang sudah dihitung di atas
       let isFraudEligible = diffDays <= 90;
       
       if (isFraudEligible && data.fraudStaff && data.fraudStaff.length > 0) {
@@ -507,7 +510,8 @@ window.getDashboardGMTemplate = function() {
         `;
       }
     
-    if (data.listLaporan.length === 0) {
+    const listLaporan = data.listLaporan || [];
+    if (listLaporan.length === 0) {
       reportsHtml = `
         <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
           <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-gray-400 uppercase tracking-widest cursor-pointer">
@@ -522,12 +526,12 @@ window.getDashboardGMTemplate = function() {
       reportsHtml = `
         <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
           <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
-            ARSIP LAPORAN PDF (${data.listLaporan.length})
+            ARSIP LAPORAN PDF (${listLaporan.length})
             <svg class="w-4 h-4 transform group-open:rotate-180 transition-transform text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
           </summary>
           <div class="p-5 bg-white">
             <div class="space-y-3">
-              ${data.listLaporan.map(item => `
+              ${listLaporan.map(item => `
                 <div class="flex justify-between items-center p-3 bg-gray-50 border border-gray-100 rounded-xl">
                   <div>
                     <h4 class="font-bold text-zero-black text-xs">${item.name}</h4>

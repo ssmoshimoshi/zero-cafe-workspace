@@ -66,6 +66,11 @@ function mock_DailyLoop(ss) {
       var isHujan = Math.random() > 0.7;
       var cuaca = isHujan ? cuacaList[3] : cuacaList[0];
       
+      var eventLokalList = ["Normal / Tidak Ada", "Event Kampus / Wisuda", "Tanggal Muda / Gajian", "Tanggal Tua"];
+      var profilList = ["Mahasiswa Nugas (Solo/Duo)", "Pekerja WFC (Solo)", "Rombongan Nongkrong"];
+      var randEvent = eventLokalList[Math.floor(Math.random() * eventLokalList.length)];
+      var randProfil = profilList[Math.floor(Math.random() * profilList.length)];
+      
       var targetOmset = outlet === "Perintis" ? 6000000 : 5300000;
       var baseOmset = outlet === "Perintis" ? 6500000 : 4500000;
       if (isHujan) baseOmset -= 1000000; // Omset turun kalau hujan
@@ -75,7 +80,7 @@ function mock_DailyLoop(ss) {
       var kendala = isHujan ? "Sepi karena hujan deras" : "Tidak ada kendala berarti";
       var saran = isHujan ? "Perbanyak promo delivery" : "Lanjutkan strategi upselling";
       
-      harian.push([idLaporan, dateStr, blnLaporan, outlet, spv, cuaca, omsetTotal, targetOmset, transaksi, kendala, saran, "-"]);
+      harian.push([idLaporan, dateStr, blnLaporan, outlet, spv, cuaca, omsetTotal, targetOmset, transaksi, kendala, saran, "-", randEvent, randProfil]);
       
       briefing.push([idLaporan, targetOmset, "Tingkatkan upselling minuman", isHujan ? "Hujan kemarin" : "-", "Tawarkan bundling"]);
       

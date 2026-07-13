@@ -877,7 +877,9 @@ function submitFullReport(payloadStr) {
         Number(data.penjualan.transaksi || 0),
         data.penutup.kendala || "",
         data.penutup.saran || "",
-        fileUrl
+        fileUrl,
+        data.eventLokal || "",
+        data.profilPengunjung || ""
       ]);
       
       // Insert DB_Briefing_Shift
@@ -1487,6 +1489,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var cuacaCerah = 0;
     var outletStats = {};
     var spvStats = {};
+    var eventStats = {};
+    var profilStats = {};
     
     // Normalize inputs into Date objects
     var startD = parseDateToObj(startDate);
@@ -1577,6 +1581,16 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           }
           spvStats[spvName].shifts++;
           spvStats[spvName].omset += rowOmset;
+          
+          // External Context & Profil
+          var rowEvent = (data[i][12] || "Normal / Tidak Ada").toString();
+          var rowProfil = (data[i][13] || "Campuran").toString();
+          
+          if (!eventStats[rowEvent]) eventStats[rowEvent] = 0;
+          eventStats[rowEvent]++;
+          
+          if (!profilStats[rowProfil]) profilStats[rowProfil] = 0;
+          profilStats[rowProfil]++;
           
         } else if (rowDateObj >= prevStartD && rowDateObj <= prevEndD) {
           omsetBulanLalu += rowOmset;
@@ -2144,6 +2158,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
         operasionalData: operasionalData,
         leaderboard: leaderboard,
         spvRevenue: spvRevenue,
+        eventStats: eventStats,
+        profilStats: profilStats,
         hygieneScore: hygieneScore,
         hygieneKritis: hygieneKritis,
         cuacaHujan: cuacaHujan,

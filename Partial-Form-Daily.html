@@ -223,16 +223,37 @@ function getDailyTabContent() {
             </div>
           </div>
           
-          <!-- Row 3: Cuaca -->
-          <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">CUACA DOMINAN HARI INI</label>
-            <select onchange="window.form.cuaca = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
-              <option value="" disabled ${!form.cuaca ? 'selected' : ''}>Pilih Kondisi Cuaca...</option>
-              <option value="Cerah / Panas" ${form.cuaca === 'Cerah / Panas' ? 'selected' : ''}>Cerah / Panas</option>
-              <option value="Mendung / Berawan" ${form.cuaca === 'Mendung / Berawan' ? 'selected' : ''}>Mendung / Berawan</option>
-              <option value="Hujan Gerimis" ${form.cuaca === 'Hujan Gerimis' ? 'selected' : ''}>Hujan Gerimis</option>
-              <option value="Hujan Deras / Badai" ${form.cuaca === 'Hujan Deras / Badai' ? 'selected' : ''}>Hujan Deras / Badai</option>
-            </select>
+          <!-- Row 3: Konteks Eksternal & Profil -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">CUACA DOMINAN</label>
+              <select onchange="window.form.cuaca = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+                <option value="" disabled ${!form.cuaca ? 'selected' : ''}>Pilih Cuaca...</option>
+                <option value="Cerah / Panas" ${form.cuaca === 'Cerah / Panas' ? 'selected' : ''}>Cerah / Panas</option>
+                <option value="Mendung / Berawan" ${form.cuaca === 'Mendung / Berawan' ? 'selected' : ''}>Mendung / Berawan</option>
+                <option value="Hujan Gerimis" ${form.cuaca === 'Hujan Gerimis' ? 'selected' : ''}>Hujan Gerimis</option>
+                <option value="Hujan Deras / Badai" ${form.cuaca === 'Hujan Deras / Badai' ? 'selected' : ''}>Hujan Deras / Badai</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">KONDISI/EVENT SEKITAR</label>
+              <select onchange="window.form.eventLokal = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+                <option value="" disabled ${!form.eventLokal ? 'selected' : ''}>Pilih Kondisi Eksternal...</option>
+                <option value="Normal / Tidak Ada" ${form.eventLokal === 'Normal / Tidak Ada' ? 'selected' : ''}>Normal / Tidak Ada</option>
+                <option value="Event Kampus / Wisuda" ${form.eventLokal === 'Event Kampus / Wisuda' ? 'selected' : ''}>Event Kampus / Wisuda</option>
+                <option value="Tanggal Muda / Gajian" ${form.eventLokal === 'Tanggal Muda / Gajian' ? 'selected' : ''}>Tanggal Muda / Gajian</option>
+                <option value="Tanggal Tua" ${form.eventLokal === 'Tanggal Tua' ? 'selected' : ''}>Tanggal Tua</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">PROFIL MAYORITAS PENGUNJUNG</label>
+              <select onchange="window.form.profilPengunjung = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+                <option value="" disabled ${!form.profilPengunjung ? 'selected' : ''}>Pilih Mayoritas Pengunjung...</option>
+                <option value="Mahasiswa Nugas (Solo/Duo)" ${form.profilPengunjung === 'Mahasiswa Nugas (Solo/Duo)' ? 'selected' : ''}>Mahasiswa Nugas (Solo/Duo)</option>
+                <option value="Pekerja WFC (Solo)" ${form.profilPengunjung === 'Pekerja WFC (Solo)' ? 'selected' : ''}>Pekerja WFC (Solo)</option>
+                <option value="Rombongan Nongkrong" ${form.profilPengunjung === 'Rombongan Nongkrong' ? 'selected' : ''}>Rombongan Nongkrong</option>
+              </select>
+            </div>
           </div>
         </div>
 

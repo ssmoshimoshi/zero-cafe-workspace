@@ -17,6 +17,7 @@ window.getDashboardGMTemplate = function() {
   let fraudHtml = "";
   let spvRevenueHtml = "";
   let spvBriefingHtml = "";
+  let marketingIntelligenceHtml = "";
   
   // Smart Briefing Mode Detection (harus dieksekusi selalu, meski data belum ditarik)
   let diffDays = 1;
@@ -615,6 +616,54 @@ window.getDashboardGMTemplate = function() {
       `;
     };
 
+    // === GENERATE MARKETING INTELLIGENCE HTML ===
+    let totalDaysWithEvent = 0;
+    let maxEvent = "Belum Ada Data";
+    let maxEventCount = 0;
+    if (data.eventStats) {
+      Object.keys(data.eventStats).forEach(key => {
+        let count = data.eventStats[key];
+        totalDaysWithEvent += count;
+        if (count > maxEventCount) {
+          maxEventCount = count;
+          maxEvent = key;
+        }
+      });
+    }
+
+    let maxProfil = "Belum Ada Data";
+    let maxProfilCount = 0;
+    if (data.profilStats) {
+      Object.keys(data.profilStats).forEach(key => {
+        let count = data.profilStats[key];
+        if (count > maxProfilCount) {
+          maxProfilCount = count;
+          maxProfil = key;
+        }
+      });
+    }
+
+    let eventPercentage = totalDaysWithEvent > 0 ? Math.round((maxEventCount / totalDaysWithEvent) * 100) : 0;
+    
+    marketingIntelligenceHtml = `
+      <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 px-5 pb-5">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <span class="block text-[9px] font-bold text-blue-800 uppercase tracking-widest mb-1">Profil Pengunjung Mayoritas</span>
+            <span class="block text-sm font-black text-blue-900">${maxProfil}</span>
+          </div>
+          <p class="text-[9px] text-blue-700 mt-3 font-medium border-t border-blue-200 pt-2">Berdasarkan observasi terbanyak dari SPV selama rentang waktu dipilih.</p>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <span class="block text-[9px] font-bold text-indigo-800 uppercase tracking-widest mb-1">Kondisi/Event Dominan</span>
+            <span class="block text-sm font-black text-indigo-900">${maxEvent} <span class="text-xs text-indigo-600 font-bold ml-1">(${eventPercentage}%)</span></span>
+          </div>
+          <p class="text-[9px] text-indigo-700 mt-3 font-medium border-t border-indigo-200 pt-2">Faktor eksternal ini mendominasi ${maxEventCount} laporan harian.</p>
+        </div>
+      </div>
+    `;
+
     topProdukHtml = `
       <details class="group bg-white rounded-2xl border border-gray-200 mb-4 overflow-hidden shadow-sm">
         <summary class="p-5 flex justify-between items-center font-bold text-[10px] text-zero-black uppercase tracking-widest cursor-pointer group-open:bg-gray-50 group-open:border-b border-gray-100 transition-colors">
@@ -761,6 +810,8 @@ window.getDashboardGMTemplate = function() {
             <div id="ai-insights-container" class="p-4 space-y-2">
               <p class="text-[10px] text-gray-400 text-center py-4">Tekan tombol "Tarik Analisis AI" di atas setelah menarik data Dasbor.</p>
             </div>
+            
+            ${marketingIntelligenceHtml}
           </div>
           
           ${topProdukHtml}

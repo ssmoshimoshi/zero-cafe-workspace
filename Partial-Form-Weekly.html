@@ -91,7 +91,10 @@ function getWeeklyTabContent() {
           <div class="flex gap-3 mb-4">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">NAMA SUPERVISOR</label>
-              <input type="text" value="${form.supervisor}" onchange="window.form.supervisor = this.value" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="text" value="${form.supervisor}" oninput="window.form.supervisor = this.value; StorageHelper.set('zc_last_spv_name', this.value);" list="spvDatalistWeekly" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <datalist id="spvDatalistWeekly">
+                ${AppState.masterStaff.filter(s => s.outlet && s.outlet.toLowerCase().trim() === (window.form.outlet || 'Perintis').toLowerCase().trim() && s.status === 'Aktif').map(s => `<option value="${s.nama}"></option>`).join('')}
+              </datalist>
             </div>
           </div>
           <div class="flex gap-3">

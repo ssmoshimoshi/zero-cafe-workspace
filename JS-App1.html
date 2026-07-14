@@ -863,6 +863,7 @@ function addSelectedStaff() {
       nama: master.nama,
       posisi: master.posisi,
       outletAsal: master.outlet,
+      metode: "Dinilai Langsung",
       status: "Hadir",
       keramahan: false,
       keterangan: ""
@@ -1087,6 +1088,19 @@ function addQcRow() { window.form.qc.items.push({ jam: "12:00", kategori: "minum
 function removeQcRow(idx) { window.form.qc.items.splice(idx, 1); renderApp(); }
 function updateQcField(idx, field, value) { window.form.qc.items[idx][field] = value; }
 function addFeedbackRow() { window.form.feedback.items.push({ jam: "12:00", inisial: "", isi: "", remake: false, eskalasi: false, respon: "" }); renderApp(); }
+
+window.addFeedbackSusulanRow = function() {
+  if (!window.form.feedbackSusulan) window.form.feedbackSusulan = [];
+  window.form.feedbackSusulan.push({ komplain: "", remake: false, tindakan: "" });
+  renderApp();
+}
+window.removeFeedbackSusulanRow = function(idx) {
+  if (window.form.feedbackSusulan) window.form.feedbackSusulan.splice(idx, 1);
+  renderApp();
+}
+window.updateFeedbackSusulanField = function(idx, field, value) {
+  if (window.form.feedbackSusulan) window.form.feedbackSusulan[idx][field] = value;
+}
 function removeFeedbackRow(idx) { window.form.feedback.items.splice(idx, 1); renderApp(); }
 function updateFeedbackField(idx, field, value) { window.form.feedback.items[idx][field] = value; }
 function updateTotalRemake(value) { window.form.feedback.totalRemake = value; renderApp(); }

@@ -711,6 +711,11 @@ function submitFullReport(payloadStr) {
       // Gabungkan data keuangan shift 2
       draftData.penjualan.shift2 = data.penjualan.shift2;
       draftData.penjualan.transaksi = data.penjualan.transaksi;
+      
+      // Gabungkan Evaluasi Produk & Komplain Shift Malam (Fase 2)
+      if (data.produk) draftData.produk = data.produk;
+      if (data.feedbackSusulan) draftData.feedbackSusulan = data.feedbackSusulan;
+      
       draftData.fase = 2;
       draftData.rowIdx = data.rowIdx;
       
@@ -2462,13 +2467,14 @@ function generateHtmlReport(data) {
     
     html += `<h2>D. Absensi & Evaluasi Staff</h2>`;
     html += `<table>
-      <tr><th>Nama Staff</th><th>Posisi</th><th>Status Kehadiran</th><th>Keramahan Terlewat</th><th>Keterangan</th></tr>`;
+      <tr><th>Nama Staff</th><th>Posisi</th><th>Metode Penilaian</th><th>Status Kehadiran</th><th>Keramahan Terlewat</th><th>Keterangan</th></tr>`;
     if (data.staff && data.staff.length > 0) {
       data.staff.forEach(function(row) {
         var badge = (row.outletAsal && row.outletAsal.toLowerCase() !== data.outlet.toLowerCase()) ? ' <span class="badge-pinjaman">(Pinjaman)</span>' : '';
         html += `<tr>
           <td>${row.nama || '-'}${badge}</td>
           <td>${row.posisi || '-'}</td>
+          <td>${row.metode || 'Dinilai Langsung'}</td>
           <td>${row.status || '-'}</td>
           <td>${row.keramahan ? 'Ya' : 'Tidak'}</td>
           <td>${row.keterangan || '-'}</td>
@@ -2523,6 +2529,19 @@ function generateHtmlReport(data) {
       html += `<tr><td colspan="6" style="text-align:center;">Tidak ada insiden komplain.</td></tr>`;
     }
     html += `</table>`;
+    if (data.feedbackSusulan && data.feedbackSusulan.length > 0) {
+      html += `<h3>Komplain & Remake (Shift Malam)</h3>`;
+      html += `<table>
+        <tr><th>Keluhan (Komplain)</th><th>Di-remake?</th><th>Tindakan Staf</th></tr>`;
+      data.feedbackSusulan.forEach(function(row) {
+        html += `<tr>
+          <td>${row.komplain || '-'}</td>
+          <td>${row.remake ? 'Ya' : 'Tidak'}</td>
+          <td>${row.tindakan || '-'}</td>
+        </tr>`;
+      });
+      html += `</table>`;
+    }
     
     html += `<h2>H. Fasilitas & Bahan Penunjang</h2>`;
     html += `<h3>Kondisi Fasilitas</h3>`;

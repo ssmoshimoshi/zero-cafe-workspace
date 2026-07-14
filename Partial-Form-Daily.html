@@ -85,6 +85,118 @@ window.getDailyFormTemplate = function() {
               <input type="number" value="${form.penjualan.transaksi || ''}" onchange="window.form.penjualan.transaksi = Number(this.value)" placeholder="Contoh: 85 (Shift 1 + Shift 2)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
           </div>
+          <!-- TOP / BOTTOM PRODUK (FASE 2) -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-6 shadow-sm">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">EVALUASI PRODUK (SHIFT MALAM)</h3>
+            <p class="text-[10px] text-gray-500 mb-4 border-b border-gray-100 pb-2">Masukkan data Top 5 & Bottom 3 dari Moka/POS di akhir shift.</p>
+            
+            <!-- Minuman -->
+            <div class="mb-4">
+              <span class="block text-[10px] font-bold text-gray-400 uppercase mb-2">TOP 5 MINUMAN</span>
+              <div class="space-y-2">
+                ${form.produk.topMinuman.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'topMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg cursor-pointer bg-gray-50">
+                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="mb-4 pb-4 border-b border-gray-100">
+              <span class="block text-[10px] font-bold text-gray-400 uppercase mb-2">BOTTOM 3 MINUMAN</span>
+              <div class="space-y-2">
+                ${form.produk.bottomMinuman.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'bottomMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg cursor-pointer bg-gray-50">
+                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Makanan -->
+            <div class="mb-4">
+              <span class="block text-[10px] font-bold text-gray-400 uppercase mb-2">TOP 5 MAKANAN</span>
+              <div class="space-y-2">
+                ${form.produk.topMakanan.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'topMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg cursor-pointer bg-gray-50">
+                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="mb-4 pb-4 border-b border-gray-100">
+              <span class="block text-[10px] font-bold text-gray-400 uppercase mb-2">BOTTOM 3 MAKANAN</span>
+              <div class="space-y-2">
+                ${form.produk.bottomMakanan.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'bottomMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg cursor-pointer bg-gray-50">
+                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Snack -->
+            <div class="mb-4">
+              <span class="block text-[10px] font-bold text-gray-400 uppercase mb-2">TOP 5 SNACK</span>
+              <div class="space-y-2">
+                ${form.produk.topSnack.map((item, idx) => `
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                    <input type="text" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'topSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg cursor-pointer bg-gray-50">
+                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="mb-4">
+              <span class="block text-[10px] font-bold text-gray-400 uppercase mb-2">BOTTOM 3 SNACK</span>
+              <div class="space-y-2">
+                ${form.produk.bottomSnack.map((item, idx) => `
+                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
+                      <input type="text" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'bottomSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg cursor-pointer bg-gray-50">
+                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg bg-white">
+                    </div>
+                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg bg-white">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+          
+          <!-- KOMPLAIN SUSULAN (FASE 2) -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-6 shadow-sm">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">KOMPLAIN & REMAKE (SHIFT MALAM)</h3>
+            <p class="text-[10px] text-gray-400 mb-3 pb-2 border-b border-gray-100">Tambahkan komplain/remake yang terjadi saat shift malam. Biarkan kosong jika tidak ada.</p>
+            <div id="komplainSusulanContainer" class="space-y-3 mb-3">
+              ${(window.form.feedbackSusulan || []).map((row, idx) => `
+                <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/50 relative">
+                   <button type="button" onclick="removeFeedbackSusulanRow(${idx})" class="absolute top-2 right-2 text-[10px] font-bold text-red-500 hover:text-red-700 p-1">HAPUS</button>
+                   <input type="text" value="${row.komplain || ''}" onchange="updateFeedbackSusulanField(${idx}, 'komplain', this.value)" placeholder="Deskripsi Komplain" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg mb-2 mt-4 focus:outline-none">
+                   <div class="flex items-center gap-2 mb-2">
+                     <label class="text-[10px] text-gray-500 font-bold">Apakah di-remake (diganti baru)?</label>
+                     <input type="checkbox" ${row.remake ? 'checked' : ''} onchange="updateFeedbackSusulanField(${idx}, 'remake', this.checked)">
+                   </div>
+                   <input type="text" value="${row.tindakan || ''}" onchange="updateFeedbackSusulanField(${idx}, 'tindakan', this.value)" placeholder="Tindakan yang diambil staf" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none">
+                </div>
+              `).join('')}
+            </div>
+            <button type="button" onclick="addFeedbackSusulanRow()" class="px-3 py-2 border border-dashed border-gray-300 text-gray-500 text-[10px] font-bold rounded-lg hover:bg-gray-50 transition-all w-full text-center">+ TAMBAH KOMPLAIN SHIFT MALAM</button>
+          </div>
           
           <button type="button" onclick="openPreviewModal()" class="w-full py-4 bg-emerald-500 text-white rounded-2xl font-bold tracking-widest shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-colors transform active:scale-[0.98]">
             KIRIM FINAL & BUAT PDF
@@ -302,116 +414,7 @@ function getDailyTabContent() {
           })()}
         </div>
 
-        <!-- Card Minuman -->
-        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
-          <button type="button" onclick="toggleAccordion('dailyMinuman')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
-            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MINUMAN</h3>
-            <svg id="icon-dailyMinuman" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </button>
-          <div id="dailyMinuman" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 5 MINUMAN</span>
-              <div class="space-y-2">
-                ${form.produk.topMinuman.map((item, idx) => `
-                  <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" id="input-minuman-topMinuman-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'topMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MINUMAN</span>
-              <div class="space-y-2">
-                ${form.produk.bottomMinuman.map((item, idx) => `
-                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" id="input-minuman-bottomMinuman-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'bottomMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    </div>
-                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Card Makanan -->
-        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
-          <button type="button" onclick="toggleAccordion('dailyMakanan')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
-            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK MAKANAN</h3>
-            <svg id="icon-dailyMakanan" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </button>
-          <div id="dailyMakanan" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 5 MAKANAN</span>
-              <div class="space-y-2">
-                ${form.produk.topMakanan.map((item, idx) => `
-                  <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" id="input-makanan-topMakanan-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'topMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 MAKANAN</span>
-              <div class="space-y-2">
-                ${form.produk.bottomMakanan.map((item, idx) => `
-                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" id="input-makanan-bottomMakanan-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'bottomMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    </div>
-                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Card Snack -->
-        <div class="bg-white border border-gray-200 rounded-2xl mb-4 overflow-hidden">
-          <button type="button" onclick="toggleAccordion('dailySnack')" class="w-full flex justify-between items-center p-5 bg-white focus:outline-none hover:bg-gray-50 transition-colors">
-            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest">EVALUASI PRODUK SNACK</h3>
-            <svg id="icon-dailySnack" class="w-4 h-4 transition-transform duration-300 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          </button>
-          <div id="dailySnack" class="hidden px-5 pb-5 space-y-4 border-t border-gray-100 mt-2 pt-4">
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">TOP 5 SNACK</span>
-              <div class="space-y-2">
-                ${form.produk.topSnack.map((item, idx) => `
-                  <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" id="input-snack-topSnack-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'topSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                    <input type="number" value="${item.terjual}" onchange="window.form.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-            <div>
-              <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1 mt-4">BOTTOM 3 SNACK</span>
-              <div class="space-y-2">
-                ${form.produk.bottomSnack.map((item, idx) => `
-                  <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" id="input-snack-bottomSnack-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'bottomSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                      <input type="number" value="${item.terjual}" onchange="window.form.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
-                    </div>
-                    <input type="text" value="${item.rencana}" onchange="window.form.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Produk dipindahkan ke Fase 2 -->
       `;
     case 2:
       return `
@@ -497,7 +500,14 @@ function getDailyTabContent() {
                   <button type="button" onclick="removeStaffRow(${idx})" class="text-[10px] font-bold text-red-400 hover:text-red-600">HAPUS</button>
                 </div>
                 
-                <div class="${s.posisi !== 'Kitchen' ? 'grid grid-cols-2 gap-3' : ''} mb-3">
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">METODE PENILAIAN</label>
+                    <select onchange="updateStaffField(${idx}, 'metode', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-[34px]">
+                      <option value="Dinilai Langsung" ${s.metode === 'Dinilai Langsung' || !s.metode ? 'selected' : ''}>Dinilai Langsung</option>
+                      <option value="Dinilai via Absensi" ${s.metode === 'Dinilai via Absensi' ? 'selected' : ''}>Dinilai via Absensi</option>
+                    </select>
+                  </div>
                   <div>
                     <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">STATUS KEHADIRAN</label>
                     <select onchange="updateStaffField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none text-green-600 font-bold bg-white h-[34px]">
@@ -508,16 +518,17 @@ function getDailyTabContent() {
                       <option value="Alpha" ${s.status === 'Alpha' ? 'selected' : ''}>Alpha</option>
                     </select>
                   </div>
-                  ${s.posisi !== 'Kitchen' ? `
-                  <div>
-                    <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KERAMAHAN TERLEWAT?</label>
-                    <select onchange="updateStaffField(${idx}, 'keramahan', this.value === 'true')" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-[34px]">
-                      <option value="false" ${!s.keramahan ? 'selected' : ''}>Tidak</option>
-                      <option value="true" ${s.keramahan ? 'selected' : ''}>Ya (Miss)</option>
-                    </select>
-                  </div>
-                  ` : ''}
                 </div>
+                
+                ${s.posisi !== 'Kitchen' ? `
+                <div class="mb-3">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">KERAMAHAN TERLEWAT?</label>
+                  <select onchange="updateStaffField(${idx}, 'keramahan', this.value === 'true')" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-[34px]">
+                    <option value="false" ${!s.keramahan ? 'selected' : ''}>Tidak</option>
+                    <option value="true" ${s.keramahan ? 'selected' : ''}>Ya (Miss)</option>
+                  </select>
+                </div>
+                ` : ''}
                 
                 <div>
                   <textarea onchange="updateStaffField(${idx}, 'keterangan', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Catatan khusus (Opsional)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-gray-300 resize-none overflow-hidden" style="min-height:36px">${s.keterangan || ''}</textarea>

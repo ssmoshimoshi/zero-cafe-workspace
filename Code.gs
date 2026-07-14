@@ -725,19 +725,32 @@ function submitFullReport(payloadStr) {
 
     
     if (data.type === "daily") {
-      dateFormatted = data.tanggal; // Awalnya YYYY-MM-DD
-      var dateParts = dateFormatted.split("-");
-      if (dateParts.length === 3 && dateParts[0].length === 4) {
-         // Format menjadi DD-MM-YYYY
-         data.tanggal = ("0" + dateParts[2]).slice(-2) + "-" + ("0" + dateParts[1]).slice(-2) + "-" + dateParts[0];
-         yyyy = dateParts[0];
-         mm = dateParts[1];
-         dd = dateParts[2];
+      var dateParts = String(data.tanggal).split("-");
+      if (dateParts.length === 3) {
+        if (dateParts[0].length === 4) {
+          // Input: YYYY-MM-DD (dari Fase 1 form baru)
+          yyyy = dateParts[0];
+          mm = dateParts[1];
+          dd = dateParts[2];
+        } else {
+          // Input: DD-MM-YYYY (dari Fase 2 yang memuat pending report)
+          dd = dateParts[0];
+          mm = dateParts[1];
+          yyyy = dateParts[2];
+        }
+        // Standardize output ke DD-MM-YYYY untuk Spreadsheet
+        data.tanggal = ("0" + dd).slice(-2) + "-" + ("0" + mm).slice(-2) + "-" + yyyy;
+        // Construct YYYY-MM-DD for getIndonesianMonth to prevent Invalid Date
+        dateFormatted = yyyy + "-" + ("0" + mm).slice(-2) + "-" + ("0" + dd).slice(-2);
       } else {
-         yyyy = new Date().getFullYear().toString();
-         mm = ("0" + (new Date().getMonth() + 1)).slice(-2);
-         dd = ("0" + new Date().getDate()).slice(-2);
+         var now = new Date();
+         yyyy = now.getFullYear().toString();
+         mm = ("0" + (now.getMonth() + 1)).slice(-2);
+         dd = ("0" + now.getDate()).slice(-2);
+         data.tanggal = dd + "-" + mm + "-" + yyyy;
+         dateFormatted = yyyy + "-" + mm + "-" + dd;
       }
+      
       year = yyyy;
       monthName = getIndonesianMonth(dateFormatted);
       supervisor = data.supervisor;

@@ -677,6 +677,7 @@ function startNewForm(type) {
         if (loader) loader.classList.add('hidden');
         try {
           const result = JSON.parse(res);
+          if (result.debug) console.log("Pendings Debug:", result.debug);
           if (result.status === 'success' && result.pendings) {
             AppState.allPendingLaporan = result.pendings; // Array of all pendings
           } else {

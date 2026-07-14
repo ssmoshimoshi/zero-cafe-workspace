@@ -1449,42 +1449,74 @@ function api_checkPendingLaporan() {
     var pendings = [];
     
     if (sheet) {
-      var data = sheet.getDataRange().getValues();
-      
-      // Cari dari bawah (data terbaru) ke atas, limit ke 60 baris terakhir untuk efisiensi
-      var limit = Math.max(1, data.length - 60);
-      for (var i = data.length - 1; i >= limit; i--) {
-        var rowStatus = data[i][14] ? data[i][14].toString() : ""; 
+      // Gunakan getRange eksplisit agar tidak ada kolom terpotong
+      var maxRows = sheet.getLastRow();
+      var maxCols = Math.max(15, sheet.getLastColumn()); // Pastikan minimal 15 kolom terbaca
+      if (maxRows > 0) {
+        var data = sheet.getRange(1, 1, maxRows, maxCols).getValues();
+        var limit = Math.max(1, data.length - 60);
         
-        if (rowStatus === "Fase 1") {
-          var rawDate = data[i][1];
-          var rowOutlet = data[i][3] ? data[i][3].toString() : "";
-          var formattedDate = "";
-          if (rawDate instanceof Date) {
-            var y = rawDate.getFullYear();
-            var m = ("0" + (rawDate.getMonth() + 1)).slice(-2);
-            var d = ("0" + rawDate.getDate()).slice(-2);
-            formattedDate = d + "-" + m + "-" + y;
-          } else {
-            formattedDate = rawDate.toString();
-          }
+        // Ambil indeks header jika ada, atau gunakan default
+        var header = data[0] || [];
+        var statusCol = 14; 
+        var outletCol = 3;
+        var tglCol = 1;
+        var spvCol = 4;
+        var omsetCol = 6;
+        
+        // Coba cari kata kunci "Status" atau "Fase" di header baris pertama
+        for (var j = 0; j < header.length; j++) {
+          var h = header[j].toString().toLowerCase();
+          if (h.indexOf("status") !== -1 || h.indexOf("fase") !== -1) statusCol = j;
+        }
+        
+        var debugLogs = [];
+        for (var i = data.length - 1; i >= limit; i--) {
+          var rowStatus = data[i][statusCol] !== undefined ? data[i][statusCol].toString().trim() : ""; 
+          var rowOutlet = data[i][outletCol] !== undefined ? data[i][outletCol].toString().trim() : "";
           
-          pendings.push({
-            outlet: rowOutlet,
-            tanggal: formattedDate,
-            supervisor: data[i][4] ? data[i][4].toString() : "",
-            shift1: data[i][6] ? Number(data[i][6]) : 0,
-            rowIdx: i + 1, // Row index is relative to this specific sheet
-            sheetName: "DB_Laporan_Harian" // Critical for Fase 2 target identification
-          });
+          debugLogs.push("Row " + (i+1) + " [" + rowOutlet + "]: " + rowStatus);
+          
+          if (rowStatus === "Fase 1") {
+            var rawDate = data[i][tglCol];
+            var formattedDate = "";
+            if (rawDate instanceof Date) {
+              var y = rawDate.getFullYear();
+              var m = ("0" + (rawDate.getMonth() + 1)).slice(-2);
+              var d = ("0" + rawDate.getDate()).slice(-2);
+              formattedDate = d + "-" + m + "-" + y;
+            } else {
+              formattedDate = rawDate ? rawDate.toString().trim() : "";
+            }
+            
+            pendings.push({
+              outlet: rowOutlet,
+              tanggal: formattedDate,
+              supervisor: data[i][spvCol] !== undefined ? data[i][spvCol].toString().trim() : "",
+              shift1: data[i][omsetCol] !== undefined ? Number(data[i][omsetCol]) : 0,
+              rowIdx: i + 1,
+              sheetName: "DB_Laporan_Harian"
+            });
+          }
         }
       }
     }
     
-    return JSON.stringify({ status: "success", pendings: pendings });
+    return JSON.stringify({ status: "success", pendings: pendings, debug: debugLogs });
   } catch(e) {
     return JSON.stringify({ status: "error", error: e.toString() });
   }
+}
+
+function api_debugLastRow() {
+  var sheet = getSpreadsheet().getSheetByName("DB_Laporan_Harian");
+  var data = sheet.getDataRange().getValues();
+  var lastRow = data[data.length - 1];
+  return JSON.stringify({
+    length: lastRow.length,
+    row: lastRow,
+    col14: lastRow[14]
+  });
 }
 
 /**

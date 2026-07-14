@@ -379,7 +379,7 @@ function api_getAllMasterStaff(reqOutlet) {
     
     for (var i = 1; i < data.length; i++) {
       var staff = getStaffFromRow(data[i], headers, i);
-      if (!reqOutlet || reqOutlet === "Semua" || staff.outlet === reqOutlet) {
+      if (matchesOutlet(staff.outlet, reqOutlet)) {
         staffList.push(staff);
       }
     }

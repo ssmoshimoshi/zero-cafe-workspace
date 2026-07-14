@@ -126,6 +126,95 @@ window.renderSettingsUI = function() {
             <p class="text-xs text-gray-400 mt-3 font-medium">Memuat data parameter...</p>
           </div>
         </div>
+        </div>
+      </div>
+
+      <!-- Kelola Master Staff Outlet -->
+      <div class="mt-8">
+        <button onclick="openMasterStaffModal()" class="w-full py-4 bg-zero-black text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Kelola Staf Outlet
+        </button>
+      </div>
+
+      <!-- SPV Master Staff Modal -->
+      <div id="modalSPVMasterStaff" class="fixed inset-0 z-50 hidden flex items-end justify-center sm:items-center sm:p-4">
+        <div class="absolute inset-0 bg-white/70 backdrop-blur-md" onclick="closeMasterStaffModal()"></div>
+        <div class="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col transform transition-transform translate-y-full" id="modalSPVMasterStaffContent">
+          <div class="flex-shrink-0 p-5 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-3xl sm:rounded-3xl z-10">
+            <div>
+              <h3 class="text-sm font-extrabold text-zero-black">KELOLA STAF OUTLET</h3>
+              <p class="text-[10px] text-gray-400 mt-1">Daftar staf untuk outlet <span id="staffModalOutletLabel" class="font-bold"></span></p>
+            </div>
+            <button type="button" onclick="closeMasterStaffModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          
+          <div class="p-5 overflow-y-auto" id="spvMasterStaffContainer">
+            <div class="flex justify-center py-8">
+              <svg class="animate-spin h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </div>
+          </div>
+          <div class="p-5 border-t border-gray-100 bg-white sm:rounded-b-3xl">
+            <button onclick="openAddStaffModal()" class="w-full py-4 bg-emerald-500 text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-emerald-600 transition-colors shadow-sm">
+              + Tambah Staf Baru
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPV Edit/Add Master Staff Modal -->
+      <div id="modalSPVEditStaff" class="fixed inset-0 z-50 hidden flex items-end justify-center sm:items-center sm:p-4">
+        <div class="absolute inset-0 bg-white/70 backdrop-blur-md" onclick="closeEditStaffModal()"></div>
+        <div class="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col transform transition-transform translate-y-full" id="modalSPVEditStaffContent">
+          <div class="flex-shrink-0 p-5 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-3xl sm:rounded-3xl z-10">
+            <div>
+              <h3 class="text-sm font-extrabold text-zero-black" id="editStaffTitle">EDIT STAF</h3>
+              <p class="text-[10px] text-gray-400 mt-1" id="editStaffSubtitle">Ubah data staf outlet</p>
+            </div>
+            <button type="button" onclick="closeEditStaffModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+          
+          <div class="p-5 overflow-y-auto">
+            <input type="hidden" id="editStaffId">
+            <div class="mb-4">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Nama Staff</label>
+              <input type="text" id="editStaffNama" placeholder="Nama Lengkap" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-zero-black rounded-xl font-bold text-sm focus:outline-none focus:border-zero-black transition-colors">
+            </div>
+            <div class="mb-4">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Posisi</label>
+              <select id="editStaffPosisi" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-zero-black rounded-xl font-bold text-sm focus:outline-none focus:border-zero-black transition-colors">
+                <option value="Barista">Barista</option>
+                <option value="Kitchen">Kitchen</option>
+                <option value="Kasir">Kasir</option>
+                <option value="SPV">SPV</option>
+              </select>
+            </div>
+            <div class="mb-4" id="editStaffStatusContainer">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status Pekerjaan</label>
+              <select id="editStaffStatus" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-zero-black rounded-xl font-bold text-sm focus:outline-none focus:border-zero-black transition-colors">
+                <option value="Aktif">Aktif</option>
+                <option value="Resign">Resign</option>
+              </select>
+            </div>
+            <div class="mb-6 pt-5 border-t border-gray-100 hidden">
+              <input type="hidden" id="editStaffOutlet">
+            </div>
+            
+            <button type="button" id="btnSaveEditStaff" onclick="saveEditStaff()" class="w-full py-4 bg-zero-black text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-colors shadow-lg shadow-black/20 relative">
+              <span id="btnSaveEditStaffText">Simpan Data</span>
+              <div id="btnSaveEditStaffLoader" class="hidden absolute inset-0 flex items-center justify-center">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -277,4 +366,169 @@ window.submitParameter = function() {
     })
     .api_saveParameter(JSON.stringify(payload));
 }
+
+// ================= MASTER STAFF FUNCTIONS =================
+window.openMasterStaffModal = function() {
+  document.getElementById('staffModalOutletLabel').innerText = AppState.outlet || 'Semua';
+  const modal = document.getElementById('modalSPVMasterStaff');
+  const content = document.getElementById('modalSPVMasterStaffContent');
+  if (modal && content) {
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      content.classList.remove('translate-y-full');
+      content.classList.add('translate-y-0');
+      renderMasterStaffList();
+    }, 10);
+  }
+};
+
+window.closeMasterStaffModal = function() {
+  const modal = document.getElementById('modalSPVMasterStaff');
+  const content = document.getElementById('modalSPVMasterStaffContent');
+  if (modal && content) {
+    content.classList.remove('translate-y-0');
+    content.classList.add('translate-y-full');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300);
+  }
+};
+
+window.renderMasterStaffList = async function() {
+  const container = document.getElementById('spvMasterStaffContainer');
+  if (!container) return;
+  const outlet = AppState.outlet || "Semua";
+  
+  container.innerHTML = `
+    <div class="flex justify-center py-8">
+      <svg class="animate-spin h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    </div>
+  `;
+
+  try {
+    const staffList = await Server.call('api_getAllMasterStaff', outlet);
+    
+    if (!staffList || staffList.length === 0) {
+      container.innerHTML = '<p class="text-xs text-center text-gray-500 py-8">Tidak ada data staff untuk outlet ini.</p>';
+      return;
+    }
+    
+    let html = '<div class="space-y-3">';
+    staffList.forEach((staff) => {
+      const isAktif = staff.status === 'Aktif';
+      const badgeColor = isAktif ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800';
+      
+      html += `
+        <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/50">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <span class="text-xs font-bold ${isAktif ? 'text-zero-black' : 'text-gray-400 line-through'}">${staff.nama}</span>
+              <span class="text-[10px] text-gray-500 ml-1">(${staff.posisi})</span>
+            </div>
+            <span class="text-[8px] font-bold px-2 py-0.5 rounded-full ${badgeColor}">${staff.status}</span>
+          </div>
+          <div class="flex gap-2 border-t border-gray-100 pt-3 mt-3">
+            <button onclick="editMasterStaff('${staff.id}', '${staff.nama}', '${staff.posisi}', '${staff.status}', '${staff.outlet}')" class="flex-1 py-2 bg-white border border-gray-200 text-zero-black rounded-lg text-[9px] font-bold hover:bg-gray-50 transition-colors">EDIT</button>
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = '<p class="text-xs text-center text-red-500 py-8">Gagal memuat data staff.</p>';
+  }
+};
+
+window.openAddStaffModal = function() {
+  document.getElementById('editStaffTitle').innerText = 'TAMBAH STAF BARU';
+  document.getElementById('editStaffSubtitle').innerText = 'Daftarkan staf baru ke outlet Anda';
+  document.getElementById('editStaffId').value = '';
+  document.getElementById('editStaffNama').value = '';
+  document.getElementById('editStaffPosisi').value = 'Barista';
+  document.getElementById('editStaffStatus').value = 'Aktif';
+  document.getElementById('editStaffStatusContainer').classList.add('hidden');
+  
+  const modal = document.getElementById('modalSPVEditStaff');
+  const content = document.getElementById('modalSPVEditStaffContent');
+  if (modal && content) {
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      content.classList.remove('translate-y-full');
+      content.classList.add('translate-y-0');
+    }, 10);
+  }
+};
+
+window.editMasterStaff = function(id, nama, posisi, status, outlet) {
+  document.getElementById('editStaffTitle').innerText = 'EDIT STAF';
+  document.getElementById('editStaffSubtitle').innerText = 'Ubah data staf outlet';
+  document.getElementById('editStaffId').value = id;
+  document.getElementById('editStaffNama').value = nama;
+  document.getElementById('editStaffPosisi').value = posisi;
+  document.getElementById('editStaffStatus').value = status;
+  document.getElementById('editStaffStatusContainer').classList.remove('hidden');
+  
+  const modal = document.getElementById('modalSPVEditStaff');
+  const content = document.getElementById('modalSPVEditStaffContent');
+  if (modal && content) {
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      content.classList.remove('translate-y-full');
+      content.classList.add('translate-y-0');
+    }, 10);
+  }
+};
+
+window.closeEditStaffModal = function() {
+  const modal = document.getElementById('modalSPVEditStaff');
+  const content = document.getElementById('modalSPVEditStaffContent');
+  if (modal && content) {
+    content.classList.remove('translate-y-0');
+    content.classList.add('translate-y-full');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300);
+  }
+};
+
+window.saveEditStaff = async function() {
+  const id = document.getElementById('editStaffId').value;
+  const nama = document.getElementById('editStaffNama').value.trim();
+  const posisi = document.getElementById('editStaffPosisi').value;
+  const status = document.getElementById('editStaffStatus').value || 'Aktif';
+  const outlet = AppState.outlet || "Semua"; 
+  
+  if (!nama) {
+    showToast("Nama tidak boleh kosong", "error");
+    return;
+  }
+  
+  const btnText = document.getElementById('btnSaveEditStaffText');
+  const btnLoader = document.getElementById('btnSaveEditStaffLoader');
+  btnText.classList.add('opacity-0');
+  btnLoader.classList.remove('hidden');
+  
+  try {
+    let res;
+    if (id) {
+      res = await Server.call('api_updateMasterStaff', id, nama, posisi, status, outlet);
+    } else {
+      res = await Server.call('api_addMasterStaff', nama, posisi, outlet);
+    }
+    
+    if (res && res.success) {
+      showToast("Data staf berhasil disimpan!", "success");
+      closeEditStaffModal();
+      renderMasterStaffList();
+    } else {
+      showToast(res && res.error ? res.error : "Gagal menyimpan data", "error");
+    }
+  } catch (e) {
+    showToast("Terjadi kesalahan sistem", "error");
+  } finally {
+    btnText.classList.remove('opacity-0');
+    btnLoader.classList.add('hidden');
+  }
+};
 </script>

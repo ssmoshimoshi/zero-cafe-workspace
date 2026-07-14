@@ -365,7 +365,7 @@ function api_getMasterStaff() {
   }
 }
 
-function api_getAllMasterStaff() {
+function api_getAllMasterStaff(reqOutlet) {
   try {
     var ss = getSpreadsheet();
     var sheet = ss.getSheetByName("Master_Staff");
@@ -378,7 +378,10 @@ function api_getAllMasterStaff() {
     var staffList = [];
     
     for (var i = 1; i < data.length; i++) {
-      staffList.push(getStaffFromRow(data[i], headers, i));
+      var staff = getStaffFromRow(data[i], headers, i);
+      if (!reqOutlet || reqOutlet === "Semua" || staff.outlet === reqOutlet) {
+        staffList.push(staff);
+      }
     }
     return staffList;
   } catch (err) {

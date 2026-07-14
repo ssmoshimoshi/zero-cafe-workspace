@@ -624,6 +624,9 @@ function submitFullReport(payloadStr) {
   try {
     var data = JSON.parse(payloadStr);
     
+    // Fallback: Jika payload dari draft lawas tidak memiliki properti fase, anggap Fase 1
+    if (data.type === "daily" && !data.fase) data.fase = 1;
+    
     // Cast fase ke Number agar tahan terhadap string "1" vs angka 1 dari JSON
     if (data.fase !== undefined) data.fase = Number(data.fase);
     

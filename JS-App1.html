@@ -705,6 +705,11 @@ function _startNormalForm(type) {
   const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet && p.outlet.trim() === (AppState.outlet || StorageHelper.get('zc_last_outlet') || "Perintis").trim()) : null;
 
   if (loadDraft(type)) {
+    // PROTEKSI: Jika draft dari localStorage versi lama tidak memiliki properti fase, paksa menjadi 1
+    if (type === 'daily' && !window.form.fase) {
+      window.form.fase = 1;
+    }
+
     // BUGS FIX: Jika ada draft di lokal tapi server bilang ada Fase 1 yang pending, berarti user mereload halaman 
     // sebelum draft terhapus otomatis. Kita harus memaksa draft ini menjadi Fase 2.
     if (type === 'daily' && pending && window.form.fase === 1) {

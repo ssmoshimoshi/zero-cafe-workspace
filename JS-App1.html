@@ -208,6 +208,9 @@ function bootstrapApp() {
     if (savedRole) {
       AppState.role = savedRole;
       AppState.menu = savedRole === 'SPV' ? 'select_report' : 'dashboard_gm';
+      if (savedRole === 'SPV') {
+        AppState.outlet = StorageHelper.get('zc_last_outlet');
+      }
     } else {
       AppState.role = null;
       AppState.menu = 'login';

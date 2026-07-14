@@ -1053,7 +1053,7 @@ function removeResignStaff(idx) {
 }
 
 function updateStaffField(idx, field, value) { window.form.staff[idx][field] = value; }
-function addQcRow() { window.form.qc.items.push({ jam: "12:00", nama: "", status: "Baik", keterangan: "" }); renderApp(); }
+function addQcRow() { window.form.qc.items.push({ jam: "12:00", kategori: "minuman", nama: "", status: "Sesuai SOP", keterangan: "" }); renderApp(); }
 function removeQcRow(idx) { window.form.qc.items.splice(idx, 1); renderApp(); }
 function updateQcField(idx, field, value) { window.form.qc.items[idx][field] = value; }
 function addFeedbackRow() { window.form.feedback.items.push({ jam: "12:00", inisial: "", isi: "", remake: false, eskalasi: false, respon: "" }); renderApp(); }

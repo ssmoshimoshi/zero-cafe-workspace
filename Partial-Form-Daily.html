@@ -591,14 +591,23 @@ function getDailyTabContent() {
                   <input type="time" value="${row.jam}" onchange="updateQcField(${idx}, 'jam', this.value)" class="w-20 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none">
                   <button type="button" onclick="removeQcRow(${idx})" class="text-[10px] font-bold text-red-500 hover:text-red-700">HAPUS</button>
                 </div>
-                <div class="mb-2">
-                  <input type="text" value="${row.nama}" onchange="updateQcField(${idx}, 'nama', this.value)" placeholder="Nama Menu (Cth: Nasi Goreng)" class="w-full px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none">
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                  <select onchange="updateQcField(${idx}, 'kategori', this.value); updateQcField(${idx}, 'nama', ''); renderApp();" class="w-full px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <option value="minuman" ${row.kategori === 'minuman' ? 'selected' : ''}>Minuman</option>
+                    <option value="makanan" ${row.kategori === 'makanan' ? 'selected' : ''}>Makanan</option>
+                    <option value="snack" ${row.kategori === 'snack' ? 'selected' : ''}>Snack</option>
+                  </select>
+                  <select onchange="updateQcField(${idx}, 'nama', this.value)" class="w-full px-2 py-1.5 text-sm font-bold border border-gray-200 rounded-lg focus:outline-none bg-white">
+                    <option value="">Pilih Produk...</option>
+                    ${(AppState.masterMenu[row.kategori || 'minuman'] || []).map(m => `<option value="${m}" ${row.nama === m ? 'selected' : ''}>${m}</option>`).join('')}
+                  </select>
                 </div>
                 <div class="grid grid-cols-2 gap-2 mb-2">
                    <select onchange="updateQcField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
-                      <option value="Baik" ${row.status === 'Baik' ? 'selected' : ''}>Status: Baik</option>
-                      <option value="Revisi" ${row.status === 'Revisi' ? 'selected' : ''}>Revisi Rasa/Suhu</option>
-                      <option value="BS" ${row.status === 'BS' ? 'selected' : ''}>BS / Rusak</option>
+                      <option value="Sesuai SOP" ${row.status === 'Sesuai SOP' ? 'selected' : ''}>Sesuai SOP</option>
+                      <option value="Rasa Berubah" ${row.status === 'Rasa Berubah' ? 'selected' : ''}>Rasa Berubah</option>
+                      <option value="Suhu Tidak Sesuai" ${row.status === 'Suhu Tidak Sesuai' ? 'selected' : ''}>Suhu Tidak Sesuai</option>
+                      <option value="Porsi Kurang" ${row.status === 'Porsi Kurang' ? 'selected' : ''}>Porsi Kurang</option>
                    </select>
                 </div>
                 <textarea onchange="updateQcField(${idx}, 'keterangan', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Catatan tindakan (opsional)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none resize-none overflow-hidden" style="min-height:36px">${row.keterangan || ''}</textarea>

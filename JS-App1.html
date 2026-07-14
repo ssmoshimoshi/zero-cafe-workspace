@@ -722,6 +722,13 @@ function _startNormalForm(type) {
       window.form.sheetName = pending.sheetName;
     }
     
+    // BUGS FIX: Jika ada draft Fase 2, TAPI server bilang TIDAK ADA pending Fase 1, 
+    // berarti draft ini usang atau data di server sudah dihapus. Kita HARUS memaksa draft ini menjadi Fase 1.
+    if (type === 'daily' && !pending && window.form.fase === 2) {
+      console.warn("Server mendeteksi TIDAK ADA Fase 1 pending, namun draft lokal Fase 2 tersisa. Memaksa kembali ke Fase 1.");
+      window.form.fase = 1;
+    }
+    
     // Patch missing data for Phase 2 drafts (e.g. supervisor name) that were saved incorrectly before the hotfix
     if (type === 'daily' && window.form.fase === 2) {
       if (pending) {

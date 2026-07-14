@@ -1492,6 +1492,13 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     var eventStats = {};
     var profilStats = {};
     
+    // Load Config Parameter to memory for cross-matching
+    var paramData = [];
+    var pSheet = ss.getSheetByName("Config_Parameter");
+    if (pSheet) {
+      paramData = pSheet.getDataRange().getValues();
+    }
+    
     // Normalize inputs into Date objects
     var startD = parseDateToObj(startDate);
     var endD = parseDateToObj(endDate);
@@ -1583,7 +1590,21 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           spvStats[spvName].omset += rowOmset;
           
           // External Context & Profil
-          var rowEvent = (data[i][12] || "Normal / Tidak Ada").toString();
+          var rowEvent = "Normal / Tidak Ada";
+          var rowDay = rowDateObj.getDate();
+          if (rowDay >= 25 || rowDay <= 5) rowEvent = "Tanggal Muda (Kiriman/Gajian)";
+          else if (rowDay >= 6 && rowDay <= 24) rowEvent = "Tanggal Tua";
+          
+          var rDateStr = rowDateObj.getFullYear() + "-" + ("0" + (rowDateObj.getMonth()+1)).slice(-2) + "-" + ("0" + rowDateObj.getDate()).slice(-2);
+          for (var p = 1; p < paramData.length; p++) {
+             if (paramData[p][5] === "Aktif" && (paramData[p][0] === "Semua" || matchesOutlet(paramData[p][0], outletFilter))) {
+                 if (rDateStr >= paramData[p][3] && rDateStr <= paramData[p][4]) {
+                     rowEvent = paramData[p][2]; // Override with specific event
+                     break;
+                 }
+             }
+          }
+          
           var rowProfil = (data[i][13] || "Campuran").toString();
           
           if (!eventStats[rowEvent]) eventStats[rowEvent] = 0;
@@ -2186,7 +2207,11 @@ function api_saveParameter(payloadStr) {
     var data = JSON.parse(payloadStr);
     var ss = getSpreadsheet();
     var sheet = ss.getSheetByName("Config_Parameter");
-    if (!sheet) throw new Error("Tab Config_Parameter tidak ditemukan. Jalankan Setup ulang.");
+    if (!sheet) {
+      sheet = ss.insertSheet("Config_Parameter");
+      sheet.appendRow(["Outlet", "Kategori", "Nama_Event", "Tanggal_Mulai", "Tanggal_Selesai", "Status"]);
+      sheet.getRange("A1:F1").setFontWeight("bold").setBackground("#d9ead3");
+    }
     
     // Validasi data
     if (!data.kategori || !data.namaEvent || !data.tglMulai || !data.tglSelesai) {

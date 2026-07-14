@@ -252,8 +252,23 @@ async function fetchMasterStaff() {
     
     // Fetch master menu
     const menuRes = await Server.call('api_getMasterMenu');
-    if (menuRes && menuRes.success) {
-      AppState.masterMenu = menuRes.data;
+    
+    // Default 10+ Dummy Products
+    const dummyMenu = {
+      minuman: ["Kopi Susu Zero", "Americano", "Cafe Latte", "Vanilla Latte", "Caramel Macchiato", "Mochaccino", "Matcha Latte", "Red Velvet", "Taro Latte", "Lychee Tea", "Lemon Tea"],
+      makanan: ["Nasi Goreng Zero", "Mie Goreng Spesial", "Ayam Geprek", "Chicken Katsu", "Beef Teriyaki", "Spaghetti Bolognese", "Carbonara", "Indomie Telur Kornet", "Ayam Bakar", "Nasi Gila"],
+      snack: ["Pisang Goreng Keju", "Kentang Goreng", "Cireng Bumbu Rujak", "Roti Bakar Coklat", "Roti Bakar Keju", "Singkong Goreng", "Onion Rings", "Dimsum", "Siomay", "Tempe Mendoan"]
+    };
+
+    if (menuRes && menuRes.success && menuRes.data) {
+      // Merge live data with dummy data (prevent duplicates)
+      AppState.masterMenu = {
+        minuman: [...new Set([...(menuRes.data.minuman || []), ...dummyMenu.minuman])],
+        makanan: [...new Set([...(menuRes.data.makanan || []), ...dummyMenu.makanan])],
+        snack: [...new Set([...(menuRes.data.snack || []), ...dummyMenu.snack])]
+      };
+    } else {
+      AppState.masterMenu = dummyMenu;
     }
   } catch (err) {
     showToast("Gagal memuat data awal: " + err.toString(), "error");

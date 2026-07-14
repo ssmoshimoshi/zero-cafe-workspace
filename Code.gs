@@ -1593,11 +1593,12 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           var rowEvent = "Normal / Tidak Ada";
           var rowDay = rowDateObj.getDate();
           if (rowDay >= 25 || rowDay <= 5) rowEvent = "Tanggal Muda (Kiriman/Gajian)";
-          else if (rowDay >= 6 && rowDay <= 24) rowEvent = "Tanggal Tua";
+          else if (rowDay >= 6 && rowDay <= 15) rowEvent = "Tanggal Berjaga";
+          else rowEvent = "Tanggal Tua";
           
           var rDateStr = rowDateObj.getFullYear() + "-" + ("0" + (rowDateObj.getMonth()+1)).slice(-2) + "-" + ("0" + rowDateObj.getDate()).slice(-2);
           for (var p = 1; p < paramData.length; p++) {
-             if (paramData[p][5] === "Aktif" && (paramData[p][0] === "Semua" || matchesOutlet(paramData[p][0], outletFilter))) {
+             if (paramData[p][5] === "Aktif" && (paramData[p][0] === "Semua" || paramData[p][0] === data[i][3])) {
                  if (rDateStr >= paramData[p][3] && rDateStr <= paramData[p][4]) {
                      rowEvent = paramData[p][2]; // Override with specific event
                      break;

@@ -25,10 +25,7 @@ window.renderSettingsUI = function() {
         <div class="space-y-4">
           <div>
             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Outlet</label>
-            <select id="targetOutlet" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
-              <option value="Perintis">Perintis</option>
-              <option value="Dg Tata">Dg Tata</option>
-            </select>
+            <input type="text" id="targetOutlet" value="${AppState.outlet || 'Perintis'}" class="w-full bg-gray-200 border border-gray-300 text-gray-500 text-sm rounded-2xl p-3.5 cursor-not-allowed font-bold" disabled>
           </div>
           
           <div class="grid grid-cols-2 gap-3">
@@ -80,11 +77,7 @@ window.renderSettingsUI = function() {
         <div class="space-y-4">
           <div>
             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Outlet</label>
-            <select id="paramOutlet" class="w-full bg-gray-50 border border-gray-200 text-zero-black text-sm rounded-2xl focus:ring-zero-gray focus:border-zero-gray block p-3.5 transition-colors">
-              <option value="Semua">Semua Outlet</option>
-              <option value="Perintis">Perintis</option>
-              <option value="Dg Tata">Dg Tata</option>
-            </select>
+            <input type="text" id="paramOutlet" value="${AppState.outlet || 'Perintis'}" class="w-full bg-gray-200 border border-gray-300 text-gray-500 text-sm rounded-2xl p-3.5 cursor-not-allowed font-bold" disabled>
           </div>
           
           <div>

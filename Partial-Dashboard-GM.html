@@ -48,7 +48,8 @@ window.getDashboardGMTemplate = function() {
       const op = data.operasionalData || {
         isFallback: true, kepatuhanSop: 0, totalTelat: 0, totalTeguran: 0,
         kendalaUtama: "Data bulanan belum ditarik.", eskalasiFasilitas: "-", strategiDepan: "-",
-        kebutuhanGM: "-", pencapaian: "-", tantangan: "-", skill: "-"
+        kebutuhanGM: "-", pencapaian: "-", tantangan: "-", skill: "-",
+        listEskalasi: [], listPengeluaran: []
       };
       const salesPercent = data.targetOmset > 0 ? Math.round((data.omsetTotal / data.targetOmset) * 100) : 0;
       

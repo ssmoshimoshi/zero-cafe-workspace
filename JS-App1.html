@@ -1559,6 +1559,12 @@ window.validateFormCompletion = function(f) {
         return 'Nama fasilitas/alat yang bermasalah wajib diisi!';
       }
     }
+    
+    if (f.qc && f.qc.items && f.qc.items.length > 0) {
+      if (f.qc.items.some(q => !q.nama)) {
+        return 'Nama produk pada inspeksi QC wajib dipilih!';
+      }
+    }
   }
   
   if (f.type === 'weekly') {

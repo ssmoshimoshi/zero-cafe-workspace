@@ -426,8 +426,10 @@ function api_updateMasterStaff(id, nama, posisi, status, outlet) {
     
     var data = sheet.getDataRange().getValues();
     
+    var headers = data[0];
     for (var i = 1; i < data.length; i++) {
-      if (data[i][0] == id) {
+      var staff = getStaffFromRow(data[i], headers, i);
+      if (staff.id == id) {
         // Found the row
         var row = i + 1;
         // Col 2: Nama

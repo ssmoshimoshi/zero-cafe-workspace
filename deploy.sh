@@ -28,6 +28,8 @@ clasp push
 clasp deploy -i AKfycbz7mSoOmKpOtZnACm0LwFnmOGtZL-KlUOekGzylA8b20_j9mMsom1dgaSNExQ2OJTUp -d "Pembaruan otomatis dari deploy.sh"
 # Deploy ke ID versi lama (@50) agar tersinkronisasi
 clasp deploy -i AKfycbzmjpOPY34k7AQ4YTieRxRwnkGKsWsPH6-Xcl4bZK4nvNLRIAbOOKONRnMVFCE3ZjWf -d "Sinkronisasi versi lama"
+# Deploy ke ID user (1U9)
+clasp deploy -i AKfycbyD1u4Vyo4ckow8EUhTYt18YQAsKsnuDM6MVq053WaOVG2OuC75PpoG2x0uho74-1U9 -d "Pembaruan otomatis dari deploy.sh"
 
 echo "=== Selesai! Aplikasi Anda telah diperbarui di GAS dan GitHub ==="
 # Deploy ke Zero Report

@@ -770,8 +770,9 @@ function getDailyTabContent() {
                       <option value="Rusak Sedang" ${row.status === 'Rusak Sedang' ? 'selected' : ''}>Rusak Sedang</option>
                       <option value="Rusak Berat" ${row.status === 'Rusak Berat' ? 'selected' : ''}>Rusak Berat (Mati)</option>
                    </select>
-                   <label class="flex items-center justify-center gap-2 text-[10px] font-bold text-red-500 border border-gray-200 rounded-lg bg-white">
-                    <input type="checkbox" ${row.eskalasi ? 'checked' : ''} onchange="updateFasilitasField(${idx}, 'eskalasi', this.checked)"> Eskalasi
+                   <label class="flex items-center justify-center gap-2 text-[10px] font-bold ${row.eskalasi ? 'text-white bg-red-500 border-red-500' : 'text-red-500 bg-white border-gray-200'} border rounded-lg transition-colors cursor-pointer py-1.5 px-2">
+                    <input type="checkbox" ${row.eskalasi ? 'checked' : ''} onchange="updateFasilitasField(${idx}, 'eskalasi', this.checked); renderApp();" class="hidden"> 
+                    ${row.eskalasi ? '⚠️ ESKALASI GM' : 'Eskalasi GM?'}
                   </label>
                 </div>
                 <div class="mb-2">

@@ -1553,6 +1553,12 @@ window.validateFormCompletion = function(f) {
         return `Ada area Kotor (atau skor < 80) yang belum diberi keterangan alasan. Wajib diisi!`;
       }
     }
+    
+    if (f.fasilitas && f.fasilitas.length > 0) {
+      if (f.fasilitas.some(fas => !fas.item || !fas.item.trim())) {
+        return 'Nama fasilitas/alat yang bermasalah wajib diisi!';
+      }
+    }
   }
   
   if (f.type === 'weekly') {

@@ -841,6 +841,13 @@ function submitFullReport(payloadStr) {
     
     // 4. Append row to corresponding Sheet tab
     if (data.type === "daily") {
+      var ddmmyyyy = data.tanggal;
+      var tglParts = String(data.tanggal).split("-");
+      if (tglParts.length === 3 && tglParts[0].length === 4) { // Jika YYYY-MM-DD
+         ddmmyyyy = ("0" + tglParts[2]).slice(-2) + "-" + ("0" + tglParts[1]).slice(-2) + "-" + tglParts[0];
+      }
+      data.tanggal = ddmmyyyy; // Simpan kembali ke payload
+      
       var idLaporan = data.tanggal + "-" + (data.outlet || "Perintis").replace(/\s+/g, "_");
       var bulanLaporan = String(data.tanggal).substring(3, 10); // from DD-MM-YYYY
       var sheetUtama = ss.getSheetByName("DB_Laporan_Harian");
@@ -975,6 +982,19 @@ function submitFullReport(payloadStr) {
       }
       
     } else if (data.type === "weekly") {
+      var dStart = data.periodeStart;
+      var dEnd = data.periodeEnd;
+      var tStartParts = String(data.periodeStart).split("-");
+      if (tStartParts.length === 3 && tStartParts[0].length === 4) {
+         dStart = ("0" + tStartParts[2]).slice(-2) + "-" + ("0" + tStartParts[1]).slice(-2) + "-" + tStartParts[0];
+      }
+      var tEndParts = String(data.periodeEnd).split("-");
+      if (tEndParts.length === 3 && tEndParts[0].length === 4) {
+         dEnd = ("0" + tEndParts[2]).slice(-2) + "-" + ("0" + tEndParts[1]).slice(-2) + "-" + tEndParts[0];
+      }
+      data.periodeStart = dStart;
+      data.periodeEnd = dEnd;
+      
       var idLaporanWeekly = data.periodeStart + "_to_" + data.periodeEnd + "-" + (data.outlet || "Perintis").replace(/\s+/g, "_");
       var wSheet = ss.getSheetByName("DB_Laporan_Mingguan");
       var totalRealSales = 0, totalTargetSales = 0;

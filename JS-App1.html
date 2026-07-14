@@ -702,16 +702,26 @@ function startNewForm(type) {
 }
 
 function _startNormalForm(type) {
+  const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet && p.outlet.trim() === (AppState.outlet || StorageHelper.get('zc_last_outlet') || "Perintis").trim()) : null;
+
   if (loadDraft(type)) {
+    // BUGS FIX: Jika ada draft di lokal tapi server bilang ada Fase 1 yang pending, berarti user mereload halaman 
+    // sebelum draft terhapus otomatis. Kita harus memaksa draft ini menjadi Fase 2.
+    if (type === 'daily' && pending && window.form.fase === 1) {
+      console.warn("Server mendeteksi Fase 1 selesai, namun draft lokal tertinggal. Memaksa masuk Fase 2.");
+      window.form.fase = 2;
+      window.form.tanggal = pending.tanggal;
+      window.form.supervisor = pending.supervisor;
+      window.form.penjualan.shift1 = pending.shift1;
+      window.form.rowIdx = pending.rowIdx;
+      window.form.sheetName = pending.sheetName;
+    }
+    
     // Patch missing data for Phase 2 drafts (e.g. supervisor name) that were saved incorrectly before the hotfix
     if (type === 'daily' && window.form.fase === 2) {
-      const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet === window.form.outlet) : null;
       if (pending) {
         window.form.tanggal = pending.tanggal;
         window.form.supervisor = pending.supervisor;
-        window.form.penjualan.shift1 = pending.shift1;
-        window.form.rowIdx = pending.rowIdx;
-        window.form.sheetName = pending.sheetName;
       }
     }
     transitionToMenu(`form_${type}`, () => {
@@ -725,7 +735,7 @@ function _startNormalForm(type) {
   if (type === 'daily') {
     window.form.staff = [];
     window.form.outlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || "Perintis";
-    const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet === window.form.outlet) : null;
+    const pending = AppState.allPendingLaporan ? AppState.allPendingLaporan.find(p => p.outlet && p.outlet.trim() === window.form.outlet.trim()) : null;
     window.form.fase = pending ? 2 : 1;
     if (pending) {
       window.form.tanggal = pending.tanggal;

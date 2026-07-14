@@ -978,15 +978,29 @@ async function submitReport() {
       
       showToast("Laporan berhasil dikirim!", "success");
       
-      // Jika Fase 1, kembali ke dashboard. Jika normal/Fase 2, buka PDF.
+      // Jika Fase 1, tampilkan sukses sejenak lalu kembali ke dashboard. Jika normal/Fase 2, buka PDF.
       if (f.type === 'daily' && f.fase === 1) {
+         const body = document.getElementById('previewModalBody');
+         const modalFooter = document.getElementById('previewModalFooter');
+         if (body) {
+           body.innerHTML = `<div class="text-center py-6">
+             <h4 class="text-xl font-bold text-gray-900 mb-2">Tahap 1 Berhasil!</h4>
+             <p class="text-gray-600 mb-4">Laporan SOP awal telah disimpan. Jangan lupa melengkapi Tahap 2 saat closing shift 2.</p>
+             <div class="animate-pulse bg-green-50 text-green-700 p-3 rounded-xl text-sm font-bold">
+               Mengalihkan ke menu utama...
+             </div>
+           </div>`;
+         }
+         if (modalFooter) modalFooter.innerHTML = ''; // Hide buttons
+         
          setTimeout(function() {
            showUploadLoading(false);
            AppState.isSubmitting = false;
+           closePreviewModal(); // Tutup modal yang stuck!
            transitionToMenu('select_report', function() {
              AppState.currentTab = 1;
            });
-         }, 1500);
+         }, 2500); // Beri waktu 2.5 detik untuk membaca
       } else {
          const body = document.getElementById('previewModalBody');
          const modalFooter = document.getElementById('previewModalFooter');

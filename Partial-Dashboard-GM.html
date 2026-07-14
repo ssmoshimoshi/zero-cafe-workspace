@@ -285,6 +285,53 @@ window.getDashboardGMTemplate = function() {
         `;
       }
 
+      let pengeluaranHtml = "";
+      if (op.listPengeluaran && op.listPengeluaran.length > 0) {
+        let totalPengeluaran = op.listPengeluaran.reduce((acc, curr) => acc + (Number(curr.harga) || 0), 0);
+        pengeluaranHtml = `
+          <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 mb-6 shadow-sm">
+            <h3 class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-4 border-b border-blue-200 pb-2 flex items-center justify-between">
+              <span>GALERI PENGELUARAN (BAHAN & ATK)</span>
+              <span class="text-[8px] bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">Rp ${totalPengeluaran.toLocaleString('id-ID')}</span>
+            </h3>
+            
+            <!-- Horizontal Scrollable Gallery -->
+            <div class="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">
+              ${op.listPengeluaran.map((k, idx) => `
+                <div class="snap-start flex-none w-48 bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                  ${k.photoUrl ? `
+                    <div class="w-full h-32 bg-gray-100 relative group cursor-pointer" onclick="window.open('${k.photoUrl}', '_blank')">
+                      <img src="${k.photoUrl}" alt="Nota ${k.item}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                        <span class="text-white text-[10px] font-bold border border-white px-2 py-1 rounded">Lihat Nota</span>
+                      </div>
+                    </div>
+                  ` : `
+                    <div class="w-full h-32 bg-gray-100 flex items-center justify-center">
+                      <span class="text-gray-400 text-[10px] font-bold">Tidak ada foto</span>
+                    </div>
+                  `}
+                  <div class="p-3 flex flex-col justify-between flex-1">
+                    <div>
+                      <span class="text-xs font-bold text-zero-black line-clamp-1 mb-1">${k.item}</span>
+                      <span class="text-[9px] text-gray-500 block mb-1">${k.tanggal} - ${k.outlet}</span>
+                    </div>
+                    <div class="mt-2 flex justify-between items-end border-t border-gray-50 pt-2">
+                      <span class="text-[8px] text-gray-400 uppercase tracking-widest">${k.ketersediaan}</span>
+                      <span class="text-[10px] font-extrabold text-blue-600">Rp ${Number(k.harga).toLocaleString('id-ID')}</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <style>
+              .hide-scrollbar::-webkit-scrollbar { display: none; }
+              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            </style>
+          </div>
+        `;
+      }
+
       let leaderboardHtml = "";
       if ((!AppState.activeFilters.outlet || AppState.activeFilters.outlet === 'Semua') && data.leaderboard && data.leaderboard.length > 0) {
         leaderboardHtml = `
@@ -722,7 +769,7 @@ window.getDashboardGMTemplate = function() {
     `;
     
     // Combine everything
-    statsHtml = statsHtml + eskalasiHtml + leaderboardHtml;
+    statsHtml = statsHtml + eskalasiHtml + pengeluaranHtml + leaderboardHtml;
     
   } else {
     statsHtml = `

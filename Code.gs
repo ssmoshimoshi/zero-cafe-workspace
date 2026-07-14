@@ -624,6 +624,9 @@ function submitFullReport(payloadStr) {
   try {
     var data = JSON.parse(payloadStr);
     
+    // Cast fase ke Number agar tahan terhadap string "1" vs angka 1 dari JSON
+    if (data.fase !== undefined) data.fase = Number(data.fase);
+    
     // ANTI DOUBLE-SUBMIT LOCK
     var cache = PropertiesService.getScriptProperties();
     var lockKey = "LOCK_" + data.type + "_" + (data.fase || 0) + "_" + (data.outlet || "Unknown") + "_" + data.tanggal;
@@ -892,7 +895,7 @@ function submitFullReport(payloadStr) {
         fileUrl,
         data.eventLokal || "",
         data.profilPengunjung || "",
-        (data.fase === 1 ? "Fase 1" : "Fase 2")
+        (Number(data.fase) === 1 ? "Fase 1" : "Fase 2")
       ]);
       
       // Insert DB_Briefing_Shift

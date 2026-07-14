@@ -725,8 +725,15 @@ function _startNormalForm(type) {
     // BUGS FIX: Jika ada draft Fase 2, TAPI server bilang TIDAK ADA pending Fase 1, 
     // berarti draft ini usang atau data di server sudah dihapus. Kita HARUS memaksa draft ini menjadi Fase 1.
     if (type === 'daily' && !pending && window.form.fase === 2) {
-      console.warn("Server mendeteksi TIDAK ADA Fase 1 pending, namun draft lokal Fase 2 tersisa. Memaksa kembali ke Fase 1.");
+      console.warn("Server mendeteksi TIDAK ADA Fase 1 pending, namun draft lokal Fase 2 tersisa. Membuang draft usang.");
+      StorageHelper.remove('zc_draft_daily');
+      resetFormData(type);
       window.form.fase = 1;
+      
+      // Set default outlet if SPV
+      if (AppState.role === 'SPV') {
+        window.form.outlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || "Perintis";
+      }
     }
     
     // Patch missing data for Phase 2 drafts (e.g. supervisor name) that were saved incorrectly before the hotfix

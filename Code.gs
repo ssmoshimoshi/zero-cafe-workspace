@@ -725,11 +725,19 @@ function submitFullReport(payloadStr) {
 
     
     if (data.type === "daily") {
-      dateFormatted = data.tanggal; // YYYY-MM-DD
+      dateFormatted = data.tanggal; // Awalnya YYYY-MM-DD
       var dateParts = dateFormatted.split("-");
-      yyyy = dateParts[0];
-      mm = dateParts[1];
-      dd = dateParts[2];
+      if (dateParts.length === 3 && dateParts[0].length === 4) {
+         // Format menjadi DD-MM-YYYY
+         data.tanggal = ("0" + dateParts[2]).slice(-2) + "-" + ("0" + dateParts[1]).slice(-2) + "-" + dateParts[0];
+         yyyy = dateParts[0];
+         mm = dateParts[1];
+         dd = dateParts[2];
+      } else {
+         yyyy = new Date().getFullYear().toString();
+         mm = ("0" + (new Date().getMonth() + 1)).slice(-2);
+         dd = ("0" + new Date().getDate()).slice(-2);
+      }
       year = yyyy;
       monthName = getIndonesianMonth(dateFormatted);
       supervisor = data.supervisor;
@@ -847,13 +855,7 @@ function submitFullReport(payloadStr) {
     
     // 4. Append row to corresponding Sheet tab
     if (data.type === "daily") {
-      var ddmmyyyy = data.tanggal;
-      var tglParts = String(data.tanggal).split("-");
-      if (tglParts.length === 3 && tglParts[0].length === 4) { // Jika YYYY-MM-DD
-         ddmmyyyy = ("0" + tglParts[2]).slice(-2) + "-" + ("0" + tglParts[1]).slice(-2) + "-" + tglParts[0];
-      }
-      data.tanggal = ddmmyyyy; // Simpan kembali ke payload
-      
+      var ddmmyyyy = data.tanggal; // Sudah dalam format DD-MM-YYYY
       var idLaporan = data.tanggal + "-" + (data.outlet || "Perintis").replace(/\s+/g, "_");
       var bulanLaporan = String(data.tanggal).substring(3, 10); // from DD-MM-YYYY
       var sheetUtama = ss.getSheetByName("DB_Laporan_Harian");
@@ -868,6 +870,9 @@ function submitFullReport(payloadStr) {
               sheetUtama.getRange(r + 1, 7).setValue(totalOmset); // Col G
               sheetUtama.getRange(r + 1, 9).setValue(Number(data.penjualan.transaksi || 0)); // Col I
               sheetUtama.getRange(r + 1, 12).setValue(fileUrl);    // Col L
+              
+              // [CRITICAL BUG FIX] Update status kolom ke-15 dari Fase 1 menjadi Fase 2 agar tidak terbaca pending lagi
+              sheetUtama.getRange(r + 1, 15).setValue("Fase 2");
               break;
             }
           }

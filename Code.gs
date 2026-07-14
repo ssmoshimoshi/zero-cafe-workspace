@@ -756,8 +756,8 @@ function submitFullReport(payloadStr) {
       supervisor = data.supervisor;
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
       
-      // Filename: 01-juli-laporan harian.PDF
-      fileName = dd + "-" + monthName.toLowerCase() + "-laporan harian.pdf";
+      // Filename: 30-12-2026-laporan-harian.pdf
+      fileName = data.tanggal + "-laporan-harian.pdf";
       
     } else if (data.type === "weekly") {
       var startDD = "1", endDD = "7";
@@ -812,7 +812,7 @@ function submitFullReport(payloadStr) {
     // 1.b Generate Kebersihan PDF blob if exists
     var kbPdfBlob = null;
     var kbFileName = data.tanggal + "-checklistbox-" + outlet + ".pdf";
-    if (data.type === "daily" && data.kebersihanPdfBase64) {
+    if (isFase1 && data.type === "daily" && data.kebersihanPdfBase64) {
       try {
         var decodedKb = Utilities.base64Decode(data.kebersihanPdfBase64);
         kbPdfBlob = Utilities.newBlob(decodedKb, "application/pdf", kbFileName);
@@ -879,13 +879,25 @@ function submitFullReport(payloadStr) {
           var allData = sheetUtama.getDataRange().getValues();
           for (var r = 1; r < allData.length; r++) {
             if (allData[r][0] === idLaporan) {
+              var oldFileId = allData[r][11]; // Col L: File URL/ID JSON Draft
+              
               var totalOmset = Number(data.penjualan.shift1 || 0) + Number(data.penjualan.shift2 || 0);
               sheetUtama.getRange(r + 1, 7).setValue(totalOmset); // Col G
               sheetUtama.getRange(r + 1, 9).setValue(Number(data.penjualan.transaksi || 0)); // Col I
-              sheetUtama.getRange(r + 1, 12).setValue(fileUrl);    // Col L
+              sheetUtama.getRange(r + 1, 12).setValue(fileUrl);    // Col L (Timpa dengan link PDF)
               
               // [CRITICAL BUG FIX] Update status kolom ke-15 dari Fase 1 menjadi Fase 2 agar tidak terbaca pending lagi
               sheetUtama.getRange(r + 1, 15).setValue("Fase 2");
+              
+              // Hapus file JSON draft dari Google Drive (Clean up)
+              if (oldFileId && oldFileId.length > 20 && oldFileId.indexOf("http") === -1) {
+                 try {
+                    DriveApp.getFileById(oldFileId).setTrashed(true);
+                 } catch(e) {
+                    Logger.log("Gagal trash JSON: " + e.toString());
+                 }
+              }
+              
               break;
             }
           }

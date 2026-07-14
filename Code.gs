@@ -684,7 +684,7 @@ function submitFullReport(payloadStr) {
               var allData = sheet.getDataRange().getValues();
               var rowsToDelete = [];
               for (var i = allData.length - 1; i >= 1; i--) {
-                var rowStatus = allData[i][5] ? allData[i][5].toString() : "";
+                var rowStatus = allData[i][14] ? allData[i][14].toString() : "";
                 var rowOutlet = allData[i][3] ? allData[i][3].toString() : "";
                 if (rowStatus === "Fase 1" && rowOutlet === (data.outlet || "Perintis").replace(/_/g, " ")) {
                    rowsToDelete.push(i + 1);
@@ -891,7 +891,8 @@ function submitFullReport(payloadStr) {
         data.penutup.saran || "",
         fileUrl,
         data.eventLokal || "",
-        data.profilPengunjung || ""
+        data.profilPengunjung || "",
+        (data.fase === 1 ? "Fase 1" : "Fase 2")
       ]);
       
       // Insert DB_Briefing_Shift
@@ -1444,44 +1445,37 @@ function api_verifyPIN(pin) {
 function api_checkPendingLaporan() {
   try {
     var ss = getSpreadsheet();
-    var sheets = getAllOutletSheets(ss, "Daily");
+    var sheet = ss.getSheetByName("DB_Laporan_Harian");
     var pendings = [];
     
-    for (var s = 0; s < sheets.length; s++) {
-      var sheet = sheets[s];
+    if (sheet) {
       var data = sheet.getDataRange().getValues();
       
       // Cari dari bawah (data terbaru) ke atas, limit ke 60 baris terakhir untuk efisiensi
       var limit = Math.max(1, data.length - 60);
       for (var i = data.length - 1; i >= limit; i--) {
-        var rowOutlet = data[i][2] ? data[i][2].toString() : "";
-        var rowStatus = data[i][10] ? data[i][10].toString() : ""; 
+        var rowStatus = data[i][14] ? data[i][14].toString() : ""; 
         
         if (rowStatus === "Fase 1") {
-          var rawDate = data[i][0];
+          var rawDate = data[i][1];
+          var rowOutlet = data[i][3] ? data[i][3].toString() : "";
           var formattedDate = "";
           if (rawDate instanceof Date) {
             var y = rawDate.getFullYear();
             var m = ("0" + (rawDate.getMonth() + 1)).slice(-2);
             var d = ("0" + rawDate.getDate()).slice(-2);
-            formattedDate = y + "-" + m + "-" + d;
+            formattedDate = d + "-" + m + "-" + y;
           } else {
-            var ds = rawDate.toString();
-            var parts = ds.split("-");
-            if (parts.length === 3) {
-              formattedDate = parts[2] + "-" + parts[1] + "-" + parts[0];
-            } else {
-              formattedDate = ds;
-            }
+            formattedDate = rawDate.toString();
           }
           
           pendings.push({
             outlet: rowOutlet,
             tanggal: formattedDate,
-            supervisor: data[i][1].toString(),
-            shift1: data[i][4] ? Number(data[i][4]) : 0,
+            supervisor: data[i][4] ? data[i][4].toString() : "",
+            shift1: data[i][6] ? Number(data[i][6]) : 0,
             rowIdx: i + 1, // Row index is relative to this specific sheet
-            sheetName: sheet.getName() // Critical for Fase 2 target identification
+            sheetName: "DB_Laporan_Harian" // Critical for Fase 2 target identification
           });
         }
       }

@@ -983,7 +983,9 @@ async function submitReport() {
          setTimeout(function() {
            showUploadLoading(false);
            AppState.isSubmitting = false;
-           window.location.reload();
+           transitionToMenu('select_report', function() {
+             AppState.currentTab = 1;
+           });
          }, 1500);
       } else {
          const body = document.getElementById('previewModalBody');

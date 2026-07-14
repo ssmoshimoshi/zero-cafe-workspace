@@ -12,6 +12,7 @@ function runAllMocks() {
 }
 
 function mock_MasterData(ss) {
+  ss = ss || SpreadsheetApp.getActiveSpreadsheet();
   var staffSheet = ss.getSheetByName("Master_Staff");
   if (staffSheet && staffSheet.getLastRow() <= 1) {
     var staffs = [
@@ -40,6 +41,7 @@ function mock_MasterData(ss) {
 }
 
 function mock_DailyLoop(ss) {
+  ss = ss || SpreadsheetApp.getActiveSpreadsheet();
   var startDate = new Date(2026, 6, 1); // 1 July 2026
   var endDate = new Date(2026, 8, 30);  // 30 Sept 2026
 
@@ -127,6 +129,7 @@ function mock_DailyLoop(ss) {
 }
 
 function mock_WeeklyMonthly(ss) {
+  ss = ss || SpreadsheetApp.getActiveSpreadsheet();
   var minggu = [], bulan = [], evStaf = [];
   var outlets = ["Perintis", "Dg Tata"];
   var spvs = ["Nathan", "Sela"];

@@ -955,12 +955,13 @@ function submitFullReport(payloadStr) {
         }
         if (data.fasilitas && data.fasilitas.length > 0) {
           data.fasilitas.forEach(function(f) {
-            ioSheet.appendRow([idLaporan, "Fasilitas", f.item, f.status, 0, f.eskalasi ? "Eskalasi GM" : "TIDAK"]);
+            var ketEskalasi = (f.eskalasi ? "[ESKALASI GM] " : "") + (f.keterangan || "");
+            ioSheet.appendRow([idLaporan, "Fasilitas", f.item, f.status, 0, ketEskalasi, f.photoUrl || ""]);
           });
         }
         if (data.bahan && data.bahan.length > 0) {
           data.bahan.forEach(function(b) {
-            ioSheet.appendRow([idLaporan, "Bahan", b.nama, b.ketersediaan, Number(b.harga||0), ""]);
+            ioSheet.appendRow([idLaporan, "Bahan", b.nama, b.ketersediaan, Number(b.harga||0), "", b.photoUrl || ""]);
           });
         }
         if (data.qc && data.qc.espresso) {
@@ -1969,26 +1970,54 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           var matches = matchesOutlet(rowOutlet, outletFilter);
           if (matches && dObj >= startD && dObj <= endD) {
             var kategori = (kbData[i][1] || "").toString(); // Col B: Tipe_Inspeksi
-            // Only process "Kebersihan" rows — "Fasilitas" rows have text scores, not numbers
-            if (kategori !== "Kebersihan") continue;
-
-            var area = kbData[i][2]; // Col C: Objek_Dicek
-            var skor = Number(kbData[i][3]); // Col D: Skor_Kondisi
-            var ket = kbData[i][5]; // Col F: Tindakan_Catatan
+            var areaAtauItem = kbData[i][2]; // Col C: Objek_Dicek / Item
+            var skorAtauStatus = kbData[i][3]; // Col D: Skor_Kondisi / Status
+            var biaya = Number(kbData[i][4]); // Col E: Biaya (Bahan)
+            var ket = (kbData[i][5] || "").toString(); // Col F: Tindakan_Catatan / Eskalasi
+            var photo = (kbData[i][6] || "").toString(); // Col G: Bukti_Foto
             
-            if (isNaN(skor)) continue; // Skip if score is not a valid number
-            
-            hygieneScoreTotal += skor;
-            hygieneCount++;
-            
-            if (!hygieneAreas[area]) {
-              hygieneAreas[area] = { totalSkor: 0, count: 0, logs: [] };
-            }
-            hygieneAreas[area].totalSkor += skor;
-            hygieneAreas[area].count++;
-            if (ket && ket.toString().trim() !== "") {
-              if (hygieneAreas[area].logs.indexOf(ket) === -1) {
-                hygieneAreas[area].logs.push(ket);
+            if (kategori === "Kebersihan") {
+              var skor = Number(skorAtauStatus);
+              if (!isNaN(skor)) {
+                hygieneScoreTotal += skor;
+                hygieneCount++;
+                
+                if (!hygieneAreas[areaAtauItem]) {
+                  hygieneAreas[areaAtauItem] = { totalSkor: 0, count: 0, logs: [] };
+                }
+                hygieneAreas[areaAtauItem].totalSkor += skor;
+                hygieneAreas[areaAtauItem].count++;
+                if (ket && ket.trim() !== "") {
+                  if (hygieneAreas[areaAtauItem].logs.indexOf(ket) === -1) {
+                    hygieneAreas[areaAtauItem].logs.push(ket);
+                  }
+                }
+              }
+            } else if (kategori === "Fasilitas") {
+              if (ket.indexOf("ESKALASI GM") !== -1 || (photo && photo.trim() !== "")) {
+                if (!operasionalData) operasionalData = { listEskalasi: [] };
+                if (!operasionalData.listEskalasi) operasionalData.listEskalasi = [];
+                operasionalData.listEskalasi.push({
+                  tanggal: rowDateObj ? (rowDateObj.getDate() + "-" + (rowDateObj.getMonth()+1) + "-" + rowDateObj.getFullYear()) : "",
+                  outlet: rowOutlet,
+                  item: areaAtauItem,
+                  status: skorAtauStatus,
+                  keterangan: ket,
+                  photoUrl: photo
+                });
+              }
+            } else if (kategori === "Bahan") {
+              if (photo && photo.trim() !== "") {
+                if (!operasionalData) operasionalData = { listPengeluaran: [] };
+                if (!operasionalData.listPengeluaran) operasionalData.listPengeluaran = [];
+                operasionalData.listPengeluaran.push({
+                  tanggal: rowDateObj ? (rowDateObj.getDate() + "-" + (rowDateObj.getMonth()+1) + "-" + rowDateObj.getFullYear()) : "",
+                  outlet: rowOutlet,
+                  item: areaAtauItem,
+                  harga: biaya,
+                  ketersediaan: skorAtauStatus,
+                  photoUrl: photo
+                });
               }
             }
           }

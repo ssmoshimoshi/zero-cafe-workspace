@@ -1,5 +1,11 @@
 # Zero Cafe Workspace - CHANGELOG
 
+## [Checkpoint 19] - 2026-07-15
+### STABLE CHECKPOINT - Perbaikan Bug Penanggalan & Agregasi Produk
+- **Perbaikan Korupsi Penanggalan (The Apostrophe Rule)**: Mengatasi auto-format US locale Google Sheets dengan memaksakan tanggal Plain Text dengan tanda kutip tunggal (`'`) di depannya.
+- **Generator Mock Unik**: Memperbaiki MockGenerator agar mengambil data produk real dari `Master_Produk` secara acak unik, mengisi penuh Top 5 dan Bottom 3.
+- **Lockdown Evaluasi Produk**: Mengubah form evaluasi produk di Laporan Mingguan & Bulanan menjadi Read-Only agar SPV fokus melihat hasil agregasi data harian dan hanya perlu mengisi rencana tindakan (action plan).
+
 ## [v125] - 2026-07-03
 ### STABLE CHECKPOINT - Upgrade UI/UX, Bottom Sheets, and Steppers
 - **Meningkatkan Estetika Visual**: Mengubah warna dasar menjadi palet resmi Zero Cafe (Hitam `#171717`, background `#f0efef`, abu-abu `#919191`).

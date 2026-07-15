@@ -52,6 +52,21 @@ function mock_DailyLoop(ss) {
   var cuacaList = ["Cerah / Panas", "Berawan", "Hujan Gerimis", "Hujan Deras"];
 
   var dt = new Date(startDate);
+  
+  var realProduk = { Minuman: [], Makanan: [], Snack: [] };
+  var mpSheet = ss.getSheetByName("DB_Master_Produk");
+  if (mpSheet) {
+    var mpData = mpSheet.getDataRange().getValues();
+    for (var m = 1; m < mpData.length; m++) {
+      if (mpData[m][4] === "Aktif") {
+        var pCat = String(mpData[m][1]).trim();
+        if (realProduk[pCat]) {
+          realProduk[pCat].push(String(mpData[m][2]).trim());
+        }
+      }
+    }
+  }
+  
   while (dt <= endDate) {
     var yyyy = dt.getFullYear();
     var mm = ("0" + (dt.getMonth() + 1)).slice(-2);
@@ -101,14 +116,18 @@ function mock_DailyLoop(ss) {
       var selisih = outlet === "Dg Tata" && Math.random() > 0.8 ? -50000 : 0;
       kas.push([idLaporan, "Shift 2", outlet==="Perintis"?"Amel":"Siti", 1000000, 800000, 2000000, 2800000, selisih, selisih < 0 ? "Kurang kembalian" : "Aman"]);
       
-      // Produk (Generate 5 Top and 3 Bottom for each category)
+      // Produk (Generate Top and Bottom for each category using real names)
       var categories = ["Minuman", "Makanan", "Snack"];
       categories.forEach(function(cat) {
+        var available = realProduk[cat] && realProduk[cat].length > 0 ? realProduk[cat] : [cat + " Default"];
+        
         for (var i = 1; i <= 5; i++) {
-          produk.push([idLaporan, cat, "Top", cat + " Unggulan " + i, Math.floor(Math.random() * 20) + 20, "-"]);
+          var pName = available[Math.floor(Math.random() * available.length)];
+          produk.push([idLaporan, cat, "Top", pName, Math.floor(Math.random() * 20) + 20, "-"]);
         }
         for (var j = 1; j <= 3; j++) {
-          produk.push([idLaporan, cat, "Bottom", cat + " Sepi " + j, Math.floor(Math.random() * 5) + 1, "-"]);
+          var pName = available[Math.floor(Math.random() * available.length)];
+          produk.push([idLaporan, cat, "Bottom", pName, Math.floor(Math.random() * 5) + 1, "-"]);
         }
       });
       

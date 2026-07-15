@@ -118,3 +118,9 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
   2. Parsing tanggal dari Spreadsheet wajib sanggup menangani pemisah strip (`-`) maupun garis miring (`/`) serta mendeteksi urutan (YYYY-MM-DD vs DD-MM-YYYY).
   3. Angka nominal (Omset, Target) wajib dibersihkan dari mata uang menggunakan `.replace(/[^0-9]/g, "")` sebelum di-cast menjadi Number().
 - **Tujuan:** Jangan biarkan sistem menelan data mentah dari Spreadsheet yang rentan terhadap *human error*. Selalu *sanitize* di level backend (`Code.gs`).
+
+## The Apostrophe Rule (Perlindungan Format Tanggal)
+- **Kutukan US Locale:** Google Sheets seringkali memiliki *locale* US (MM/DD/YYYY). Ketika kita menulis tanggal `10-08-2026` (10 Agustus), Sheets akan sering mengubahnya secara diam-diam menjadi `8 Oktober 2026` (karena ia menganggap 10 adalah bulan).
+- **Aturan Mutlak Penulisan Tanggal:** SETIAP KALI sistem (atau *Mock Generator*) melakukan `appendRow` atau `setValue` yang berhubungan dengan data Tanggal (`DD-MM-YYYY`) ke Spreadsheet, Anda **WAJIB MUTLAK** menyisipkan tanda kutip tunggal (`'`) di depan string tersebut! 
+- **Contoh Benar:** `sheet.appendRow(["'" + data.tanggal, outlet]);`
+- **Tujuan:** Ini memaksa Google Sheets untuk menerima data sebagai *Plain Text* murni, dan secara absolut mencegah korupsi data bulan/tanggal. Anda berjanji kepada pengguna untuk SELALU mematuhi ini.

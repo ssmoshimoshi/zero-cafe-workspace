@@ -188,6 +188,67 @@ window.getDailyFormTemplate = function() {
               </div>
             </div>
           </div>
+          <!-- ABSENSI STAFF MALAM -->
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-6 shadow-sm">
+            <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">ABSENSI & KEPATUHAN STAFF (SHIFT MALAM)</h3>
+            
+            <div class="flex gap-2 mb-6 border-b border-gray-100 pb-5">
+              <div class="flex-1">
+                <select id="staffMalamSelectDropdown" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black bg-white mb-2">
+                  <option value="">PILIH STAFF MALAM</option>
+                  ${AppState.masterStaff.filter(s => s.outlet && s.outlet.toLowerCase().trim() === (window.form.outlet || 'Perintis').toLowerCase().trim() && s.status === 'Aktif').map(s => {
+                    return `<option value="${s.nama}">${s.nama}</option>`;
+                  }).join('')}
+                </select>
+                <div class="flex gap-3 mt-1 items-center">
+                  <button type="button" onclick="openAddStaffModal()" class="text-[10px] font-bold text-gray-500 hover:text-zero-black">+ STAFF BARU</button>
+                  <span class="text-gray-300 text-[10px]">|</span>
+                  <button type="button" onclick="openBorrowStaffModal()" class="text-[10px] font-bold text-gray-500 hover:text-zero-black">+ PINJAM STAF</button>
+                </div>
+              </div>
+              <button type="button" onclick="addSelectedStaffMalam()" class="px-4 py-2 bg-zero-black text-white rounded-xl text-[10px] font-bold hover:bg-gray-800 transition-all self-start h-[38px]">TAMBAH</button>
+            </div>
+
+            <div class="space-y-3">
+              ${(!window.form.staffMalam || window.form.staffMalam.length === 0) ? `<p class="text-[10px] text-center text-gray-400 py-4">Belum ada staff shift malam yang ditambahkan.</p>` : ''}
+              ${(window.form.staffMalam || []).map((s, idx) => `
+                <div class="border border-gray-100 rounded-xl p-4 bg-gray-50/30">
+                  <div class="flex justify-between items-center mb-3">
+                    <div>
+                      <span class="text-sm font-bold text-zero-black">${s.nama}</span>
+                      <span class="text-[10px] text-gray-500 ml-1">(${s.posisi})</span>
+                      ${s.outletAsal && s.outletAsal.toLowerCase().trim() !== (window.form.outlet || '').toLowerCase().trim() ? `<span class="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[8px] font-bold border border-yellow-200">PINJAMAN DARI ${s.outletAsal.toUpperCase()}</span>` : ''}
+                    </div>
+                    <button type="button" onclick="removeStaffMalamRow(${idx})" class="text-[10px] font-bold text-red-400 hover:text-red-600">HAPUS</button>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">METODE PENILAIAN</label>
+                      <select onchange="updateStaffMalamField(${idx}, 'metode', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white h-[34px]">
+                        <option value="Dinilai Langsung" ${s.metode === 'Dinilai Langsung' || !s.metode ? 'selected' : ''}>Dinilai Langsung</option>
+                        <option value="Dinilai via Absensi" ${s.metode === 'Dinilai via Absensi' ? 'selected' : ''}>Dinilai via Absensi</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">STATUS KEHADIRAN</label>
+                      <select onchange="updateStaffMalamField(${idx}, 'status', this.value)" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none text-green-600 font-bold bg-white h-[34px]">
+                        <option value="Hadir" ${s.status === 'Hadir' ? 'selected' : ''}>Hadir</option>
+                        <option value="Terlambat" ${s.status === 'Terlambat' ? 'selected' : ''}>Terlambat</option>
+                        <option value="Izin" ${s.status === 'Izin' ? 'selected' : ''}>Izin</option>
+                        <option value="Sakit" ${s.status === 'Sakit' ? 'selected' : ''}>Sakit</option>
+                        <option value="Alpha" ${s.status === 'Alpha' ? 'selected' : ''}>Alpha</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <textarea onchange="updateStaffMalamField(${idx}, 'keterangan', this.value)" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'" placeholder="Catatan khusus (Opsional)" class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-gray-300 resize-none overflow-hidden" style="min-height:36px">${s.keterangan || ''}</textarea>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
           
           <!-- KOMPLAIN SUSULAN (FASE 2) -->
           <div class="bg-white border border-gray-200 rounded-2xl p-5 mb-6 shadow-sm">

@@ -95,6 +95,7 @@ function resetFormData(type) {
     },
     kas: { modalAwal: 200000, audit: [] },
     staff: [], /*  dynamically structured based on masterStaff */
+    staffMalam: [], /* staff untuk shift malam fase 2 */
     briefing: { target: "", fokus: "", masalah: "", solusi: "" },
     qc: { espresso: { jam: "07:00", status: "Baik", keterangan: "" }, items: [] },
     feedback: { items: [], totalKomplain: 0, totalRemake: 0, analisisRemake: "" },
@@ -875,6 +876,37 @@ function addSelectedStaff() {
 function removeStaffRow(idx) {
   window.form.staff.splice(idx, 1);
   renderApp();
+}
+
+function addSelectedStaffMalam() {
+  const select = document.getElementById('staffMalamSelectDropdown');
+  if (!select) return;
+  const nama = select.value;
+  if (!nama) return;
+  
+  if (window.form.staffMalam.some(s => s.nama === nama)) return;
+  
+  const master = AppState.masterStaff.find(s => s.nama === nama);
+  if (master) {
+    window.form.staffMalam.push({
+      nama: master.nama,
+      posisi: master.posisi,
+      outletAsal: master.outlet,
+      metode: "Dinilai Langsung",
+      status: "Hadir",
+      keterangan: ""
+    });
+    renderApp();
+  }
+}
+
+function removeStaffMalamRow(idx) {
+  window.form.staffMalam.splice(idx, 1);
+  renderApp();
+}
+
+function updateStaffMalamField(idx, field, value) {
+  window.form.staffMalam[idx][field] = value;
 }
 
 function saveDraft(quiet = false) {

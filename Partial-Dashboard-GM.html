@@ -96,7 +96,7 @@ window.getDashboardGMTemplate = function() {
       const titleMap = { 'red': 'text-red-800', 'yellow': 'text-amber-800', 'green': 'text-emerald-800', 'blue': 'text-blue-800' };
 
       let summaryHtml = `
-        <div class="${bgMap[summaryColor]} border-l-4 p-4 rounded-xl mb-4 shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
+        <div class="${bgMap[summaryColor]} border-l-4 p-5 rounded-xl mb-8 shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
           <div class="flex items-center gap-2 mb-2">
             <svg class="w-4 h-4 ${iconMap[summaryColor]}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             <span class="text-[10px] font-extrabold ${titleMap[summaryColor]} uppercase tracking-widest">AI SUMMARY (${data.systemVerdict})</span>
@@ -110,7 +110,6 @@ window.getDashboardGMTemplate = function() {
       const ytdPercent = data.targetYTD > 0 ? Math.round((data.omsetYTD / data.targetYTD) * 100) : 0;
       const ytdColor = ytdPercent >= 100 ? 'bg-emerald-500' : (ytdPercent >= 80 ? 'bg-yellow-500' : 'bg-blue-500');
       
-      // --- OPERATIONAL EFFICIENCY SCORE (Phase 3A) ---
       const targetOmsetPct = data.targetOmset > 0 ? Math.min((data.omsetTotal / data.targetOmset) * 100, 100) : 0;
       const hygienePct = data.hygieneScore || 0;
       const kepatuhanPct = op.kepatuhanSop !== null ? op.kepatuhanSop : hygienePct; 
@@ -118,142 +117,106 @@ window.getDashboardGMTemplate = function() {
       const opsScore = Math.round((targetOmsetPct * 0.5) + (hygienePct * 0.3) + (kepatuhanPct * 0.2));
       let opsLabel = "CRITICAL";
       let opsColor = "text-red-600";
-      let opsBg = "bg-red-50 border-red-200";
-      if (opsScore >= 85) { opsLabel = "EXCELLENT"; opsColor = "text-emerald-600"; opsBg = "bg-emerald-50 border-emerald-200"; }
-      else if (opsScore >= 70) { opsLabel = "GOOD"; opsColor = "text-blue-600"; opsBg = "bg-blue-50 border-blue-200"; }
-      else if (opsScore >= 50) { opsLabel = "ATTENTION"; opsColor = "text-amber-600"; opsBg = "bg-amber-50 border-amber-200"; }
+      if (opsScore >= 85) { opsLabel = "EXCELLENT"; opsColor = "text-emerald-600"; }
+      else if (opsScore >= 70) { opsLabel = "GOOD"; opsColor = "text-blue-600"; }
+      else if (opsScore >= 50) { opsLabel = "ATTENTION"; opsColor = "text-amber-600"; }
 
-      let ytdOpsHtml = `
-        <div class="flex flex-col gap-3 mb-6">
-          <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
+      const tlSopColor = op.kepatuhanSop >= 90 ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200";
+      const tlSalesColor = data.omsetTotal >= data.targetOmset && data.targetOmset > 0 ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200";
+      const tlKomplainColor = data.komplainTotal <= 2 ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200";
+      const tlTurnoverColor = op.turnoverBarista <= 1 ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200";
+
+      let financialHtml = `
+        <div class="bg-zero-black p-6 rounded-3xl text-white shadow-xl mb-8 transform transition-transform duration-300 hover:scale-[1.01]">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset & Target</span>
+            ${op.isFallback ? '<span class="text-[8px] bg-gray-800 text-gray-400 px-2 py-1 rounded-full border border-gray-700">Snapshot Mingguan</span>' : ''}
+          </div>
+          <div class="flex flex-col mb-4">
+            <div class="flex items-center">
+              <span class="text-4xl font-extrabold">Rp ${data.omsetTotal.toLocaleString('id-ID')}</span>
+              ${trendHtml}
+            </div>
+            <span class="text-xs font-bold text-gray-400 mt-1">Target: Rp ${data.targetOmset.toLocaleString('id-ID')}</span>
+          </div>
+          <div class="w-full bg-gray-800 rounded-full h-2 mb-1 overflow-hidden">
+            <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${Math.min(salesPercent, 100)}%"></div>
+          </div>
+          <span class="text-[9px] font-bold text-gray-400 mb-6 block">${salesPercent}% Tercapai</span>
+          
+          <div class="border-t border-gray-800 pt-5 mt-2">
             <div class="flex justify-between items-center mb-2">
               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Year-to-Date (YTD) Trajectory</span>
-              <span class="text-[10px] font-extrabold text-zero-black">${ytdPercent}%</span>
+              <span class="text-[10px] font-extrabold text-white">${ytdPercent}%</span>
             </div>
             <div class="flex justify-between items-end mb-3">
               <div>
-                <span class="text-2xl font-black text-zero-black">Rp ${data.omsetYTD.toLocaleString('id-ID')}</span>
+                <span class="text-lg font-black text-white">Rp ${data.omsetYTD.toLocaleString('id-ID')}</span>
               </div>
               <div class="text-right">
                 <span class="text-[9px] font-bold text-gray-400 block mb-1">Target Tahunan</span>
-                <span class="text-xs font-bold text-gray-600">Rp ${data.targetYTD.toLocaleString('id-ID')}</span>
+                <span class="text-xs font-bold text-gray-300">Rp ${data.targetYTD.toLocaleString('id-ID')}</span>
               </div>
             </div>
-            <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
               <div class="${ytdColor} h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${Math.min(ytdPercent, 100)}%"></div>
             </div>
           </div>
-
-          <div class="border ${opsBg} p-4 rounded-2xl flex flex-col shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
-            <div class="flex justify-between items-center mb-3 border-b ${opsBg.replace('bg-', 'border-').replace('50', '200')} pb-2">
-              <span class="text-[10px] uppercase tracking-widest font-bold text-gray-500">Operational Efficiency</span>
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white ${opsColor} border shadow-sm uppercase tracking-widest">${opsLabel}</span>
+          
+          <div class="flex justify-between items-center border-t border-gray-800 pt-5 mt-5">
+            <div>
+              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Transaksi</span>
+              <span class="text-xl font-black text-white">${data.transaksiTotal || 0} <span class="text-[10px] text-gray-500 font-normal">struk</span></span>
             </div>
-            
-            <div class="flex justify-between items-center">
+            <div class="text-right">
+              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Average Ticket Size</span>
+              <span class="text-xl font-bold text-white">Rp ${data.transaksiTotal > 0 ? Math.round(data.omsetTotal / data.transaksiTotal).toLocaleString('id-ID') : 0}</span>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-5 border-t border-gray-800 relative h-24">
+            <canvas id="gmOmsetChart" class="w-full h-full"></canvas>
+          </div>
+          <div id="anomalyContainer"></div>
+          <div id="dayOfWeekContainer" class="mt-5"></div>
+        </div>
+      `;
+
+      let operationalHtml = `
+        <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm mb-8 transform transition-transform duration-300 hover:scale-[1.01]">
+          <div class="flex justify-between items-start mb-6 pb-4 border-b border-gray-100">
+            <div>
+              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Indikator Operasional</span>
               <div class="flex items-baseline gap-1">
                 <span class="text-4xl font-black ${opsColor}">${opsScore}</span>
                 <span class="text-sm font-bold text-gray-400">/100</span>
               </div>
-              
-              <div class="flex flex-col gap-1.5 w-[55%]">
-                <div class="flex justify-between items-center text-[9px]">
-                  <span class="text-gray-500 font-medium">Omset (50%)</span>
-                  <span class="font-bold ${opsColor}">${Math.round(targetOmsetPct)}</span>
-                </div>
-                <div class="w-full bg-white/60 rounded-full h-1">
-                  <div class="bg-gray-400 h-1 rounded-full opacity-40" style="width: ${Math.round(targetOmsetPct)}%"></div>
-                </div>
-                
-                <div class="flex justify-between items-center text-[9px] mt-1">
-                  <span class="text-gray-500 font-medium">Kebersihan (30%)</span>
-                  <span class="font-bold ${opsColor}">${hygienePct}</span>
-                </div>
-                <div class="w-full bg-white/60 rounded-full h-1">
-                  <div class="bg-gray-400 h-1 rounded-full opacity-40" style="width: ${hygienePct}%"></div>
-                </div>
-                
-                <div class="flex justify-between items-center text-[9px] mt-1">
-                  <span class="text-gray-500 font-medium">SOP (20%)</span>
-                  <span class="font-bold ${opsColor}">${kepatuhanPct}</span>
-                </div>
-                <div class="w-full bg-white/60 rounded-full h-1">
-                  <div class="bg-gray-400 h-1 rounded-full opacity-40" style="width: ${kepatuhanPct}%"></div>
-                </div>
-              </div>
+            </div>
+            <span class="text-[9px] font-bold px-3 py-1 rounded-full bg-white ${opsColor} border shadow-sm uppercase tracking-widest">${opsLabel}</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="${tlSopColor} border p-4 rounded-xl flex flex-col justify-between shadow-sm">
+              <span class="text-[9px] uppercase tracking-widest font-bold opacity-80 mb-2">SOP Keramahan</span>
+              <span class="text-2xl font-black">${op.kepatuhanSop || 0}%</span>
+            </div>
+            <div class="${tlSalesColor} border p-4 rounded-xl flex flex-col justify-between shadow-sm">
+              <span class="text-[9px] uppercase tracking-widest font-bold opacity-80 mb-2">Target Penjualan</span>
+              <span class="text-xl font-black">${data.omsetTotal >= data.targetOmset && data.targetOmset > 0 ? 'TERCAPAI' : 'GAGAL'}</span>
+            </div>
+            <div class="${tlKomplainColor} border p-4 rounded-xl flex flex-col justify-between shadow-sm">
+              <span class="text-[9px] uppercase tracking-widest font-bold opacity-80 mb-2">Komplain Bulanan</span>
+              <span class="text-2xl font-black">${data.komplainTotal} <span class="text-[10px] font-normal opacity-70">/ Max 2</span></span>
+            </div>
+            <div class="${tlTurnoverColor} border p-4 rounded-xl flex flex-col justify-between shadow-sm">
+              <span class="text-[9px] uppercase tracking-widest font-bold opacity-80 mb-2">Turnover Staf</span>
+              <span class="text-2xl font-black">${op.turnoverBarista} <span class="text-[10px] font-normal opacity-70">/ Max 1</span></span>
             </div>
           </div>
         </div>
       `;
 
-      // --- TRAFFIC LIGHT KPI CARDS ---
-      const tlSopColor = op.kepatuhanSop >= 90 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
-      const tlSalesColor = data.omsetTotal >= data.targetOmset && data.targetOmset > 0 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
-      const tlKomplainColor = data.komplainTotal <= 2 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
-      const tlTurnoverColor = op.turnoverBarista <= 1 ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-red-100 text-red-800 border-red-300";
-
-      let trafficLightHtml = `
-        <div class="grid grid-cols-4 gap-2 mb-6">
-          <div class="${tlSopColor} border p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
-            <span class="text-[8px] uppercase tracking-widest font-bold opacity-80 mb-1">SOP &gt;= 90%</span>
-            <span class="text-sm font-black">${op.kepatuhanSop || 0}%</span>
-          </div>
-          <div class="${tlSalesColor} border p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
-            <span class="text-[8px] uppercase tracking-widest font-bold opacity-80 mb-1">Target Penj.</span>
-            <span class="text-sm font-black">${data.omsetTotal >= data.targetOmset && data.targetOmset > 0 ? 'TERCAPAI' : 'GAGAL'}</span>
-          </div>
-          <div class="${tlKomplainColor} border p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
-            <span class="text-[8px] uppercase tracking-widest font-bold opacity-80 mb-1">Komplain &lt;= 2</span>
-            <span class="text-sm font-black">${data.komplainTotal}</span>
-          </div>
-          <div class="${tlTurnoverColor} border p-3 rounded-xl flex flex-col justify-center items-center text-center shadow-sm">
-            <span class="text-[8px] uppercase tracking-widest font-bold opacity-80 mb-1">Turnover &lt;= 1</span>
-            <span class="text-sm font-black">${op.turnoverBarista}</span>
-          </div>
-        </div>
-      `;
-
-      statsHtml = summaryHtml + trafficLightHtml + ytdOpsHtml + `
-        <div class="grid grid-cols-2 gap-3 mb-6">
-          <!-- Sales Card -->
-          <div class="col-span-2 bg-zero-black p-5 rounded-2xl text-white shadow-md transform transition-transform duration-300 hover:scale-[1.01]">
-            <div class="flex justify-between items-start mb-2">
-              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Omset & Target</span>
-              ${op.isFallback ? '<span class="text-[8px] bg-gray-800 text-gray-400 px-2 py-1 rounded-full border border-gray-700">Snapshot Mingguan</span>' : ''}
-            </div>
-            <div class="flex flex-col mb-3">
-              <div class="flex items-center">
-                <span class="text-3xl font-extrabold">Rp ${data.omsetTotal.toLocaleString('id-ID')}</span>
-                ${trendHtml}
-              </div>
-              <span class="text-xs font-bold text-gray-400 mt-1">Target: Rp ${data.targetOmset.toLocaleString('id-ID')}</span>
-            </div>
-            <div class="w-full bg-gray-800 rounded-full h-2 mb-1 overflow-hidden">
-              <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${Math.min(salesPercent, 100)}%"></div>
-            </div>
-            <span class="text-[9px] font-bold text-gray-400">${salesPercent}% Tercapai</span>
-            
-            <!-- Minimalist Chart Canvas -->
-            <div class="mt-4 pt-4 border-t border-gray-800 relative h-24">
-              <canvas id="gmOmsetChart" class="w-full h-full"></canvas>
-            </div>
-            <div id="anomalyContainer"></div>
-            <div id="dayOfWeekContainer" class="mt-4"></div>
-          </div>
-
-          <!-- Transaction Card -->
-          <div class="col-span-2 bg-white p-4 rounded-2xl border border-gray-200 flex justify-between items-center shadow-sm transform transition-transform duration-300 hover:scale-[1.01]">
-            <div>
-              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Total Transaksi</span>
-              <span class="text-2xl font-black text-zero-black">${data.transaksiTotal || 0} <span class="text-[10px] text-gray-400 font-normal">struk</span></span>
-            </div>
-            <div class="text-right">
-              <span class="text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">Average Ticket Size</span>
-              <span class="text-xl font-bold text-gray-700">Rp ${data.transaksiTotal > 0 ? Math.round(data.omsetTotal / data.transaksiTotal).toLocaleString('id-ID') : 0}</span>
-            </div>
-          </div>
-        </div>
-      `;
+      statsHtml = summaryHtml + financialHtml + operationalHtml;
       
       let hygieneKritisHtml = "";
       if (data.hygieneKritis && data.hygieneKritis.length > 0) {

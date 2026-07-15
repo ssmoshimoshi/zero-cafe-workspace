@@ -918,7 +918,7 @@ function submitFullReport(payloadStr) {
       
       // Insert DB_Laporan_Harian
       sheetUtama.appendRow([
-        idLaporan, data.tanggal, bulanLaporan, data.outlet, data.supervisor, data.cuaca || "",
+        idLaporan, "'" + data.tanggal, bulanLaporan, data.outlet, data.supervisor, data.cuaca || "",
         Number(data.penjualan.shift1 || 0) + Number(data.penjualan.shift2 || 0),
         Number(data.penjualan.target || 0),
         Number(data.penjualan.transaksi || 0),

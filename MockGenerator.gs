@@ -82,7 +82,7 @@ function mock_DailyLoop(ss) {
       var kendala = isHujan ? "Sepi karena hujan deras" : "Tidak ada kendala berarti";
       var saran = isHujan ? "Perbanyak promo delivery" : "Lanjutkan strategi upselling";
       
-      harian.push([idLaporan, dateStr, blnLaporan, outlet, spv, cuaca, omsetTotal, targetOmset, transaksi, kendala, saran, "-", randEvent, randProfil]);
+      harian.push([idLaporan, "'" + dateStr, blnLaporan, outlet, spv, cuaca, omsetTotal, targetOmset, transaksi, kendala, saran, "-", randEvent, randProfil]);
       
       briefing.push([idLaporan, targetOmset, "Tingkatkan upselling minuman", isHujan ? "Hujan kemarin" : "-", "Tawarkan bundling"]);
       

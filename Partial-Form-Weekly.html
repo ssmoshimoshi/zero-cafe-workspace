@@ -188,8 +188,8 @@ function getWeeklyTabContent() {
                 ${form.weekly.produk.topMinuman.map((item, idx) => `
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" id="input-minuman-topMinuman-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'topMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                    <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.topMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="text" id="input-minuman-topMinuman-${idx}" value="${item.nama}" readonly placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
+                    <input type="number" value="${item.terjual}" readonly placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
                   </div>
                 `).join('')}
               </div>
@@ -201,8 +201,8 @@ function getWeeklyTabContent() {
                   <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" id="input-minuman-bottomMinuman-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('minuman', 'bottomMinuman', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                      <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="text" id="input-minuman-bottomMinuman-${idx}" value="${item.nama}" readonly placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
+                      <input type="number" value="${item.terjual}" readonly placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
                     </div>
                     <input type="text" value="${item.rencana}" onchange="window.form.weekly.produk.bottomMinuman[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
                   </div>
@@ -225,8 +225,8 @@ function getWeeklyTabContent() {
                 ${form.weekly.produk.topMakanan.map((item, idx) => `
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" id="input-makanan-topMakanan-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'topMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                    <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.topMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="text" id="input-makanan-topMakanan-${idx}" value="${item.nama}" readonly placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
+                    <input type="number" value="${item.terjual}" readonly placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
                   </div>
                 `).join('')}
               </div>
@@ -238,8 +238,8 @@ function getWeeklyTabContent() {
                   <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" id="input-makanan-bottomMakanan-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('makanan', 'bottomMakanan', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                      <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="text" id="input-makanan-bottomMakanan-${idx}" value="${item.nama}" readonly placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
+                      <input type="number" value="${item.terjual}" readonly placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
                     </div>
                     <input type="text" value="${item.rencana}" onchange="window.form.weekly.produk.bottomMakanan[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
                   </div>
@@ -262,8 +262,8 @@ function getWeeklyTabContent() {
                 ${form.weekly.produk.topSnack.map((item, idx) => `
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                    <input type="text" id="input-snack-topSnack-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'topSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                    <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.topSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none">
+                    <input type="text" id="input-snack-topSnack-${idx}" value="${item.nama}" readonly placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
+                    <input type="number" value="${item.terjual}" readonly placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
                   </div>
                 `).join('')}
               </div>
@@ -275,8 +275,8 @@ function getWeeklyTabContent() {
                   <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-bold text-gray-400 w-4">${idx+1}</span>
-                      <input type="text" id="input-snack-bottomSnack-${idx}" value="${item.nama}" readonly onclick="openMenuPicker('snack', 'bottomSnack', ${idx})" placeholder="Pilih Menu" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none cursor-pointer bg-gray-50">
-                      <input type="number" value="${item.terjual}" onchange="window.form.weekly.produk.bottomSnack[${idx}].terjual = Number(this.value)" placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-white">
+                      <input type="text" id="input-snack-bottomSnack-${idx}" value="${item.nama}" readonly placeholder="Nama Produk" class="flex-1 px-2 py-1.5 text-xs font-bold border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
+                      <input type="number" value="${item.terjual}" readonly placeholder="Terjual" class="w-16 px-2 py-1.5 text-xs text-center border border-gray-200 rounded-lg focus:outline-none bg-gray-50 pointer-events-none">
                     </div>
                     <input type="text" value="${item.rencana}" onchange="window.form.weekly.produk.bottomSnack[${idx}].rencana = this.value" placeholder="Catatan/Alasan" class="w-full px-2 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none bg-white">
                   </div>

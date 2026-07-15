@@ -348,30 +348,30 @@ function renderGMChart() {
     const bestDay = validDays[0];
     const worstDay = validDays[validDays.length - 1];
     
-    dayOfWeekHtml = `<div class="p-4 bg-gray-50 border border-gray-100 rounded-2xl shadow-sm text-[10px]">
-      <h4 class="font-bold text-zero-black uppercase tracking-widest mb-3 border-b border-gray-200 pb-2 flex items-center gap-2">
-        <svg class="w-4 h-4 text-zero-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    dayOfWeekHtml = `<div class="pt-4 mt-4 border-t border-white/10 text-[10px]">
+      <h4 class="font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-2">
+        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
         Day-of-Week Intelligence
       </h4>
       <div class="grid grid-cols-2 gap-3">
-        <div class="bg-white p-3 rounded-xl border border-emerald-100 relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-8 h-8 bg-emerald-50 rounded-bl-xl flex items-center justify-center">
-            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        <div class="bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/20 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-8 h-8 bg-emerald-500/10 rounded-bl-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
           </div>
           <span class="block text-[8px] text-gray-400 uppercase tracking-widest mb-1">Hari Terkuat</span>
-          <span class="block text-emerald-600 font-black text-sm">${bestDay.name}</span>
-          <span class="block text-gray-500 font-bold mt-1">Rata: Rp ${Math.round(bestDay.avg).toLocaleString('id-ID')}</span>
+          <span class="block text-emerald-400 font-black text-sm">${bestDay.name}</span>
+          <span class="block text-gray-300 font-bold mt-1">Rata: Rp ${Math.round(bestDay.avg).toLocaleString('id-ID')}</span>
         </div>
-        <div class="bg-white p-3 rounded-xl border border-red-100 relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-8 h-8 bg-red-50 rounded-bl-xl flex items-center justify-center">
-            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+        <div class="bg-red-950/20 p-3 rounded-xl border border-red-500/20 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-8 h-8 bg-red-500/10 rounded-bl-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
           </div>
           <span class="block text-[8px] text-gray-400 uppercase tracking-widest mb-1">Hari Terlemah</span>
-          <span class="block text-red-600 font-black text-sm">${worstDay.name}</span>
-          <span class="block text-gray-500 font-bold mt-1">Rata: Rp ${Math.round(worstDay.avg).toLocaleString('id-ID')}</span>
+          <span class="block text-red-400 font-black text-sm">${worstDay.name}</span>
+          <span class="block text-gray-300 font-bold mt-1">Rata: Rp ${Math.round(worstDay.avg).toLocaleString('id-ID')}</span>
         </div>
       </div>
-      <p class="text-[9px] text-gray-500 mt-3 italic leading-relaxed border-l-2 border-gray-300 pl-2">Insight: Alokasikan promosi agresif atau event khusus pada hari terlemah (${worstDay.name}) untuk menyeimbangkan revenue mingguan.</p>
+      <p class="text-[9px] text-gray-400 mt-3 italic leading-relaxed border-l-2 border-white/10 pl-2">Insight: Alokasikan promosi agresif atau event khusus pada hari terlemah (${worstDay.name}) untuk menyeimbangkan revenue mingguan.</p>
     </div>`;
   }
   

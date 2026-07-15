@@ -100,17 +100,17 @@ function getWeeklyTabContent() {
           <div class="flex gap-3">
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">DARI TANGGAL</label>
-              <input type="date" value="${form.periodeStart || ''}" onchange="window.form.periodeStart = this.value; validateWeeklyPeriode(); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="date" value="${form.periodeStart || ''}" onchange="window.form.periodeStart = this.value; validateWeeklyPeriode();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
             <div class="flex-1">
               <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SAMPAI TANGGAL</label>
-              <input type="date" value="${form.periodeEnd || ''}" onchange="window.form.periodeEnd = this.value; validateWeeklyPeriode(); renderApp();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
+              <input type="date" value="${form.periodeEnd || ''}" onchange="window.form.periodeEnd = this.value; validateWeeklyPeriode();" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-zero-black transition-colors" required>
             </div>
           </div>
           <div id="periodeWarning" class="mt-2 text-[10px] font-bold text-red-500 hidden">Peringatan: Periode lebih dari 7 hari!</div>
         </div>
 
-        <div id="weeklySalesContainer" class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 transition-all duration-300">
+        <div id="weeklySalesContainer" class="bg-white border border-gray-200 rounded-2xl p-5 mb-4 transition-all duration-300 ${form.isFetchingWeekly ? 'shimmer-loading opacity-50 pointer-events-none' : ''}">
           <h3 class="text-[10px] font-bold text-zero-black uppercase tracking-widest mb-4">REKAP OMSET 7 HARI</h3>
           
           <div class="space-y-2">

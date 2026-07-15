@@ -14,17 +14,20 @@ function addWeeklyArrayItem(arrName) { window.form.weekly[arrName].push(""); ren
 function removeWeeklyArrayItem(arrName, idx) { window.form.weekly[arrName].splice(idx, 1); renderApp(); }
 
 function validateWeeklyPeriode() {
-  if (!window.form.periodeStart || !window.form.periodeEnd) return;
+  if (!window.form.periodeStart || !window.form.periodeEnd) { renderApp(); return; }
   const diffDays = Math.ceil(Math.abs(new Date(window.form.periodeEnd) - new Date(window.form.periodeStart)) / (1000 * 60 * 60 * 24));
   const warningEl = document.getElementById('periodeWarning');
   if (warningEl) {
     if (diffDays > 6) { 
       warningEl.textContent = 'Peringatan: Periode maksimal 7 hari!';
       warningEl.classList.remove('hidden');
+      renderApp(); // Add explicitly since we removed it from HTML
     } else {
       warningEl.classList.add('hidden');
       fetchWeeklyData();
     }
+  } else {
+    fetchWeeklyData();
   }
 }
 
@@ -32,12 +35,8 @@ async function fetchWeeklyData() {
   const f = window.form;
   if (!f.periodeStart || !f.periodeEnd) return;
   
-  const container = document.getElementById('weeklySalesContainer');
-  if (container) {
-    container.classList.add('shimmer-loading', 'opacity-50', 'pointer-events-none');
-  } else {
-    showToast("Mengambil data omset dari database...", "info");
-  }
+  f.isFetchingWeekly = true;
+  renderApp();
   
   try {
     const res = await Server.call('api_getWeeklyData', f.periodeStart, f.periodeEnd, f.outlet || 'Perintis');
@@ -61,13 +60,16 @@ async function fetchWeeklyData() {
           }
         });
       }
-      if (!container) showToast("Data omset dan target harian berhasil ditarik!", "success");
-      renderApp(); // This will re-render and implicitly remove the shimmer class since it recreates the DOM element
+      if (typeof showToast === 'function') showToast("Data omset dan target harian berhasil ditarik!", "success");
+    } else {
+      if (typeof showToast === 'function') showToast("Gagal menarik data omset otomatis", "error");
     }
   } catch (err) {
     console.error("Error fetchWeeklyData", err);
-    showToast("Gagal menarik data omset otomatis", "error");
-    if (container) container.classList.remove('shimmer-loading', 'opacity-50', 'pointer-events-none');
+    if (typeof showToast === 'function') showToast("Gagal menarik data omset otomatis", "error");
+  } finally {
+    f.isFetchingWeekly = false;
+    renderApp();
   }
 }
 

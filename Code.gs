@@ -1326,7 +1326,7 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
       if (rowDate) {
         // Normalize the time to midnight for accurate comparison
         var t = new Date(rowDate.getFullYear(), rowDate.getMonth(), rowDate.getDate()).getTime();
-        var rowOutlet = String(row[3]); // Col D (Outlet)
+        var rowOutlet = String(row[2]); // Col C (Outlet)
         
         if (t >= start && t <= end && rowOutlet.toLowerCase() === String(outlet).toLowerCase()) {
           var dayName = daysMap[rowDate.getDay()];
@@ -1394,7 +1394,7 @@ function api_getMonthlyData(monthStr, outlet) {
         }
         
         if (rowDate) {
-          if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(hData[i][3]).toLowerCase() === String(outlet).toLowerCase()) {
+          if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(hData[i][2]).toLowerCase() === String(outlet).toLowerCase()) {
             totalReal += Number(hData[i][6] || 0); // Col G: Total Omset
             totalTarget += String(outlet).toLowerCase() === "perintis" ? 6000000 : 5300000;
           }
@@ -1461,7 +1461,7 @@ function api_getMonthlyData(monthStr, outlet) {
       totalTelat: totalTelat,
       kepatuhanSop: kepatuhanSop,
       totalTeguran: totalTeguran,
-      staffEvaluations: staffEvaluations,
+      staffEvaluations: staffPerformances,
       produk: aggregatedProducts
     };
   } catch (err) {

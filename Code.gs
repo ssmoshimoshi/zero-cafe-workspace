@@ -1303,6 +1303,29 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
     // Convert JS day 0-6 (Sun-Sat) to our day names
     var daysMap = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
     
+    // Pre-fill daily targets based on monthly configuration
+    var currD = new Date(startD.getFullYear(), startD.getMonth(), startD.getDate());
+    var endDCopy = new Date(endD.getFullYear(), endD.getMonth(), endD.getDate());
+    
+    while (currD <= endDCopy) {
+      var m = currD.getMonth() + 1;
+      var y = currD.getFullYear();
+      var monthYear = (m < 10 ? "0" + m : m) + "-" + y;
+      
+      var targetResStr = api_getTargetBulanan(outlet, monthYear);
+      var targetRes = JSON.parse(targetResStr);
+      var monthlyTarget = Number(targetRes.target || 0);
+      
+      var daysInMonth = new Date(y, m, 0).getDate();
+      var dailyTarget = monthlyTarget > 0 ? Math.round(monthlyTarget / daysInMonth) : 0;
+      
+      var dayName = daysMap[currD.getDay()];
+      dailyTotals[dayName].target = dailyTarget;
+      
+      currD.setDate(currD.getDate() + 1);
+    }
+    
+    // Iterate through daily data to accumulate real sales
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       var rowDate = null;
@@ -1326,16 +1349,13 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
       if (rowDate) {
         // Normalize the time to midnight for accurate comparison
         var t = new Date(rowDate.getFullYear(), rowDate.getMonth(), rowDate.getDate()).getTime();
-        var rowOutlet = String(row[2]); // Col C (Outlet)
+        var rowOutlet = String(row[3]); // Col D (Outlet)
         
         if (t >= start && t <= end && rowOutlet.toLowerCase() === String(outlet).toLowerCase()) {
           var dayName = daysMap[rowDate.getDay()];
           var omset = Number(row[6] || 0); // Col G (Total_Omset)
-          // Hardcode daily target since it's no longer stored in the daily sheet
-          var target = rowOutlet.toLowerCase() === "perintis" ? 6000000 : 5300000;
           
           dailyTotals[dayName].real += omset;
-          dailyTotals[dayName].target += target;
         }
       }
     }
@@ -1371,7 +1391,12 @@ function api_getMonthlyData(monthStr, outlet) {
     var targetMonth = parseInt(monthParts[1], 10) - 1; // JS months are 0-11
     
     var totalReal = 0;
-    var totalTarget = 0;
+    
+    var monthYearStr = (targetMonth + 1 < 10 ? "0" + (targetMonth + 1) : (targetMonth + 1)) + "-" + targetYear;
+    var targetResStr = api_getTargetBulanan(outlet, monthYearStr);
+    var targetRes = JSON.parse(targetResStr);
+    var totalTarget = Number(targetRes.target || 0);
+    
     var totalKomplain = 0;
     
     var hSheet = ss.getSheetByName("DB_Laporan_Harian");
@@ -1394,9 +1419,8 @@ function api_getMonthlyData(monthStr, outlet) {
         }
         
         if (rowDate) {
-          if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(hData[i][2]).toLowerCase() === String(outlet).toLowerCase()) {
+          if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(hData[i][3]).toLowerCase() === String(outlet).toLowerCase()) {
             totalReal += Number(hData[i][6] || 0); // Col G: Total Omset
-            totalTarget += String(outlet).toLowerCase() === "perintis" ? 6000000 : 5300000;
           }
         }
       }

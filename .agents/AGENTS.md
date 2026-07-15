@@ -106,3 +106,6 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
 
 - **GM = Owner Zero Cafe (Bukan Manajer Profesional):** Pengguna level "GM" di dalam app ini adalah owner langsung, bukan GM profesional berbayar. Implikasinya: (1) insight bisa lebih detail dan sensitif karena owner memiliki konteks operasional penuh, (2) tidak perlu "menyederhanakan" data secara berlebihan, (3) keputusan akhir ada sepenuhnya di tangan owner. Sistem ini adalah "mata dan telinga analitik" owner di outlet yang tidak bisa ia kunjungi setiap hari.
 
+
+## UX Data Fetching (Loading State)
+- Setiap kali Anda membuat atau memperbaiki sistem yang menarik data dari backend (GAS) berdasarkan perubahan input (seperti `onchange` pada field tanggal, kategori, dll), **WAJIB** memberikan penanda UX/Visual (seperti teks "Mengambil data..." pada input, atau memunculkan animasi spinner `l-newtons-cradle`). Jangan biarkan UI diam membeku lalu tiba-tiba angkanya muncul.

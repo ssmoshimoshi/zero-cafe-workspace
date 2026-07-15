@@ -439,7 +439,10 @@ function getDailyTabContent() {
         <div class="bg-zero-black rounded-2xl p-5 mb-4 text-white shadow-md">
           <h3 class="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-4">TARGET HARI INI</h3>
           <div>
-            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">TARGET OMSET (Rp)</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">TARGET OMSET (Rp)</label>
+              <l-newtons-cradle id="targetHarianLoader" class="hidden" size="20" speed="1.4" color="#9ca3af"></l-newtons-cradle>
+            </div>
             <input id="displayTargetHarian" type="text" value="${form.penjualan.target > 0 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(form.penjualan.target) : 'Rp 0 (Belum Diset)'}" class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-white transition-colors opacity-80 cursor-not-allowed" readonly>
             <p class="text-[8px] text-gray-400 mt-2">*Target dihitung otomatis dari target bulanan. Hubungi GM jika belum diset.</p>
           </div>

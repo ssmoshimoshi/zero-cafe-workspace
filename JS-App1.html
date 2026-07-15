@@ -806,15 +806,25 @@ window.fetchDailyTarget = function() {
   const outlet = window.form.outlet || "Perintis";
   const daysInMonth = new Date(dObj.getFullYear(), m, 0).getDate();
   
+  const loaderEl = document.getElementById('targetHarianLoader');
+  const displayEl = document.getElementById('displayTargetHarian');
+  
+  if (loaderEl) loaderEl.classList.remove('hidden');
+  if (displayEl) {
+    displayEl.classList.add('opacity-50');
+    displayEl.value = 'Mengambil data...';
+  }
+  
   google.script.run
     .withSuccessHandler(function(resStr) {
+      if (loaderEl) loaderEl.classList.add('hidden');
+      if (displayEl) displayEl.classList.remove('opacity-50');
       try {
          const res = JSON.parse(resStr);
          if (res.status === 'success') {
            const dailyTarget = res.target > 0 ? Math.round(res.target / daysInMonth) : 0;
            window.form.penjualan.target = dailyTarget;
            
-           const displayEl = document.getElementById('displayTargetHarian');
            if (displayEl) {
              displayEl.value = dailyTarget > 0 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(dailyTarget) : 'Rp 0 (Belum Diset)';
            }
@@ -822,6 +832,13 @@ window.fetchDailyTarget = function() {
            if (window.updateDailyProgress) window.updateDailyProgress();
          }
       } catch(e){}
+    })
+    .withFailureHandler(function(err) {
+      if (loaderEl) loaderEl.classList.add('hidden');
+      if (displayEl) {
+        displayEl.classList.remove('opacity-50');
+        displayEl.value = 'Gagal mengambil data';
+      }
     })
     .api_getTargetBulanan(outlet, monthYear);
 };

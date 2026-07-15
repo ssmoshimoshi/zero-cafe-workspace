@@ -654,12 +654,34 @@ function submitFullReport(payloadStr) {
     var isFase1 = (data.type === "daily" && data.fase === 1);
     var isFase2 = (data.type === "daily" && data.fase === 2);
     
+    // --- [BUG FIX: Standardize Date Parsing Early] ---
+    if (data.type === "daily") {
+      var dateParts = String(data.tanggal).split("-");
+      if (dateParts.length === 3) {
+        if (dateParts[0].length === 4) {
+          // Input: YYYY-MM-DD (Fase 1)
+          yyyy = dateParts[0]; mm = dateParts[1]; dd = dateParts[2];
+        } else {
+          // Input: DD-MM-YYYY (Fase 2 pending report)
+          dd = dateParts[0]; mm = dateParts[1]; yyyy = dateParts[2];
+        }
+        data.tanggal = ("0" + dd).slice(-2) + "-" + ("0" + mm).slice(-2) + "-" + yyyy;
+        dateFormatted = yyyy + "-" + ("0" + mm).slice(-2) + "-" + ("0" + dd).slice(-2);
+      } else {
+         var now = new Date();
+         yyyy = now.getFullYear().toString();
+         mm = ("0" + (now.getMonth() + 1)).slice(-2);
+         dd = ("0" + now.getDate()).slice(-2);
+         data.tanggal = dd + "-" + mm + "-" + yyyy;
+         dateFormatted = yyyy + "-" + mm + "-" + dd;
+      }
+      year = yyyy;
+      monthName = getIndonesianMonth(dateFormatted);
+    }
+    
     // FASE 2: Load draft JSON dari Drive terlebih dahulu
     if (isFase2) {
-      dateFormatted = data.tanggal;
-      var dateParts = dateFormatted.split("-");
-      yyyy = dateParts[0]; mm = dateParts[1]; dd = dateParts[2];
-      year = yyyy; monthName = getIndonesianMonth(dateFormatted);
+      outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
       
       var ss = getSpreadsheet();
@@ -712,9 +734,10 @@ function submitFullReport(payloadStr) {
       draftData.penjualan.shift2 = data.penjualan.shift2;
       draftData.penjualan.transaksi = data.penjualan.transaksi;
       
-      // Gabungkan Evaluasi Produk & Komplain Shift Malam (Fase 2)
+      // Gabungkan Evaluasi Produk, Feedback, & Staff Malam (Fase 2)
       if (data.produk) draftData.produk = data.produk;
       if (data.feedbackSusulan) draftData.feedbackSusulan = data.feedbackSusulan;
+      if (data.staffMalam) draftData.staffMalam = data.staffMalam;
       
       draftData.fase = 2;
       draftData.rowIdx = data.rowIdx;
@@ -727,37 +750,8 @@ function submitFullReport(payloadStr) {
       // Timpa `data` dengan data gabungan untuk pembuatan PDF
       data = draftData;
     }
-
     
     if (data.type === "daily") {
-      var dateParts = String(data.tanggal).split("-");
-      if (dateParts.length === 3) {
-        if (dateParts[0].length === 4) {
-          // Input: YYYY-MM-DD (dari Fase 1 form baru)
-          yyyy = dateParts[0];
-          mm = dateParts[1];
-          dd = dateParts[2];
-        } else {
-          // Input: DD-MM-YYYY (dari Fase 2 yang memuat pending report)
-          dd = dateParts[0];
-          mm = dateParts[1];
-          yyyy = dateParts[2];
-        }
-        // Standardize output ke DD-MM-YYYY untuk Spreadsheet
-        data.tanggal = ("0" + dd).slice(-2) + "-" + ("0" + mm).slice(-2) + "-" + yyyy;
-        // Construct YYYY-MM-DD for getIndonesianMonth to prevent Invalid Date
-        dateFormatted = yyyy + "-" + ("0" + mm).slice(-2) + "-" + ("0" + dd).slice(-2);
-      } else {
-         var now = new Date();
-         yyyy = now.getFullYear().toString();
-         mm = ("0" + (now.getMonth() + 1)).slice(-2);
-         dd = ("0" + now.getDate()).slice(-2);
-         data.tanggal = dd + "-" + mm + "-" + yyyy;
-         dateFormatted = yyyy + "-" + mm + "-" + dd;
-      }
-      
-      year = yyyy;
-      monthName = getIndonesianMonth(dateFormatted);
       supervisor = data.supervisor;
       outlet = (data.outlet || "Perintis").replace(/\s+/g, "_");
       
@@ -946,13 +940,22 @@ function submitFullReport(payloadStr) {
       }
       
       // Insert DB_Kehadiran_Staf
+      var ksSheet = ss.getSheetByName("DB_Kehadiran_Staf");
       if (data.staff && data.staff.length > 0) {
-        var ksSheet = ss.getSheetByName("DB_Kehadiran_Staf");
         data.staff.forEach(function(s) {
           var outletAsal = s.outletAsal || data.outlet;
           if (ksSheet) ksSheet.appendRow([
             idLaporan, s.nama, s.posisi, data.outlet, outletAsal, 
             s.status, s.keramahan ? "YA" : "TIDAK", s.keterangan || ""
+          ]);
+        });
+      }
+      if (data.staffMalam && data.staffMalam.length > 0) {
+        data.staffMalam.forEach(function(s) {
+          var outletAsal = s.outletAsal || data.outlet;
+          if (ksSheet) ksSheet.appendRow([
+            idLaporan, s.nama, s.posisi, data.outlet, outletAsal, 
+            s.status, "N/A (Shift Malam)", s.keterangan || ""
           ]);
         });
       }

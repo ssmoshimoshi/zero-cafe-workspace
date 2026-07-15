@@ -3536,11 +3536,12 @@ function api_gm_saveBenchmarkATS(newATS) {
  */
 function api_saveConfigTarget(bulanTahun, outlet, targetOmset) {
   try {
-    var ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID"));
+    var ss = getSpreadsheet();
     var sheet = ss.getSheetByName("Config_Target");
     if (!sheet) {
       sheet = ss.insertSheet("Config_Target");
       sheet.appendRow(["Bulan", "Tahun", "Outlet", "Target Omset"]);
+      sheet.getRange("A:A").setNumberFormat("@");
     }
     
     var data = sheet.getDataRange().getValues();
@@ -3549,7 +3550,17 @@ function api_saveConfigTarget(bulanTahun, outlet, targetOmset) {
     // Check if exists
     var found = false;
     for (var i = 1; i < data.length; i++) {
-      if (data[i][0].toString() === bulanTahun && data[i][2].toString() === outlet) {
+      var rawBulan = data[i][0];
+      var strBulan = "";
+      if (Object.prototype.toString.call(rawBulan) === '[object Date]') {
+        var m = rawBulan.getMonth() + 1;
+        var y = rawBulan.getFullYear();
+        strBulan = (m < 10 ? "0" + m : m) + "-" + y;
+      } else {
+        strBulan = rawBulan.toString();
+      }
+      
+      if (strBulan === bulanTahun && data[i][2].toString() === outlet) {
         sheet.getRange(i + 1, 4).setValue(Number(targetOmset));
         found = true;
         break;
@@ -3572,13 +3583,23 @@ function api_saveConfigTarget(bulanTahun, outlet, targetOmset) {
  */
 function api_getTargetBulanan(outlet, monthYear) {
   try {
-    var ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID"));
+    var ss = getSpreadsheet();
     var sheet = ss.getSheetByName("Config_Target");
     if (!sheet) return JSON.stringify({ status: "success", target: 0 });
     
     var data = sheet.getDataRange().getValues();
     for (var i = 1; i < data.length; i++) {
-      if (data[i][0].toString() === monthYear && data[i][2].toString() === outlet) {
+      var rawBulan = data[i][0];
+      var strBulan = "";
+      if (Object.prototype.toString.call(rawBulan) === '[object Date]') {
+        var m = rawBulan.getMonth() + 1;
+        var y = rawBulan.getFullYear();
+        strBulan = (m < 10 ? "0" + m : m) + "-" + y;
+      } else {
+        strBulan = rawBulan.toString();
+      }
+      
+      if (strBulan === monthYear && data[i][2].toString() === outlet) {
         return JSON.stringify({ status: "success", target: Number(data[i][3]) });
       }
     }

@@ -15,20 +15,29 @@ function removeWeeklyArrayItem(arrName, idx) { window.form.weekly[arrName].splic
 
 function validateWeeklyPeriode() {
   if (!window.form.periodeStart || !window.form.periodeEnd) { renderApp(); return; }
-  const diffDays = Math.ceil(Math.abs(new Date(window.form.periodeEnd) - new Date(window.form.periodeStart)) / (1000 * 60 * 60 * 24));
-  const warningEl = document.getElementById('periodeWarning');
-  if (warningEl) {
-    if (diffDays > 6) { 
-      warningEl.textContent = 'Peringatan: Periode maksimal 7 hari!';
-      warningEl.classList.remove('hidden');
-      renderApp(); // Add explicitly since we removed it from HTML
-    } else {
-      warningEl.classList.add('hidden');
-      fetchWeeklyData();
-    }
-  } else {
-    fetchWeeklyData();
+  
+  // Calculate difference in days (end - start)
+  const startDate = new Date(window.form.periodeStart);
+  const endDate = new Date(window.form.periodeEnd);
+  
+  if (endDate < startDate) {
+    alert("Tanggal akhir tidak boleh lebih awal dari tanggal mulai.");
+    window.form.periodeEnd = "";
+    renderApp();
+    return;
   }
+  
+  const diffDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+  
+  // Must be EXACTLY 7 days (6 days difference)
+  if (diffDays !== 6) { 
+    alert("Mohon pilih rentang waktu TEPAT 7 HARI (contoh: Senin sampai Minggu). Laporan mingguan membutuhkan data penuh 7 hari.");
+    // Do not fetch data if invalid
+    return;
+  }
+  
+  // If valid 7 days, fetch data
+  fetchWeeklyData();
 }
 
 async function fetchWeeklyData() {

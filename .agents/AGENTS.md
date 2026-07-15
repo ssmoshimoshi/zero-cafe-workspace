@@ -109,3 +109,12 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
 
 ## UX Data Fetching (Loading State)
 - Setiap kali Anda membuat atau memperbaiki sistem yang menarik data dari backend (GAS) berdasarkan perubahan input (seperti `onchange` pada field tanggal, kategori, dll), **WAJIB** memberikan penanda UX/Visual (seperti teks "Mengambil data..." pada input, atau memunculkan animasi spinner `l-newtons-cradle`). Jangan biarkan UI diam membeku lalu tiba-tiba angkanya muncul.
+
+## Bulletproof Date Parsing & Sanitization (Wajib)
+- **Problem Historis:** Aplikasi sering gagal menarik data dari Spreadsheet karena salah ketik oleh pengguna (misal: menggunakan garis miring "06/07/2026" alih-alih strip "06-07-2026", ada spasi ekstra di belakang teks, atau nilai omset mengandung teks "Rp").
+- **Tindakan Wajib saat "Check Code" / Membaca Kode:** Setiap kali pengguna memerintahkan Anda untuk memeriksa codebase/logika aplikasi, Anda **WAJIB** ikut memindai *semua* fungsi yang mengekstrak tanggal, angka, atau melakukan string-matching (seperti Outlet) dari Google Sheets.
+- **Standar Pembersihan (Bulletproof):**
+  1. Pencocokan string (seperti Outlet) wajib menggunakan `.trim().toLowerCase()`.
+  2. Parsing tanggal dari Spreadsheet wajib sanggup menangani pemisah strip (`-`) maupun garis miring (`/`) serta mendeteksi urutan (YYYY-MM-DD vs DD-MM-YYYY).
+  3. Angka nominal (Omset, Target) wajib dibersihkan dari mata uang menggunakan `.replace(/[^0-9]/g, "")` sebelum di-cast menjadi Number().
+- **Tujuan:** Jangan biarkan sistem menelan data mentah dari Spreadsheet yang rentan terhadap *human error*. Selalu *sanitize* di level backend (`Code.gs`).

@@ -1829,11 +1829,8 @@ function renderMenuPickerList(query) {
   let html = '';
   filtered.forEach(m => {
     html += `
-      <button onclick="selectMenuItem('${m.replace(/'/g, "\\'")}')" class="w-full bg-white p-4 rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-gray-100 shadow-sm mb-2">
-        <span class="font-bold text-gray-800 text-sm">${m}</span>
-        <div class="w-6 h-6 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" class="text-gray-300"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
-        </div>
+      <button onclick="selectMenuItem('${m.replace(/'/g, "\\'")}')" class="px-3.5 py-2.5 bg-white text-[11px] font-bold text-gray-800 rounded-xl border border-gray-200 hover:border-zero-black active:scale-[0.96] transition-all shadow-sm flex-shrink-0">
+        ${m}
       </button>
     `;
   });
@@ -1845,7 +1842,9 @@ function selectMenuItem(menuName) {
   
   // Update state directly via string reference hack or switch
   if (AppState.menu === 'form_daily') {
-    if (form.produk[_menuPickerTargetField] && form.produk[_menuPickerTargetField][_menuPickerTargetIndex]) {
+    if (_menuPickerTargetField === 'qc') {
+       updateQcField(_menuPickerTargetIndex, 'nama', menuName);
+    } else if (form.produk[_menuPickerTargetField] && form.produk[_menuPickerTargetField][_menuPickerTargetIndex]) {
        form.produk[_menuPickerTargetField][_menuPickerTargetIndex].nama = menuName;
     }
   } else if (AppState.menu === 'form_weekly') {

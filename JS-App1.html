@@ -813,6 +813,12 @@ window.fetchDailyTarget = function() {
          if (res.status === 'success') {
            const dailyTarget = res.target > 0 ? Math.round(res.target / daysInMonth) : 0;
            window.form.penjualan.target = dailyTarget;
+           
+           const displayEl = document.getElementById('displayTargetHarian');
+           if (displayEl) {
+             displayEl.value = dailyTarget > 0 ? 'Rp ' + new Intl.NumberFormat('id-ID').format(dailyTarget) : 'Rp 0 (Belum Diset)';
+           }
+           
            if (window.updateDailyProgress) window.updateDailyProgress();
          }
       } catch(e){}

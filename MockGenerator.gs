@@ -54,7 +54,7 @@ function mock_DailyLoop(ss) {
   var dt = new Date(startDate);
   
   var realProduk = { Minuman: [], Makanan: [], Snack: [] };
-  var mpSheet = ss.getSheetByName("DB_Master_Produk");
+  var mpSheet = ss.getSheetByName("Master_Produk");
   if (mpSheet) {
     var mpData = mpSheet.getDataRange().getValues();
     for (var m = 1; m < mpData.length; m++) {
@@ -149,6 +149,21 @@ function mock_DailyLoop(ss) {
 
 function mock_WeeklyMonthly(ss) {
   ss = ss || SpreadsheetApp.getActiveSpreadsheet();
+  
+  var realProduk = { Minuman: [], Makanan: [], Snack: [] };
+  var mpSheet = ss.getSheetByName("Master_Produk");
+  if (mpSheet) {
+    var mpData = mpSheet.getDataRange().getValues();
+    for (var m = 1; m < mpData.length; m++) {
+      if (mpData[m][4] === "Aktif") {
+        var pCat = String(mpData[m][1]).trim();
+        if (realProduk[pCat]) {
+          realProduk[pCat].push(String(mpData[m][2]).trim());
+        }
+      }
+    }
+  }
+
   var minggu = [], bulan = [], evStaf = [];
   var outlets = ["Perintis", "Dg Tata"];
   var spvs = ["Nathan", "Sela"];
@@ -186,18 +201,21 @@ function mock_WeeklyMonthly(ss) {
   }
   
   // Bulanan: Tambahkan Saran Produk dari SPV ke DB_Kinerja_Produk
-  var ss = getSpreadsheet();
   var kpSheet = ss.getSheetByName("DB_Kinerja_Produk");
   for (var p = 0; p < periods.length; p++) {
     for (var o = 0; o < outlets.length; o++) {
       var idBulan = periods[p] + "-" + outlets[o].replace(/\s+/g, "_");
       var categories = ["Minuman", "Makanan", "Snack"];
       categories.forEach(function(cat) {
+        var available = realProduk[cat] && realProduk[cat].length > 0 ? realProduk[cat] : [cat + " Default"];
+        
+        for (var i = 1; i <= 5; i++) {
+          var pName = available[Math.floor(Math.random() * available.length)];
+          kpSheet.appendRow([idBulan, cat, "Top", pName, 0, ""]);
+        }
         for (var j = 1; j <= 3; j++) {
-          // Add Monthly ID mock suggestions
-          if (kpSheet) {
-            kpSheet.appendRow([idBulan, cat, "Bottom", cat + " Sepi " + j, 0, "Saran Laporan Bulanan: Diskon 50% atau hapus menu"]);
-          }
+          var pName = available[Math.floor(Math.random() * available.length)];
+          kpSheet.appendRow([idBulan, cat, "Bottom", pName, 0, "Saran Laporan Bulanan: Diskon 50% atau hapus menu"]);
         }
       });
     }

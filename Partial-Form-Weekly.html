@@ -77,6 +77,19 @@ window.getWeeklyFormTemplate = function() {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
+
+      <!-- Weekly Validation Modal -->
+      <div id="modalWeeklyValidation" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-white/70 backdrop-blur-md transition-opacity" onclick="closeWeeklyValidationModal()"></div>
+        <div class="relative w-full max-w-[280px] bg-white rounded-3xl shadow-xl flex flex-col p-6 text-center transform scale-95 opacity-0 transition-all duration-300" id="modalWeeklyValidationContent">
+          <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 mx-auto flex items-center justify-center mb-4">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+          <h3 id="modalWeeklyValidationTitle" class="text-[12px] font-extrabold text-zero-black mb-2 uppercase tracking-widest">PERIODE TIDAK VALID</h3>
+          <p id="modalWeeklyValidationMsg" class="text-[10px] text-gray-500 mb-6 leading-relaxed">Laporan mingguan membutuhkan rentang waktu <strong>TEPAT 7 HARI</strong> (contoh: Senin sampai Minggu).</p>
+          <button type="button" onclick="closeWeeklyValidationModal()" class="w-full py-3 bg-zero-black text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-gray-800 transition-colors shadow-lg">SAYA MENGERTI</button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -392,4 +405,30 @@ function removeWeeklyArrayItem(arrName, idx) {
   form.weekly[arrName].splice(idx, 1);
   renderApp();
 }
+
+window.showWeeklyValidationModal = function(title, msg) {
+  const modal = document.getElementById('modalWeeklyValidation');
+  if (modal) {
+    document.getElementById('modalWeeklyValidationTitle').innerText = title;
+    document.getElementById('modalWeeklyValidationMsg').innerHTML = msg;
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('modalWeeklyValidationContent').classList.remove('scale-95', 'opacity-0');
+      document.getElementById('modalWeeklyValidationContent').classList.add('scale-100', 'opacity-100');
+    }, 10);
+  } else {
+    alert(msg);
+  }
+};
+
+window.closeWeeklyValidationModal = function() {
+  const modal = document.getElementById('modalWeeklyValidation');
+  if (modal) {
+    document.getElementById('modalWeeklyValidationContent').classList.remove('scale-100', 'opacity-100');
+    document.getElementById('modalWeeklyValidationContent').classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300);
+  }
+};
 </script>

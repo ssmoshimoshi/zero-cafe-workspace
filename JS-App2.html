@@ -21,7 +21,11 @@ function validateWeeklyPeriode() {
   const endDate = new Date(window.form.periodeEnd);
   
   if (endDate < startDate) {
-    alert("Tanggal akhir tidak boleh lebih awal dari tanggal mulai.");
+    if (typeof showWeeklyValidationModal === 'function') {
+      showWeeklyValidationModal("TANGGAL MUNDUR", "Tanggal akhir tidak boleh lebih awal dari tanggal mulai.");
+    } else {
+      alert("Tanggal akhir tidak boleh lebih awal dari tanggal mulai.");
+    }
     window.form.periodeEnd = "";
     renderApp();
     return;
@@ -31,7 +35,11 @@ function validateWeeklyPeriode() {
   
   // Must be EXACTLY 7 days (6 days difference)
   if (diffDays !== 6) { 
-    alert("Mohon pilih rentang waktu TEPAT 7 HARI (contoh: Senin sampai Minggu). Laporan mingguan membutuhkan data penuh 7 hari.");
+    if (typeof showWeeklyValidationModal === 'function') {
+      showWeeklyValidationModal("PERIODE TIDAK VALID", "Laporan mingguan membutuhkan rentang waktu <br><strong>TEPAT 7 HARI</strong> (contoh: Senin sampai Minggu).");
+    } else {
+      alert("Mohon pilih rentang waktu TEPAT 7 HARI (contoh: Senin sampai Minggu). Laporan mingguan membutuhkan data penuh 7 hari.");
+    }
     // Do not fetch data if invalid
     return;
   }

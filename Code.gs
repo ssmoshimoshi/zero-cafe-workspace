@@ -1333,27 +1333,36 @@ function api_getWeeklyData(startDateStr, endDateStr, outlet) {
       if (dateCol instanceof Date) {
         rowDate = dateCol;
       } else {
-        var dateParts = String(dateCol).split("-");
+        var dateStrStr = String(dateCol).trim();
+        var dateParts = dateStrStr.split("-");
+        if (dateParts.length !== 3) {
+          dateParts = dateStrStr.split("/");
+        }
         if (dateParts.length === 3) {
-          var d = parseInt(dateParts[0], 10);
-          var m = parseInt(dateParts[1], 10) - 1;
-          var y = parseInt(dateParts[2], 10);
-          if (y < 2000) { // Format is likely YYYY-MM-DD
-            y = parseInt(dateParts[0], 10);
-            d = parseInt(dateParts[2], 10);
+          var p0 = parseInt(dateParts[0], 10);
+          var p1 = parseInt(dateParts[1], 10) - 1;
+          var p2 = parseInt(dateParts[2], 10);
+          var d = p0, m = p1, y = p2;
+          if (p2 < 100) y = p2 + 2000;
+          if (p0 > 1000) { // Format is YYYY-MM-DD
+            y = p0;
+            d = p2;
           }
-          rowDate = new Date(y, m, d);
+          if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
+            rowDate = new Date(y, m, d);
+          }
         }
       }
       
       if (rowDate) {
         // Normalize the time to midnight for accurate comparison
         var t = new Date(rowDate.getFullYear(), rowDate.getMonth(), rowDate.getDate()).getTime();
-        var rowOutlet = String(row[3]); // Col D (Outlet)
+        var rowOutlet = String(row[3]).trim(); // Col D (Outlet)
         
-        if (t >= start && t <= end && rowOutlet.toLowerCase() === String(outlet).toLowerCase()) {
+        if (t >= start && t <= end && rowOutlet.toLowerCase() === String(outlet).trim().toLowerCase()) {
           var dayName = daysMap[rowDate.getDay()];
-          var omset = Number(row[6] || 0); // Col G (Total_Omset)
+          var omsetRaw = String(row[6] || "0").replace(/[^0-9]/g, ""); // Bersihkan dari Rp atau titik
+          var omset = Number(omsetRaw);
           
           dailyTotals[dayName].real += omset;
         }
@@ -1408,19 +1417,32 @@ function api_getMonthlyData(monthStr, outlet) {
         if (dateCol instanceof Date) {
           rowDate = dateCol;
         } else {
-          var dateParts = String(dateCol).split("-");
+          var dateStrStr = String(dateCol).trim();
+          var dateParts = dateStrStr.split("-");
+          if (dateParts.length !== 3) {
+            dateParts = dateStrStr.split("/");
+          }
           if (dateParts.length === 3) {
-            var d = parseInt(dateParts[0], 10);
-            var m = parseInt(dateParts[1], 10) - 1;
-            var y = parseInt(dateParts[2], 10);
-            if (y < 2000) { y = parseInt(dateParts[0], 10); d = parseInt(dateParts[2], 10); }
-            rowDate = new Date(y, m, d);
+            var p0 = parseInt(dateParts[0], 10);
+            var p1 = parseInt(dateParts[1], 10) - 1;
+            var p2 = parseInt(dateParts[2], 10);
+            var d = p0, m = p1, y = p2;
+            if (p2 < 100) y = p2 + 2000;
+            if (p0 > 1000) { // Format is YYYY-MM-DD
+              y = p0;
+              d = p2;
+            }
+            if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
+              rowDate = new Date(y, m, d);
+            }
           }
         }
         
         if (rowDate) {
-          if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && String(hData[i][3]).toLowerCase() === String(outlet).toLowerCase()) {
-            totalReal += Number(hData[i][6] || 0); // Col G: Total Omset
+          var rowOutlet = String(hData[i][3]).trim();
+          if (rowDate.getFullYear() === targetYear && rowDate.getMonth() === targetMonth && rowOutlet.toLowerCase() === String(outlet).trim().toLowerCase()) {
+            var omsetRaw = String(hData[i][6] || "0").replace(/[^0-9]/g, "");
+            totalReal += Number(omsetRaw);
           }
         }
       }

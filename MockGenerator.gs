@@ -58,10 +58,16 @@ function mock_DailyLoop(ss) {
   if (mpSheet) {
     var mpData = mpSheet.getDataRange().getValues();
     for (var m = 1; m < mpData.length; m++) {
-      if (mpData[m][4] === "Aktif") {
-        var pCat = String(mpData[m][1]).trim();
-        if (realProduk[pCat]) {
-          realProduk[pCat].push(String(mpData[m][2]).trim());
+      var status = String(mpData[m][4] || "").trim().toLowerCase();
+      if (status === "aktif") {
+        var pCat = String(mpData[m][1] || "").trim();
+        var matchedCat = null;
+        if (pCat.toLowerCase() === "minuman") matchedCat = "Minuman";
+        else if (pCat.toLowerCase() === "makanan") matchedCat = "Makanan";
+        else if (pCat.toLowerCase() === "snack") matchedCat = "Snack";
+        
+        if (matchedCat && realProduk[matchedCat]) {
+          realProduk[matchedCat].push(String(mpData[m][2] || "").trim());
         }
       }
     }
@@ -116,18 +122,37 @@ function mock_DailyLoop(ss) {
       var selisih = outlet === "Dg Tata" && Math.random() > 0.8 ? -50000 : 0;
       kas.push([idLaporan, "Shift 2", outlet==="Perintis"?"Amel":"Siti", 1000000, 800000, 2000000, 2800000, selisih, selisih < 0 ? "Kurang kembalian" : "Aman"]);
       
+      // Helper function to shuffle and pick unique items
+      function getUniqueRandomItems(arr, count, fallbackPrefix) {
+        var shuffled = arr.slice();
+        for (var i = shuffled.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = shuffled[i];
+          shuffled[i] = shuffled[j];
+          shuffled[j] = temp;
+        }
+        var result = [];
+        for (var k = 0; k < count; k++) {
+          if (k < shuffled.length) {
+            result.push(shuffled[k]);
+          } else {
+            result.push(fallbackPrefix + " " + (k + 1));
+          }
+        }
+        return result;
+      }
+
       // Produk (Generate Top and Bottom for each category using real names)
       var categories = ["Minuman", "Makanan", "Snack"];
       categories.forEach(function(cat) {
-        var available = realProduk[cat] && realProduk[cat].length > 0 ? realProduk[cat] : [cat + " Default"];
+        var available = realProduk[cat] && realProduk[cat].length > 0 ? realProduk[cat] : [];
+        var chosen = getUniqueRandomItems(available, 8, cat + " Default");
         
-        for (var i = 1; i <= 5; i++) {
-          var pName = available[Math.floor(Math.random() * available.length)];
-          produk.push([idLaporan, cat, "Top", pName, Math.floor(Math.random() * 20) + 20, "-"]);
+        for (var i = 0; i < 5; i++) {
+          produk.push([idLaporan, cat, "Top", chosen[i], Math.floor(Math.random() * 20) + 20, "-"]);
         }
-        for (var j = 1; j <= 3; j++) {
-          var pName = available[Math.floor(Math.random() * available.length)];
-          produk.push([idLaporan, cat, "Bottom", pName, Math.floor(Math.random() * 5) + 1, "-"]);
+        for (var j = 5; j < 8; j++) {
+          produk.push([idLaporan, cat, "Bottom", chosen[j], Math.floor(Math.random() * 5) + 1, "-"]);
         }
       });
       
@@ -155,10 +180,16 @@ function mock_WeeklyMonthly(ss) {
   if (mpSheet) {
     var mpData = mpSheet.getDataRange().getValues();
     for (var m = 1; m < mpData.length; m++) {
-      if (mpData[m][4] === "Aktif") {
-        var pCat = String(mpData[m][1]).trim();
-        if (realProduk[pCat]) {
-          realProduk[pCat].push(String(mpData[m][2]).trim());
+      var status = String(mpData[m][4] || "").trim().toLowerCase();
+      if (status === "aktif") {
+        var pCat = String(mpData[m][1] || "").trim();
+        var matchedCat = null;
+        if (pCat.toLowerCase() === "minuman") matchedCat = "Minuman";
+        else if (pCat.toLowerCase() === "makanan") matchedCat = "Makanan";
+        else if (pCat.toLowerCase() === "snack") matchedCat = "Snack";
+        
+        if (matchedCat && realProduk[matchedCat]) {
+          realProduk[matchedCat].push(String(mpData[m][2] || "").trim());
         }
       }
     }
@@ -205,17 +236,36 @@ function mock_WeeklyMonthly(ss) {
   for (var p = 0; p < periods.length; p++) {
     for (var o = 0; o < outlets.length; o++) {
       var idBulan = periods[p] + "-" + outlets[o].replace(/\s+/g, "_");
+      // Helper function to shuffle and pick unique items for monthly suggestions
+      function getUniqueRandomItems(arr, count, fallbackPrefix) {
+        var shuffled = arr.slice();
+        for (var i = shuffled.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = shuffled[i];
+          shuffled[i] = shuffled[j];
+          shuffled[j] = temp;
+        }
+        var result = [];
+        for (var k = 0; k < count; k++) {
+          if (k < shuffled.length) {
+            result.push(shuffled[k]);
+          } else {
+            result.push(fallbackPrefix + " " + (k + 1));
+          }
+        }
+        return result;
+      }
+
       var categories = ["Minuman", "Makanan", "Snack"];
       categories.forEach(function(cat) {
-        var available = realProduk[cat] && realProduk[cat].length > 0 ? realProduk[cat] : [cat + " Default"];
+        var available = realProduk[cat] && realProduk[cat].length > 0 ? realProduk[cat] : [];
+        var chosen = getUniqueRandomItems(available, 8, cat + " Default");
         
-        for (var i = 1; i <= 5; i++) {
-          var pName = available[Math.floor(Math.random() * available.length)];
-          kpSheet.appendRow([idBulan, cat, "Top", pName, 0, ""]);
+        for (var i = 0; i < 5; i++) {
+          kpSheet.appendRow([idBulan, cat, "Top", chosen[i], 0, ""]);
         }
-        for (var j = 1; j <= 3; j++) {
-          var pName = available[Math.floor(Math.random() * available.length)];
-          kpSheet.appendRow([idBulan, cat, "Bottom", pName, 0, "Saran Laporan Bulanan: Diskon 50% atau hapus menu"]);
+        for (var j = 5; j < 8; j++) {
+          kpSheet.appendRow([idBulan, cat, "Bottom", chosen[j], 0, "Saran Laporan Bulanan: Diskon 50% atau hapus menu"]);
         }
       });
     }

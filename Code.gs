@@ -3733,6 +3733,7 @@ function onOpen() {
     .addItem('Hard Reset Database', 'hardResetDatabase')
     .addItem('Build New Architecture', 'buildNewArchitecture')
     .addItem('Run All Mocks', 'runAllMocks')
+    .addItem('Isi Data Produk Default', 'api_populateMasterProduk')
     .addToUi();
 }
 

@@ -290,12 +290,12 @@ function renderGMChart() {
         pointBgColors.push('#3b82f6'); // blue
         pointBorderColors.push('#ffffff');
         pointRadii.push(5);
-        anomalies.push({ date: labels[i], type: 'positif', val: val });
+        anomalies.push({ date: labels[i], type: 'positif', val: val, catatan: cData[i].catatan });
       } else if (val < Math.max(0, mu - 2 * sigma) && sigma > 0) {
         pointBgColors.push('#ef4444'); // red
         pointBorderColors.push('#ffffff');
         pointRadii.push(5);
-        anomalies.push({ date: labels[i], type: 'negatif', val: val });
+        anomalies.push({ date: labels[i], type: 'negatif', val: val, catatan: cData[i].catatan });
       } else {
         pointBgColors.push('#10b981');
         pointBorderColors.push('#ffffff');
@@ -304,10 +304,35 @@ function renderGMChart() {
     });
     
     if (anomalies.length > 0) {
-      anomaliesHtml = `<div class="mt-3 p-3 bg-indigo-50 border-l-2 border-indigo-400 rounded-lg text-[9px] text-indigo-900 leading-relaxed shadow-sm">
-        <strong>⚡ DETEKSI ANOMALI (±2σ):</strong><br/>
-        ${anomalies.map(a => `<span class="${a.type === 'positif' ? 'text-blue-600' : 'text-red-600'} font-bold mt-1 block">● ${a.date} : Rp ${a.val.toLocaleString('id-ID')}</span><span class="block ml-3 opacity-80 text-[8px]">${a.type === 'positif' ? 'Lonjakan positif di luar batas kewajaran.' : 'Penurunan drastis di bawah rata-rata wajar.'}</span>`).join('')}
-      </div>`;
+      anomaliesHtml = `
+        <div class="mt-5 border-t border-white/10 pt-4">
+          <h4 class="font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-2 text-[10px]">
+            <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Deteksi Anomali (±2σ)
+          </h4>
+          <div class="space-y-3">
+            ${anomalies.map(a => `
+              <div class="${a.type === 'positif' ? 'bg-blue-950/20 border-blue-500/20' : 'bg-red-950/20 border-red-500/20'} border p-4 rounded-xl flex flex-col relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="font-black text-sm ${a.type === 'positif' ? 'text-blue-400' : 'text-red-400'}">${a.date}</span>
+                  <span class="font-bold text-white">Rp ${a.val.toLocaleString('id-ID')}</span>
+                </div>
+                <span class="text-[9px] text-gray-400 mb-2">${a.type === 'positif' ? 'Lonjakan positif di luar batas kewajaran rata-rata.' : 'Penurunan drastis di bawah rata-rata wajar.'}</span>
+                ${a.catatan && a.catatan.trim().length > 0 ? `
+                  <div class="mt-2 pt-2 border-t ${a.type === 'positif' ? 'border-blue-500/10' : 'border-red-500/10'}">
+                    <span class="text-[8px] uppercase tracking-widest text-gray-500 mb-1 block">Konteks Lapangan (Laporan SPV)</span>
+                    <span class="text-[10px] text-gray-300 italic">"${a.catatan}"</span>
+                  </div>
+                ` : `
+                  <div class="mt-2 pt-2 border-t ${a.type === 'positif' ? 'border-blue-500/10' : 'border-red-500/10'}">
+                    <span class="text-[10px] text-gray-500 italic">Tidak ada catatan lapangan spesifik dari SPV.</span>
+                  </div>
+                `}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
     }
   }
   
@@ -348,12 +373,12 @@ function renderGMChart() {
     const bestDay = validDays[0];
     const worstDay = validDays[validDays.length - 1];
     
-    dayOfWeekHtml = `<div class="pt-4 mt-4 border-t border-white/10 text-[10px]">
+    dayOfWeekHtml = `<div class="pt-5 mt-5 border-t border-white/10 text-[10px]">
       <h4 class="font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-2">
         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
         Day-of-Week Intelligence
       </h4>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-2 gap-3 mb-3">
         <div class="bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/20 relative overflow-hidden">
           <div class="absolute top-0 right-0 w-8 h-8 bg-emerald-500/10 rounded-bl-xl flex items-center justify-center">
             <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
@@ -371,7 +396,20 @@ function renderGMChart() {
           <span class="block text-gray-300 font-bold mt-1">Rata: Rp ${Math.round(worstDay.avg).toLocaleString('id-ID')}</span>
         </div>
       </div>
-      <p class="text-[9px] text-gray-400 mt-3 italic leading-relaxed border-l-2 border-white/10 pl-2">Insight: Alokasikan promosi agresif atau event khusus pada hari terlemah (${worstDay.name}) untuk menyeimbangkan revenue mingguan.</p>
+      
+      <details class="group bg-gray-800/30 rounded-xl border border-gray-700/50 overflow-hidden cursor-pointer">
+        <summary class="p-3 flex justify-between items-center text-[9px] text-gray-400 font-medium transition-colors hover:text-gray-300">
+          <span>AI Strategy: Rekomendasi untuk memaksimalkan Hari ${worstDay.name}</span>
+          <svg class="w-3 h-3 transform group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </summary>
+        <div class="p-4 pt-0 border-t border-gray-700/50 mt-1">
+          <ul class="text-[10px] text-gray-300 space-y-2 list-disc pl-4 mt-3">
+            <li><strong>Optimasi SDM:</strong> Jadwalkan libur bergilir (off) staf pada hari ${worstDay.name} untuk efisiensi payroll.</li>
+            <li><strong>Marketing:</strong> Buat special deals atau bundling khusus yang hanya berlaku di hari ${worstDay.name}.</li>
+            <li><strong>Maintenance:</strong> Lakukan perawatan mesin atau pembersihan intensif di hari sepi ini agar operasional weekend optimal.</li>
+          </ul>
+        </div>
+      </details>
     </div>`;
   }
   

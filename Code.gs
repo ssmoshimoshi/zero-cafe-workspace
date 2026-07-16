@@ -1713,7 +1713,8 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
           });
           chartData.push({
             date: rowDate,
-            omset: rowOmset
+            omset: rowOmset,
+            catatan: (data[i][9] || "").toString()
           });
           
           // Leaderboard Outlet

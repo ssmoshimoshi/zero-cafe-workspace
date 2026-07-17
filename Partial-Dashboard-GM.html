@@ -258,90 +258,6 @@ window.getDashboardGMTemplate = function() {
         `;
       }
 
-      let eskalasiHtml = "";
-      if (op.listEskalasi && op.listEskalasi.length > 0) {
-        eskalasiHtml = `
-          <div class="bg-red-50 p-5 rounded-2xl border border-red-100 mb-6 shadow-sm">
-            <h3 class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-4 border-b border-red-200 pb-2 flex items-center justify-between">
-              <span>MAINTENANCE & ESKALASI FASILITAS</span>
-              <span class="text-[8px] bg-red-200 text-red-800 px-2 py-0.5 rounded-full">${op.listEskalasi.length} TIKET</span>
-            </h3>
-            <div class="space-y-3">
-              ${op.listEskalasi.map((k, idx) => `
-                <div class="flex flex-col p-3 bg-white border border-red-100 rounded-xl shadow-sm">
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex flex-col">
-                      <span class="text-xs font-bold text-red-900">${k.item}</span>
-                      <span class="text-[9px] text-gray-500">${k.tanggal} - ${k.outlet}</span>
-                    </div>
-                    <span class="text-[9px] font-extrabold text-red-600 px-2 py-1 bg-red-100 rounded-lg">${k.status}</span>
-                  </div>
-                  ${k.keterangan ? `
-                  <div class="text-[10px] text-gray-700 italic border-l-2 border-red-300 pl-2 py-1 mb-2 bg-red-50">
-                    ${k.keterangan.replace("[ESKALASI GM] ", "")}
-                  </div>` : ''}
-                  ${k.photoUrl ? `
-                    <div class="mt-2 w-full h-32 bg-gray-100 relative group cursor-pointer rounded-xl overflow-hidden shadow-sm" onclick="window.open('${k.photoUrl}', '_blank')">
-                      <img src="${k.photoUrl}" alt="Foto ${k.item}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <span class="text-white text-[10px] font-bold border border-white px-2 py-1 rounded">Lihat Foto Penuh</span>
-                      </div>
-                    </div>
-                  ` : ''}
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      }
-
-      let pengeluaranHtml = "";
-      if (op.listPengeluaran && op.listPengeluaran.length > 0) {
-        let totalPengeluaran = op.listPengeluaran.reduce((acc, curr) => acc + (Number(curr.harga) || 0), 0);
-        pengeluaranHtml = `
-          <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 mb-6 shadow-sm">
-            <h3 class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-4 border-b border-blue-200 pb-2 flex items-center justify-between">
-              <span>GALERI PENGELUARAN (BAHAN & ATK)</span>
-              <span class="text-[8px] bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">Rp ${totalPengeluaran.toLocaleString('id-ID')}</span>
-            </h3>
-            
-            <!-- Horizontal Scrollable Gallery -->
-            <div class="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">
-              ${op.listPengeluaran.map((k, idx) => `
-                <div class="snap-start flex-none w-48 bg-white border border-blue-100 rounded-xl overflow-hidden shadow-sm flex flex-col">
-                  ${k.photoUrl ? `
-                    <div class="w-full h-32 bg-gray-100 relative group cursor-pointer" onclick="window.open('${k.photoUrl}', '_blank')">
-                      <img src="${k.photoUrl}" alt="Nota ${k.item}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                        <span class="text-white text-[10px] font-bold border border-white px-2 py-1 rounded">Lihat Nota</span>
-                      </div>
-                    </div>
-                  ` : `
-                    <div class="w-full h-32 bg-gray-100 flex items-center justify-center">
-                      <span class="text-gray-400 text-[10px] font-bold">Tidak ada foto</span>
-                    </div>
-                  `}
-                  <div class="p-3 flex flex-col justify-between flex-1">
-                    <div>
-                      <span class="text-xs font-bold text-zero-black line-clamp-1 mb-1">${k.item}</span>
-                      <span class="text-[9px] text-gray-500 block mb-1">${k.tanggal} - ${k.outlet}</span>
-                    </div>
-                    <div class="mt-2 flex justify-between items-end border-t border-gray-50 pt-2">
-                      <span class="text-[8px] text-gray-400 uppercase tracking-widest">${k.ketersediaan}</span>
-                      <span class="text-[10px] font-extrabold text-blue-600">Rp ${Number(k.harga).toLocaleString('id-ID')}</span>
-                    </div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-            <style>
-              .hide-scrollbar::-webkit-scrollbar { display: none; }
-              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            </style>
-          </div>
-        `;
-      }
-
       let leaderboardHtml = "";
       if ((!AppState.activeFilters.outlet || AppState.activeFilters.outlet === 'Semua') && data.leaderboard && data.leaderboard.length > 0) {
         leaderboardHtml = `
@@ -779,7 +695,8 @@ window.getDashboardGMTemplate = function() {
     `;
     
     // Combine everything
-    statsHtml = statsHtml + eskalasiHtml + pengeluaranHtml + leaderboardHtml;
+    statsHtml = statsHtml + leaderboardHtml;
+    window.galleryData = { pengeluaran: op.listPengeluaran || [], eskalasi: op.listEskalasi || [] };
     
   } else {
     statsHtml = `
@@ -791,10 +708,7 @@ window.getDashboardGMTemplate = function() {
   }
 
   
-  window.galleryData = {
-    pengeluaran: op.listPengeluaran || [],
-    eskalasi: op.listEskalasi || []
-  };
+
   return `
     <div class="w-full min-h-screen pb-24 bg-[#f3f4f6]">
       <div class="bg-white px-6 py-4 flex justify-between items-center sticky top-0 z-20 border-b border-gray-200 shadow-sm">
@@ -926,7 +840,7 @@ window.getDashboardGMTemplate = function() {
             let galleryHtml = "";
             
             // Pengeluaran (Bahan & ATK)
-            const pengeluaran = op.listPengeluaran || [];
+            const pengeluaran = (typeof op !== 'undefined' && op) ? (op.listPengeluaran || []) : [];
             let totalPengeluaran = pengeluaran.reduce((acc, curr) => acc + (Number(curr.harga) || 0), 0);
             const recentPengeluaran = pengeluaran.slice(0, 3);
             
@@ -984,7 +898,7 @@ window.getDashboardGMTemplate = function() {
             galleryHtml += `</div>`;
             
             // Eskalasi Fasilitas
-            const eskalasi = op.listEskalasi || [];
+            const eskalasi = (typeof op !== 'undefined' && op) ? (op.listEskalasi || []) : [];
             const recentEskalasi = eskalasi.slice(0, 3);
             
             galleryHtml += `

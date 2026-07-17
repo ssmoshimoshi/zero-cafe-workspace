@@ -94,11 +94,10 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
 - **Tujuan Utama App = KPI Tracking:** Seluruh arsitektur, fitur baru, dan analisis yang diusulkan agen HARUS dapat dijawab dengan pertanyaan: *"Apakah fitur ini membantu owner mengukur atau mencapai KPI Zero Cafe?"* Jika tidak bisa dijawab — fitur tersebut tidak perlu dibangun saat ini.
 
 - **KPI Resmi Zero Cafe (Referensi Mutlak untuk Evaluasi Fitur):**
-  1. **SOP Compliance (Kepatuhan Operasional):** ≥90%
-  2. **Audit Acak Accuracy:** ≥95% (diukur lewat audit acak)
-  3. **Rata-rata Penjualan Harian:** Tidak boleh turun dari target yang ditetapkan
-  4. **Komplain Pelanggan Serius:** ≤2 per bulan
-  5. **Turnover Barista:** ≤1 orang per 3 bulan
+  1. **SOP Compliance (Kepatuhan):** ≥95% (diukur lewat audit acak)
+  2. **Rata-rata Penjualan Harian:** Tidak boleh turun dari target yang ditetapkan
+  3. **Komplain Pelanggan Serius:** ≤2 per bulan
+  4. **Turnover Barista:** ≤1 orang per 3 bulan
 
 - **App = Indikator Kedisiplinan Staf:** Salah satu fungsi utama app ini adalah memberikan data objektif kepada owner tentang pola perilaku staf di lapangan (keterlambatan, kepatuhan SOP keramahan, kehadiran). Fitur apapun yang melemahkan atau menyembunyikan fungsi ini tidak boleh dihapus atau disimplifikasi.
 

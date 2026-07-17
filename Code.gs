@@ -49,6 +49,39 @@ function hardResetDatabase() {
 }
 
 /**
+ * Utilitas untuk memperbaiki Header yang hilang pada Spreadsheet aktif
+ */
+function fixAllHeaders() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  var sheetHarian = ss.getSheetByName("DB_Laporan_Harian");
+  if (sheetHarian) {
+    sheetHarian.getRange(1, 1, 1, 15).setValues([[
+      "ID_Laporan", "Tanggal", "Bulan_Laporan", "Outlet", "Supervisor", "Cuaca", 
+      "Omset_Total", "Target_Omset", "Total_Transaksi", "Kendala_Operasional", "Rekomendasi", "URL_PDF", "Event_Lokal", "Profil_Pengunjung", "Status_Fase"
+    ]]).setFontWeight("bold");
+  }
+  
+  var sheetBulanan = ss.getSheetByName("DB_Laporan_Bulanan");
+  if (sheetBulanan) {
+    sheetBulanan.getRange(1, 1, 1, 18).setValues([[
+      "ID_Laporan_Bulanan", "Bulan_Laporan", "Outlet", "Supervisor", 
+      "Omset_Aktual", "Omset_Target", "Persen_Tercapai", "Rating_Kerja", 
+      "Kepatuhan_SOP", "Total_Telat", "Pencapaian", "Tantangan", "Total_Pengeluaran_Ekstra",
+      "Total_Turnover", "Strategi_Bulan_Depan", "Kebutuhan_Approval_GM", "URL_PDF", "Detail_Resign_JSON"
+    ]]).setFontWeight("bold");
+  }
+  
+  var sheetInspeksi = ss.getSheetByName("DB_Inspeksi_Operasional");
+  if (sheetInspeksi) {
+    sheetInspeksi.getRange(1, 1, 1, 7).setValues([[
+      "ID_Laporan", "Tipe_Inspeksi", "Objek_Dicek", "Skor_Kondisi", "Estimasi_Biaya", "Tindakan_Catatan", "URL_Foto_Bukti"
+    ]]).setFontWeight("bold");
+  }
+  Logger.log("Header Berhasil Diperbaiki!");
+}
+
+/**
  * Tahap 2: Re-build 9 Sheet Architecture
  */
 function buildNewArchitecture() {
@@ -58,7 +91,7 @@ function buildNewArchitecture() {
   // 1. Transactional Sheets (Daily)
   setupSheet(ss, "DB_Laporan_Harian", [
     "ID_Laporan", "Tanggal", "Bulan_Laporan", "Outlet", "Supervisor", "Cuaca", 
-    "Omset_Total", "Target_Omset", "Total_Transaksi", "Kendala_Operasional", "Rekomendasi", "URL_PDF"
+    "Omset_Total", "Target_Omset", "Total_Transaksi", "Kendala_Operasional", "Rekomendasi", "URL_PDF", "Event_Lokal", "Profil_Pengunjung", "Status_Fase"
   ]);
   
   setupSheet(ss, "DB_Briefing_Shift", [
@@ -80,7 +113,7 @@ function buildNewArchitecture() {
   ]);
   
   setupSheet(ss, "DB_Inspeksi_Operasional", [
-    "ID_Laporan", "Tipe_Inspeksi", "Objek_Dicek", "Skor_Kondisi", "Estimasi_Biaya", "Tindakan_Catatan"
+    "ID_Laporan", "Tipe_Inspeksi", "Objek_Dicek", "Skor_Kondisi", "Estimasi_Biaya", "Tindakan_Catatan", "URL_Foto_Bukti"
   ]);
   
   // 2. Evaluasi & Agregasi Sheets (Weekly & Monthly)
@@ -93,7 +126,7 @@ function buildNewArchitecture() {
     "ID_Laporan_Bulanan", "Bulan_Laporan", "Outlet", "Supervisor", 
     "Omset_Aktual", "Omset_Target", "Persen_Tercapai", "Rating_Kerja", 
     "Kepatuhan_SOP", "Total_Telat", "Pencapaian", "Tantangan", "Total_Pengeluaran_Ekstra",
-    "Total_Turnover", "Strategi_Bulan_Depan", "Kebutuhan_Approval_GM", "URL_PDF"
+    "Total_Turnover", "Strategi_Bulan_Depan", "Kebutuhan_Approval_GM", "URL_PDF", "Detail_Resign_JSON"
   ]);
   
   setupSheet(ss, "DB_Evaluasi_Staf", [

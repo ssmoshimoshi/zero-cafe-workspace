@@ -1,0 +1,53 @@
+Berikut adalah rangkuman lengkap dari seluruh hal yang pernah Anda minta untuk diingat untuk dicek di aplikasi **Zero Cafe Workspace**.
+
+Semua poin ini telah diimplementasikan ke dalam *codebase* dan dikelompokkan ke dalam 3 area utama untuk memudahkan proses inspeksi Anda:
+
+---
+
+### I. Pembaruan Fitur & UI/UX pada Form SPV (Laporan Harian/Bulanan)
+
+1. **Tab QC Dinamis & Terintegrasi (Form Harian)**
+   *   **Lokasi File:** [Partial-Form-Daily.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Partial-Form-Daily.html#L602)
+   *   **Cara Cek:** Masuk ke form Laporan Harian, pilih tab **QC**. Ketika Anda memilih kategori (Minuman/Makanan/Snack), daftar dropdown menu di sebelahnya harus terfilter secara dinamis sesuai menu dari database, dan checklist box parameter evaluasi (seperti *"Rasa Berubah", "Suhu Tidak Sesuai"*) akan menyesuaikan secara otomatis.
+2. **Eskalasi Fasilitas ke GM (Form Harian)**
+   *   **Lokasi File:** [Partial-Form-Daily.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Partial-Form-Daily.html#L843)
+   *   **Cara Cek:** Pada tab **Fasilitas**, tambahkan baris kerusakan dan centang tombol merah **"⚠️ ESKALASI GM"**. Coba kirim dengan nama fasilitas kosong—sistem harus menolak kiriman dan meminta input nama terlebih dahulu.
+3. **Pop-up / Modal Picker Menu**
+   *   **Lokasi File:** [JS-App1.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/JS-App1.html#L1774) (Fungsi `openMenuPicker`)
+   *   **Cara Cek:** Klik pada input pemilihan produk di form. Alih-alih menampilkan dropdown panjang yang rumit, sistem harus memunculkan jendela pop-up modal pencarian menu agar SPV lebih mudah mencari produk.
+4. **Input Tanggal Resign Staf (Form Bulanan)**
+   *   **Lokasi File:** [Partial-Form-Monthly.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Partial-Form-Monthly.html)
+   *   **Cara Cek:** Buka form Bulanan, klik modal input resign. Sekarang SPV wajib menginput **Tanggal Efektif Resign** (menggunakan *input type date*) untuk mencatat detail waktu resign staf.
+
+---
+
+### II. Pembaruan Visual & Analisis pada Dashboard GM
+
+5. **Modul Maintenance & Eskalasi Fasilitas**
+   *   **Lokasi File:** [Partial-Dashboard-GM.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Partial-Dashboard-GM.html)
+   *   **Cara Cek:** Login sebagai GM (`Zero123`). Jika ada eskalasi kerusakan fasilitas dari SPV pada rentang tanggal yang dipilih, modul khusus berwarna merah menyala harus muncul di bagian atas dashboard dengan tombol **"LIHAT FOTO BUKTI"** yang terhubung ke Google Drive.
+6. **Galeri Nota Pengeluaran (Bahan & ATK)**
+   *   **Lokasi File:** [Partial-Dashboard-GM.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Partial-Dashboard-GM.html)
+   *   **Cara Cek:** Pada Dashboard GM, lihat modul Pengeluaran. Foto nota belanja yang diunggah SPV harus tampil dalam barisan galeri foto mini (*thumbnail*) yang bisa di-scroll secara horizontal, dengan total nominal yang dihitung secara *real-time*.
+7. **Turnover "Absolute Quarter Rule"**
+   *   **Lokasi File:** [JS-App2.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/JS-App2.html) & [Code.gs](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Code.gs) (Fungsi `getDashboardGM`)
+   *   **Cara Cek:** Kartu Turnover di GM Dashboard sekarang terpisah dari AI Summary dan menyajikan data kuartalan secara absolut. Judul kartu akan tertulis dinamis (misal: **Turnover Q2 (Apr-Jun)**) dan mencantumkan daftar nama staf yang keluar beserta tanggalnya secara rinci (contoh: *⚠️ Eko - 5 Mei*).
+
+---
+
+### III. Penyelarasan Logika Backend & Keamanan Sistem
+
+8. **Penanganan Format Tanggal Global (`DD-MM-YYYY`)**
+   *   **Lokasi File:** [AGENTS.md](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/.agents/AGENTS.md) (Standardisasi Global) & [Code.gs](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Code.gs)
+   *   **Cara Cek:** Sistem secara otomatis menyisipkan tanda kutip tunggal (`'`) di Google Sheets pada setiap kolom Tanggal untuk menghindari korupsi format dari locale US Sheets. Backend juga menyaring format payload dari frontend agar selalu disimpan dalam standar `DD-MM-YYYY`.
+9. **Perbaikan Layar Blank Putih (Upload Fase 1 Harian)**
+   *   **Lokasi File:** [JS-App2.html](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/JS-App2.html#L981)
+   *   **Cara Cek:** Kirim laporan Harian Tahap 1. Layar tidak boleh lagi membeku/blank putih. Modal preview harus menampilkan status sukses sejenak dan otomatis menutup, lalu mengalihkan SPV kembali ke menu utama. Laporan Tahap 2 juga dipastikan muncul saat SPV kembali membuka aplikasi.
+10. **Resiliensi Database Menu (Wipe-Safe Protection)**
+    *   **Lokasi File:** [Code.gs](file:///Users/muhammadfanani/.gemini/antigravity-ide/scratch/zero-cafe-workspace/Code.gs#L455) (Fungsi `api_getMasterMenu`)
+    *   **Cara Cek:** Jika database `Master_Produk` di Google Sheets tidak sengaja terhapus secara manual, sistem harus tetap berjalan aman dan beralih menggunakan menu cadangan lokal (*dummy menu*) agar aplikasi tidak *crash*.
+
+---
+**Ringkasan Pekerjaan Sesi Ini:**
+*   Memindai seluruh riwayat transkrip percakapan sebelumnya untuk mencari instruksi memori, pengingat, dan *checkpoint* tugas.
+*   Mengompilasi dan mengelompokkan 10 poin pengecekan aplikasi ke dalam format rangkuman yang terstruktur, lengkap dengan lokasi file kode terkait untuk mempermudah verifikasi mandiri Anda.

@@ -1074,7 +1074,17 @@ function submitFullReport(payloadStr) {
       }
       var resignListStr = "";
       if (data.monthly.operasional.resignList && data.monthly.operasional.resignList.length > 0) {
-        resignListStr = JSON.stringify(data.monthly.operasional.resignList);
+        var sanitizedResign = data.monthly.operasional.resignList.map(function(item) {
+          var tgl = item.tanggal || "";
+          if (tgl && tgl.indexOf("-") !== -1) {
+            var parts = tgl.split("-");
+            if (parts[0].length === 4) { // Convert YYYY-MM-DD to DD-MM-YYYY
+              tgl = parts[2] + "-" + parts[1] + "-" + parts[0];
+            }
+          }
+          return { id: item.id, nama: item.nama, alasan: item.alasan, tanggal: tgl };
+        });
+        resignListStr = JSON.stringify(sanitizedResign);
       }
       
       if (mSheet) mSheet.appendRow([

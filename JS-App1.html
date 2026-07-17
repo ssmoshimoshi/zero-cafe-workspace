@@ -1308,7 +1308,7 @@ function buildDailyPDF(f) {
     <tr>
       <td>${r.item || '-'}</td>
       <td><span class="badge ${r.status === 'Rusak Berat' ? 'badge-red' : r.status === 'Rusak Sedang' ? 'badge-yellow' : 'badge-gray'}">${r.status}</span></td>
-      <td>${r.eskalasi ? '⚠️ Eskalasi' : '—'}</td>
+      <td>${r.eskalasi ? 'Eskalasi' : '—'}</td>
       <td>${r.keterangan || '—'}</td>
     </tr>`).join('');
 

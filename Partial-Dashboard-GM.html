@@ -844,16 +844,21 @@ window.getDashboardGMTemplate = function() {
             let totalPengeluaran = pengeluaran.reduce((acc, curr) => acc + (Number(curr.harga) || 0), 0);
             const recentPengeluaran = pengeluaran.slice(0, 3);
             
+            const pBgClass = pengeluaran.length === 0 ? "bg-white border-gray-200" : "bg-blue-50 border-blue-100";
+            const pTextClass = pengeluaran.length === 0 ? "text-gray-400" : "text-blue-800";
+            const pBorderClass = pengeluaran.length === 0 ? "border-gray-100" : "border-blue-200";
+            const pBadgeClass = pengeluaran.length === 0 ? "bg-gray-100 text-gray-500" : "bg-blue-200 text-blue-800";
+            
             galleryHtml += `
-              <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 mb-6 shadow-sm">
-                <h3 class="text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-4 border-b border-blue-200 pb-2 flex items-center justify-between">
+              <div class="${pBgClass} p-5 rounded-2xl border mb-6 shadow-sm transition-colors duration-300">
+                <h3 class="text-[10px] font-bold ${pTextClass} uppercase tracking-widest mb-4 border-b ${pBorderClass} pb-2 flex items-center justify-between">
                   <span>PENGELUARAN (BAHAN & ATK)</span>
-                  <span class="text-[8px] bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">Rp ${totalPengeluaran.toLocaleString('id-ID')} (${pengeluaran.length} ITEM)</span>
+                  <span class="text-[8px] ${pBadgeClass} px-2 py-0.5 rounded-full">Rp ${totalPengeluaran.toLocaleString('id-ID')} (${pengeluaran.length} ITEM)</span>
                 </h3>
             `;
             
             if (pengeluaran.length === 0) {
-              galleryHtml += `<div class="text-xs text-center text-blue-500/70 italic py-4">Aman. Tidak ada pengeluaran di periode ini.</div>`;
+              galleryHtml += `<div class="text-xs text-center text-gray-400 italic py-4">Aman. Tidak ada pengeluaran di periode ini.</div>`;
             } else {
               galleryHtml += `
                 <div class="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">
@@ -901,16 +906,21 @@ window.getDashboardGMTemplate = function() {
             const eskalasi = (typeof op !== 'undefined' && op) ? (op.listEskalasi || []) : [];
             const recentEskalasi = eskalasi.slice(0, 3);
             
+            const eBgClass = eskalasi.length === 0 ? "bg-white border-gray-200" : "bg-red-50 border-red-100";
+            const eTextClass = eskalasi.length === 0 ? "text-gray-400" : "text-red-800";
+            const eBorderClass = eskalasi.length === 0 ? "border-gray-100" : "border-red-200";
+            const eBadgeClass = eskalasi.length === 0 ? "bg-gray-100 text-gray-500" : "bg-red-200 text-red-800";
+
             galleryHtml += `
-              <div class="bg-red-50 p-5 rounded-2xl border border-red-100 mb-6 shadow-sm">
-                <h3 class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-4 border-b border-red-200 pb-2 flex items-center justify-between">
+              <div class="${eBgClass} p-5 rounded-2xl border mb-6 shadow-sm transition-colors duration-300">
+                <h3 class="text-[10px] font-bold ${eTextClass} uppercase tracking-widest mb-4 border-b ${eBorderClass} pb-2 flex items-center justify-between">
                   <span>MAINTENANCE & ESKALASI FASILITAS</span>
-                  <span class="text-[8px] bg-red-200 text-red-800 px-2 py-0.5 rounded-full">${eskalasi.length} TIKET</span>
+                  <span class="text-[8px] ${eBadgeClass} px-2 py-0.5 rounded-full">${eskalasi.length} TIKET</span>
                 </h3>
             `;
             
             if (eskalasi.length === 0) {
-              galleryHtml += `<div class="text-xs text-center text-red-500/70 italic py-4">Aman. Tidak ada kerusakan fasilitas di periode ini.</div>`;
+              galleryHtml += `<div class="text-xs text-center text-gray-400 italic py-4">Aman. Tidak ada kerusakan fasilitas di periode ini.</div>`;
             } else {
               galleryHtml += `
                 <div class="flex overflow-x-auto gap-4 pb-2 snap-x hide-scrollbar">

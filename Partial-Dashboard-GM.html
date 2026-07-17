@@ -126,6 +126,16 @@ window.getDashboardGMTemplate = function() {
       const tlKomplainColor = data.komplainTotal <= 2 ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200";
       const tlTurnoverColor = op.turnoverBarista <= 1 ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200";
 
+      let turnoverDetailsHtml = "";
+      if (op.quarterResignList && op.quarterResignList.length > 0) {
+        turnoverDetailsHtml = `<div class="mt-3 space-y-1.5 pt-3 border-t border-current opacity-90">`;
+        op.quarterResignList.forEach(r => {
+           let tglStr = r.tanggal ? r.tanggal.split("-").reverse().join("-") : "?";
+           turnoverDetailsHtml += `<div class="text-[9px] font-bold leading-tight flex flex-col gap-0.5"><span class="flex items-center gap-1"><svg class="w-3 h-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> ${r.nama}</span> <span class="font-normal opacity-70 ml-4">${tglStr}</span></div>`;
+        });
+        turnoverDetailsHtml += `</div>`;
+      }
+      const turnoverTitle = op.quarterLabel ? `Turnover ${op.quarterLabel}` : "Turnover Staf";
       let financialHtml = `
         <div class="bg-zero-black p-6 rounded-3xl text-white shadow-xl mb-8 transform transition-transform duration-300 hover:scale-[1.01]">
           <div class="flex justify-between items-start mb-2">
@@ -208,9 +218,12 @@ window.getDashboardGMTemplate = function() {
               <span class="text-[9px] uppercase tracking-widest font-bold opacity-80 mb-2">Komplain Bulanan</span>
               <span class="text-2xl font-black">${data.komplainTotal} <span class="text-[10px] font-normal opacity-70">/ Max 2</span></span>
             </div>
-            <div class="${tlTurnoverColor} border p-4 rounded-xl flex flex-col justify-between shadow-sm">
-              <span class="text-[9px] uppercase tracking-widest font-bold opacity-80 mb-2">Turnover Staf</span>
-              <span class="text-2xl font-black">${op.turnoverBarista} <span class="text-[10px] font-normal opacity-70">/ Max 1</span></span>
+            <div class="${tlTurnoverColor} border p-4 rounded-xl flex flex-col shadow-sm">
+              <div class="mb-2 flex-grow">
+                <span class="text-[9px] uppercase tracking-widest font-bold opacity-80 mb-2 block">${turnoverTitle}</span>
+                <span class="text-2xl font-black">${op.turnoverBarista} <span class="text-[10px] font-normal opacity-70">/ Max 1</span></span>
+              </div>
+              ${turnoverDetailsHtml}
             </div>
           </div>
         </div>

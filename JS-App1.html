@@ -1066,8 +1066,9 @@ function openResignModal(idx = -1) {
     const modal = document.getElementById('resignModal');
     const selId = document.getElementById('resignModalId');
     const txtAlasan = document.getElementById('resignModalAlasan');
+    const txtTanggal = document.getElementById('resignModalTanggal');
     
-    if (!modal || !selId || !txtAlasan) {
+    if (!modal || !selId || !txtAlasan || !txtTanggal) {
       showToast("Elemen UI tidak lengkap", "error");
       return;
     }
@@ -1086,10 +1087,12 @@ function openResignModal(idx = -1) {
       if (item) {
         selId.value = item.nama || item.id || "";
         txtAlasan.value = item.alasan || "";
+        txtTanggal.value = item.tanggal || "";
       }
     } else {
       selId.value = "";
       txtAlasan.value = "";
+      txtTanggal.value = "";
     }
     
     modal.classList.remove('hidden');
@@ -1114,11 +1117,13 @@ function saveResignModal() {
   const idx = parseInt(document.getElementById('resignModalIdx').value, 10);
   const selId = document.getElementById('resignModalId').value;
   const txtAlasan = document.getElementById('resignModalAlasan').value;
+  const txtTanggal = document.getElementById('resignModalTanggal').value;
   
   if (!selId) { showToast("Pilih nama staf terlebih dahulu!", "error"); return; }
+  if (!txtTanggal) { showToast("Tanggal keluar tidak boleh kosong!", "error"); return; }
   if (!txtAlasan) { showToast("Alasan resign tidak boleh kosong!", "error"); return; }
   
-  const newItem = { id: selId, nama: selId, alasan: txtAlasan };
+  const newItem = { id: selId, nama: selId, alasan: txtAlasan, tanggal: txtTanggal };
   
   if (!window.form.monthly.operasional.resignList) window.form.monthly.operasional.resignList = [];
   

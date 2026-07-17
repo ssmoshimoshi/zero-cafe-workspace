@@ -1072,6 +1072,10 @@ function submitFullReport(payloadStr) {
         var p = bulanFormatted.split("-");
         bulanFormatted = p[1] + "-" + p[0]; // MM-YYYY from YYYY-MM
       }
+      var resignListStr = "";
+      if (data.monthly.operasional.resignList && data.monthly.operasional.resignList.length > 0) {
+        resignListStr = JSON.stringify(data.monthly.operasional.resignList);
+      }
       
       if (mSheet) mSheet.appendRow([
         idLaporanMonthly, bulanFormatted, data.outlet, data.supervisor,
@@ -1081,7 +1085,8 @@ function submitFullReport(payloadStr) {
         Number(data.monthly.operasional.turnover || 0),       // Index 13: Total_Turnover
         data.monthly.operasional.strategi || "",              // Index 14: Strategi_Bulan_Depan
         data.monthly.operasional.kebutuhanGM || "",           // Index 15: Kebutuhan_Approval_GM
-        fileUrl                                                // Index 16: URL_PDF
+        fileUrl,                                               // Index 16: URL_PDF
+        resignListStr                                          // Index 17: Resign_List_JSON
       ]);
       
       // Auto-Sync Turnover Barista to MasterStaff
@@ -1985,6 +1990,58 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
       };
     }
     if (!operasionalData.komplainMingguan) operasionalData.komplainMingguan = [];
+
+    // --- ABSOLUTE QUARTER RULE FOR TURNOVER ---
+    var endDDate = new Date(endD);
+    var targetYear = endDDate.getFullYear();
+    var targetMonthIdx = endDDate.getMonth(); // 0-11
+    var qStartMonth = Math.floor(targetMonthIdx / 3) * 3; // 0, 3, 6, 9
+    var qEndMonth = qStartMonth + 2; 
+    var targetQuarter = Math.floor(targetMonthIdx / 3) + 1; // 1, 2, 3, 4
+    
+    var qNames = ["Jan-Mar", "Apr-Jun", "Jul-Sep", "Okt-Des"];
+    var quarterLabel = "Q" + targetQuarter + " (" + qNames[targetQuarter - 1] + ")";
+    
+    var quarterTurnoverTotal = 0;
+    var quarterResignList = [];
+    
+    for (var i = 1; i < mData.length; i++) {
+        var bulObj = mData[i][1];
+        var mYear = -1, mMonthIdx = -1;
+        if (bulObj instanceof Date) {
+           mMonthIdx = bulObj.getMonth();
+           mYear = bulObj.getFullYear();
+        } else {
+           var bulStr = (bulObj || "").toString();
+           if (bulStr.indexOf("-") !== -1) {
+             var p2 = bulStr.split("-");
+             mMonthIdx = parseInt(p2[0], 10) - 1;
+             mYear = parseInt(p2[1], 10);
+           }
+        }
+        
+        if (mYear === targetYear && mMonthIdx >= qStartMonth && mMonthIdx <= qEndMonth) {
+            var rowOutletQ = (mData[i][2] || "").toString();
+            if (matchesOutlet(rowOutletQ, outletFilter)) {
+                var tValQ = parseInt(mData[i][13], 10);
+                if (!isNaN(tValQ)) quarterTurnoverTotal += tValQ;
+                
+                var jsonStr = (mData[i][17] || "").toString();
+                if (jsonStr) {
+                    try {
+                        var parsedList = JSON.parse(jsonStr);
+                        if (Array.isArray(parsedList)) {
+                            quarterResignList = quarterResignList.concat(parsedList);
+                        }
+                    } catch (e) {}
+                }
+            }
+        }
+    }
+    
+    operasionalData.turnoverBarista = quarterTurnoverTotal;
+    operasionalData.quarterLabel = quarterLabel;
+    operasionalData.quarterResignList = quarterResignList;
 
     // --- Prepare Revenue per SPV Shift ---
     var spvRevenue = [];

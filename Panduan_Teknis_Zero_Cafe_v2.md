@@ -556,7 +556,7 @@ Tab ini memindahkan fokus GM dari sekadar angka finansial ke "biaya & komplain" 
 Menggantikan rutinitas *meeting* basi. Di tab ini, GM bisa langsung melihat siapa SPV yang "berkeringat" dan mana yang tidak, serta memantau kesehatan operasional tim secara makro. 
 
 > [!NOTE] 
-> **Kenapa tampilan Tab SDM Anda mungkin terlihat berbeda (seperti di screenshot)?**
+> **Kenapa tampilan Tab SDM Anda mungkin terlihat berbeda?**
 > Tab ini sangat dinamis! Sistem akan **menyembunyikan** beberapa *accordion* analisis individu staf (seperti *Minus Kas* atau *Revenue SPV*) jika Anda sedang berada di **Mode Strategis (>95 Hari)** atau jika data SPV tersebut kosong. Ini disengaja agar data tahunan tidak terdistorsi oleh pergantian (turnover) staf.
 
 Secara penuh, terdapat **5 komponen (*accordion*)** yang akan muncul di tab ini jika semua syarat data terpenuhi:
@@ -577,3 +577,37 @@ Jika *accordion* ini diklik, akan muncul daftar historis laporan yang pernah dis
 | :--- | :--- |
 | **Judul & Tanggal Upload** | Menampilkan nama file (contoh: *Laporan_Mingguan_Perintis.pdf*) beserta stempel waktu (`dateCreated`) riil kapan SPV menekan tombol Submit. |
 | **Tombol PDF (View/Download)** | Setiap laporan SPV otomatis di- *generate* menjadi PDF oleh backend dan di- *hosting* ke Google Drive GM. GM cukup menekan tombol "PDF" ini untuk membukanya secara utuh. Berfungsi mutlak sebagai dokumen legal/fisik untuk diserahkan ke *Investor* atau Akuntan eksternal. |
+
+---
+
+## BAB 8: MESIN AI & ALGORITMA PREDIKTIF
+Bagian ini membongkar bagaimana sistem Zero Cafe mengubah kumpulan angka mati dari laporan SPV menjadi wawasan eksekutif (*Executive Insights*). Sistem ini bukanlah AI generatif (seperti ChatGPT), melainkan gabungan sistem pakar (*Expert System*), *Text Mining*, dan algoritma probabilitas silang.
+
+### 8.1 AI Predictive Summary (Korelasi Matriks Lintas Domain)
+Mesin ini tidak membaca data secara terpisah, melainkan menyilangkan minimal dua domain data (misal: Finansial vs HRD, atau Finansial vs Operasional) untuk mencari pola yang tidak kasat mata.
+
+| Nama Algoritma | Matriks yang Disilangkan | Kondisi Terpicu (Trigger) | Output / Pesan Peringatan ke GM |
+| :--- | :--- | :--- | :--- |
+| **Fatigue Limit Detection** | Omset Aktual vs Skor Kebersihan | Omset > Target BULANAN, TAPI Skor Kebersihan < 80%. | *"Fatigue Limit Tercapai. Transaksi tinggi mengorbankan kualitas. Pertimbangkan penambahan staf."* |
+| **Traffic vs Quality Paradox** | Omset Aktual vs Skor Kebersihan | Omset GAGAL (Di bawah target), DAN Skor Kebersihan < 80%. | *"Kritis: Sepi namun kotor. Indikasi staf lalai/malas saat tidak ada pelanggan."* |
+| **Golden Era (Momentum)** | Cuaca/Event vs Omset | Ada Event (Misal: Ujian Kampus) ATAU Cuaca Cerah, DAN Omset Tercapai. | *"Momen Emas: Eksekusi lapangan maksimal memanfaatkan trafik tinggi."* |
+| **Churn Risk (Demotivasi)** | Absensi Telat vs Standar SOP | Angka Keterlambatan > 15% dari total hari operasional. | *"Prediksi Churn: Keterlambatan kronis. Indikasi kuat staf demotivasi atau akan resign."* |
+
+### 8.2 Marketing Intelligence & Text Mining
+Alih-alih menyuruh GM membaca ratusan baris evaluasi laporan harian/mingguan SPV, AI secara otomatis memindai pola teks menggunakan metode penghitungan kata (*Word Frequency/Tokenization*).
+
+1. **Analisis Bottom 3 Produk (Menu Mati):** AI melihat produk apa yang paling sering muncul di daftar "Bottom 3" selama sebulan. AI kemudian menarik teks "Alasan SPV" yang paling sering diketik untuk produk tersebut, dan merangkumnya menjadi satu kalimat strategi untuk GM (contoh: *"Diskon cuci gudang karena bahan baku menumpuk"*).
+2. **Ekstraksi Topik Briefing SPV:** Sistem menghitung kata (misal: "Kebersihan", "Sapa", "Senyum") yang paling sering ditulis SPV di kolom *Topik Briefing*. Kata terbanyak diangkat menjadi "Fokus Utama Shift", memberi tahu GM apa isu yang paling sering dibahas saat internal *meeting* di outlet.
+
+### 8.3 Algoritma Deteksi Fraud Kasir (Cash Discrepancy)
+Sistem tidak pernah menuduh satu staf secara langsung jika uang kas minus, melainkan menggunakan metode "Frekuensi Kehadiran" (*Attendance Frequency Algorithm*).
+
+**Cara Kerja Mesin:**
+1. **Agregasi Insiden:** Saat GM memilih rentang tanggal, sistem mencari hari-hari di mana terjadi **Minus Kas** (Uang riil lebih kecil dari sistem).
+2. **Pemetaan Staf (Fingerprinting):** Mesin mengekstrak daftar staf (Barista/Kasir) yang bertugas *tepat pada shift dan hari* di mana uang tersebut hilang.
+3. **Pembobotan Tumpang Tindih:** Jika uang hilang 5 kali dalam sebulan, mesin menghitung nama siapa yang paling sering muncul di 5 insiden tersebut.
+4. **Indikator Potensi (Output):** Bar Chart tidak akan menampilkan "Jumlah Uang yang Dicuri", melainkan **"Frekuensi Keterlibatan Shift"**. Jika nama Budi menjulang tinggi (misal 5 kali hadir di setiap uang hilang, sementara staf lain hanya 1 kali), GM memiliki basis data yang kuat untuk melakukan interogasi/evaluasi terhadap Budi.
+
+---
+
+*(Akhir dari Dokumen Panduan Teknis & Arsitektur Zero Cafe App v2.0)*

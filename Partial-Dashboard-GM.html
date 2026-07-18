@@ -423,8 +423,8 @@ window.getDashboardGMTemplate = function() {
         let spvCards = data.spvRevenue.map(spv => `
           <div class="flex justify-between items-center bg-gray-50 border border-gray-100 p-3 rounded-xl mb-2 hover:bg-gray-100 transition-colors">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-zero-black text-white flex justify-center items-center font-bold text-[10px]">
-                ${spv.name.replace("SPV ", "")}
+              <div class="w-8 h-8 rounded-full bg-zero-black text-white flex justify-center items-center font-bold text-[12px] uppercase">
+                ${spv.name.charAt(0)}
               </div>
               <div>
                 <div class="text-[10px] font-bold text-zero-black uppercase tracking-widest">${spv.name}</div>

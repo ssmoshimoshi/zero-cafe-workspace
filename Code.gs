@@ -2101,7 +2101,7 @@ function api_gm_fetchReports(startDate, endDate, outletFilter) {
     tempSpvRev.sort(function(a, b) { return b.avgOmset - a.avgOmset; });
     for (var st = 0; st < tempSpvRev.length; st++) {
       spvRevenue.push({
-        name: "SPV " + String.fromCharCode(65 + st),
+        name: tempSpvRev[st].originalName,
         avgOmset: tempSpvRev[st].avgOmset,
         shifts: tempSpvRev[st].shifts
       });

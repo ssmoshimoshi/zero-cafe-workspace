@@ -47,7 +47,7 @@ function mock_DailyLoop(ss) {
 
   var harian = [], briefing = [], kehadiran = [], kas = [], produk = [], inspeksi = [];
   var outlets = ["Perintis", "Dg Tata"];
-  var spvs = ["Nathan", "Sela"];
+  var spvs = [["Nathan", "Bima"], ["Sela", "Rani"]];
   
   var cuacaList = ["Cerah / Panas", "Berawan", "Hujan Gerimis", "Hujan Deras"];
 
@@ -82,7 +82,7 @@ function mock_DailyLoop(ss) {
 
     for (var o = 0; o < outlets.length; o++) {
       var outlet = outlets[o];
-      var spv = spvs[o];
+      var spv = spvs[o][Math.floor(Math.random() * spvs[o].length)];
       var idLaporan = dateStr + "-" + outlet.replace(/\s+/g, "_");
       
       // LOGIKA KINERJA: Perintis bagus, Dg Tata agak kurang (terutama jika ada hujan)
@@ -105,7 +105,18 @@ function mock_DailyLoop(ss) {
       
       harian.push([idLaporan, "'" + dateStr, blnLaporan, outlet, spv, cuaca, omsetTotal, targetOmset, transaksi, kendala, saran, "-", randEvent, randProfil]);
       
-      briefing.push([idLaporan, targetOmset, "Tingkatkan upselling minuman", isHujan ? "Hujan kemarin" : "-", "Tawarkan bundling"]);
+      var briefingFokusList = [
+        "Tingkatkan upselling minuman dan keramahan",
+        "Jaga kebersihan area meja pelanggan",
+        "Percepat pelayanan di jam sibuk",
+        "Cek stok bahan baku sebelum shift",
+        "Disiplin datang tepat waktu",
+        "Keramahan dan upselling makanan"
+      ];
+      var bFokus = briefingFokusList[Math.floor(Math.random() * briefingFokusList.length)];
+      var bEvaluasi = isHujan ? "Pelayanan lambat saat hujan, lantai kotor" : "Kemarin cukup bagus, pertahankan";
+      
+      briefing.push([idLaporan, targetOmset, bFokus, bEvaluasi, "Tawarkan bundling dan jaga kebersihan"]);
       
       // Kehadiran (Perintis: Aman, Dg Tata: Sering Telat)
       if (outlet === "Perintis") {
@@ -119,7 +130,7 @@ function mock_DailyLoop(ss) {
       
       // Kas
       kas.push([idLaporan, "Shift 1", outlet==="Perintis"?"Amel":"Siti", 1000000, 500000, 1500000, 2000000, 0, "Aman"]);
-      var selisih = outlet === "Dg Tata" && Math.random() > 0.8 ? -50000 : 0;
+      var selisih = Math.random() > 0.8 ? -50000 : 0; // Kasir Minus terjadi di semua outlet
       kas.push([idLaporan, "Shift 2", outlet==="Perintis"?"Amel":"Siti", 1000000, 800000, 2000000, 2800000, selisih, selisih < 0 ? "Kurang kembalian" : "Aman"]);
       
       // Helper function to shuffle and pick unique items

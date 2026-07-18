@@ -3088,7 +3088,7 @@ function api_gm_getMarketingInsights(payloadStr) {
     var aggMode = "weekly";
     if (totalRangeDays <= 10) {
       aggMode = "daily";
-    } else if (totalRangeDays > 90) {
+    } else if (totalRangeDays > 95) {
       aggMode = "monthly";
     }
 

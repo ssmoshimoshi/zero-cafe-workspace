@@ -418,7 +418,7 @@ window.getDashboardGMTemplate = function() {
         </details>
       `;
 
-      let spvRevenueHtml = "";
+      spvRevenueHtml = "";
       if (data.spvRevenue && data.spvRevenue.length > 0) {
         let spvCards = data.spvRevenue.map(spv => `
           <div class="flex justify-between items-center bg-gray-50 border border-gray-100 p-3 rounded-xl mb-2 hover:bg-gray-100 transition-colors">
@@ -452,7 +452,7 @@ window.getDashboardGMTemplate = function() {
         `;
       }
       
-      let spvBriefingHtml = "";
+      spvBriefingHtml = "";
       if (data.topBriefingKeywords && data.topBriefingKeywords.length > 0) {
         let kwCards = data.topBriefingKeywords.map((kw, i) => `
           <div class="inline-block bg-gray-100 text-zero-black font-bold px-3 py-1.5 rounded-full text-[10px] mr-2 mb-2 border border-gray-200">

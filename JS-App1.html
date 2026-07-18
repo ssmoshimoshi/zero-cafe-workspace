@@ -962,7 +962,8 @@ async function uploadPhoto(fileInput, category, customFilename) {
         
         try {
           showLoading(true);
-          const res = await Server.call('api_uploadImage', dataUrl, filename, category);
+          const currentOutlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || window.form.outlet || "Perintis";
+          const res = await Server.call('api_uploadImage', dataUrl, filename, category, currentOutlet);
           showLoading(false);
           
           if (res.success) {

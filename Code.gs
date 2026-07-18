@@ -2922,7 +2922,7 @@ function generateHtmlReport(data) {
 /**
  * Uploads a base64 encoded image to Google Drive and returns its URL.
  */
-function api_uploadImage(base64Data, filename, category) {
+function api_uploadImage(base64Data, filename, category, outlet) {
   try {
     var date = new Date();
     var year = date.getFullYear().toString();
@@ -2946,7 +2946,13 @@ function api_uploadImage(base64Data, filename, category) {
     
     var yearFolder = getOrCreateSubFolder(rootFolder, year);
     var monthFolder = getOrCreateSubFolder(yearFolder, monthName);
-    var categoryFolder = getOrCreateSubFolder(monthFolder, category || "Lain-lain");
+    var parentFolderForCategory = monthFolder;
+    
+    if (outlet) {
+      parentFolderForCategory = getOrCreateSubFolder(monthFolder, outlet);
+    }
+    
+    var categoryFolder = getOrCreateSubFolder(parentFolderForCategory, category || "Lain-lain");
     
     // Remove base64 prefix if exists (e.g., "data:image/jpeg;base64,")
     var cleanBase64 = base64Data;

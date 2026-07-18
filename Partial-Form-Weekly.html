@@ -1,10 +1,13 @@
 <!-- Partial-Form-Weekly.html -->
 <script>
 window.getWeeklyFormTemplate = function() {
+  const currentOutlet = AppState.currentUser ? AppState.currentUser.outlet : "";
+  const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
+
   if (!form.weekly.staff || form.weekly.staff.length === 0) {
-    form.weekly.staff = AppState.masterStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" }));
+    form.weekly.staff = filteredStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" }));
   } else {
-    AppState.masterStaff.forEach(s => {
+    filteredStaff.forEach(s => {
       if (!form.weekly.staff.find(fs => fs.nama === s.nama)) {
         form.weekly.staff.push({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" });
       }

@@ -1159,9 +1159,9 @@ function executeResetForm() {
   } else {
     const filteredStaff = AppState.masterStaff.filter(s => s.outlet && s.outlet.toLowerCase().trim() === (window.form.outlet || 'Perintis').toLowerCase().trim() && s.status === 'Aktif');
     if (currentType === 'weekly') {
-      window.form.weekly.staff = filteredStaff.map(s => ({ nama: s.nama, kpi: "", kendala: "" }));
+      window.form.weekly.staff = filteredStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" }));
     } else if (currentType === 'monthly') {
-      window.form.monthly.staff = filteredStaff.map(s => ({ nama: s.nama, posisi: s.posisi, attitude: "Baik", skill: "Bagus", rekomendasi: "Lanjut" }));
+      window.form.monthly.staff = filteredStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: "" }));
     }
   }
   

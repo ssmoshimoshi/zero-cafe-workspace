@@ -689,11 +689,15 @@ function _startNormalForm(type) {
     }
     window.fetchDailyTarget();
   } else if (type === 'weekly') {
-    window.form.weekly.staff = AppState.masterStaff.map(s => ({
+    const currentOutlet = AppState.currentUser ? AppState.currentUser.outlet : (window.form.outlet || "");
+    const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
+    window.form.weekly.staff = filteredStaff.map(s => ({
       nama: s.nama, posisi: s.posisi, status: "", alasan: ""
     }));
   } else if (type === 'monthly') {
-    window.form.monthly.staff = AppState.masterStaff.map(s => ({
+    const currentOutlet = AppState.currentUser ? AppState.currentUser.outlet : (window.form.outlet || "");
+    const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
+    window.form.monthly.staff = filteredStaff.map(s => ({
       nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: ""
     }));
   }

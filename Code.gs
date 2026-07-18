@@ -2933,24 +2933,20 @@ function generateHtmlReport(data) {
  */
 function api_uploadImage(base64Data, filename, category, outlet, dateStr) {
   try {
-    var date;
-    if (dateStr && dateStr.trim() !== "") {
-      date = new Date(dateStr);
-    } else {
-      date = new Date();
+    var year = new Date().getFullYear().toString();
+    
+    // Timezone-safe year extraction
+    if (dateStr && typeof dateStr === 'string') {
+      var parts = dateStr.split('-');
+      if (parts.length >= 1 && parts[0].length === 4) {
+        year = parts[0]; // YYYY-MM-DD or YYYY-MM
+      } else if (parts.length === 3 && parts[2].length === 4) {
+        year = parts[2]; // DD-MM-YYYY
+      }
     }
     
-    if (isNaN(date.getTime())) {
-       date = new Date();
-    }
-    
-    var year = date.getFullYear().toString();
-    var monthIndex = date.getMonth();
-    var months = [
-      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-    ];
-    var monthName = months[monthIndex];
+    // getIndonesianMonth is already timezone-safe
+    var monthName = getIndonesianMonth(dateStr || new Date().toISOString().split('T')[0]);
     
     // Get or create category folder inside month folder
     // [A3] Centralize: selalu baca ROOT_FOLDER_ID dari ScriptProperties

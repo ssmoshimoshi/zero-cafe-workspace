@@ -963,7 +963,9 @@ async function uploadPhoto(fileInput, category, customFilename) {
         try {
           showLoading(true);
           const currentOutlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || window.form.outlet || "Perintis";
-          const res = await Server.call('api_uploadImage', dataUrl, filename, category, currentOutlet);
+          // Gunakan tanggal spesifik dari form, atau bulan dari form, jika tidak ada fallback ke hari ini
+          const dateStr = window.form.tanggal || window.form.bulan || new Date().toISOString().split('T')[0];
+          const res = await Server.call('api_uploadImage', dataUrl, filename, category, currentOutlet, dateStr);
           showLoading(false);
           
           if (res.success) {

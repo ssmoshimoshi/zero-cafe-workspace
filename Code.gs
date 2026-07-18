@@ -638,15 +638,24 @@ function getOrCreateSubFolder(parentFolder, folderName) {
   return parentFolder.createFolder(folderName);
 }
 
-/**
- * Maps numeric month index or date string to Indonesian Month Name.
- */
 function getIndonesianMonth(dateStr) {
-  var date = new Date(dateStr);
   var months = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
     "Juli", "Agustus", "September", "Oktober", "November", "Desember"
   ];
+  if (typeof dateStr === 'string' && dateStr.length >= 7) {
+    // Expected format: YYYY-MM-DD or YYYY-MM
+    var parts = dateStr.split('-');
+    if (parts.length >= 2) {
+      var m = parseInt(parts[1], 10);
+      if (!isNaN(m) && m >= 1 && m <= 12) {
+        return months[m - 1];
+      }
+    }
+  }
+  // Fallback
+  var date = new Date(dateStr);
+  if (isNaN(date.getTime())) date = new Date();
   return months[date.getMonth()];
 }
 
@@ -2922,11 +2931,26 @@ function generateHtmlReport(data) {
 /**
  * Uploads a base64 encoded image to Google Drive and returns its URL.
  */
-function api_uploadImage(base64Data, filename, category, outlet) {
+function api_uploadImage(base64Data, filename, category, outlet, dateStr) {
   try {
-    var date = new Date();
+    var date;
+    if (dateStr && dateStr.trim() !== "") {
+      date = new Date(dateStr);
+    } else {
+      date = new Date();
+    }
+    
+    if (isNaN(date.getTime())) {
+       date = new Date();
+    }
+    
     var year = date.getFullYear().toString();
-    var monthName = getIndonesianMonth(date.toISOString().split('T')[0]);
+    var monthIndex = date.getMonth();
+    var months = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    var monthName = months[monthIndex];
     
     // Get or create category folder inside month folder
     // [A3] Centralize: selalu baca ROOT_FOLDER_ID dari ScriptProperties

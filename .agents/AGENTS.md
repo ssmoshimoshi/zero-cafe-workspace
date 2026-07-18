@@ -123,3 +123,12 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
 - **Aturan Mutlak Penulisan Tanggal:** SETIAP KALI sistem (atau *Mock Generator*) melakukan `appendRow` atau `setValue` yang berhubungan dengan data Tanggal (`DD-MM-YYYY`) ke Spreadsheet, Anda **WAJIB MUTLAK** menyisipkan tanda kutip tunggal (`'`) di depan string tersebut! 
 - **Contoh Benar:** `sheet.appendRow(["'" + data.tanggal, outlet]);`
 - **Tujuan:** Ini memaksa Google Sheets untuk menerima data sebagai *Plain Text* murni, dan secara absolut mencegah korupsi data bulan/tanggal. Anda berjanji kepada pengguna untuk SELALU mematuhi ini.
+
+## Sinkronisasi Buku Panduan (Living Document)
+- **Wajib Update:** Setiap kali Anda (Agen) melakukan perombakan atau penambahan fitur yang signifikan pada kode (baik *backend* maupun *frontend*), Anda **WAJIB** secara otomatis melakukan penyesuaian/penjelasan fitur tersebut ke dalam dokumen Buku Panduan teknis (`Panduan_Teknis_Zero_Cafe_v2.md`).
+- **Tujuan:** Hal ini dilakukan agar Buku Panduan tetap akurat, relevan, dan tidak usang meskipun aplikasi terus berevolusi, tanpa perlu diminta secara terpisah oleh pengguna.
+
+## Terminologi Khusus (Singkatan)
+Pengguna akan sering menggunakan singkatan berikut dalam memberikan instruksi (berlaku untuk huruf besar maupun kecil):
+- **bp / BP:** Merujuk pada "Buku Panduan" (File: `Panduan_Teknis_Zero_Cafe_v2.md`).
+- **dgm / DGM:** Merujuk pada "Dashboard General Manager" (Layar eksekutif GM).

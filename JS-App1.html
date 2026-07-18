@@ -893,6 +893,12 @@ function loadDraft(type) {
         StorageHelper.remove(`zc_draft_${type}`);
         return false;
       }
+
+      if (AppState.role === 'SPV' && AppState.outlet && parsed.outlet && parsed.outlet !== AppState.outlet) {
+        console.warn("Draft outlet mismatch. Clearing cross-contaminated draft.");
+        StorageHelper.remove(`zc_draft_${type}`);
+        return false;
+      }
       
       showToast("Melanjutkan draft yang belum terkirim...", "success");
       Object.assign(form, parsed);

@@ -78,7 +78,7 @@ function resetFormData(type) {
     periode: "",
     supervisor: StorageHelper.get('zc_last_spv_name') || "",
     shift: "06:00",
-    outlet: "Perintis",
+    outlet: AppState.outlet || StorageHelper.get('zc_last_outlet') || "Perintis",
     cuaca: "",
     eventLokal: "",
     profilPengunjung: "",

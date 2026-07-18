@@ -428,78 +428,24 @@ function getLoginTemplate() {
         <p class="text-[10px] font-bold text-gray-500 tracking-[0.2em] uppercase">Enterprise Workspace</p>
       </div>
 
-      <!-- Action Buttons Bottom -->
-      <div class="pb-16 px-6 flex flex-col items-center space-y-4 animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.8s; animation-fill-mode: both;">
-        <p class="text-xs text-gray-400 font-medium mb-4">Pilih akses sistem Anda:</p>
+      <!-- Single Column Login -->
+      <div class="pb-16 px-6 flex flex-col items-center w-full max-w-sm mx-auto animate-slide-up" style="animation-delay: 0.1s; animation-duration: 0.8s; animation-fill-mode: both;">
+        <p class="text-xs text-gray-400 font-medium mb-8 uppercase tracking-widest">Masukkan Kunci Akses</p>
         
-        <!-- SPV with PIN -->
-        <button onclick="showPINModal()" class="w-full max-w-[260px] bg-zero-black text-white text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md active:scale-[0.97] transition-all duration-300">
-          Login SPV Outlet
-        </button>
+        <input type="password" id="inputSmartLogin" placeholder="Kata Sandi / PIN" class="w-full max-w-[260px] text-center text-xl font-bold tracking-widest pb-3 border-b-2 border-zero-black bg-transparent focus:outline-none focus:border-gray-400 transition-colors placeholder-gray-300 mb-8" />
         
-        <!-- GM -->
-        <button onclick="showGMPasswordModal()" class="w-full max-w-[260px] bg-white border border-gray-200 text-zero-black text-sm font-bold py-4 px-6 rounded-full shadow-sm hover:shadow-md hover:bg-gray-50 active:scale-[0.97] transition-all duration-300">
-          General Manager
+        <button id="btnSmartLogin" onclick="submitSmartLogin()" class="w-full max-w-[260px] bg-zero-black text-white text-sm font-bold py-4 px-6 rounded-full shadow-lg hover:shadow-xl hover:bg-gray-800 active:scale-[0.97] transition-all duration-300 flex items-center justify-center">
+          MASUK
         </button>
-      </div>
-      
-      <!-- PIN MODAL (Hidden by default) -->
-      <div id="pinModal" class="fixed inset-0 z-50 hidden bg-white/90 backdrop-blur-sm flex-col items-center justify-center animate-fade-in">
-        <div class="w-full max-w-sm px-8 text-center">
-          <h2 class="text-xl font-black text-zero-black tracking-widest mb-2 uppercase">Kunci Outlet</h2>
-          <p class="text-xs text-gray-500 mb-8 font-medium">Masukkan 4 digit PIN Outlet Anda.</p>
-          
-          <input type="password" id="inputPIN" inputmode="numeric" maxlength="4" placeholder="----" class="w-full text-center text-3xl font-black tracking-[1em] pb-2 border-b-2 border-zero-black bg-transparent focus:outline-none focus:border-gray-400 transition-colors placeholder-gray-200 mb-8" />
-          
-          <div class="flex gap-4 justify-center">
-            <button onclick="hidePINModal()" class="px-6 py-3 border border-gray-200 text-gray-500 text-xs font-bold rounded-full hover:bg-gray-50 transition-colors">BATAL</button>
-            <button id="btnSubmitPIN" onclick="submitPIN()" class="px-8 py-3 bg-gray-500 text-white text-xs font-bold rounded-full transition-colors flex items-center justify-center">MASUK</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- GM PASSWORD MODAL (Hidden by default) -->
-      <div id="gmModal" class="fixed inset-0 z-50 hidden bg-white/90 backdrop-blur-sm flex-col items-center justify-center animate-fade-in">
-        <div class="w-full max-w-sm px-8 text-center">
-          <h2 class="text-xl font-black text-zero-black tracking-widest mb-2 uppercase">Kunci Eksekutif</h2>
-          <p class="text-xs text-gray-500 mb-8 font-medium">Masukkan kata sandi GM.</p>
-          
-          <input type="password" id="inputGMPassword" placeholder="Sandi..." class="w-full text-center text-xl font-bold tracking-widest pb-2 border-b-2 border-zero-black bg-transparent focus:outline-none focus:border-gray-400 transition-colors placeholder-gray-200 mb-8" />
-          
-          <div class="flex gap-4 justify-center">
-            <button onclick="hideGMPasswordModal()" class="px-6 py-3 border border-gray-200 text-gray-500 text-xs font-bold rounded-full hover:bg-gray-50 transition-colors">BATAL</button>
-            <button id="btnSubmitGM" onclick="submitGMPassword()" class="px-8 py-3 bg-gray-500 text-white text-xs font-bold rounded-full transition-colors flex items-center justify-center">MASUK</button>
-          </div>
-        </div>
       </div>
       
     </div>
   `;
 }
 
-window.showPINModal = function() {
-  const modal = document.getElementById('pinModal');
-  const input = document.getElementById('inputPIN');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    setTimeout(() => { if (input) input.focus(); }, 100);
-  }
-};
-
-window.hidePINModal = function() {
-  const modal = document.getElementById('pinModal');
-  const input = document.getElementById('inputPIN');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-  if (input) input.value = '';
-};
-
-window.submitPIN = function() {
-  const input = document.getElementById('inputPIN');
-  const btn = document.getElementById('btnSubmitPIN');
+window.submitSmartLogin = function() {
+  const input = document.getElementById('inputSmartLogin');
+  const btn = document.getElementById('btnSmartLogin');
   if (!input || !input.value) return;
   
   const pin = input.value;
@@ -507,6 +453,19 @@ window.submitPIN = function() {
   btn.classList.remove('bg-zero-black');
   btn.classList.add('bg-gray-400');
   
+  // 1. Cek Sandi GM
+  if (pin === 'Zero123') {
+    setTimeout(() => {
+      btn.innerHTML = 'MASUK';
+      btn.classList.add('bg-zero-black');
+      btn.classList.remove('bg-gray-400');
+      input.value = '';
+      handleLogin('GM');
+    }, 500); // Simulasi delay singkat agar UX terasa natural
+    return;
+  }
+  
+  // 2. Jika bukan GM, lempar ke backend (cek PIN SPV)
   google.script.run
     .withSuccessHandler(function(resStr) {
       btn.innerHTML = 'MASUK';
@@ -516,20 +475,19 @@ window.submitPIN = function() {
       try {
         const res = JSON.parse(resStr);
         if (res.success) {
-          hidePINModal();
-          // Set outlet dan role
+          input.value = '';
           AppState.outlet = res.outlet;
           StorageHelper.set('zc_last_outlet', res.outlet);
           StorageHelper.set('zc_role', 'SPV');
           AppState.role = 'SPV';
           transitionToMenu('select_report');
         } else {
-          showToast(res.error || "PIN Salah", "error");
+          showToast(res.error || "Kata Sandi / PIN Salah", "error");
           input.value = '';
           input.focus();
         }
       } catch(e) {
-        showToast("Error Parse: " + e.message + " (Res: " + resStr + ")", "error");
+        showToast("Error Parse: " + e.message, "error");
         console.error("Parse Error:", e, resStr);
       }
     })
@@ -540,41 +498,6 @@ window.submitPIN = function() {
       showToast("Server Error: " + err.message, "error");
     })
     .api_verifyPIN(pin);
-};
-
-window.showGMPasswordModal = function() {
-  const modal = document.getElementById('gmModal');
-  const input = document.getElementById('inputGMPassword');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    setTimeout(() => { if (input) input.focus(); }, 100);
-  }
-};
-
-window.hideGMPasswordModal = function() {
-  const modal = document.getElementById('gmModal');
-  const input = document.getElementById('inputGMPassword');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-  if (input) input.value = '';
-};
-
-window.submitGMPassword = function() {
-  const input = document.getElementById('inputGMPassword');
-  const btn = document.getElementById('btnSubmitGM');
-  if (!input || !input.value) return;
-  
-  if (input.value === 'Zero123') {
-    hideGMPasswordModal();
-    handleLogin('GM');
-  } else {
-    showToast("Kata Sandi GM Salah", "error");
-    input.value = '';
-    input.focus();
-  }
 };
 
 function handleLogin(role) {

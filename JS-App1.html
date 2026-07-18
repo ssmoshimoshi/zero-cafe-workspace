@@ -690,13 +690,13 @@ function _startNormalForm(type) {
     window.fetchDailyTarget();
   } else if (type === 'weekly') {
     const currentOutlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || window.form.outlet || "";
-    const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
+    const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? (s.outlet && s.outlet.toLowerCase().trim() === currentOutlet.toLowerCase().trim()) : true);
     window.form.weekly.staff = filteredStaff.map(s => ({
       nama: s.nama, posisi: s.posisi, status: "", alasan: ""
     }));
   } else if (type === 'monthly') {
     const currentOutlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || window.form.outlet || "";
-    const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
+    const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? (s.outlet && s.outlet.toLowerCase().trim() === currentOutlet.toLowerCase().trim()) : true);
     window.form.monthly.staff = filteredStaff.map(s => ({
       nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: ""
     }));

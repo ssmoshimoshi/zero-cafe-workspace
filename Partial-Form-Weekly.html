@@ -1,8 +1,8 @@
 <!-- Partial-Form-Weekly.html -->
 <script>
 window.getWeeklyFormTemplate = function() {
-  const currentOutlet = AppState.currentUser ? AppState.currentUser.outlet : "";
-  const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
+  const currentOutlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || window.form.outlet || "";
+  const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? (s.outlet && s.outlet.toLowerCase().trim() === currentOutlet.toLowerCase().trim()) : true);
 
   if (!form.weekly.staff || form.weekly.staff.length === 0) {
     form.weekly.staff = filteredStaff.map(s => ({ nama: s.nama, posisi: s.posisi, status: "", alasan: "" }));

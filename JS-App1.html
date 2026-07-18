@@ -689,13 +689,13 @@ function _startNormalForm(type) {
     }
     window.fetchDailyTarget();
   } else if (type === 'weekly') {
-    const currentOutlet = AppState.currentUser ? AppState.currentUser.outlet : (window.form.outlet || "");
+    const currentOutlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || window.form.outlet || "";
     const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
     window.form.weekly.staff = filteredStaff.map(s => ({
       nama: s.nama, posisi: s.posisi, status: "", alasan: ""
     }));
   } else if (type === 'monthly') {
-    const currentOutlet = AppState.currentUser ? AppState.currentUser.outlet : (window.form.outlet || "");
+    const currentOutlet = AppState.outlet || StorageHelper.get('zc_last_outlet') || window.form.outlet || "";
     const filteredStaff = AppState.masterStaff.filter(s => currentOutlet ? s.outlet === currentOutlet : true);
     window.form.monthly.staff = filteredStaff.map(s => ({
       nama: s.nama, posisi: s.posisi, status: "Berkembang", alasan: ""

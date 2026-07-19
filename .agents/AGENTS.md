@@ -132,3 +132,9 @@ Setiap kali menerima masalah atau permintaan fitur baru, Anda WAJIB mematuhi hie
 Pengguna akan sering menggunakan singkatan berikut dalam memberikan instruksi (berlaku untuk huruf besar maupun kecil):
 - **bp / BP:** Merujuk pada "Buku Panduan" (File: `Panduan_Teknis_Zero_Cafe_v2.md`).
 - **dgm / DGM:** Merujuk pada "Dashboard General Manager" (Layar eksekutif GM).
+
+## KODE SOLID (Checkpoint 20) & Larangan Perubahan Prematur
+- **Status Basis Kode:** Sejak Checkpoint 20, seluruh sistem (terutama arsitektur backend, pemrosesan tanggal, dan pembuatan folder/PDF) dianggap **SOLID dan BERFUNGSI SEMPURNA**.
+- **HARAM MENGUBAH KODE EKSISTING:** Anda (Agen) **DIHARAMKAN** untuk langsung merombak, menghapus, atau memodifikasi fungsi yang sudah ada jika pengguna meminta fitur baru.
+- **Prosedur Fitur Baru:** Jika ada permintaan fitur baru yang berpotensi menyenggol fungsi eksisting, Anda WAJIB membuat *Implementation Plan* (Rencana Perubahan) terlebih dahulu dan meminta **PERSETUJUAN EKSPLISIT** dari pengguna sebelum menulis satu baris kode pun.
+- **Tujuan Utama:** Mencegah terjadinya "bug berentet" (cascading bugs) akibat modifikasi kode yang tidak terencana dengan baik. Fokus utama jika tidak ada instruksi lain adalah merapikan Buku Panduan (BP).

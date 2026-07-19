@@ -10,28 +10,20 @@ hero:
     alt: Zero Cafe Logo
   actions:
     - theme: brand
-      text: Baca Panduan SPV
-      link: /panduan-spv
+      text: Panduan SPV →
+      link: /spv/laporan-harian
     - theme: alt
-      text: Lihat Dashboard GM
-      link: /panduan-gm
-    - theme: alt
-      text: Arsitektur Sistem
-      link: /arsitektur-sistem
+      text: Panduan GM →
+      link: /gm/dashboard-keuangan
 
 features:
-  - title: Panduan Harian & Laporan
-    details: SOP lengkap untuk operasional harian Supervisor di seluruh outlet.
-  - title: Eksekutif Dasbor
-    details: Penjelasan indikator kunci (KPI) dan metrik keuangan untuk General Manager.
-  - title: Transparansi Arsitektur
-    details: Dokumentasi mesin analitik di balik layar, keamanan data, dan struktur database.
+  - title: Laporan Harian
+    details: SOP lengkap 9 tab laporan harian — dari penjualan hingga closing shift.
+    link: /spv/laporan-harian
+  - title: Dashboard Keuangan
+    details: Metrik omset, KPI utama, dan AI Summary untuk keputusan real-time.
+    link: /gm/dashboard-keuangan
+  - title: Mesin Analisis
+    details: Algoritma di balik layar — deteksi anomali, prediksi burnout, dan marketing intelligence.
+    link: /arsitektur/mesin-analisis
 ---
-
-<br>
-<br>
-
-<div style="text-align: center; color: var(--vp-c-text-2);">
-Dikembangkan oleh <strong>Acronimous Studio</strong><br>
-Versi 2.1 — Checkpoint 20 — Juli 2026
-</div>

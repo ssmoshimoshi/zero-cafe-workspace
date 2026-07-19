@@ -1,29 +1,52 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: "Zero Cafe Tech Manual",
+  title: "Zero Cafe",
   description: "Buku Panduan Operasional & Teknis Zero Cafe",
-  appearance: 'dark', // Default to dark mode to match Zero Vibe
+  appearance: 'dark',
+  head: [
+    ['link', { rel: 'icon', href: 'https://cdn-icons-png.flaticon.com/512/3124/3124092.png' }],
+    ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+    ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
+    ['link', { href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap', rel: 'stylesheet' }]
+  ],
   themeConfig: {
     logo: 'https://cdn-icons-png.flaticon.com/512/3124/3124092.png',
+    siteTitle: 'Zero Cafe',
+
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Panduan SPV', link: '/spv/laporan-harian' },
-      { text: 'Panduan GM', link: '/gm/dashboard-keuangan' }
+      {
+        text: 'Panduan SPV',
+        items: [
+          { text: 'Laporan Harian', link: '/spv/laporan-harian' },
+          { text: 'Laporan Mingguan', link: '/spv/laporan-mingguan' },
+          { text: 'Laporan Bulanan', link: '/spv/laporan-bulanan' },
+          { text: 'Pengaturan & Master Data', link: '/spv/pengaturan-master' }
+        ]
+      },
+      {
+        text: 'Panduan GM',
+        items: [
+          { text: 'Keuangan & KPI', link: '/gm/dashboard-keuangan' },
+          { text: 'Operasional & QC', link: '/gm/operasional-layanan' },
+          { text: 'SDM & Leaderboard', link: '/gm/sdm-evaluasi' }
+        ]
+      }
     ],
 
     sidebar: [
       {
         text: 'Pengantar',
-        collapsed: false,
+        collapsed: true,
         items: [
           { text: 'Apa itu Zero Cafe App?', link: '/pengantar/apa-itu-zero-cafe' },
           { text: 'Login & Navigasi', link: '/pengantar/login-navigasi' }
         ]
       },
       {
-        text: 'Buku Panduan SPV',
-        collapsed: false,
+        text: 'Panduan Supervisor',
+        collapsed: true,
         items: [
           { text: 'Laporan Harian (9 Tab)', link: '/spv/laporan-harian' },
           { text: 'Laporan Mingguan', link: '/spv/laporan-mingguan' },
@@ -32,19 +55,19 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Buku Panduan GM (Owner)',
-        collapsed: false,
+        text: 'Panduan GM / Owner',
+        collapsed: true,
         items: [
-          { text: 'Tab 1: Keuangan & KPI', link: '/gm/dashboard-keuangan' },
-          { text: 'Tab 2: Operasional & QC', link: '/gm/operasional-layanan' },
-          { text: 'Tab 3: SDM & Leaderboard', link: '/gm/sdm-evaluasi' }
+          { text: 'Keuangan & KPI', link: '/gm/dashboard-keuangan' },
+          { text: 'Operasional & QC', link: '/gm/operasional-layanan' },
+          { text: 'SDM & Leaderboard', link: '/gm/sdm-evaluasi' }
         ]
       },
       {
         text: 'Di Balik Layar',
         collapsed: true,
         items: [
-          { text: 'Mesin Analisis (Algoritma)', link: '/arsitektur/mesin-analisis' },
+          { text: 'Mesin Analisis', link: '/arsitektur/mesin-analisis' },
           { text: 'Database & Folder', link: '/arsitektur/database-folder' },
           { text: 'Sistem Keamanan', link: '/arsitektur/sistem-keamanan' }
         ]
@@ -56,13 +79,25 @@ export default defineConfig({
       provider: 'local'
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/ssmoshimoshi/zero-cafe-workspace' }
-    ],
-    
     footer: {
-      message: 'Dikembangkan secara eksklusif untuk Zero Cafe.',
-      copyright: 'Copyright © 2026 Acronimous Studio'
-    }
+      message: 'Zero Cafe Workspace — Internal Tech Manual',
+      copyright: '© 2026 Acronimous Studio'
+    },
+
+    outline: {
+      level: [2, 3],
+      label: 'Di Halaman Ini'
+    },
+
+    docFooter: {
+      prev: 'Halaman Sebelumnya',
+      next: 'Halaman Berikutnya'
+    },
+
+    lastUpdated: {
+      text: 'Terakhir diperbarui'
+    },
+
+    returnToTopLabel: 'Kembali ke atas'
   }
 })

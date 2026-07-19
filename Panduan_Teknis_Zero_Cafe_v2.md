@@ -1,613 +1,1338 @@
 # ZERO CAFE APP v2.0
-## Panduan Pengguna & Spesifikasi Teknis Komprehensif
-**Antarmuka, Sistem Keamanan, Algoritma & Dashboard Executive**
+## Buku Panduan Pengguna & Spesifikasi Teknis Komprehensif
 
-**Disusun untuk:** Pemilik (Owner) & General Manager
-**Status:** Official Release
+**Dikembangkan oleh:** Acronimous Studio
+**Disusun untuk:** Pemilik (Owner), General Manager & Supervisor Zero Cafe
+**Versi Dokumen:** 2.1 — Checkpoint 20
+**Tanggal Rilis:** Juli 2026
 
 ---
 
 ## DAFTAR ISI
 
-**BAB 1: FILOSOFI & ARSITEKTUR APLIKASI**
-1.1 Standar Zero: Data-Driven Disciplinary
-1.2 Sistem Offline & Keamanan
-1.3 Mekanisme Dua Fase (Fase 1 & 2)
+**BAGIAN I — PENGANTAR**
+- BAB 1: Apa Itu Zero Cafe App & Kenapa Dibuat
+- BAB 2: Cara Masuk (Login) & Navigasi
 
-**BAB 2: PANDUAN PENGGUNA SPV - LAPORAN HARIAN (9 TAB)**
-2.1 Akses, Navigasi & Login (Single-Column Smart Login)
-2.2 Tab 1: JUAL
-2.3 Tab 2: KAS
-2.4 Tab 3: STAFF
-2.5 Tab 4: BRIEF
-2.6 Tab 5: QC
-2.7 Tab 6: BERSIH
-2.8 Tab 7: KOMPLAIN
-2.9 Tab 8: FASILITAS
-2.10 Tab 9: TUTUP
-2.11 Fase 2 (Penyelesaian Pagi Hari & Total Struk)
+**BAGIAN II — PANDUAN SUPERVISOR (SPV)**
+- BAB 3: Laporan Harian (9 Tab + Fase 2)
+- BAB 4: Laporan Mingguan
+- BAB 5: Laporan Bulanan
+- BAB 6: Pengaturan & Master Data
 
-**BAB 3: LAPORAN MINGGUAN (EVALUASI TAKTIS)**
-3.1 Tab 1: Identitas & Rekap Omset
-3.2 Tab 2: Komplain & Evaluasi Staf
-3.3 Tab 3: Rencana Perbaikan Tim
+**BAGIAN III — PANDUAN GENERAL MANAGER (GM / OWNER)**
+- BAB 7: Dashboard Tab 1 — Keuangan & Ringkasan KPI
+- BAB 8: Dashboard Tab 2 — Operasional & Layanan
+- BAB 9: Dashboard Tab 3 — SDM & Evaluasi
 
-**BAB 4: LAPORAN BULANAN (EVALUASI STRATEGIS)**
-4.1 Tab 1: Identitas & Metrik Penjualan
-4.2 Tab 2: Evaluasi Kinerja (Diri Sendiri & Tim)
-4.3 Tab 3: Rencana Strategis & Kebutuhan
+**BAGIAN IV — DI BALIK LAYAR (ARSITEKTUR & FORMULA)**
+- BAB 10: Mesin Analisis — Parameter, Threshold & Formula
+- BAB 11: Arsitektur Data — Database & Penyimpanan File
+- BAB 12: Diagram Alur Kerja (Visual)
+- BAB 13: Sistem Keamanan & Perlindungan Data
 
-**BAB 5: PENGATURAN PARAMETER & MASTER DATA**
-5.1 Form Target Omset Bulanan
-5.2 Manajemen Event (Kalender Akademik)
-5.3 Kelola Master Staf Outlet
-
-**BAB 6: SISTEM KEAMANAN & INTEGITAS DATA**
-6.1 Race-Condition Lock & Anti-Spam
-6.2 Autosave & Draft Recovery
-6.3 The Apostrophe Rule & Sanitasi Input
-
-**BAB 7: DASHBOARD GENERAL MANAGER**
-7.1 Overview & Navigasi 3 Tab Dashboard
-
-**BAB 8: MESIN AI & ALGORITMA PREDIKTIF**
-8.1 AI Predictive Summary (4 Algoritma)
-8.2 Marketing Intelligence & Text Mining
-8.3 Algoritma Deteksi Fraud Kasir
+**BAGIAN V — BANTUAN**
+- BAB 14: FAQ & Troubleshooting (Pertanyaan Umum)
 
 ---
 
-## BAB 1: FILOSOFI & ARSITEKTUR APLIKASI
+# BAGIAN I — PENGANTAR
 
-### 1.1 Standar Zero: Data-Driven Disciplinary
-Aplikasi Zero Cafe dirancang dengan filosofi **"Data-Driven Disciplinary"**. Setiap masukan yang diketik SPV tidak hanya disimpan, melainkan **dikalkulasi secara algoritmik** oleh *backend* untuk membentuk *Key Performance Indicators* (KPI) di layar Dashboard GM.
+---
 
-### 1.2 Sistem Offline & Keamanan
-Aplikasi dirancang tangguh terhadap kondisi lapangan (WiFi mati / HP baterai habis):
-1. **AUTOSAVE (DRAFT LOKAL):** Setiap ketikan langsung tersimpan di *LocalStorage* browser. Jika aplikasi tertutup, data tidak hilang.
-2. **RACE-CONDITION LOCK:** Sistem menahan pengiriman ganda selama 10 detik setelah tombol Submit ditekan, melindungi database dari duplikasi.
+## BAB 1: APA ITU ZERO CAFE APP & KENAPA DIBUAT
+
+### 1.1 Latar Belakang
+
+Zero Cafe App adalah aplikasi pelaporan operasional harian yang dibangun secara khusus oleh **Acronimous Studio** untuk Zero Cafe. Aplikasi ini bukan aplikasi kasir (POS), bukan aplikasi stok, dan bukan aplikasi akuntansi. Fungsi utamanya adalah **menjadi mata dan telinga pemilik (owner) di outlet yang tidak bisa dikunjungi setiap hari**.
+
+Melalui aplikasi ini:
+- **Supervisor (SPV)** melaporkan kondisi lapangan secara terstruktur setiap hari.
+- **General Manager (GM/Owner)** memantau kesehatan bisnis melalui Dashboard yang menampilkan angka-angka kunci secara otomatis.
+
+### 1.2 Filosofi: Data-Driven Disciplinary
+
+Setiap data yang diketik SPV bukan sekadar formalitas. Angka-angka tersebut dihitung secara otomatis oleh mesin di balik layar untuk menghasilkan **4 Indikator Kunci (KPI)** yang menentukan sehat atau tidaknya operasional kafe:
+
+| No | KPI | Target | Artinya |
+|----|-----|--------|---------|
+| 1 | **Kepatuhan SOP (Keramahan)** | ≥ 95% | Seberapa sering staf menyapa dan melayani pelanggan dengan ramah |
+| 2 | **Rata-rata Penjualan Harian** | Tidak boleh turun dari target bulanan | Omset harian harus konsisten menuju target |
+| 3 | **Komplain Pelanggan Serius** | Maksimal 2 per bulan | Lebih dari 2 komplain = alarm merah |
+| 4 | **Turnover Barista** | Maksimal 1 orang per 3 bulan | Staf yang keluar terlalu sering = operasional terganggu |
+
+Keempat angka ini muncul di halaman pertama Dashboard GM sebagai **"Ringkasan 4 KPI Utama"** — sehingga owner cukup membuka aplikasi dan dalam 3 detik sudah tahu kondisi kafe.
 
 ### 1.3 Mekanisme Dua Fase (Fase 1 & Fase 2)
-Karena outlet beroperasi hingga larut malam, pelaporan harian dibagi dua:
-- **FASE 1 (Malam):** Dilakukan saat SPV *shift* malam pulang. Memuat Tab 1 hingga Tab 9 (Inspeksi lapangan & SOP).
-- **FASE 2 (Pagi Besoknya):** Wajib dikirim sebelum jam 13:00. Memuat Omset Shift 2, Total Struk Transaksi Harian, dan Menu Bottom 3. Keterlambatan akan menghanguskan *Streak* kedisiplinan SPV.
+
+Karena outlet Zero Cafe beroperasi hingga larut malam (Perintis tutup jam 04:00 dini hari), tidak mungkin menunggu semua data selesai baru mengirim laporan. Oleh karena itu, pelaporan harian dibagi menjadi **dua tahap**:
+
+| Fase | Kapan | Siapa | Isi |
+|------|-------|-------|-----|
+| **Fase 1 (Malam)** | Saat SPV selesai shift (±21:00) | SPV | 9 Tab inspeksi: Penjualan Shift 1, Kas, Staf, Briefing, QC, Kebersihan, Komplain, Fasilitas, Penutup |
+| **Fase 2 (Pagi Besoknya)** | Sebelum jam 13:00 siang keesokan hari | SPV | Omset Shift 2, Total Struk Transaksi, Evaluasi Produk (Top 5 & Bottom 3), Komplain Susulan Malam, Absensi Staf Malam |
+
+**Apa yang terjadi di balik layar?**
+Saat SPV menekan tombol "Kirim" di Fase 1, sistem **belum mencetak PDF**. Sistem menyimpan data sementara dalam bentuk file cadangan (Draft JSON) di Google Drive. Keesokan paginya, saat SPV mengirim Fase 2, sistem menggabungkan kedua data, mencetak PDF final, dan menyimpan laporan lengkap ke database.
+
+### 1.4 Jam Operasional Outlet
+
+| Outlet | Buka | Tutup |
+|--------|------|-------|
+| **Perintis** | 08:00 | 04:00 (dini hari, setiap hari) |
+| **Dg Tata** | 08:00 | 24:00 (Minggu–Kamis) / 01:00 (Jumat–Sabtu) |
+
+**Jam Kerja SPV:** 12:00 siang – 21:00 malam (sama untuk kedua outlet).
+
+### 1.5 Batas Waktu Laporan (Streak)
+
+Untuk mendorong kedisiplinan, sistem memiliki fitur **Streak** (rantai keberhasilan):
+- **Batas Akhir:** Laporan Fase 2 **wajib dikirim sebelum jam 13:00 (1 siang) keesokan harinya**.
+- Jika terlambat melewati batas waktu tersebut, rantai Streak SPV akan **putus**.
+- Streak ini terlihat di Dashboard GM sebagai indikator kedisiplinan SPV.
 
 ---
 
-## BAB 2: PANDUAN PENGGUNA SPV - LAPORAN HARIAN (9 TAB LENGKAP)
+## BAB 2: CARA MASUK (LOGIN) & NAVIGASI
 
-### 2.1 Akses, Navigasi & Login (Single-Column Smart Login)
-Pada versi 2.0, sistem login menggunakan metode **Smart Single-Column Login** untuk antarmuka yang lebih bersih ("Zero Vibe") dan efisien.
-- **Satu Pintu Masuk:** Pengguna hanya akan melihat satu kolom input di tengah layar awal.
-- **Kunci Eksekutif (GM):** Jika pengguna memasukkan kata sandi `Zero123`, sistem otomatis mengotorisasi akses sebagai GM dan mengarahkan ke Dashboard GM.
-- **Kunci Outlet (SPV):** Jika pengguna memasukkan PIN 4 digit (contoh: `1234` untuk Perintis, `5678` untuk Dg Tata), sistem memvalidasinya ke server. Jika valid, SPV akan diarahkan ke Menu Utama (berisi tombol Laporan Harian, Mingguan, Bulanan, dan Pengaturan Parameter).
+### 2.1 Membuka Aplikasi
 
-### 2.2 Tab 1: JUAL (Penjualan Shift 1 & Konteks)
-| Field Name | Tipe Input | Wajib? | Deskripsi & Algoritma |
-| :--- | :--- | :---: | :--- |
-| **Nama Supervisor** | Autocomplete | YA | Menarik data Master Staf secara dinamis sesuai dengan *outlet* tempat SPV sedang bertugas. |
-| **Outlet Terkunci (PIN)** | Read-Only | YA | Terkunci otomatis (abu-abu/disabled). Outlet didapatkan dari hasil validasi PIN saat SPV Login. SPV tidak bisa seenaknya mengubah outlet untuk mencegah manipulasi data antar cabang. |
-| **Tanggal Laporan** | Date Picker | YA | Menentukan tanggal data. **Penting:** Saat tanggal dipilih, sistem akan otomatis melakukan *fetching* (menarik) data "Target Harian" dari database berdasarkan parameter bulan tersebut. |
-| **Jam Masuk** | Time Picker | YA | Mencatat jam kehadiran awal SPV (Shift 1). |
-| **Cuaca Dominan** | Dropdown | YA | Cerah/Panas, Mendung, Hujan Gerimis, Hujan Badai. Dipakai AI untuk analisis traffic (contoh: korelasi hujan dengan turunnya *dine-in*). |
-| **Profil Pengunjung** | Dropdown | YA | Mahasiswa Nugas, Pekerja WFC, Rombongan Nongkrong. Menjadi basis segmentasi AI Marketing di Dasbor GM. |
-| **Target Omset (Rp)** | Read-Only | YA | Angka diambil otomatis (di-fetch) dari database berdasarkan *Bulan/Tahun* laporan. Target ini sebelumnya **wajib diset oleh SPV sendiri pada awal bulan melalui menu Pengaturan Parameter**. |
-| **Omset Shift 1 (Rp)** | Currency | YA | Input nominal omset Shift 1. Saat diisi, angka ini akan langsung bereaksi mengisi indikator Bar (Progress Bar) di bagian bawah secara *real-time*, sekaligus mengubah persentase pencapaian target di ujung kanan bar. |
-| **Omset Shift 2** | Read-Only | — | Di Fase 1 (Malam), kolom ini berstatus *disabled* dengan keterangan "Diisi Besok Pagi". Hanya bisa diisi di Fase 2 keesokan harinya. |
+Aplikasi Zero Cafe dibuka melalui browser HP atau laptop menggunakan link (URL) khusus yang diberikan oleh Acronimous Studio. Tidak perlu mengunduh atau memasang aplikasi dari Play Store/App Store.
 
-*(Catatan: "Total Struk Transaksi" **dihilangkan** dari Fase 1 agar data Average Ticket Size (ATS) tidak dikalkulasi secara prematur sebelum operasional hari tersebut benar-benar selesai).*
+### 2.2 Layar Login (Satu Kolom Pintar)
 
-### 2.3 Tab 2: KAS (Audit Petty Cash)
-Bagian ini merekam hasil perhitungan uang fisik di laci kasir (Petty Cash). Karena operasional cafe dinamis, SPV sangat mungkin melakukan pengecekan uang lebih dari satu kali dalam satu *shift*.
+Saat halaman terbuka, Anda hanya akan melihat **satu kotak input di tengah layar**. Tidak ada tombol "SPV" atau "GM" — cukup masukkan kode akses Anda:
 
-| Field Name | Tipe Input | Wajib? | Deskripsi & Algoritma |
-| :--- | :--- | :---: | :--- |
-| **Modal Awal Kasir** | Currency | YA | Uang receh standar saat buka (umumnya Rp 200.000). |
-| **Jam Audit** | Time Picker | YA | Menandakan pukul berapa SPV melakukan audit laci kasir ini (default `12:00`). |
-| **Total QRIS** | Currency | YA | Jumlah uang masuk via QRIS yang dihitung. |
-| **Total Tunai** | Currency | YA | Fisik uang tunai di laci saat dihitung (belum dikurangi modal awal). |
-| **Aktual (Sistem)** | Currency | YA | Bacaan murni total uang (Tunai+QRIS) berdasarkan mesin POS (*Ground Truth*). |
-| **Selisih (Rp)** | Kalkulasi | YA | Wajib diisi. Jika terdapat selisih minus, font akan berubah merah. Selisih minus ini yang dideteksi oleh AI Deteksi Fraud GM. |
-| **Catatan Selisih** | Textarea | Opsional | **Sangat Krusial:** Jika terjadi selisih (misal karena kembalian kurang, *human error* input, atau alasan wajar lain), SPV *wajib* memberikan penjelasan di sini agar GM bisa membedakan mana fraud dan mana sekadar kesalahan input. |
+| Kode yang Dimasukkan | Hasilnya |
+|---|---|
+| **`Zero123`** | Masuk sebagai **GM/Owner** → langsung diarahkan ke Dashboard GM |
+| **`1234`** | Masuk sebagai **SPV Outlet Perintis** → diarahkan ke Menu Utama SPV |
+| **`5678`** | Masuk sebagai **SPV Outlet Dg Tata** → diarahkan ke Menu Utama SPV |
 
-**Catatan Tombol Interaktif Tab Kas:**
-- **Tombol "TAMBAH" (Kanan Atas):** Digunakan *setiap kali* SPV melakukan audit kasir tambahan di hari yang sama. Misalnya, SPV mengecek laci pada siang hari (jam 14:00) dan mengeceknya lagi sebelum pergantian shift (jam 21:00). Tombol ini akan memunculkan blok form audit baru ke bawah sehingga SPV tidak perlu mereset audit sebelumnya.
-- **Tombol "HAPUS" (Warna Merah di Kanan Jam Audit):** Berfungsi untuk membuang baris form audit spesifik. Sangat berguna jika SPV tidak sengaja/salah menekan tombol Tambah, atau batal mengaudit.
+> **Catatan Keamanan:** PIN SPV menentukan outlet mana yang terkunci. Setelah login, SPV **tidak bisa mengubah outlet**. Ini mencegah kesalahan atau manipulasi data antar cabang.
 
-### 2.4 Tab 3: STAFF (Absensi & SOP)
-Fitur sentral untuk mendisiplinkan operasional lapangan.
-**Fungsi Tombol Atas:**
-- **PILIH STAFF (Dropdown):** Memilih nama staf dari database.
-- **+ STAFF BARU:** Modal khusus untuk mendaftarkan staf cabutan/freelance yang belum ada di database.
-- **+ PINJAM STAF:** Mengambil nama staf dari outlet lain jika ada pertukaran shift dadakan.
-- **TAMBAH:** Menambahkan staf terpilih ke dalam baris evaluasi.
-- **HAPUS:** Menghapus baris staf tersebut dari layar.
+### 2.3 Menu Utama SPV
 
-| Field Name | Tipe Input | Wajib? | Deskripsi & Algoritma |
-| :--- | :--- | :---: | :--- |
-| **Metode Penilaian** | Dropdown | YA | Pilihan: *Dinilai Langsung* atau *Dinilai via Absensi*. |
-| **Status Kehadiran** | Dropdown | YA | Hadir, Terlambat, Izin, Sakit, Alpha. **Penting:** Memilih "Terlambat" akan langsung merusak persentase kedisiplinan staf tersebut di Dasbor GM. |
-| **Keramahan Terlewat?** | Dropdown | YA | *The Ultimate Quality Gate*. Jika SPV memilih "Ya (Miss)" pada barista/kasir, skor kepatuhan SOP otomatis turun. (Field ini tidak muncul untuk posisi Kitchen). |
-| **Catatan Khusus** | Textarea | Opsional | Alasan keterlambatan, atau jenis pelanggaran keramahan yang dilakukan. |
+Setelah login berhasil, SPV akan melihat 4 tombol utama:
 
-### 2.5 Tab 4: BRIEF (Evaluasi Shift & Briefing)
-Bagian kualitatif yang mengandalkan analisis SPV. Kata kunci di sini akan dibaca oleh *Text Mining* GM Dashboard.
-| Field Name | Tipe Input | Wajib? | Deskripsi & Algoritma |
-| :--- | :--- | :---: | :--- |
-| **Target Hari Ini** | Textarea | YA | Penjelasan target omset, jumlah struk yang diincar, atau event yang sedang berlangsung hari ini. |
-| **Fokus Perilaku** | Textarea | YA | Instruksi harian kepada tim (contoh: "Fokus pada senyum, sapa, tawarkan add-on"). |
-| **Masalah Shift Kemarin**| Textarea | YA | Masalah *carry-over* dari hari sebelumnya (contoh: "Kulkas kurang dingin"). |
-| **Solusi Disepakati** | Textarea | YA | Aksi yang harus dilakukan staf hari ini untuk mencegah masalah kemarin terulang. |
+1. **Laporan Harian** — Mengisi laporan operasional 9 Tab (atau melanjutkan Fase 2 jika ada yang tertunda)
+2. **Laporan Mingguan** — Evaluasi taktis 7 hari
+3. **Laporan Bulanan** — Evaluasi strategis 1 bulan penuh
+4. **Pengaturan Parameter** — Mengatur target omset, mendaftarkan event, dan mengelola data staf
 
-### 2.6 Tab 5: QC (Quality Control Produk)
-Dibagi menjadi dua area: QC Espresso (Wajib setiap pagi) dan QC Makanan/Minuman (Bebas ditambah dengan **Tombol "TAMBAH ITEM"** & bisa di-**HAPUS** per baris).
+---
 
-**A. QC Espresso (Wajib)**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Jam Kalibrasi** | Time Picker | YA | Pukul berapa grinder/espresso ditarik. |
-| **Kondisi** | Dropdown | YA | Baik/Standar, Pahit/Bitter, Asam/Sour, Watery. |
-| **Keterangan Adjust** | Textarea | Opsional| Contoh: "Ubah grind size jadi 2.5 karena ekstraksi terlalu cepat." |
+# BAGIAN II — PANDUAN SUPERVISOR (SPV)
 
-**B. QC Menu Lainnya (Dinamis)**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Jam** | Time | YA | Waktu pengecekan dilakukan. |
-| **Kategori & Produk**| Dropdown | YA | Pilih Minuman/Makanan/Snack, lalu *tap* input produk untuk memunculkan modal pencarian menu. |
-| **Status Temuan** | Dropdown | YA | Berubah dinamis sesuai kategori (Contoh: Makanan punya status "Tidak Fresh", Minuman punya "Layering Salah"). |
-| **Catatan Tindakan** | Textarea | Opsional| Langkah koreksi yang diambil staf. |
+> **Catatan untuk SPV:** Bagian ini ditulis khusus untuk Anda. Bahasa yang digunakan bersifat langsung dan praktis — fokus pada "apa yang harus dilakukan" di setiap layar.
 
-### 2.7 Tab 6: BERSIH (Sanitasi 8 Area)
-Terdiri dari 8 Akordion (Kaca, Lantai, Tembok, Toilet, Wastafel, Parking Area, Bar, Musholah). Sistem menuntut semua harus dibuka dan diinspeksi.
+---
 
-| Field Name | Tipe Input | Wajib? | Deskripsi & Algoritma |
-| :--- | :--- | :---: | :--- |
-| **Status Kebersihan** | Dropdown | YA | Bersih, Cukup Bersih, Kotor. Rata-rata membentuk "Hygiene Score" di GM. |
-| **Skor** | Number | YA | Otomatis terisi sesuai status (contoh: Bersih = 100), namun SPV bisa mengubahnya secara manual jika dirasa nilainya nanggung (misal 85). |
-| **Checklist Alasan** | Checkbox | YA | Muncul secara adaptif sesuai dengan Status yang dipilih (Misal: Memilih "Kotor" pada Toilet akan memunculkan checklist yang berbeda dengan "Kotor" pada Kaca). |
+## BAB 3: LAPORAN HARIAN (9 TAB + FASE 2)
 
-**Filosofi Desain Checklist & Penyimpanan PDF:**
-- **Kenapa Menggunakan Checkbox (Bukan Teks)?** Fitur *Checkbox* (Kotak Centang) sengaja dipilih untuk memangkas waktu kerja SPV agar lebih efisien dan cepat tanpa harus mengetik. Dari sisi GM, data berbasis centang ini bisa dipetakan secara algoritmik menjadi *Highlight Area Kritis* di Dashboard untuk dicermati, sesuatu yang tidak bisa dilakukan jika SPV mengetik teks bebas.
-- **Sumber Template Alasan:** Pilihan alasan yang berbeda-beda di tiap area dan tiap skor (seperti "Cermin buram" di Wastafel vs "Sarang laba-laba" di Toilet) diekstrak langsung dari **data historis laporan fisik** yang selama ini diisi oleh SPV. Pilihan ini adalah cerminan realita lapangan.
-- **Penyimpanan Data & Cetak PDF:** Seluruh data inspeksi 8 area ini akan dikirim ke Spreadsheet (Database Utama). Terkhusus untuk data kebersihan ini, sistem juga akan **mencetaknya secara otomatis menjadi file PDF Laporan Kebersihan Harian**. PDF ini disimpan permanen di Google Drive sebagai bukti pengamatan otentik.
+### 3.1 Fitur Penting Sebelum Mulai
 
-### 2.8 Tab 7: KOMPLAIN (Eskalasi Pelanggan)
-Fitur untuk melacak cacat produksi operasional. **Tombol "TAMBAH" (Kanan Atas)** digunakan untuk menambah baris insiden. SPV bebas menekan tombol ini berkali-kali untuk merekam *berapapun* jumlah komplain yang terjadi di hari itu tanpa batasan. Tombol **"HAPUS"** di setiap baris disediakan jika SPV salah menekan tambah atau batal melaporkan komplain tersebut.
+Sebelum mengisi laporan, kenali dulu 3 fitur perlindungan data yang bekerja diam-diam di balik layar:
 
-**A. Statistik Makro**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Total Kasus & Remake**| Number | YA | Jumlah total komplain & jumlah produk yang diganti baru. |
-| **Analisis Remake >=3**| Textarea | BERSYARAT| Kotak peringatan merah ini **akan muncul otomatis** jika Total Remake diketik angka 3 atau lebih. SPV wajib menjelaskan kenapa terjadi banyak kegagalan hari itu. |
+1. **Simpan Otomatis (Autosave):** Setiap huruf yang Anda ketik langsung tersimpan di memori browser HP Anda. Jika aplikasi tertutup mendadak (baterai habis, sinyal putus), data Anda **tidak hilang**. Saat Anda buka kembali, semua isian akan tetap ada.
 
-**B. Data Baris Komplain**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Jam & Inisial PLG** | Time, Text | YA | Melacak di *shift* mana komplain terjadi dan nama inisial pelanggan. |
-| **Isi Komplain** | Textarea | YA | Detail keluhan (contoh: "Matcha terlalu manis"). |
-| **Tindakan (Respon)** | Textarea | YA | Cara penyelesaian (contoh: "Minta maaf dan dibuatkan ulang yang baru"). |
-| **Checkbox Remake/Eskalasi**| Checkbox | Opsional| *Remake* menandai kerugian bahan, sedangkan *Eskalasi GM* akan menaikkan isu ke layar merah Dasbor Executive. |
+2. **Perlindungan Anti-Klik Ganda:** Setelah Anda menekan tombol "Kirim", sistem akan menahan semua klik selama 10 detik. Ini mencegah laporan terkirim 2 kali jika Anda tidak sengaja menekan tombol berkali-kali.
 
-### 2.9 Tab 8: FASILITAS & BAHAN (Manajemen Aset & ATK)
-Menggunakan **Tombol "TAMBAH"** (dan **HAPUS**) untuk melacak alat rusak atau bahan yang habis. SPV bisa menambah berapapun baris alat rusak atau daftar belanjaan hari itu.
+3. **Perlindungan Antar-Outlet:** Jika Anda login sebagai SPV Perintis, lalu besok login sebagai SPV Dg Tata (misalnya karena pindah tugas), sistem akan otomatis membuang data lama yang tidak cocok dengan outlet Anda saat ini. Data outlet lain tidak akan pernah tercampur.
+
+### 3.2 Tab 1: JUAL (Penjualan Shift 1 & Konteks)
+
+Tab ini adalah fondasi utama laporan harian. Data di sini menjadi bahan kalkulasi omset, target, dan tren di Dashboard GM.
+
+| Yang Harus Anda Isi | Cara Mengisi | Catatan Penting |
+|---|---|---|
+| **Nama Supervisor** | Ketik nama Anda, sistem akan memunculkan daftar pilihan otomatis | Hanya nama staf dari outlet Anda yang muncul |
+| **Outlet** | Sudah terkunci otomatis (abu-abu), tidak bisa diedit | Ditentukan dari PIN saat login |
+| **Tanggal Laporan** | Pilih tanggal dari kalender | Setelah memilih tanggal, **tunggu sebentar** — sistem sedang menarik angka target omset dari database |
+| **Jam Masuk** | Pilih jam Anda tiba di outlet | Digunakan untuk menghitung ketepatan waktu |
+| **Cuaca Dominan** | Pilih salah satu: Cerah/Panas, Mendung, Hujan Gerimis, Hujan Badai | Digunakan mesin AI untuk menganalisis pengaruh cuaca terhadap penjualan |
+| **Profil Pengunjung** | Pilih tipe pengunjung yang paling dominan hari ini | Digunakan untuk strategi pemasaran |
+| **Target Omset (Rp)** | **Tidak perlu diisi** — angka muncul otomatis | Diambil dari target yang Anda atur di Pengaturan Parameter |
+| **Omset Shift 1 (Rp)** | Ketik angka penjualan Shift 1 | Saat diketik, bar hijau di bawah akan bergerak menunjukkan persentase pencapaian |
+| **Omset Shift 2** | Tidak bisa diisi sekarang (abu-abu) | Diisi besok pagi di Fase 2 |
+
+### 3.3 Tab 2: KAS (Audit Uang di Laci Kasir)
+
+Tab ini merekam hasil penghitungan uang fisik di laci kasir. Anda bisa mengaudit lebih dari sekali dalam satu shift.
+
+| Yang Harus Anda Isi | Cara Mengisi | Catatan Penting |
+|---|---|---|
+| **Modal Awal Kasir** | Ketik jumlah uang receh standar saat buka (umumnya Rp 200.000) | — |
+| **Jam Audit** | Pilih jam saat Anda menghitung uang | — |
+| **Total QRIS** | Ketik total uang masuk via QRIS | — |
+| **Total Tunai** | Ketik total uang tunai fisik di laci (belum dikurangi modal awal) | — |
+| **Aktual (Sistem)** | Ketik angka total penjualan menurut mesin kasir (POS) | Ini adalah angka "kebenaran" yang jadi pembanding |
+| **Selisih (Rp)** | Ketik hasil selisih antara uang fisik dan data sistem | Jika minus, angka akan berwarna **merah** — ini yang dipantau GM |
+| **Catatan Selisih** | Jelaskan kenapa ada selisih (jika ada) | **Sangat penting!** Tanpa penjelasan, GM bisa salah mengira ini sebagai kecurangan |
+
+**Tombol penting:**
+- **Tombol "TAMBAH" (kanan atas):** Tekan jika Anda mengaudit laci kasir lebih dari sekali (misal: siang dan malam).
+- **Tombol "HAPUS" (merah, di setiap baris):** Hapus baris audit tertentu jika salah tekan.
+
+### 3.4 Tab 3: STAFF (Absensi & Kepatuhan SOP)
+
+Tab ini adalah salah satu yang paling berpengaruh terhadap KPI di Dashboard GM. Setiap pilihan yang Anda buat di sini akan langsung mempengaruhi skor kedisiplinan staf.
+
+**Langkah mengisi:**
+1. Pilih nama staf dari dropdown **"PILIH STAFF"**
+2. Tekan tombol **"TAMBAH"** untuk menambahkan ke daftar evaluasi
+3. Isi penilaian untuk setiap staf yang sudah ditambahkan
+
+**Tombol khusus:**
+- **+ STAFF BARU:** Untuk mendaftarkan staf freelance/cabutan yang belum ada di database
+- **+ PINJAM STAF:** Untuk mengambil nama staf dari outlet lain (jika ada pertukaran shift)
+
+| Yang Harus Anda Isi | Pilihan | Dampak ke Dashboard GM |
+|---|---|---|
+| **Metode Penilaian** | Dinilai Langsung / Dinilai via Absensi | — |
+| **Status Kehadiran** | Hadir, Terlambat, Izin, Sakit, Alpha | Memilih "Terlambat" **langsung menurunkan** persentase kedisiplinan staf di Dashboard GM |
+| **Keramahan Terlewat?** | Ya (Miss) / Tidak (Aman) | Memilih "Ya (Miss)" **langsung menurunkan** skor SOP Keramahan. Tidak muncul untuk posisi Kitchen |
+| **Catatan Khusus** | Teks bebas | Jelaskan alasan keterlambatan atau pelanggaran |
+
+### 3.5 Tab 4: BRIEF (Evaluasi Shift & Briefing)
+
+Tab ini berisi analisis kualitatif Anda sebagai SPV. Kata-kata yang Anda ketik di sini akan dibaca oleh mesin *Text Mining* di Dashboard GM.
+
+| Yang Harus Anda Isi | Contoh |
+|---|---|
+| **Target Hari Ini** | "Capai 120 struk, fokus upselling dessert" |
+| **Fokus Perilaku** | "Ingatkan tim untuk senyum dan tawarkan add-on" |
+| **Masalah Shift Kemarin** | "Kulkas kurang dingin, es batu cepat cair" |
+| **Solusi Disepakati** | "Sudah panggil teknisi, sementara pakai es dari luar" |
+
+### 3.6 Tab 5: QC (Quality Control Produk)
+
+Dibagi menjadi dua bagian:
+
+**A. QC Espresso (Wajib diisi setiap hari)**
+
+| Yang Harus Anda Isi | Pilihan |
+|---|---|
+| **Jam Kalibrasi** | Jam berapa grinder/espresso machine ditarik |
+| **Kondisi** | Baik/Standar, Pahit/Bitter, Asam/Sour, Watery |
+| **Keterangan Adjust** | Contoh: "Ubah grind size jadi 2.5, ekstraksi terlalu cepat" |
+
+**B. QC Menu Lainnya (Tekan "TAMBAH ITEM" untuk menambah)**
+
+| Yang Harus Anda Isi | Cara Mengisi |
+|---|---|
+| **Jam** | Jam pengecekan |
+| **Kategori & Produk** | Pilih Minuman/Makanan/Snack, lalu ketuk input produk untuk mencari nama menu |
+| **Status Temuan** | Pilihan berubah sesuai kategori (misal: Makanan → "Tidak Fresh"; Minuman → "Layering Salah") |
+| **Catatan Tindakan** | Langkah koreksi yang diambil |
+
+### 3.7 Tab 6: BERSIH (Inspeksi Kebersihan 8 Area)
+
+Tab ini mewajibkan Anda menginspeksi **8 area kafe** satu per satu: Kaca, Lantai, Tembok, Toilet, Wastafel, Parking Area, Bar, Musholah.
+
+Setiap area berbentuk kotak lipatan (Accordion) yang harus Anda buka dan isi:
+
+| Yang Harus Anda Isi | Pilihan | Dampak |
+|---|---|---|
+| **Status Kebersihan** | Bersih, Cukup Bersih, Kotor | Rata-rata dari 8 area ini membentuk **Skor Kebersihan (Hygiene Score)** di Dashboard GM |
+| **Skor** | Otomatis terisi (Bersih=100, Cukup=70, Kotor=40), tapi Anda bisa ubah manual | Misal: area "Cukup Bersih" tapi hampir sempurna, Anda boleh ubah jadi 85 |
+| **Centang Alasan** | Kotak-kotak centang yang muncul otomatis sesuai area dan status | Cukup centang, tidak perlu mengetik — menghemat waktu Anda |
+
+> **Kenapa menggunakan centang, bukan ketik?**
+> Fitur centang sengaja dipilih agar Anda lebih cepat selesai. Pilihan-pilihan yang tersedia diambil dari **catatan laporan fisik Zero Cafe sebelumnya** — jadi semua pilihan memang relevan dengan kondisi nyata di lapangan.
+
+**Apa yang terjadi dengan data kebersihan ini?**
+Selain disimpan ke database utama, sistem juga otomatis **mencetak PDF Checklist Kebersihan Harian** yang tersimpan permanen di Google Drive sebagai bukti fisik.
+
+### 3.8 Tab 7: KOMPLAIN (Laporan Keluhan Pelanggan)
+
+Gunakan tombol **"TAMBAH"** untuk menambah baris insiden (bisa diulang tanpa batas). Gunakan tombol **"HAPUS"** untuk menghapus baris jika salah.
+
+**Bagian Atas — Statistik:**
+
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Total Kasus Komplain** | Angka total komplain hari ini |
+| **Total Remake** | Jumlah produk yang harus dibikin ulang |
+| **Analisis Remake ≥3** | Kotak peringatan merah ini **hanya muncul** jika Total Remake 3 atau lebih. Anda wajib jelaskan kenapa banyak gagal |
+
+**Bagian Bawah — Detail Per Komplain:**
+
+| Yang Harus Anda Isi | Contoh |
+|---|---|
+| **Jam & Inisial Pelanggan** | "14:30" dan "Bpk. A" |
+| **Isi Komplain** | "Matcha terlalu manis" |
+| **Tindakan (Respon)** | "Minta maaf, dibuatkan ulang yang baru" |
+| **Checkbox Remake/Eskalasi** | Centang "Remake" jika produk dibikin ulang. Centang "Eskalasi GM" jika butuh perhatian owner |
+
+### 3.9 Tab 8: FASILITAS & BAHAN
+
+Tab ini merekam kerusakan alat dan kebutuhan belanja bahan habis pakai. Gunakan tombol **"TAMBAH"** dan **"HAPUS"** sesuai kebutuhan.
 
 **A. Fasilitas & Alat (Kerusakan)**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Nama Alat/Fasilitas**| Text | YA | Contoh: "AC Lantai 1", "Grinder". |
-| **Status Kerusakan** | Dropdown | YA | Rusak Ringan, Rusak Sedang, Rusak Berat (Mati). |
-| **Eskalasi GM?** | Tombol Toggle| Opsional| Berbentuk kotak merah. Jika ditekan, meminta atensi perbaikan cepat dari GM. |
-| **Keterangan Singkat** | Text | Opsional | Penjelasan tulisan mengenai kerusakan (Contoh: "Bocor freon, air menetes"). Sengaja dipisah dari fitur unggah foto agar GM bisa membaca intisari masalah tanpa harus membuka gambar. |
-| **Tombol Unggah Foto** | Button | Opsional| Tombol untuk mengambil atau melampirkan bukti fisik kerusakan. Setelah unggah, tombol berubah menjadi *Lihat Foto* dan *Hapus Foto*. |
+
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Nama Alat/Fasilitas** | Contoh: "AC Lantai 1", "Grinder" |
+| **Status Kerusakan** | Rusak Ringan / Rusak Sedang / Rusak Berat (Mati) |
+| **Eskalasi GM?** | Tekan kotak merah jika butuh perbaikan cepat dari owner |
+| **Keterangan Singkat** | Contoh: "Bocor freon, air menetes" |
+| **Tombol Unggah Foto** | Ambil/lampirkan foto bukti kerusakan. Setelah unggah, berubah jadi "Lihat Foto" & "Hapus Foto" |
 
 **B. Bahan & ATK Habis**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Nama Bahan**| Text | YA | Contoh: "Sabun Cuci", "Tisu". |
-| **Status Ketersediaan** | Text | YA | Contoh: "Habis", "Sisa 1 Botol". |
-| **Estimasi Harga (Rp)** | Number | YA | Perkiraan biaya yang dikeluarkan untuk *reimburse* / Petty Cash. |
-| **Tombol Unggah Bukti** | Button | Opsional| Digunakan khusus untuk memfoto *Nota Belanja* atau keadaan fisik barang yang kosong. |
 
-**Arsitektur Penyimpanan Foto (Otomasi Google Drive):**
-Untuk mencegah file tercampur aduk, saat SPV menekan "Kirim Laporan", sistem *backend* (Code.gs) akan mengeksekusi otomatisasi dua hal:
-1. **Membentuk Nama File Cerdas:** Foto tidak lagi bernama `IMG_1234.jpg`, melainkan dikonversi otomatis dengan format `DD-MM-NamaItem-Status` (Contoh: `18-07-ACLantai1-RusakBerat.jpg`). Ini mempermudah pencarian historis GM.
-2. **Menyortir ke Folder Berbeda:** Foto akan masuk ke dalam *Root Folder* utama GM di Google Drive, lalu masuk ke folder Tahun dan Bulan berjalan, dan terakhir dipisah ke sub-folder spesifik:
-   - Foto Fasilitas Rusak masuk ke folder: `/Tahun/Bulan/Trouble/`
-   - Foto Bahan & Nota masuk ke folder: `/Tahun/Bulan/Nota Pengeluaran/`
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Nama Bahan** | Contoh: "Sabun Cuci", "Tisu" |
+| **Status Ketersediaan** | Contoh: "Habis", "Sisa 1 Botol" |
+| **Estimasi Harga (Rp)** | Perkiraan biaya untuk reimburse |
+| **Tombol Unggah Bukti** | Foto nota belanja atau kondisi barang yang kosong |
 
-### 2.10 Tab 9: TUTUP (Kesimpulan & Pengiriman)
-Tahap finalisasi pelaporan shift.
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Kendala Utama Hari Ini**| Textarea | YA | Ringkasan kesulitan paling mengganggu selama shift. |
-| **Rekomendasi / Saran** | Textarea | YA | Permintaan ke manajemen atau solusi strategis dari SPV. |
-| **Tombol BATAL** | Button | — | Jika diklik, sistem akan membatalkan pengiriman dan mengembalikan SPV ke Halaman Menu Utama. **Catatan:** Data yang sudah diketik tidak akan hilang berkat fitur *Autosave (Draft)*, SPV bisa meneruskan isiannya nanti. |
-| **Tombol KIRIM LAPORAN SOP** | Button | — | Tombol eksekusi utama untuk Fase 1 ataupun Fase 2. |
+> **Penyimpanan Foto Otomatis:**
+> Semua foto yang Anda unggah akan otomatis tersortir ke folder yang benar di Google Drive:
+> - Foto kerusakan alat → masuk folder **`Fasilitas`**
+> - Foto nota belanja/bahan → masuk folder **`Pengeluaran`**
+>
+> Nama file juga otomatis diganti menjadi format cerdas, contoh: `18-07-ACLantai1-RusakBerat.jpg` — sehingga GM mudah mencari di kemudian hari.
 
-**Alur Pengiriman & Validasi (KIRIM LAPORAN):**
-Sistem didesain untuk menolak data rumpang. Saat tombol KIRIM ditekan, akan terjadi salah satu dari dua skenario berikut:
-1. **Muncul Alert Merah (Error):** Artinya sistem mendeteksi ada kolom *Wajib* yang terlewat (misal: area kebersihan belum diisi statusnya). Sistem tidak akan memunculkan pop-up apapun selain notifikasi *error* merah di layar yang menyuruh SPV melengkapi data yang kurang.
-2. **Muncul Pop-up Preview PDF (Sukses):** Jika semua data valid, sistem akan memunculkan modal *Preview* (Pratinjau) besar. Modal ini menampilkan bentuk asli PDF yang akan dicetak. Ini adalah kesempatan terakhir bagi SPV untuk membaca ulang laporannya. Jika dirasa sudah benar, SPV tinggal menekan tombol Kirim Final di dalam pop-up tersebut.
+### 3.10 Tab 9: TUTUP (Kesimpulan & Pengiriman)
 
-### 2.11 Fase 2 (Penyelesaian Pagi Hari)
-Fase 2 dirancang khusus untuk direkap keesokan paginya (Maksimal jam 13:00 siang) guna mencakup seluruh operasional *Shift Malam* yang terjadi setelah SPV pulang. Keterlambatan mengirim Fase 2 akan memutus *Streak* kedisiplinan SPV di Dasbor GM.
+Ini adalah tab terakhir sebelum laporan dikirim.
 
-**A. Finansial & Metrik Utama**
-| Field Name | Tipe Input | Wajib? | Deskripsi & Algoritma |
-| :--- | :--- | :---: | :--- |
-| **Omset Shift 2 (Rp)** | Currency | YA | Nominal omset masuk pada shift malam. Angka ini akan otomatis dijumlahkan dengan Omset Shift 1 (dari data Fase 1) untuk membentuk Total Omset Harian. |
-| **Total Struk Transaksi** | Number | YA | Jumlah total keseluruhan struk yang tercetak hari itu (Shift 1 + Shift 2). Sangat krusial karena mesin AI GM menggunakan angka ini untuk membagi Total Omset guna melahirkan metrik **ATS (Average Ticket Size)**. |
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Kendala Utama Hari Ini** | Ringkasan kesulitan paling mengganggu selama shift |
+| **Rekomendasi / Saran** | Permintaan ke manajemen atau solusi strategis dari Anda |
 
-**B. Evaluasi Produk (Kategori: Minuman, Makanan, Snack)**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Top 5 Produk** | Text | YA | Daftar 5 menu paling laris hari itu per kategori (dipisah koma). |
-| **Bottom 3 Produk** | Text | YA | Daftar 3 menu paling tidak laku atau pergerakannya lambat (Slow-moving). |
-| **Alasan Bottom 3** | Textarea | YA | SPV wajib memberikan analisa mengapa 3 produk tersebut mati (Contoh: "Bahan baku kosong", "Tidak ada promo", atau "Hujan deras mengurangi pembeli dingin"). |
+**Dua Tombol di Bawah:**
 
-**C. Operasional Malam (Komplain & Absensi)**
-Karena SPV tidak berada di lokasi hingga tutup, SPV wajib menginvestigasi *shift closing* keesokan paginya.
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Komplain Susulan (Malam)**| Textarea, Tombol| Opsional| Form dinamis persis seperti Tab 7 Komplain (dengan tombol Tambah/Hapus). Digunakan untuk mencatat insiden atau komplain pelanggan yang baru terjadi larut malam. |
-| **Absensi & SOP Malam** | Dropdown, Tombol| YA | Form dinamis persis seperti Tab 3 Staff. Mewajibkan SPV untuk memvalidasi kehadiran dan memonitor pelanggaran SOP (Keramahan Terlewat) spesifik bagi staf *closing*. |
+| Tombol | Fungsi |
+|---|---|
+| **BATAL** | Kembali ke Menu Utama. Data yang sudah diketik **tidak hilang** (tersimpan otomatis) |
+| **KIRIM LAPORAN SOP** | Mengirim laporan ke server |
 
-**Logika Keamanan Memori (Draft Fase 2):**
-Sistem *frontend* memiliki pelindung *cache*. Jika SPV membuka aplikasi dan *server* backend (GAS) mendeteksi bahwa outlet ini **tidak memiliki** laporan Fase 1 yang sedang menggantung (pending), namun di memori *browser* HP SPV masih ada sisa *draft* isian Fase 2 kemarin, maka sistem otomatis akan membuang (reset) draft usang tersebut. Ini secara absolut mencegah data hari kemarin menimpa atau tercampur dengan pelaporan hari ini.
+**Apa yang terjadi saat Anda tekan "KIRIM"?**
+1. **Jika ada data yang belum lengkap:** Muncul peringatan merah yang menyebutkan bagian mana yang belum diisi. Laporan **ditolak** sampai Anda melengkapinya.
+2. **Jika semua data lengkap:** Muncul jendela **Pratinjau (Preview)** besar yang menampilkan tampilan PDF laporan Anda. Periksa sekali lagi, lalu tekan **"Kirim Final"** di dalam jendela tersebut.
 
----
+### 3.11 Fase 2 (Penyelesaian Keesokan Pagi)
 
-## BAB 3: LAPORAN MINGGUAN (EVALUASI TAKTIS)
+Saat Anda membuka aplikasi keesokan harinya, jika ada Laporan Harian yang tertunda (Fase 1 sudah terkirim tapi Fase 2 belum), sistem akan otomatis menampilkan formulir Fase 2.
 
-Modul ini adalah jantung analisis taktis SPV. Untuk meringankan beban administrasi, sistem Zero Cafe V2.0 dirancang agar **sebagian besar data kuantitatif ditarik secara otomatis (Auto-Fill)**, sehingga SPV bisa fokus menggunakan waktunya untuk merumuskan analisa kualitatif.
+**A. Data Keuangan Malam:**
 
-### 3.1 Tab 1: Identitas, Rekap Omset & Evaluasi Produk
-Langkah pertama SPV adalah memilih **Rentang Waktu (Dari Tanggal s/d Sampai Tanggal)**.
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Omset Shift 2 (Rp)** | Penjualan shift malam. Otomatis dijumlahkan dengan Shift 1 untuk membentuk **Total Omset Harian** |
+| **Total Struk Transaksi** | Jumlah total struk hari itu (Shift 1 + Shift 2). Angka ini digunakan mesin AI untuk menghitung **Rata-rata Belanja per Pelanggan (ATS)** |
 
-**Validasi Absolut 7 Hari (The 7-Day Lock):**
-Sistem mengunci pilihan rentang waktu ini agar **TEPAT berjumlah 7 hari** (contoh: Senin sampai Minggu). Jika SPV memilih kurang atau lebih dari 7 hari, akan muncul **Modal Peringatan Merah** di tengah layar yang memblokir proses selanjutnya. 
+**B. Evaluasi Produk:**
 
-Jika rentang 7 hari yang dipilih valid, sistem (GAS) akan menarik agregasi data harian dari server dan **mengisinya secara otomatis ke kolom-kolom SPV**. Jangan kaget jika form yang kosong tiba-tiba terisi penuh!
+Untuk setiap kategori (Minuman, Makanan, Snack):
 
-| Field Name | Tipe Input | Wajib? | Deskripsi & Algoritma Otomasi |
-| :--- | :--- | :---: | :--- |
-| **Tabel Rekap Omset (7 Hari)** | Auto-Fill | YA | SPV **tidak perlu mengetik apapun**. Kolom ini akan otomatis terisi dengan data Target & Total Omset per hari selama seminggu penuh. |
-| **Total Target & Aktual** | Kalkulasi | YA | Tepat di bawah tabel, sistem menjumlahkan total akumulasi Target 7 hari dibandingkan dengan Total Omset Aktual 7 hari. |
-| **Bar Indikator & Persen** | Visual | YA | Bar progres akan bergerak dinamis dengan algoritma warna: <br>• **Hijau:** Pencapaian &ge; 100% (Aman).<br>• **Oranye:** Pencapaian 80% - 99% (Batas Waspada).<br>• **Merah:** Pencapaian &lt; 80% (Bahaya). Angka persentase absolut akan tertulis di ujung kanan bar. |
-| **Evaluasi Minuman (Top/Bottom)** | Auto-Fill | YA | Sistem *backend* mengekstrak otomatis daftar produk minuman paling laris dan mati dari akumulasi laporan harian selama 7 hari tersebut. |
-| **Evaluasi Makanan (Top/Bottom)** | Auto-Fill | YA | Diekstrak otomatis dari agregasi data makanan harian. |
-| **Evaluasi Snack (Top/Bottom)** | Auto-Fill | YA | Diekstrak otomatis dari agregasi data snack harian. |
-| **Rencana Tindakan (Action Plan)**| Textarea | YA | Ini adalah **satu-satunya kolom evaluasi yang wajib diketik manual oleh SPV** di seksi ini. Karena datanya sudah disediakan mesin, tugas SPV adalah berpikir krisis dan menuliskan strategi untuk mengatasinya. |
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Top 5 Produk** | 5 menu paling laris hari itu |
+| **Bottom 3 Produk** | 3 menu paling tidak laku |
+| **Alasan Bottom 3** | Kenapa produk ini tidak laku (Contoh: "Bahan habis", "Tidak ada promo") |
 
-### 3.2 Tab 2: Komplain & Evaluasi Performa Staff
-Tab ini memisahkan antara metrik insiden pelayanan dengan penilaian individu staf (SDM) di minggu tersebut.
+**C. Operasional Malam:**
 
-**A. Komplain & Kendala Mingguan**
-| Field Name | Tipe Input | Wajib? | Deskripsi & Logika UI |
-| :--- | :--- | :---: | :--- |
-| **Total Kasus Komplain** | Number | YA | **Input Manual:** SPV mengisi angka ini berdasarkan rekap manual. *(Bukan auto-fill agar SPV secara sadar menghitung dan merenungkan banyaknya komplain minggu ini).* |
-| **Total Remake** | Number | YA | **Input Manual:** Jumlah pesanan yang harus dibuat ulang. **Font Berwarna Merah:** Warna merah disengaja secara desain psikologis karena setiap 1 *remake* melambangkan kerugian bahan baku murni (HPP) bagi perusahaan. |
-| **Penyebab Utama Komplain**| Text | YA | **Teks Bebas:** Sengaja bukan *dropdown* karena SPV diwajibkan menyimpulkan *Akar Masalah (Root Cause)* yang unik (Misal: "Susu UHT sering basi sebelum waktunya"). |
-| **Kendala Utama Berulang** | Textarea | YA | **Teks Bebas:** Kolom ini menuntut SPV menganalisa masalah operasional makro yang terus mengulang selama 7 hari, sehingga GM bisa melihat dan mengeksekusi solusi sistemik. |
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Komplain Susulan (Malam)** | Jika ada insiden malam, tambahkan di sini (sama dengan Tab 7) |
+| **Absensi & SOP Staf Malam** | Evaluasi kehadiran dan keramahan staf closing (sama dengan Tab 3) |
 
-**B. Evaluasi Performa Staff**
-Sistem akan memunculkan daftar nama staf. *(Catatan operasional: Untuk saat ini anggaplah nama yang muncul adalah staf internal di outlet SPV yang login).*
-Setiap nama staf memiliki kotak *Accordion* (bisa dilipat) yang menyimpan form penilaian:
-| Field Name | Tipe Input | Wajib? | Deskripsi & Tujuan Penilaian |
-| :--- | :--- | :---: | :--- |
-| **Status Penilaian** | Dropdown | YA | SPV wajib melabeli staf ke dalam 1 dari 3 kategori performa mingguan:<br>• **Berkembang:** Staf memiliki inisiatif, belajar cepat, dan minim komplain.<br>• **Stagnan:** Staf bekerja "sekadar selesai", tidak ada kemajuan namun tidak ada pelanggaran berat (Zona Nyaman).<br>• **Menurun:** Sering terlambat, melanggar SOP keramahan, lambat.<br>*Data ini menjadi pondasi GM untuk kenaikan gaji, bonus, atau SP.* |
-| **Keterangan (Kendala & Planning)**| Textarea | YA | Label di atas tidak sah tanpa penjelasan. SPV **WAJIB** merincikan *Kendala/Kemajuan* staf tersebut, lalu ditutup dengan *Planning* (Rencana/Pelatihan) untuk minggu depan. <br>*(Contoh pengisian: "Kemajuan: Sudah lancar kasir. Planning: Minggu depan akan diajarkan kalibrasi grinder").* |
-
-### 3.3 Tab 3: Rencana Perbaikan Tim
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Rencana Perbaikan** | Textarea Array | YA | Menambah rencana perbaikan untuk minggu depan secara dinamis. |
+> **Perlindungan Data Usang:**
+> Jika besok Anda membuka aplikasi dan ternyata server sudah tidak punya catatan Fase 1 yang tertunda (misalnya karena sudah diproses atau dibatalkan), tapi HP Anda masih menyimpan sisa data kemarin, sistem akan otomatis **membuang data usang tersebut**. Ini mencegah data hari kemarin tercampur dengan hari ini.
 
 ---
 
-## BAB 4: LAPORAN BULANAN (EVALUASI STRATEGIS)
+## BAB 4: LAPORAN MINGGUAN (EVALUASI TAKTIS)
 
-### 4.1 Tab 1: Identitas & Metrik Penjualan
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Bulan & Outlet** | Month Picker | YA | Validasi outlet dan bulan. |
-| **Sales Real vs Target** | Currency | YA | Persentase agregat omset sebulan penuh (Rp). |
-| **Ringkasan Eksekutif** | Textarea | YA | Pencapaian Utama, Masalah/Isu Utama, Kesimpulan Keseluruhan. |
-| **Evaluasi Produk** | Text, Number | YA | Top 5 & Bottom 3 dengan Rencana Strategis (Promo/Hapus/Lainnya). |
-Berbeda dengan Laporan Mingguan yang bersifat "Taktis", Laporan Bulanan bersifat "Strategis" dan menuntut SPV untuk mengevaluasi dirinya sendiri secara radikal (Self-Reflection).
+Laporan Mingguan diisi **sekali setiap minggu** dan berfungsi sebagai evaluasi taktis. Untuk meringankan beban Anda, **sebagian besar data kuantitatif ditarik secara otomatis** dari laporan harian.
 
-### 4.1 Tab 1: Ringkasan & Sales
+### 4.1 Tab 1: Identitas, Rekap Omset & Evaluasi Produk
 
-*(Catatan: Logika Indikator Draft, Tombol Reset/Kembali, dan Stepper Navigasi di halaman ini sama persis dengan yang ada pada Laporan Harian).*
+**Langkah Pertama:** Pilih **Rentang Waktu** (Dari Tanggal sampai Tanggal).
 
-**A. Identitas & Periode (Sangat Krusial)**
-Bagian ini adalah tuas utama (*Master Switch*) dari seluruh halaman Laporan Bulanan. Kesalahan di sini berakibat fatal pada tarikan data di bawahnya.
+> **Peraturan 7 Hari:**
+> Sistem mengunci pilihan rentang waktu agar **tepat 7 hari** (misal: Senin sampai Minggu). Jika Anda memilih kurang atau lebih dari 7 hari, akan muncul **peringatan merah** yang memblokir proses selanjutnya.
 
-| Field Name | Tipe Input | Wajib? | Peran Kritis & Logika Sistem |
-| :--- | :--- | :---: | :--- |
-| **Nama Supervisor** | Teks (Autocomplete) | YA | **Fungsi Akuntabilitas:** Mencatat secara sah SPV mana yang membuat evaluasi strategis ini. Dilengkapi fitur *Autocomplete* cerdas—sistem akan memfilter *database* dan hanya memunculkan daftar staf internal dari outlet tempat SPV tersebut ditugaskan. |
-| **Outlet** | Dropdown | YA | Mengunci ruang lingkup data (Perintis / Dg Tata). Data SPV dan target omset yang ditarik *backend* akan murni berasal dari outlet ini. |
-| **Bulan Laporan** | Month Picker (Date) | YA | **Pemicu Utama Mesin (Core Trigger):** Ini adalah *field* paling vital. Pemilihan bulan di kotak ini bertindak sebagai parameter *query*. Seketika SPV mengubah bulan, sistem *backend* (GAS) akan langsung menghisap seluruh rekam jejak Laporan Harian di bulan tersebut. Jika SPV salah memilih bulan, maka seluruh data *Auto-Fill* di bawahnya (Metrik Omset, Evaluasi Produk, Komplain) akan memunculkan rentetan data yang salah sasaran. |
+Setelah rentang valid, sistem menarik data otomatis:
 
-**B. Metrik Penjualan (Kotak Mode Gelap / Dark Mode)**
-Untuk menegaskan bahwa ini adalah "Angka Suci" (Uang), blok desain ini sengaja diwarnai hitam elegan (*Dark Box*).
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Total Sales Real (Rp)** | Currency (Auto-Fill)| YA | Ditarik otomatis dari kalkulasi total penjualan harian. Teks berwarna putih elegan. |
-| **Target Sales (Rp)** | Currency (Auto-Fill)| YA | Ditarik otomatis dari target yang dipasang SPV di "Pengaturan Parameter". |
-| **Persentase Pencapaian**| Kotak Teks Dinamis| YA | Sistem membagi *Sales Real* dengan *Target Sales*. Berbeda dengan mingguan yang menggunakan *progress bar* melintang panjang, di sini ditampilkan dalam kotak abu-abu gelap ringkas yang berisi angka persentase (Misal: **119%**). |
+| Apa yang Muncul Otomatis | Penjelasan |
+|---|---|
+| **Tabel Rekap Omset (7 Hari)** | Anda **tidak perlu mengetik** — tabel ini terisi otomatis dengan data Target & Omset per hari |
+| **Total Target & Aktual** | Penjumlahan otomatis 7 hari |
+| **Bar Indikator (Warna)** | Hijau (≥100%), Oranye (80-99%), Merah (<80%) |
+| **Evaluasi Produk (Minuman, Makanan, Snack)** | Top 5 dan Bottom 3 per kategori — ditarik otomatis dari laporan harian Anda |
 
-**C. Ringkasan Eksekutif**
-Ini adalah 3 paragraf kualitatif yang wajib diserahkan SPV kepada GM sebagai "Surat Pengantar".
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Pencapaian Utama Bulan Ini** | Textarea | YA | SPV membanggakan keberhasilan terbesar (Misal: "Berhasil melampaui target sales hingga 110%"). |
-| **Masalah / Isu Utama** | Textarea | YA | Pengakuan masalah makro (Misal: "Sering terjadi pemadaman listrik di minggu ke-2"). |
-| **Kesimpulan Keseluruhan** | Textarea | YA | Opini SPV mengenai status operasional bulan ini (Lancar/Chaos/Perlu Banyak Perbaikan). |
+| Yang Harus Anda Isi Sendiri | Catatan |
+|---|---|
+| **Rencana Tindakan (Action Plan)** | Satu-satunya kolom yang harus diketik. Tulis strategi Anda untuk minggu depan berdasarkan data yang sudah tersaji |
 
-**D. Evaluasi Kategori Produk (Accordion)**
-Modul ini dipecah menjadi 4 *Accordion* yang bisa dilipat: **Minuman, Makanan, Snack, dan Lainnya**. Modul ini adalah nyawa dari strategi R&D Kafe.
+### 4.2 Tab 2: Komplain & Evaluasi Performa Staf
 
-| Field Name | Tipe Input | Wajib? | Deskripsi & Logika UI |
-| :--- | :--- | :---: | :--- |
-| **Top 5 Produk** | Read-Only (Auto-Fill) | — | Sistem akan otomatis memunculkan 5 nama menu paling laris beserta jumlah *Cup/Porsi* terjual sebulan ini. SPV **tidak bisa** dan **tidak perlu** mengeditnya karena ini murni data objektif mesin. |
-| **Bottom 3 Produk** | Read-Only (Auto-Fill) | — | Menampilkan 3 produk "Paling Mati" (Paling tidak laku) di bulan ini beserta jumlah penjualannya yang miris. |
-| **Rencana (Promo/Hapus/Dll)** | Text | YA | **Input Manual:** Terletak khusus di bawah setiap *Bottom 3 Produk*. Mesin memaksa SPV memikirkan *Action Plan* secara manual untuk produk mati ini. SPV wajib mengetikkan strategi, misalnya *"Bikin Bundling"*, *"Hapus dari menu"*, atau *"Tingkatkan kualitas rasa"*. |
+**A. Komplain & Kendala Mingguan:**
 
-### 4.2 Tab 2: Staff & QC (Quality Control)
-Fokus pada mentalitas SDM, tingkat kedisiplinan, dan konsistensi kualitas produk selama 30 hari terakhir.
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Total Kasus Komplain** | Isi sendiri (bukan otomatis — agar Anda sadar menghitung) |
+| **Total Remake** | Angka berwarna merah (setiap remake = kerugian bahan baku) |
+| **Penyebab Utama Komplain** | Sengaja teks bebas — Anda harus menyimpulkan akar masalah |
+| **Kendala Utama Berulang** | Masalah yang terus muncul selama 7 hari |
 
-**A. Evaluasi Operasional Staff**
-Bagian ini menampar SPV dengan fakta objektif lapangan.
-| Field Name | Tipe Input | Wajib? | Deskripsi & Logika UI |
-| :--- | :--- | :---: | :--- |
-| **% Kepatuhan SOP** | Read-Only | — | **Auto-Fill:** Ditarik langsung dari skor rata-rata audit SOP mingguan. |
-| **Total Telat (Kali)** | Read-Only | — | **Auto-Fill:** Berwarna merah tebal. Mengakumulasi berapa kali staf datang terlambat dalam sebulan. Angka ini tidak bisa dimanipulasi SPV. |
-| **SP / Teguran Keluar** | Number | YA | **Input Manual:** Berwarna merah. SPV wajib mengisi berapa kali Surat Peringatan (SP) atau teguran lisan keras yang dikeluarkan bulan ini. |
+**B. Evaluasi Performa Staf:**
 
-**B. Turnover (Karyawan Resign)**
-Ini adalah nyawa dari metrik Retensi HRD GM. UI didesain sangat menonjol.
-| Komponen Layar | Fungsi & Interaksi |
-| :--- | :--- |
-| **Kotak Hitam (Total)** | Menampilkan angka raksasa jumlah staf yang *resign* bulan ini. Otomatis bertambah saat SPV menekan tombol tambah. |
-| **Daftar Staf Resign** | Setiap staf yang resign akan muncul sebagai "Kartu" putih berisi *Nama*, *Alasan Resign*, dan *Tanggal Efektif*. Terdapat tombol *Trash* merah kecil di kanannya jika SPV salah menginput. |
-| **Tombol + Tambah Staf Resign** | Membuka *Pop-up Modal* khusus bagi SPV untuk memasukkan data karyawan yang keluar, lengkap dengan interogasi alasannya. |
+Sistem akan menampilkan daftar nama staf outlet Anda. Setiap nama berbentuk kotak lipatan (Accordion):
 
-**C. Evaluasi Performa Individu (Sistem Hybrid AI)**
-Berbeda dengan mingguan yang diisi mentah, bulanan menggunakan sistem *Hybrid*. Terdapat peringatan kecil di atasnya: *"Sistem menampilkan rekomendasi tren... SPV berhak mengubah"*.
-| Field Name | Tipe Input | Wajib? | Deskripsi Arsitektur |
-| :--- | :--- | :---: | :--- |
-| **Kotak Accordion Staf** | UI Lipat | — | Menampilkan nama staf, posisi, dan *Badge Status* berwarna (Hijau: Berkembang, Abu: Stagnan, Merah: Menurun). Jika diklik, kotak ini terbuka. |
-| **Status Penilaian** | Dropdown | YA | **Pre-filled (Diisi Otomatis):** Mesin akan merata-rata nilai mingguan staf tersebut dan memberikan saran awal (Misal: Stagnan). Namun SPV bisa menggantinya jika dirasa staf tersebut layak mendapat nilai lebih baik. |
-| **Catatan / Alasan** | Textarea | YA | Ruang bagi SPV untuk memberikan argumen akhir (rapor bulanan) staf tersebut. |
+| Yang Harus Anda Isi | Pilihan | Dampak |
+|---|---|---|
+| **Status Penilaian** | **Berkembang** (ada inisiatif, belajar cepat), **Stagnan** (sekadar selesai, zona nyaman), **Menurun** (sering telat, lambat) | Data ini menjadi pondasi GM untuk keputusan gaji, bonus, atau SP |
+| **Keterangan (Kendala & Planning)** | Wajib dirincikan: apa kemajuan/kendalanya, dan rencana pelatihan minggu depan | Contoh: "Sudah lancar kasir. Planning: minggu depan ajarkan kalibrasi grinder" |
 
-**D. Rekap Quality Control (QC) & Komplain**
-Membahas kualitas fisik produk yang disajikan ke pelanggan.
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Total Kasus Komplain** | Read-Only | — | **Auto-Fill:** Total komplain dari akumulasi laporan mingguan. |
-| **Total Remake Produk** | Read-Only | — | **Auto-Fill (Teks Merah):** Angka kebocoran HPP akibat produk gagal. |
-| **Evaluasi QC Espresso** | Textarea | YA | SPV sebagai QA (*Quality Assurance*) wajib menilai secara kualitatif konsistensi rasa kopi (Espresso) sebulan terakhir. |
-| **QC Produk Lainnya (Dinamis)** | Tombol Hitam + 3 Form | Opsi | Terdapat tombol hitam kecil **+ TAMBAH**. Secara otomatis sistem akan melahirkan "Kartu Evaluasi" baru yang bisa diulang tak terbatas. Tiap kartu memiliki fitur **Hapus (merah)** dan mewajibkan SPV mengisi 3 hal: <br>1. **Nama Produk:** Teks spesifik (Misal: Aren / Matcha).<br>2. **Penyebab Komplain:** Masalah kualitas dominan (Misal: Terlalu manis, sirup bocor).<br>3. **Rekomendasi Perbaikan:** Solusi untuk operasional bulan depan. |
+### 4.3 Tab 3: Rencana Perbaikan Tim & Pengiriman
 
-### 4.3 Tab 3: Evaluasi & Rencana Strategis
-Ini adalah tahap akhir Laporan Bulanan di mana SPV meminta dukungan pendanaan dan merenungkan gaya kepemimpinannya sendiri.
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Rencana Perbaikan Tim** | Tindakan nyata yang akan Anda lakukan minggu depan |
+| **Kebutuhan SPV / Tim** | Alat atau dukungan yang dibutuhkan (Contoh: "Butuh lakban", "Butuh training menu baru") |
 
-**A. Fasilitas & Inventaris**
-Blok yang fokus pada pelaporan kebocoran finansial (*maintenance*) dan eskalasi perbaikan alat.
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Total Pengeluaran Perbaikan (Rp)** | Number | YA | Uang yang dihabiskan SPV bulan ini untuk servis alat (dicetak tebal & merah). |
-| **Kerusakan Belum Selesai (Eskalasi)** | Textarea | YA | Laporan kerusakan fatal (Misal: "Mesin Espresso rusak, butuh teknisi pusat"). |
+Gunakan tombol **"TAMBAH"** untuk menambah baris jika rencana/kebutuhan lebih dari satu.
 
-**B. Strategi Bulan Depan**
-| Field Name | Tipe Input | Wajib? | Deskripsi |
-| :--- | :--- | :---: | :--- |
-| **Fokus & Strategi Utama** | Textarea | YA | Janji makro SPV untuk membesarkan omset outlet bulan depan. |
-| **Kebutuhan Supervisor** | Textarea | YA | Permintaan dukungan ke GM (Misal: "Butuh *training* eksternal untuk staf kasir baru"). |
+**Tiga Tombol Bawah:**
 
-**C. Evaluasi Mandiri Supervisor (Paling Intim)**
-Memaksa SPV untuk merenung, menilai kesehatan mental operasionalnya, dan membedah kepemimpinannya sendiri.
-| Field Name | Tipe Input | Wajib? | Deskripsi Kualitatif |
-| :--- | :--- | :---: | :--- |
-| **Pencapaian Terbaik Pribadi**| Textarea | YA | SPV memamerkan prestasinya (Misal: "Berhasil menekan angka telat staf bulan ini"). |
-| **Tantangan Tersulit** | Textarea | YA | Pengakuan jujur tentang titik kelemahannya (Misal: "Kewalahan mengatur jadwal libur saat lebaran"). |
-| **Pandangan Ke Depan** | 3 Form Mix | YA | Terdiri dari 3 *field*: Konfirmasi ulang **Jumlah Staf Resign**, **Strategi & Rencana Bulan Depan**, dan **Kebutuhan/Eskalasi ke GM**. |
-| **Skill Yang Ingin Ditingkatkan**| Textarea | YA | Refleksi diri SPV. Area kemampuan apa yang mereka rasa kurang dan ingin mereka asah (Misal: "Komunikasi & Problem Solving"). |
-| **Rating Kinerja Sendiri** | Slider (Range)| YA | Ditempatkan di dalam kotak khusus (*Grey Box*). SPV wajib menggeser *Slider* dari skala **1 - 10** untuk merating kehebatan dirinya sendiri bulan ini. Angkanya akan tercetak tebal dan membesar di sebelah kanan *slider*. |
-
-*(Catatan: Tiga tombol eksekusi bawah — **Simpan Draft, Export PDF, Tinjau & Kirim** — memiliki logika keamanan, pencegahan data hilang, dan validasi pratinjau modal yang **sama persis** dengan Laporan Mingguan).*
+| Tombol | Fungsi |
+|---|---|
+| **SIMPAN DRAFT** | Menyimpan semua isian di memori browser. Bisa dilanjutkan besok |
+| **EXPORT PDF** | Mengunduh PDF ke HP Anda sebagai arsip pribadi (tidak mengirim ke server) |
+| **TINJAU & KIRIM LAPORAN** | Validasi data → jika lengkap, tampilkan Preview → Kirim Final |
 
 ---
 
-## BAB 5: PENGATURAN PARAMETER & MASTER DATA
+## BAB 5: LAPORAN BULANAN (EVALUASI STRATEGIS)
 
-Halaman ini adalah ruang kendali administratif (*Control Room*) yang wajib dikunjungi SPV setiap awal bulan. Konfigurasi di sini akan menyuntikkan kecerdasan ke dalam algoritma Dashboard GM.
+Laporan Bulanan bersifat **strategis** dan menuntut Anda untuk mengevaluasi diri sendiri secara mendalam (Self-Reflection).
 
-### 5.1 Form Target Omset Bulanan
-**Fakta Kritis Sistem:** Angka Target Omset pada aplikasi **TIDAK DI-SETTING OLEH GM**. Wewenang ini didelegasikan penuh kepada SPV. Jika SPV lupa memasang target, semua bar persentase di aplikasi akan macet atau membaca 0%.
+### 5.1 Tab 1: Ringkasan & Sales
 
-| Komponen Layar | Tipe Input | Dampak Terhadap Mesin Kalkulasi |
-| :--- | :--- | :--- |
-| **Outlet** | Read-Only | Sistem mendeteksi otomatis *Outlet* dari profil SPV saat login (Misal: Perintis). Terkunci dan tidak bisa diedit. |
-| **Bulan & Tahun** | Dropdown | Menentukan untuk periode mana target ini berlaku. Jika SPV salah memilih bulan, perhitungan persentase pencapaian di bulan tersebut akan error. |
-| **Total Target (Rp)** | Text (Rupiah) | Memiliki fitur *Auto-Format*. Saat diketik, sistem otomatis menyisipkan titik (ribuan). Angka ini menjadi "napas utama" kalkulasi omset harian dan bulanan. |
-| **Tombol SIMPAN TARGET** | Black Button | Menyimpan data ke *database* dengan animasi *loading* eksklusif (*Newton's Cradle*) agar SPV tahu data sedang diproses. |
+**A. Identitas & Periode (Bagian Terpenting)**
 
-### 5.2 Kalender Event & Faktor Eksternal (Pemetaan Trafik)
-Alat komunikasi krusial bagi SPV untuk melaporkan anomali trafik kepada GM secara proaktif, sehingga GM tidak marah buta ketika omset anjlok.
+| Yang Harus Anda Isi | Peringatan |
+|---|---|
+| **Nama Supervisor** | Nama Anda |
+| **Outlet** | Pilih outlet Anda |
+| **Bulan Laporan** | **HATI-HATI!** Begitu Anda memilih bulan, sistem langsung menarik semua data harian di bulan tersebut. Jika salah pilih bulan, semua angka di bawahnya akan salah |
 
-**A. Form Tambah Event Baru**
-| Komponen Layar | Deskripsi Spesifik |
-| :--- | :--- |
-| **Kategori Event** | *Dropdown* dengan pilihan: **Kalender Akademik (Kampus)**, **Event Lokal / Festival**, dan **Lainnya**. |
-| **Nama Event** | Teks singkat penjelas kejadian (Contoh: "UAS Universitas Hasanuddin" atau "Hujan Badai 3 Hari"). |
-| **Tgl Mulai & Tgl Selesai** | *Date Picker*. Sangat vital bagi AI Dashboard GM untuk mengukur korelasi antara tanggal *event* ini dengan tanggal grafik omset yang menukik/naik. |
-| **Tombol SIMPAN PARAMETER**| Tombol eksekusi hitam. Setelah disimpan, *event* akan turun ke daftar di bawahnya. |
+**B. Metrik Penjualan (Kotak Hitam)**
 
-**B. Event Tersimpan**
-Area daftar visual (*List*) di bawah form. Jika belum ada, akan muncul teks abu-abu *"Belum ada event parameter yang tersimpan."* Jika ada, *event* akan berjejer dan bisa dihapus kapan saja jika dibatalkan/salah input.
+Angka-angka ini muncul otomatis dalam desain kotak hitam elegan:
 
-### 5.3 Kelola Staf Outlet (Tombol Bawah)
-Di ujung bawah layar (melayang / *sticky*), terdapat tombol hitam panjang bertuliskan **KELOLA STAF OUTLET**. 
-- Ini adalah pintu masuk ke formulir *Master Data HRD*. 
-- SPV dapat menambah staf baru atau mengubah status staf menjadi "Resign".
-- Perubahan di sini akan langsung berdampak pada *Dropdown Autocomplete* setiap kali SPV mengisi laporan kinerja staf di tab-tab sebelumnya.
+| Yang Muncul Otomatis | Penjelasan |
+|---|---|
+| **Total Sales Real (Rp)** | Penjumlahan seluruh omset harian di bulan tersebut |
+| **Target Sales (Rp)** | Diambil dari target yang Anda atur di Pengaturan Parameter |
+| **Persentase Pencapaian** | Contoh: **119%** berarti Anda melebihi target |
 
----
+**C. Ringkasan Eksekutif (Ketik Sendiri)**
 
-## BAB 6: SISTEM KEAMANAN & INTEGITAS DATA
+| Yang Harus Anda Isi | Contoh |
+|---|---|
+| **Pencapaian Utama Bulan Ini** | "Berhasil melampaui target sales hingga 110%" |
+| **Masalah / Isu Utama** | "Sering terjadi pemadaman listrik di minggu ke-2" |
+| **Kesimpulan Keseluruhan** | Opini Anda mengenai operasional bulan ini |
 
-### 6.1 Race-Condition Lock & Anti-Spam
-- **Logika Pencegahan:** Sistem menahan pengiriman ganda selama 10 detik setelah tombol Submit ditekan, melindungi database dari duplikasi.
+**D. Evaluasi Produk (4 Accordion: Minuman, Makanan, Snack, Lainnya)**
 
-### 6.2 Autosave & Draft Recovery
-- **Penyimpanan Lokal:** Setiap input langsung tersimpan di `LocalStorage` browser.
+| Yang Muncul Otomatis | Yang Harus Anda Isi |
+|---|---|
+| **Top 5 Produk** (tidak bisa diedit) | — |
+| **Bottom 3 Produk** (tidak bisa diedit) | **Rencana untuk setiap produk mati:** "Bikin Bundling", "Hapus dari menu", atau "Tingkatkan rasa" |
 
-### 6.3 The Apostrophe Rule & Sanitasi Input
-Google Sheets memiliki autokoreksi tanggal (*locale* AS). Tanggal `10-08-2026` bisa berubah menjadi 8 Oktober.
-- **The Apostrophe Rule:** *Backend* Zero Cafe memaksakan tanda kutip tunggal (`'`) sebelum menyimpan tanggal (misal: `"'10-08-2026"`). Menjamin *Plain Text* murni tanpa korupsi.
-- **Sanitasi Uang:** Input mata uang seperti "Rp 3.500.000" dicincang otomatis menggunakan regex `/[^0-9]/g` menjadi angka murni `3500000`, mencegah error `#VALUE!`.
+### 5.2 Tab 2: Staff & Quality Control
 
----
+**A. Evaluasi Operasional Staf:**
 
-## BAB 7: DASHBOARD GENERAL MANAGER (TAB 1: FINANSIAL & KINERJA)
-Bagian ini adalah otak utama *Zero Cafe App*. Setiap angka yang tampil di sini bukan sekadar pajangan, melainkan hasil agregasi ribuan sel data dari laporan lapangan SPV yang diterjemahkan menjadi wawasan strategis melalui *interface* tabel dan grafik.
+| Yang Muncul Otomatis | Catatan |
+|---|---|
+| **% Kepatuhan SOP** | Rata-rata dari audit mingguan (tidak bisa diubah) |
+| **Total Telat (Kali)** | Berwarna merah tebal. Akumulasi sebulan penuh (tidak bisa diubah) |
 
-### 7.1 Mode Waktu (Time-Awareness Detection)
-| Lencana Mode | Rentang Filter | Fokus Algoritma AI |
-| :--- | :--- | :--- |
-| **MODE OPERASIONAL (Biru)** | $\le 7$ Hari | Evaluasi *tactical* harian & mendeteksi anomali cuaca terhadap trafik seketika. |
-| **MODE TAKTIS (Indigo)** | $8 - 90$ Hari | Evaluasi tren *mid-term* (Mingguan/Bulanan) dan kinerja penyelesaian masalah oleh SPV. |
-| **MODE STRATEGIS (Ungu)** | $>90$ Hari | AI secara cerdas mematikan metrik harian yang bising. Fokus murni pada strategi bisnis makro, pertumbuhan tahunan, dan *survival* outlet. |
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **SP / Teguran Keluar** | Berapa kali Anda mengeluarkan Surat Peringatan bulan ini |
 
-### 7.2 AI Summary (Lencana Keputusan Sistem)
-Muncul di bagian paling atas untuk memberikan kesimpulan eksekutif instan hasil *cross-referencing* matriks data (Omset, SOP, Cuaca, Absensi).
-| Skenario Data Lapangan | Warna Lencana | Template Kalimat AI (Library) | Saran Aksi (Sistem) |
-| :--- | :---: | :--- | :--- |
-| Omset rekor + Kebersihan hancur | Kuning / Merah | *"Fatigue Limit (Batas Kelelahan Tim) Tercapai. Transaksi tinggi mengorbankan kualitas."* | Tambah staf *Part-Time* / Perhatikan kapasitas dapur. |
-| Ada Event + Tanggal Tua | Kuning | *"Trafik Padat, Daya Beli Rendah (Event: [Nama] + Tanggal Tua)."* | Jangan tambah staf ekstra, alihkan energi ke kebersihan. |
-| Ada Event + Tgl Muda + Omset Tercapai| Hijau | *"Momen Emas (Golden Era): Peluang mencetak rekor omset."* | Pastikan staf wajib *full-team* & kondisi prima. |
-| Staf telat sangat parah | Merah | *"Prediksi Churn Akut: Rasio keterlambatan sangat tinggi. Indikasi demotivasi."* | Waspada staf berisiko *resign* mendadak. |
-| Hujan ekstrim + Kebersihan anjlok | Kuning | *"Fasilitas rentan cuaca ekstrem. Hujan berkorelasi dengan kebersihan anjlok."* | Terapkan SOP *Double-Mopping* & Karpet Anti-Slip. |
+**B. Turnover (Karyawan Resign):**
 
-### 7.3 Metrik Keuangan Utama (Total Omset & YTD)
-| Komponen Visual | Sumber Tarikan Data | Fungsi / Cara Baca Eksekutif |
-| :--- | :--- | :--- |
-| **Total Omset (Rp)** | Agregasi Omset Shift 1 + Shift 2 | Total uang riil yang masuk pada rentang tanggal yang dipilih GM. |
-| **Persen Tren MoM (+/-)** | Omset hari ini vs Tanggal sama bulan lalu | *Month-over-Month (MoM)*. Menunjukkan persentase pertumbuhan (Hijau) atau penyusutan (Merah). Muncul otomatis sebagai lencana kecil (contoh: `▲ +5% bln lalu`) di sebelah omset *jika* ada data pembanding dari bulan sebelumnya. |
-| **Target Omset (Rp) & Bar** | Form Pengaturan Parameter SPV | Bar hijau akan otomatis terisi secara visual (proporsional 0-100%) merespons jarak antara Omset Aktual terhadap Target bulanan SPV. |
-| **YTD Trajectory (Rp & %)** | Akumulasi 1 Januari s/d Hari Ini | Memantau "napas bisnis" tahunan. Angka target tahunan **diinput langsung oleh GM melalui menu Pengaturan GM (bukan SPV)**. Persentase YTD (`Omset YTD / Target Tahunan`) membantu GM sadar posisi bisnis secara makro. Jika persen masih merah di bulan Oktober, GM wajib menyuntik dana marketing. |
+Jika ada staf yang keluar bulan ini:
+1. Tekan tombol **"+ Tambah Staf Resign"**
+2. Isi nama, alasan, dan tanggal efektif
+3. Setiap nama muncul sebagai kartu putih dengan tombol hapus (jika salah input)
 
-### 7.4 Metrik Transaksi & Visualisasi (Grafik)
-| Komponen Visual | Sumber Tarikan Data | Fungsi / Cara Baca Eksekutif |
-| :--- | :--- | :--- |
-| **Total Transaksi** | Total Struk (Laporan Harian Fase 2 Pagi) | Jumlah antrean pelanggan (meja) yang berhasil dilayani. |
-| **Average Ticket Size (ATS)** | `Omset Total / Total Transaksi` | Menilai efektivitas *Upselling* kasir. Semakin besar angkanya, semakin pintar staf membujuk tamu agar belanja lebih mahal. |
-| **Trend Line Chart** | Total Omset per Hari (Time-Series) | Grafik garis. Titik *peak* (lembah/puncak ekstrem) mempermudah mata melihat di tanggal berapa persisnya omset anjlok. |
-| **Day of Week (Bar Chart)**| Agregasi Omset per Nama Hari | Menyortir seluruh omset dalam rentang waktu yang dipilih (misal setahun penuh), lalu menjumlahkan seluruh hari Senin, Selasa, dst., untuk dicari rata-ratanya. Tujuannya mutlak: **Mencari Hari Terlemah rata-rata** agar GM bisa membuat promo tematik, serta **Hari Terkuat rata-rata** untuk menyiapkan staf *full-team*. <br><br> **Terdapat Dropdown AI Strategy (Rekomendasi untuk memaksimalkan Hari Terlemah):** <br> Harap dicatat, ini **bukanlah AI LLM sungguhan**, melainkan *template statis* (rule-based) di mana sistem akan otomatis menyisipkan kata `[Nama Hari Terlemah]` ke dalam tiga pilar template baku berikut:<br> • **Optimasi SDM:** *"Jadwalkan libur bergilir (off) staf pada hari [Hari Terlemah] untuk efisiensi payroll."*<br> • **Marketing:** *"Buat special deals atau bundling khusus yang hanya berlaku di hari [Hari Terlemah]."*<br> • **Maintenance:** *"Lakukan perawatan mesin atau pembersihan intensif di hari sepi ini..."* |
+> **Sinkronisasi Otomatis:** Saat Anda mengirim laporan bulanan dengan daftar resign, sistem otomatis mengubah status staf tersebut di database utama menjadi "Resign". Anda tidak perlu menghapusnya manual di Pengaturan.
 
-### 7.5 Indikator Operasional (Tab 1)
-Tepat di bawah grafik utama, terdapat 4 kotak besar yang merangkum kesehatan operasional outlet.
-| Komponen Visual | Sumber Data & Logika | Cara Baca (Warna & Status) |
-| :--- | :--- | :--- |
-| **SOP Keramahan** | Rata-rata dari nilai audit SPV harian. | Menunjukkan persentase kedisiplinan staf dalam menyapa pelanggan. Jika <90%, warna menjadi merah (Kritis). |
-| **Target Penjualan** | Perbandingan Total Omset Aktual terhadap Target bulanan SPV. | Akan memunculkan label **"TERCAPAI"** (Hijau) jika jarak aktual melampaui target, dan **"GAGAL"** (Merah) jika di bawah target. |
-| **Komplain Bulanan** | Hitungan form `komplainTotal`. | Membandingkan dengan angka mutlak *Max 2*. Jika bulan ini komplain sudah mencapai angka 3, kotak akan menyala merah (KPI Dilanggar). |
-| **Turnover Barista** | Form evaluasi bulanan SPV. | Membandingkan dengan angka mutlak *Max 1*. Jika dalam sebulan ada 2 staf keluar, akan muncul label "RISIKO KRITIS" karena melanggar KPI Kestabilan SDM. |
+**C. Evaluasi Individu Staf (Sistem Hybrid AI):**
 
-### 7.6 Marketing Intelligence (BETA) & Konteks Eksternal
-Bagian ini adalah otak analitik yang ditarik secara dinamis dari *Marketing Intelligence Engine v3.0* (`Code.gs`) dengan menekan tombol **"Simpan & Tarik Analisis"**. 
-Terdapat pengaturan **Benchmark ATS (Target rata-rata per struk)**, di mana angka default-nya adalah **Rp 30.000**. Angka ini bisa diganti oleh GM sesuai harga jual *hero product* outlet (saran: gunakan harga secangkir kopi signature + 1 pastry).
+Di bagian ini, sistem memberikan **saran awal** untuk setiap staf berdasarkan rata-rata nilai mingguan:
 
-Saat tombol ditekan, sistem akan meng-generate "Pills" (Modul) yang jika diklik (*accordion* terbuka) akan memunculkan diagram analisis terperinci.
+| Kolom | Cara Kerja |
+|---|---|
+| **Status Penilaian** | Sudah terisi otomatis oleh sistem (misal: "Stagnan"). Tapi Anda **boleh mengubahnya** jika merasa staf layak nilai lebih baik atau lebih buruk |
+| **Catatan / Alasan** | Ruang bagi Anda untuk menulis "rapor akhir" staf tersebut |
 
-| Modul (Pill) | Tampilan Diagram (Jika Diklik) | Sumber Data & Logika Kesimpulan | Cara Baca (Warna & Status) |
-| :--- | :--- | :--- | :--- |
-| **Tren Omset Mingguan** | **Bar Chart (Hitam):** Menampilkan rata-rata omset per minggu/hari. | Perbandingan rata-rata harian dengan minggu sebelumnya. | **Sehat (Hijau):** Naik ≥ 5%. <br> **Perhatian (Kuning):** Stagnan (selisih < 5%). <br> **Kritis (Merah):** Turun ≤ -5%. |
-| **Korelasi Kebersihan & Omset** | **Dual-Axis Chart:** Garis Hijau (Skor Kebersihan %) disandingkan dengan Bar Hitam Transparan (Omset Harian Rp). | Persentase pencapaian omset disilangkan dengan Rata-rata Skor Kebersihan harian. | **Kritis (Perfect Storm):** Omset tinggi (≥90%) tapi kotor (<70%). <br> **Kritis (Lazy Shift):** Sepi (<70%) dan kotor (<70%). <br> **Positif:** Standar ideal (>85% omset, >90% bersih). |
-| **SDM & Risiko Operasional** | **Donut Chart (Pie Berlubang):** Hijau (Tepat Waktu), Merah (Terlambat), Abu-abu (Izin/Alfa). | Menghitung persentase keterlambatan dari DB_Kehadiran_Staf. | **Krisis (Merah):** Telat > 15%. Peringatan keras (SP). <br> **Warning (Kuning):** Telat 5-15%. SPV wajib *briefing*. <br> **Positif (Hijau):** Kedisiplinan tinggi. |
-| **Benchmarking ATS Industri** | **Bar Chart Horizontal:** Membandingkan Bar Hitam (ATS Aktual) vs Bar Abu (Benchmark Target). | Rata-rata transaksi dibanding Target ATS yang di-set GM (Rp 30.000). | **Meningkat:** ATS aktual > Benchmark. *Upselling* berhasil. <br> **Menuju Target:** 75%-99% dari Benchmark. <br> **Di Bawah Standar:** <75%. Gagal *cross-selling*. |
-| **Analisis Menu** | **Horizontal Bar Chart:** Batang Hijau (Hero) dan Batang Oranye (Dead). Menampilkan frekuensi muncul. | Agregasi Top 3 & Bottom 3 dari DB_Kinerja_Produk. | **Hero Product:** Batang hijau. Konsisten di daftar terlaris. Jadikan ujung tombak diskon. <br> **Dead Menu:** Batang oranye. Konsisten di posisi terbawah. Saran aksi: diskon cuci gudang atau hapus dari menu. |
-| **Profil Pengunjung Mayoritas**| *(Teks Statis)* | Agregasi *Dropdown* form Laporan Harian SPV (Tab 1). | Contoh: *"Mahasiswa Nugas"*. Menjadi basis penentuan promosi (misal: *bundling WiFi*). |
-| **Kondisi/Event Dominan** | *(Teks Statis)* | Agregasi *Dropdown* Cuaca/Event form harian. | Contoh: *"Cuaca Hujan/Badai (60%)"*. Memberi konteks kewajaran jika tren omset turun (faktor eksternal). |
+**D. Rekap QC & Komplain:**
 
-### 7.7 Analisis Performa Produk (Kinerja Kategori)
-Tepat di bawah kontainer *Marketing Intelligence*, terdapat sebuah *accordion standalone* yang membedah secara spesifik kinerja produk per kategori secara *real-time*.
+| Yang Muncul Otomatis | Yang Harus Anda Isi |
+|---|---|
+| Total Kasus Komplain (sebulan) | — |
+| Total Remake Produk (sebulan) | — |
+| — | **Evaluasi QC Espresso:** Konsistensi rasa kopi sebulan terakhir |
+| — | **QC Produk Lainnya:** Tekan "+ TAMBAH" untuk menambah evaluasi per menu |
 
-| Komponen Visual | Sumber Data & Logika | Cara Baca Eksekutif |
-| :--- | :--- | :--- |
-| **Catatan Analisis** | Teks keterangan statis. | Memberi tahu GM bahwa tren penjualan ini murni diakumulasikan dari data Laporan Harian SPV (bukan asumsi sistem) berdasarkan outlet dan rentang waktu yang sedang dipilih. |
-| **Kategori Menu (Minuman, Makanan, Snack)** | Fungsi `renderCategorySection` | Memecah data berdasarkan kategorinya, sehingga tidak tercampur. Untuk tiap kategori, akan ditampilkan **Top 5** produk paling laku, dan **Bottom 3** produk paling tidak laku. |
-| **Rencana Tindakan (Action Plan)** | Input teks `action_plan` dari form harian SPV | Khusus untuk daftar Bottom 3, sistem akan menampilkan opini/rencana yang diketik langsung oleh SPV di lapangan (contoh: *"Bahan baku mau kedaluwarsa, kami usulkan flash sale promo"*). GM tidak perlu menduga-duga solusi. |
+### 5.3 Tab 3: Evaluasi & Rencana Strategis
 
-### 7.8 Tab Operasional & Layanan (Indikator Lapangan)
-Tab ini memindahkan fokus GM dari sekadar angka finansial ke "biaya & komplain" yang terjadi di lapangan. Di tab ini, mode taktis/strategis (Smart Briefing Mode) tetap terlihat di bagian atas.
+**A. Fasilitas & Inventaris:**
 
-| Komponen Visual | Sumber Data & Logika | Fungsi & Cara Baca Eksekutif |
-| :--- | :--- | :--- |
-| **AI Insight: Higienisitas** | *Circular Progress Bar* (%) dari rata-rata kebersihan. Logika silang antara pencapaian Omset vs SOP Kebersihan. | Memberi kesimpulan instan. Contoh *library* pesan yang muncul:<br> • **Sales Naik, SOP Turun:** Omset tembus target, tapi kebersihan <95%. Jangan sampai *quality control* kendor saat ramai.<br> • **Peringatan Ganda:** Omset gagal, dan kebersihan <95%. Butuh intervensi GM segera.<br> • **The Good Standard:** Semuanya beres (SOP >95%). |
-| **Area Kritis (Kebersihan)** | Membaca kotak *checklist* area di form harian SPV yang skornya jelek. | Berwarna merah menyala. Memunculkan list spesifik (misal: *1. Toilet (Skor: 90%) - Bersih*). GM langsung tahu persis titik lemah outlet hari itu tanpa perlu baca laporan panjang. |
-| **Galeri Pengeluaran (Bahan & ATK)** | Array `listPengeluaran` (Form Laporan Harian) | Berbentuk *horizontal slider* (bisa digeser ke samping). Menampilkan visual foto nota belanja *petty cash* SPV beserta item dan harganya. Jika kosong, akan tertulis *"Aman. Tidak ada pengeluaran"*. Jika kotak ini berwarna Biru, GM bisa klik foto nota untuk memperbesar (mencegah *fraud* nota fiktif). |
-| **Maintenance & Eskalasi Fasilitas** | Array `listEskalasi` (Form Laporan Harian) | Berbentuk galeri foto berwarna kemerahan. GM melihat foto aset apa yang butuh teknisi segera (misal: AC bocor, Mesin Espresso *error*). Jika diabaikan, omset besok pasti turun. |
-| **Statistik Komplain & QC** | Hitungan agregat form `komplainTotal`. | Sangat tegas. Warna tipografi otomatis berubah:<br> • **Aman (Hijau):** 0 Komplain.<br> • **Waspada (Kuning):** 1 Komplain.<br> • **Batas Maksimal (Oranye):** 2 Komplain.<br> • **Kritis KPI Dilanggar (Merah):** >2 komplain sebulan. |
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Total Pengeluaran Perbaikan (Rp)** | Uang yang habis untuk servis alat bulan ini |
+| **Kerusakan Belum Selesai** | Laporan alat yang masih rusak dan butuh tindakan |
 
-### 7.9 Tab SDM & Evaluasi (Kesehatan Tim)
-Menggantikan rutinitas *meeting* basi. Di tab ini, GM bisa langsung melihat siapa SPV yang "berkeringat" dan mana yang tidak, serta memantau kesehatan operasional tim secara makro. 
+**B. Strategi Bulan Depan:**
 
-> [!NOTE] 
-> **Kenapa tampilan Tab SDM Anda mungkin terlihat berbeda?**
-> Tab ini sangat dinamis! Sistem akan **menyembunyikan** beberapa *accordion* analisis individu staf (seperti *Minus Kas* atau *Revenue SPV*) jika Anda sedang berada di **Mode Strategis (>95 Hari)** atau jika data SPV tersebut kosong. Ini disengaja agar data tahunan tidak terdistorsi oleh pergantian (turnover) staf.
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Fokus & Strategi Utama** | Janji Anda untuk bulan depan |
+| **Kebutuhan Supervisor** | Dukungan yang dibutuhkan dari owner |
 
-Secara penuh, terdapat **5 komponen (*accordion*)** yang akan muncul di tab ini jika semua syarat data terpenuhi:
+**C. Evaluasi Mandiri (Paling Pribadi):**
 
-| Komponen (Accordion) | Sumber Data & Logika | Cara Baca Eksekutif |
-| :--- | :--- | :--- |
-| **1. Kesehatan Tim & Aset** | Akumulasi form harian & bulanan (Tab 1 & 2) | Menampilkan 4 matriks indikator kesehatan: **SOP Keramahan Staf** (%), **Total Telat** (berubah merah jika sering), **Teguran (SP)**, dan **Turnover**. Terdapat juga rangkuman "Penyebab Kendala Staff Utama" untuk GM. |
-| **2. Cash Discrepancy Fingerprint (Minus Kas)** | DB_Kasir (Algoritma Frekuensi Hadir) | *(Hanya muncul di Mode Taktis <95 hari).* Jika sering terjadi uang kas minus, sistem menghitung frekuensi kehadiran tiap staf tepat di hari hilangnya uang tersebut. Jika grafik satu nama menjulang tinggi, GM wajib melakukan intervensi (indikasi *fraud*). |
-| **3. Revenue Per SPV Shift (Benchmark)** | DB_Kinerja_SPV | Fitur *Leaderboard*. Menghitung rata-rata omset riil per *shift* jaga tiap SPV. Membedakan secara nyata mana SPV yang hanya bisa mengatur jadwal, dan mana SPV yang jago jualan (*upselling*). |
-| **4. Dominasi Topik Briefing SPV** | Ekstraksi kata dari input `topik_briefing` | Sistem melakukan *word count* (penghitungan kata kunci) dari topik briefing SPV (misal: "Bersih", "Telat"). AI kemudian memberikan korelasi otomatis (contoh: *Topik 'Bersih' sering disebut, namun skor Hygiene buruk, berarti eksekusi di lapangan lemah*). |
-| **5. Pandangan Ke Depan & Evaluasi SPV** | Form Laporan Bulanan SPV (Tab 2) | GM bisa membaca isi kepala SPV tanpa disensor. Berisi: **Strategi Bulan Depan**, **Kebutuhan Approval GM**, **Pencapaian Terbaik**, dan **Tantangan Tersulit** yang dirasakan oleh pimpinan di lapangan. |
-
-### 7.10 Arsip Laporan PDF (Dokumen Resmi)
-Terletak melayang di bagian paling bawah Dasbor GM (muncul di semua tab) berupa sebuah menu **Accordion (Drop-up/Drop-down)** bertuliskan *ARSIP LAPORAN PDF*.
-
-Jika *accordion* ini diklik, akan muncul daftar historis laporan yang pernah disubmit oleh SPV.
-| Komponen List | Fungsi & Cara Baca Eksekutif |
-| :--- | :--- |
-| **Judul & Tanggal Upload** | Menampilkan nama file (contoh: *Laporan_Mingguan_Perintis.pdf*) beserta stempel waktu (`dateCreated`) riil kapan SPV menekan tombol Submit. |
-| **Tombol PDF (View/Download)** | Setiap laporan SPV otomatis di- *generate* menjadi PDF oleh backend dan di- *hosting* ke Google Drive GM. GM cukup menekan tombol "PDF" ini untuk membukanya secara utuh. Berfungsi mutlak sebagai dokumen legal/fisik untuk diserahkan ke *Investor* atau Akuntan eksternal. |
+| Yang Harus Anda Isi | Catatan |
+|---|---|
+| **Pencapaian Terbaik Pribadi** | Apa yang Anda banggakan bulan ini |
+| **Tantangan Tersulit** | Pengakuan jujur tentang kelemahan Anda |
+| **Skill Yang Ingin Ditingkatkan** | Area kemampuan yang ingin diasah |
+| **Rating Kinerja Sendiri (1-10)** | Geser slider untuk merating diri sendiri |
 
 ---
 
-## BAB 8: MESIN AI & ALGORITMA PREDIKTIF
-Bagian ini membongkar bagaimana sistem Zero Cafe mengubah kumpulan angka mati dari laporan SPV menjadi wawasan eksekutif (*Executive Insights*). Sistem ini bukanlah AI generatif (seperti ChatGPT), melainkan gabungan sistem pakar (*Expert System*), *Text Mining*, dan algoritma probabilitas silang.
+## BAB 6: PENGATURAN & MASTER DATA
 
-### 8.1 AI Predictive Summary (Korelasi Matriks Lintas Domain)
-Mesin ini tidak membaca data secara terpisah, melainkan menyilangkan minimal dua domain data (misal: Finansial vs HRD, atau Finansial vs Operasional) untuk mencari pola yang tidak kasat mata.
+Halaman ini adalah **ruang kendali administratif** yang wajib Anda kunjungi setiap awal bulan.
 
-| Nama Algoritma | Matriks yang Disilangkan | Kondisi Terpicu (Trigger) | Output / Pesan Peringatan ke GM |
-| :--- | :--- | :--- | :--- |
-| **Fatigue Limit Detection** | Omset Aktual vs Skor Kebersihan | Omset > Target BULANAN, TAPI Skor Kebersihan < 80%. | *"Fatigue Limit Tercapai. Transaksi tinggi mengorbankan kualitas. Pertimbangkan penambahan staf."* |
-| **Traffic vs Quality Paradox** | Omset Aktual vs Skor Kebersihan | Omset GAGAL (Di bawah target), DAN Skor Kebersihan < 80%. | *"Kritis: Sepi namun kotor. Indikasi staf lalai/malas saat tidak ada pelanggan."* |
-| **Golden Era (Momentum)** | Cuaca/Event vs Omset | Ada Event (Misal: Ujian Kampus) ATAU Cuaca Cerah, DAN Omset Tercapai. | *"Momen Emas: Eksekusi lapangan maksimal memanfaatkan trafik tinggi."* |
-| **Churn Risk (Demotivasi)** | Absensi Telat vs Standar SOP | Angka Keterlambatan > 15% dari total hari operasional. | *"Prediksi Churn: Keterlambatan kronis. Indikasi kuat staf demotivasi atau akan resign."* |
+### 6.1 Target Omset Bulanan
 
-### 8.2 Marketing Intelligence & Text Mining
-Alih-alih menyuruh GM membaca ratusan baris evaluasi laporan harian/mingguan SPV, AI secara otomatis memindai pola teks menggunakan metode penghitungan kata (*Word Frequency/Tokenization*).
+**Fakta Penting:** Angka target omset **TIDAK di-set oleh owner**. Wewenang ini didelegasikan penuh kepada Anda (SPV). **Jika Anda lupa memasang target, semua persentase pencapaian di aplikasi akan membaca 0%.**
 
-1. **Analisis Bottom 3 Produk (Menu Mati):** AI melihat produk apa yang paling sering muncul di daftar "Bottom 3" selama sebulan. AI kemudian menarik teks "Alasan SPV" yang paling sering diketik untuk produk tersebut, dan merangkumnya menjadi satu kalimat strategi untuk GM (contoh: *"Diskon cuci gudang karena bahan baku menumpuk"*).
-2. **Ekstraksi Topik Briefing SPV:** Sistem menghitung kata (misal: "Kebersihan", "Sapa", "Senyum") yang paling sering ditulis SPV di kolom *Topik Briefing*. Kata terbanyak diangkat menjadi "Fokus Utama Shift", memberi tahu GM apa isu yang paling sering dibahas saat internal *meeting* di outlet.
+| Kolom | Cara Mengisi |
+|---|---|
+| **Outlet** | Terkunci otomatis dari PIN login |
+| **Bulan & Tahun** | Pilih untuk bulan mana target ini berlaku |
+| **Total Target (Rp)** | Ketik angka. Sistem otomatis menambahkan titik ribuan saat Anda mengetik |
+| **Tombol SIMPAN TARGET** | Tekan dan tunggu animasi loading selesai |
 
-### 8.3 Algoritma Deteksi Fraud Kasir (Cash Discrepancy)
-Sistem tidak pernah menuduh satu staf secara langsung jika uang kas minus, melainkan menggunakan metode "Frekuensi Kehadiran" (*Attendance Frequency Algorithm*).
+### 6.2 Kalender Event & Faktor Eksternal
 
-**Cara Kerja Mesin:**
-1. **Agregasi Insiden:** Saat GM memilih rentang tanggal, sistem mencari hari-hari di mana terjadi **Minus Kas** (Uang riil lebih kecil dari sistem).
-2. **Pemetaan Staf (Fingerprinting):** Mesin mengekstrak daftar staf (Barista/Kasir) yang bertugas *tepat pada shift dan hari* di mana uang tersebut hilang.
-3. **Pembobotan Tumpang Tindih:** Jika uang hilang 5 kali dalam sebulan, mesin menghitung nama siapa yang paling sering muncul di 5 insiden tersebut.
-4. **Indikator Potensi (Output):** Bar Chart tidak akan menampilkan "Jumlah Uang yang Dicuri", melainkan **"Frekuensi Keterlibatan Shift"**. Jika nama Budi menjulang tinggi (misal 5 kali hadir di setiap uang hilang, sementara staf lain hanya 1 kali), GM memiliki basis data yang kuat untuk melakukan interogasi/evaluasi terhadap Budi.
+Alat untuk melaporkan kejadian luar biasa yang mempengaruhi trafik pengunjung kepada GM.
+
+| Kolom | Contoh |
+|---|---|
+| **Kategori Event** | Kalender Akademik (Kampus), Event Lokal / Festival, Lainnya |
+| **Nama Event** | "UAS Universitas Hasanuddin" atau "Hujan Badai 3 Hari" |
+| **Tanggal Mulai & Selesai** | Pilih dari kalender. Data ini digunakan mesin AI GM untuk menjelaskan naik-turunnya omset |
+| **Tombol SIMPAN PARAMETER** | Setelah disimpan, event muncul di daftar bawah. Bisa dihapus kapan saja |
+
+### 6.3 Kelola Staf Outlet
+
+Tombol hitam panjang di bagian bawah layar bertuliskan **"KELOLA STAF OUTLET"**:
+- Menambahkan staf baru ke database
+- Mengubah status staf menjadi "Resign"
+- Perubahan di sini langsung mempengaruhi daftar nama yang muncul saat Anda mengisi laporan kinerja staf
 
 ---
 
-*(Akhir dari Dokumen Panduan Teknis & Arsitektur Zero Cafe App v2.0)*
+# BAGIAN III — PANDUAN GENERAL MANAGER (GM / OWNER)
+
+> **Catatan untuk GM:** Bagian ini ditulis khusus untuk Anda sebagai pemilik. Fokus pada cara membaca dan menginterpretasikan data yang ditampilkan sistem.
+
+---
+
+## BAB 7: DASHBOARD TAB 1 — KEUANGAN & RINGKASAN KPI
+
+Ini adalah layar pertama yang Anda lihat setelah login. Fungsinya: **dalam 10 detik, Anda sudah tahu kondisi kafe**.
+
+### 7.1 Pengaturan Filter (Bagian Atas)
+
+Sebelum data muncul, Anda perlu memilih:
+
+| Filter | Fungsi |
+|---|---|
+| **Tanggal Mulai & Selesai** | Rentang waktu data yang ingin dilihat |
+| **Outlet** | Perintis, Dg Tata, atau Semua |
+| **Tombol "Simpan & Tarik Analisis"** | Memerintahkan sistem menarik data dari database |
+
+### 7.2 Mode Waktu Otomatis (Smart Briefing Mode)
+
+Sistem secara cerdas mendeteksi berapa hari rentang waktu yang Anda pilih, dan menyesuaikan gaya analisis:
+
+| Lencana Mode | Rentang | Fokus Analisis |
+|---|---|---|
+| **MODE OPERASIONAL (Biru)** | ≤ 7 Hari | Evaluasi harian, deteksi anomali cuaca & staf |
+| **MODE TAKTIS (Ungu)** | 8 – 95 Hari | Tren mingguan/bulanan, kinerja SPV |
+| **MODE STRATEGIS (Ungu Tua)** | > 95 Hari | Strategi makro bisnis, pertumbuhan tahunan. Beberapa modul detail otomatis disembunyikan agar data tidak bising |
+
+### 7.3 AI Summary (Kotak Warna di Bagian Atas)
+
+Kotak ini adalah **kesimpulan eksekutif instan** yang dihasilkan mesin AI. Warna kotak menunjukkan tingkat urgensi:
+
+| Warna | Artinya | Contoh Pesan |
+|---|---|---|
+| **Hijau** | Semuanya aman | "Momen Emas: Peluang mencetak rekor omset" |
+| **Biru** | Normal, tidak ada anomali | "Kinerja stabil tanpa anomali" |
+| **Kuning** | Ada peringatan, perlu perhatian | "Trafik padat, daya beli rendah (Event + Tanggal Tua)" |
+| **Merah** | Kritis, butuh tindakan segera | "Batas Kelelahan Tim tercapai" atau "Prediksi staf resign mendadak" |
+
+> **Penting:** Pesan AI ini bukan sekadar teks acak. Sistem menjalankan **4 algoritma berbeda** yang memeriksa silang antara omset, kebersihan, cuaca, kehadiran staf, dan event lokal. Penjelasan detail ada di BAB 10.
+
+### 7.4 Total Omset & Target
+
+Kotak hitam elegan yang menampilkan:
+
+| Angka | Sumber Data | Cara Membaca |
+|---|---|---|
+| **Total Omset (Rp)** | Penjumlahan Omset Shift 1 + Shift 2 dari semua laporan harian | Uang riil yang masuk pada periode yang Anda pilih |
+| **Tren MoM (±%)** | Perbandingan dengan bulan lalu | Lencana kecil hijau (naik) atau merah (turun) di sebelah angka omset |
+| **Target Omset (Rp) + Bar** | Dari Pengaturan Parameter SPV | Bar hijau bergerak proporsional 0-100% |
+| **YTD Trajectory (Rp & %)** | Akumulasi 1 Januari s/d hari ini vs Target Tahunan | Menunjukkan apakah bisnis on-track untuk mencapai target tahun ini. Target tahunan diatur oleh Anda di **Pengaturan GM** |
+
+### 7.5 Metrik Transaksi & Grafik
+
+| Komponen | Sumber Data | Cara Membaca |
+|---|---|---|
+| **Total Transaksi** | Total struk dari Fase 2 | Jumlah pelanggan yang berhasil dilayani |
+| **Average Ticket Size (ATS)** | `Total Omset ÷ Total Transaksi` | Rata-rata belanja per pelanggan. Semakin besar = semakin pintar staf membujuk pelanggan belanja lebih |
+| **Trend Line Chart** | Omset per hari (garis waktu) | Lihat di tanggal berapa omset anjlok atau meroket |
+| **Day of Week (Bar Chart)** | Rata-rata omset per nama hari (Senin, Selasa, dst.) | **Hari Terlemah** = target promo. **Hari Terkuat** = siapkan staf penuh |
+
+> Di bawah grafik Day of Week, terdapat **Rekomendasi AI** berupa 3 pilar saran otomatis (SDM, Marketing, Maintenance) yang menggunakan nama hari terlemah Anda.
+
+### 7.6 Ringkasan 4 KPI Utama
+
+Empat kotak besar yang menampilkan detak jantung bisnis Anda:
+
+| Kotak | Sumber Data | Kapan Warna Berubah Merah |
+|---|---|---|
+| **SOP Keramahan** | Rata-rata dari audit SPV harian | Jika < 90% |
+| **Target Penjualan** | Omset Aktual vs Target | Jika aktual di bawah target |
+| **Komplain Bulanan** | Hitungan form komplain | Jika > 2 komplain sebulan |
+| **Turnover Barista** | Form evaluasi bulanan SPV | Jika > 1 staf keluar per kuartal |
+
+Di atas 4 kotak ini terdapat **Skor Operasional (0-100)** dengan label EXCELLENT / GOOD / ATTENTION / CRITICAL. Skor ini dihitung dari formula:
+
+```
+Skor Operasional = (Pencapaian Target × 50%) + (Skor Kebersihan × 30%) + (Kepatuhan SOP × 20%)
+```
+
+| Skor | Label |
+|---|---|
+| ≥ 85 | EXCELLENT |
+| ≥ 70 | GOOD |
+| ≥ 50 | ATTENTION |
+| < 50 | CRITICAL |
+
+---
+
+## BAB 8: DASHBOARD TAB 2 — OPERASIONAL & LAYANAN
+
+Tab ini memindahkan fokus Anda dari angka keuangan ke **kondisi fisik kafe dan kualitas pelayanan**.
+
+### 8.1 AI Insight: Kebersihan (Higienisitas)
+
+Kotak ini menampilkan lingkaran persentase skor kebersihan rata-rata, disertai kesimpulan otomatis:
+
+| Kondisi | Pesan AI |
+|---|---|
+| Omset tembus target, tapi kebersihan < 95% | **"Sales Naik, SOP Turun"** — Tim kelelahan, kebersihan terbengkalai saat ramai |
+| Omset gagal, dan kebersihan < 95% | **"Peringatan Ganda"** — Butuh intervensi segera |
+| Semua beres (SOP > 95%) | **"The Good Standard"** — Standar terjaga |
+
+### 8.2 Area Kritis (Kebersihan)
+
+Jika ada area kafe yang skornya di bawah 95%, sistem menampilkannya di sini dalam kotak merah menyala:
+- Contoh: "1. Toilet (Skor: 90%) — Bersih"
+- Anda langsung tahu titik lemah outlet tanpa perlu membaca laporan panjang
+
+### 8.3 Galeri Pengeluaran (Bahan & ATK)
+
+Tampilan geser horizontal (*slider*) yang menampilkan foto nota belanja SPV beserta nama item dan harganya.
+- Jika kosong: "Aman. Tidak ada pengeluaran di periode ini"
+- Klik foto untuk memperbesar (verifikasi nota, cegah fraud nota fiktif)
+
+### 8.4 Maintenance & Eskalasi Fasilitas
+
+Galeri foto berwarna kemerahan berisi aset yang butuh perbaikan:
+- Menampilkan foto kerusakan yang diunggah SPV
+- Jika item ditandai "Eskalasi GM" oleh SPV, muncul di sini
+- Jumlah tiket eskalasi tertulis di pojok kanan
+
+### 8.5 Statistik Komplain & QC
+
+| Total Komplain | Warna |
+|---|---|
+| 0 | Hijau (Aman) |
+| 1 | Kuning (Waspada) |
+| 2 | Oranye (Batas Maksimal) |
+| > 2 | **Merah (KPI Dilanggar)** |
+
+---
+
+## BAB 9: DASHBOARD TAB 3 — SDM & EVALUASI
+
+Tab ini menggantikan rutinitas meeting bulanan. Anda bisa langsung melihat siapa SPV yang berkinerja baik dan siapa yang perlu dievaluasi.
+
+> **Catatan:** Beberapa bagian di tab ini otomatis **disembunyikan** jika Anda sedang di Mode Strategis (>95 hari). Ini disengaja agar data tahunan tidak terdistorsi oleh pergantian staf.
+
+### 9.1 Kesehatan Tim & Aset
+
+4 indikator kesehatan tim:
+
+| Indikator | Sumber Data | Catatan |
+|---|---|---|
+| SOP Keramahan Staf (%) | Rata-rata dari laporan harian | Warna berubah sesuai persentase |
+| Total Telat | Hitungan dari database kehadiran | Berubah merah jika sering |
+| Teguran (SP) | Dari laporan bulanan SPV | — |
+| Turnover | Dari laporan bulanan SPV | — |
+
+### 9.2 Cash Discrepancy Fingerprint (Minus Kas)
+
+> Hanya muncul di Mode Taktis (< 95 hari).
+
+Jika sering terjadi uang kas minus, sistem menghitung **frekuensi kehadiran setiap staf** pada hari-hari saat kas minus terjadi. Hasilnya ditampilkan sebagai grafik batang:
+- Jika satu nama menjulang tinggi, itu adalah **indikator potensi evaluasi** (bukan tuduhan langsung — lihat BAB 10 untuk penjelasan algoritma)
+- Contoh: "Total Minus Rp 200.000. Terjadi saat Amel bertugas 26 kali, Eko 17 kali"
+
+### 9.3 Revenue Per SPV Shift (Leaderboard)
+
+Menghitung rata-rata omset per shift jaga tiap SPV:
+- Membedakan secara nyata mana SPV yang hanya bisa mengatur jadwal, dan mana SPV yang pandai menjual (upselling)
+
+### 9.4 Dominasi Topik Briefing SPV
+
+Sistem menghitung kata kunci yang paling sering muncul di topik briefing SPV:
+- Contoh: kata "Bersih" sering disebut, tapi skor kebersihan tetap buruk → **"Eksekusi di lapangan lemah"**
+
+### 9.5 Pandangan Ke Depan & Evaluasi SPV
+
+Berisi isi pikiran SPV dari laporan bulanan mereka:
+- **Strategi Bulan Depan** yang direncakanan SPV
+- **Kebutuhan Approval GM** — apa yang mereka minta dari Anda
+- **Pencapaian Terbaik & Tantangan Tersulit** — kejujuran dari lapangan
+
+### 9.6 Arsip Laporan PDF
+
+Menu accordion di bagian paling bawah Dashboard. Berisi daftar historis semua PDF laporan yang pernah dikirim SPV:
+
+| Kolom | Fungsi |
+|---|---|
+| Judul & Tanggal Upload | Nama file dan waktu submit |
+| Tombol PDF | Klik untuk membuka atau mengunduh PDF dari Google Drive |
+
+---
+
+### 9.7 Marketing Intelligence (Tab 1 — Bagian Bawah)
+
+Modul analisis lanjutan yang dipicu dengan tombol **"Simpan & Tarik Analisis"**. Terdapat pengaturan **Benchmark ATS** (default Rp 30.000) yang bisa Anda ubah.
+
+Setelah tombol ditekan, muncul 5 modul dalam bentuk kotak lipatan (*accordion*):
+
+| Modul | Diagram | Cara Membaca |
+|---|---|---|
+| **Tren Omset** | Bar Chart Hitam | Hijau jika naik ≥5%, Merah jika turun ≤-5%, Kuning jika stagnan |
+| **Korelasi Kebersihan & Omset** | Dual-Axis Chart (Garis + Bar) | "The Perfect Storm" = Ramai tapi kotor. "The Lazy Shift" = Sepi dan kotor |
+| **SDM & Risiko Operasional** | Donut Chart (Pie Berlubang) | Hijau = Tepat Waktu, Merah = Terlambat, Abu = Izin/Alpha |
+| **Benchmarking ATS** | Bar Horizontal (Aktual vs Target) | Melebihi benchmark = upselling berhasil |
+| **Analisis Menu** | Bar Horizontal (Hijau = Hero, Oranye = Dead) | Produk konsisten terlaris vs produk konsisten mati |
+
+Di bawah 5 modul ini juga terdapat ringkasan:
+- **Profil Pengunjung Mayoritas** — misal: "Mahasiswa Nugas"
+- **Kondisi/Event Dominan** — misal: "Cuaca Hujan/Badai (60%)"
+
+### 9.8 Analisis Performa Produk (Kinerja Kategori)
+
+Accordion terpisah yang membedah kinerja produk per kategori secara detail:
+- **Top 5** produk paling laku per kategori
+- **Bottom 3** produk paling tidak laku
+- **Action Plan** yang diketik SPV untuk setiap produk mati
+
+---
+
+# BAGIAN IV — DI BALIK LAYAR (ARSITEKTUR & FORMULA)
+
+> **Catatan:** Bagian ini bersifat teknis dan ditujukan untuk GM/Owner yang ingin memahami bagaimana angka-angka di Dashboard dihitung, serta bagaimana data disimpan.
+
+---
+
+## BAB 10: MESIN ANALISIS — PARAMETER, THRESHOLD & FORMULA
+
+### 10.1 Skor Operasional (Kotak Utama Tab 1)
+
+**Formula:**
+```
+Skor = (Pencapaian_Target% × 0.5) + (Skor_Kebersihan% × 0.3) + (Kepatuhan_SOP% × 0.2)
+```
+
+| Skor | Label | Warna |
+|---|---|---|
+| ≥ 85 | EXCELLENT | Hijau |
+| 70 – 84 | GOOD | Biru |
+| 50 – 69 | ATTENTION | Kuning |
+| < 50 | CRITICAL | Merah |
+
+**Penjelasan:** Skor ini menggabungkan 3 pilar utama operasional. Bobot terbesar (50%) ada di pencapaian target omset, karena pada akhirnya kafe harus menghasilkan uang. Kebersihan (30%) di posisi kedua karena langsung mempengaruhi pengalaman pelanggan. Kepatuhan SOP (20%) di posisi terakhir karena bersifat jangka panjang.
+
+### 10.2 Bar Persentase Pencapaian Target
+
+| Persentase | Warna Bar |
+|---|---|
+| ≥ 100% | Hijau |
+| 80% – 99% | Oranye |
+| < 80% | Merah |
+
+**Formula:**
+```
+Persentase = (Total_Omset_Aktual ÷ Target_Omset_Proporsional) × 100%
+```
+
+> **"Target Proporsional" — apa artinya?**
+> Jika target bulanan Anda Rp 180.000.000 dan bulan ini 30 hari, maka target harian = Rp 6.000.000. Jika Anda memilih rentang 7 hari di dashboard, maka target proporsional = 7 × Rp 6.000.000 = Rp 42.000.000. Ini mencegah perbandingan yang tidak adil.
+
+### 10.3 AI Predictive Summary (4 Algoritma Utama)
+
+Kotak AI Summary di bagian atas Dashboard dihasilkan oleh 4 algoritma yang berjalan berurutan. Jika satu algoritma "menang" (kondisinya terpenuhi), ia akan menimpa algoritma di bawahnya:
+
+#### Algoritma 1: Fatigue Limit (Batas Kelelahan Tim)
+| Kondisi | Putusan |
+|---|---|
+| Rata-rata struk harian > 100 **DAN** Skor Kebersihan < 80% | **MERAH** — "Batas Kelelahan Tim tercapai. Tim butuh bantuan staf Part-Time!" |
+| Rata-rata struk harian > 100 **DAN** Komplain > 2× jumlah hari | **KUNING** — "Transaksi tinggi mengorbankan kualitas" |
+
+**Logika:** Jika kafe sangat ramai (>100 struk/hari) tapi kebersihan hancur, artinya staf kelelahan melayani pelanggan dan tidak sempat membersihkan kafe.
+
+#### Algoritma 2: Cuaca × Kebersihan
+| Kondisi | Putusan |
+|---|---|
+| Hari hujan ≥ 30% dari total hari **DAN** Kebersihan < 80% | **KUNING** — "Fasilitas rentan cuaca ekstrem. Terapkan SOP Double-Mopping!" |
+
+**Logika:** Hujan deras menyebabkan lantai basah dan kotor. Jika kebersihan tetap buruk saat hujan, artinya tim tidak punya SOP cuaca buruk.
+
+#### Algoritma 3: Burnout / Prediksi Resign
+| Kondisi | Putusan |
+|---|---|
+| Rentang ≥ 7 hari **DAN** Rasio keterlambatan per hari > 30% | **MERAH** — "Prediksi Churn: Waspada staf resign mendadak" |
+
+**Logika:** Keterlambatan tinggi secara konsisten adalah sinyal demotivasi. Staf yang sering telat berpotensi keluar tanpa peringatan.
+
+#### Algoritma 4: Deteksi Anomali Kasir (Petty Fraud)
+| Parameter | Nilai |
+|---|---|
+| Toleransi selisih kas wajar | Rp 2.000 (di bawah ini diabaikan) |
+| Threshold total minus untuk aktifkan analisis | Rp 50.000 |
+
+| Kondisi | Putusan |
+|---|---|
+| Total selisih minus ≥ Rp 50.000 dalam periode | Sistem menghitung **frekuensi kehadiran** setiap staf pada hari-hari terjadinya minus, lalu menampilkan nama dengan frekuensi tertinggi |
+
+**Logika:** Sistem **TIDAK menuduh** satu orang secara langsung. Ia hanya mengatakan: "Total minus Rp 200.000. Terjadi saat Amel bertugas 26 kali, Eko 17 kali." Keputusan akhir tetap di tangan Anda sebagai owner.
+
+#### Fallback (Jika Tidak Ada Algoritma yang Terpicu)
+
+| Durasi | Kondisi | Putusan |
+|---|---|---|
+| ≤ 2 hari | Ada Event + Tanggal Tua (15-24) | Kuning: "Trafik padat, daya beli rendah" |
+| ≤ 2 hari | Ada Event + Tanggal Muda (25-5) | Hijau: "Momen Emas" |
+| 3-14 hari | Omset ≥ target DAN Kebersihan ≥ 90% | Hijau: "Momentum Positif" |
+| > 14 hari | Omset ≥ target DAN Kebersihan ≥ 95% DAN Komplain rendah | Hijau: "Golden Era" |
+| > 14 hari | Omset < 90% target | Merah: "Kegagalan Target Periode" |
+
+> **Catatan Tanggal:** "Tanggal Muda" artinya dekat dengan tanggal gajian (akhir bulan/awal bulan: tanggal 25-5), sehingga daya beli masyarakat tinggi. "Tanggal Tua" (15-24) artinya uang sudah menipis.
+
+### 10.4 Marketing Intelligence (5 Modul Analisis)
+
+#### Modul C1: Tren Omset
+
+| Perubahan vs Periode Sebelumnya | Status | Warna |
+|---|---|---|
+| Naik ≥ 5% | Sehat | Hijau |
+| Antara -5% sampai +5% | Stagnan | Kuning |
+| Turun ≤ -5% | Kritis | Merah |
+
+**Formula:** `Perubahan% = ((Rata-rata_Harian_Periode_Ini - Rata-rata_Harian_Periode_Lalu) ÷ Rata-rata_Harian_Periode_Lalu) × 100%`
+
+#### Modul C2: Analisis Menu (Hero vs Dead)
+
+| Parameter | Nilai |
+|---|---|
+| Threshold konsistensi | Produk harus muncul di posisi Top/Bottom minimal **40% dari total hari** data |
+
+Momentum produk juga dianalisis:
+- **Rising Star:** Produk yang makin sering muncul di Top di paruh kedua periode
+- **Fading:** Produk hero yang mulai menurun
+- **Worse:** Produk dead yang makin sering muncul
+- **Improving:** Produk dead yang mulai membaik
+
+#### Modul C3: Korelasi Kebersihan × Omset
+
+| Kombinasi | Label | Artinya |
+|---|---|---|
+| Omset ≥ 90% target, Kebersihan < 70% | **The Perfect Storm** | Ramai tapi kotor — sangat berbahaya |
+| Omset < 70% target, Kebersihan < 70% | **The Lazy Shift** | Sepi dan kotor — tim malas |
+| Omset ≥ 85% target, Kebersihan ≥ 90% | **The Good Standard** | Performa ideal |
+| Kebersihan < 80% (umumnya) | **Hygiene di Bawah Standar** | Risiko komplain meningkat |
+
+#### Modul C4: SDM & Risiko Operasional
+
+| Tingkat Keterlambatan | Status | Tindakan |
+|---|---|---|
+| > 15% | **Krisis** (Merah) | Pertimbangkan SP |
+| 5% – 15% | **Warning** (Kuning) | SPV wajib briefing |
+| < 5% | **Positif** (Hijau) | Beri apresiasi |
+
+#### Modul C5: Benchmarking ATS
+
+| ATS Aktual vs Benchmark | Status |
+|---|---|
+| < 80% dari benchmark | **Kritis** — Gagal cross-selling |
+| 80% – 99% dari benchmark | **Warning** — Masih di bawah standar |
+| ≥ 100% dari benchmark | **Positif** — Upselling berhasil |
+
+**Formula ATS:**
+```
+Average Ticket Size (ATS) = Total Omset ÷ Total Transaksi (Struk)
+```
+
+### 10.5 Area Kritis Kebersihan
+
+| Threshold | Tindakan |
+|---|---|
+| Rata-rata skor area < 95% | Muncul di daftar "Area Kritis" dengan warna merah |
+
+Sistem menampilkan maksimal 3 area terburuk, diurutkan dari skor terendah.
+
+### 10.6 KPI Komplain
+
+| Total Komplain Sebulan | Label |
+|---|---|
+| 0 | Aman (Hijau) |
+| 1 | Waspada (Kuning) |
+| 2 | Batas Maksimal (Oranye) |
+| > 2 | **KPI Dilanggar** (Merah) |
+
+### 10.7 KPI Turnover
+
+| Total Resign per Kuartal (3 bulan) | Label |
+|---|---|
+| 0 | Aman |
+| 1 | Batas Maksimal |
+| > 1 | **Risiko Kritis** |
+
+### 10.8 Pengaturan GM (Hanya untuk Owner)
+
+| Pengaturan | Lokasi | Fungsi |
+|---|---|---|
+| **Target Tahunan** | Pengaturan GM di Dashboard | Digunakan untuk menghitung YTD Trajectory |
+| **Benchmark ATS** | Di bawah tombol "Simpan & Tarik Analisis" | Default Rp 30.000. Saran: gunakan harga kopi signature + 1 pastry |
+| **Folder Google Drive** | Pengaturan GM di Dashboard | Mengubah folder utama penyimpanan file |
+
+---
+
+## BAB 11: ARSITEKTUR DATA — DATABASE & PENYIMPANAN FILE
+
+### 11.1 Daftar Lengkap Tabel Database (Google Sheets)
+
+Seluruh data aplikasi disimpan di dalam satu file Google Spreadsheet yang terdiri dari beberapa lembar (sheet). Berikut daftar lengkapnya:
+
+#### A. Tabel Transaksi Harian
+
+**1. `DB_Laporan_Harian`** — Tabel utama yang menyimpan ringkasan setiap laporan harian.
+
+| No | Nama Kolom | Contoh Isi | Penjelasan |
+|----|-----------|-----------|-----------|
+| 1 | ID_Laporan | 18-07-2026-Perintis | Kunci unik: Tanggal + Outlet |
+| 2 | Tanggal | '18-07-2026 | Tanggal laporan (tanda kutip di depan mencegah korupsi format) |
+| 3 | Bulan_Laporan | 07-2026 | Untuk filter cepat per bulan |
+| 4 | Outlet | Perintis | Nama outlet |
+| 5 | Supervisor | Nathan | Nama SPV yang bertugas |
+| 6 | Cuaca | Hujan Gerimis | Cuaca dominan hari itu |
+| 7 | Omset_Total | 5800000 | Shift 1 + Shift 2 (angka murni) |
+| 8 | Target_Omset | 6000000 | Target harian dari Pengaturan |
+| 9 | Total_Transaksi | 95 | Jumlah struk |
+| 10 | Kendala_Operasional | "AC mati" | Dari Tab TUTUP |
+| 11 | Rekomendasi | "Panggil teknisi" | Dari Tab TUTUP |
+| 12 | URL_PDF | (link PDF atau ID Draft JSON) | Fase 1: ID file JSON. Fase 2: URL PDF |
+| 13 | Event_Lokal | "UAS Unhas" | Event yang sedang berlangsung |
+| 14 | Profil_Pengunjung | Mahasiswa Nugas | Profil dominan |
+| 15 | Status_Fase | Fase 1 / Fase 2 | Status pengiriman |
+
+**2. `DB_Briefing_Shift`** — Catatan briefing harian SPV.
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan | Menghubungkan ke DB_Laporan_Harian |
+| 2 | Target_Harian | Target yang disampaikan ke tim |
+| 3 | Fokus_Briefing | Instruksi perilaku harian |
+| 4 | Kendala_Sebelumnya | Masalah carry-over |
+| 5 | Solusi_Eksekusi | Solusi yang disepakati |
+
+**3. `DB_Kehadiran_Staf`** — Rekaman kehadiran dan kepatuhan SOP per staf per hari.
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan | Menghubungkan ke laporan harian |
+| 2 | Nama_Staf | Nama staf |
+| 3 | Posisi | Barista / Kasir / Server / Kitchen |
+| 4 | Outlet_Tugas | Outlet tempat bertugas hari itu |
+| 5 | Outlet_Asal | Outlet asli staf (jika dipinjam) |
+| 6 | Status_Kehadiran | Hadir / Terlambat / Izin / Sakit / Alpha |
+| 7 | SOP_Keramahan_Miss | YA / TIDAK / N/A (Shift Malam) |
+| 8 | Catatan_Kinerja | Keterangan tambahan |
+
+**4. `DB_Audit_Kas`** — Rekaman setiap audit laci kasir.
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan | Menghubungkan ke laporan harian |
+| 2 | Waktu_Audit | Jam audit dilakukan |
+| 3 | Kasir_Bertugas | Nama kasir saat itu |
+| 4 | Modal_Awal | Uang receh standar (Rp) |
+| 5 | Total_QRIS | Uang masuk via QRIS (Rp) |
+| 6 | Total_Tunai | Uang fisik di laci (Rp) |
+| 7 | Aktual_Sistem | Data dari mesin POS (Rp) |
+| 8 | Selisih | Selisih kas (Rp). Minus = masalah |
+| 9 | Keterangan | Penjelasan SPV jika ada selisih |
+
+**5. `DB_Kinerja_Produk`** — Data produk terlaris dan paling tidak laku.
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan | Menghubungkan ke laporan harian/bulanan |
+| 2 | Kategori | Minuman / Makanan / Snack |
+| 3 | Peringkat | Top / Bottom |
+| 4 | Nama_Produk | Nama menu |
+| 5 | Qty_Terjual | Jumlah terjual |
+| 6 | Keterangan_Promo | Rencana/Action Plan untuk produk Bottom |
+
+**6. `DB_Inspeksi_Operasional`** — Data kebersihan, kerusakan fasilitas, bahan habis pakai, dan QC.
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan | Menghubungkan ke laporan harian |
+| 2 | Tipe_Inspeksi | Kebersihan / Fasilitas / Bahan / QC Espresso / QC Menu |
+| 3 | Objek_Dicek | Nama area atau item |
+| 4 | Skor_Kondisi | Angka skor (untuk kebersihan) atau status (untuk fasilitas) |
+| 5 | Estimasi_Biaya | Untuk bahan: perkiraan harga |
+| 6 | Tindakan_Catatan | Catatan atau tanda "[ESKALASI GM]" |
+| 7 | URL_Foto_Bukti | Link foto di Google Drive |
+
+#### B. Tabel Evaluasi & Agregasi
+
+**7. `DB_Laporan_Mingguan`** — Ringkasan laporan mingguan.
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan_Mingguan | Format: TglAwal_to_TglAkhir-Outlet |
+| 2 | Periode_Tanggal | "01-07-2026 s/d 07-07-2026" |
+| 3 | Outlet | Nama outlet |
+| 4 | Supervisor | Nama SPV |
+| 5 | Omset_Aktual | Total omset 7 hari |
+| 6 | Omset_Target | Total target 7 hari |
+| 7 | Komplain_Utama | Ringkasan kendala |
+| 8 | URL_PDF | Link PDF laporan di Drive |
+
+**8. `DB_Laporan_Bulanan`** — Ringkasan laporan bulanan (18 kolom).
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan_Bulanan | Format: YYYY-MM-Outlet |
+| 2 | Bulan_Laporan | MM-YYYY |
+| 3 | Outlet | Nama outlet |
+| 4 | Supervisor | Nama SPV |
+| 5 | Omset_Aktual | Total omset sebulan |
+| 6 | Omset_Target | Target sebulan |
+| 7 | Persen_Tercapai | Persentase pencapaian |
+| 8 | Rating_Kerja | Rating diri sendiri (1-10) |
+| 9 | Kepatuhan_SOP | Persentase SOP |
+| 10 | Total_Telat | Jumlah keterlambatan sebulan |
+| 11 | Pencapaian | Pencapaian terbaik SPV |
+| 12 | Tantangan | Tantangan tersulit |
+| 13 | Total_Pengeluaran_Ekstra | Biaya perbaikan (Rp) |
+| 14 | Total_Turnover | Jumlah staf resign |
+| 15 | Strategi_Bulan_Depan | Rencana SPV |
+| 16 | Kebutuhan_Approval_GM | Permintaan ke owner |
+| 17 | URL_PDF | Link PDF laporan |
+| 18 | Detail_Resign_JSON | Data staf resign dalam format JSON |
+
+**9. `DB_Evaluasi_Staf`** — Evaluasi individu dari laporan mingguan & bulanan.
+
+| No | Kolom | Penjelasan |
+|----|-------|-----------|
+| 1 | ID_Laporan_Evaluasi | Menghubungkan ke laporan mingguan/bulanan |
+| 2 | Nama_Staf | Nama staf |
+| 3 | Posisi | Jabatan |
+| 4 | Outlet | Outlet |
+| 5 | Status_Evaluasi | Berkembang / Stagnan / Menurun |
+| 6 | Catatan_Kinerja | Keterangan dari SPV |
+
+#### C. Tabel Master Data
+
+**10. `Master_Staff`** — Daftar seluruh staf Zero Cafe.
+
+| No | Kolom | Contoh |
+|----|-------|--------|
+| 1 | ID_Staff | STF-001 |
+| 2 | Nama | Nathan |
+| 3 | Posisi | Supervisor |
+| 4 | Status_Aktif | Aktif / Resign |
+| 5 | Outlet_Utama | Perintis |
+
+**11. `Master_Produk`** — Daftar menu kafe.
+
+| No | Kolom | Contoh |
+|----|-------|--------|
+| 1 | ID_Menu | MNU-001 |
+| 2 | Kategori | Minuman |
+| 3 | Nama_Menu | Kopi Susu Zero |
+| 4 | Harga_Jual | 18000 |
+| 5 | Status | Aktif |
+
+#### D. Tabel Konfigurasi
+
+**12. `Config_Parameter`** — Penyimpanan event/kalender akademik.
+
+| No | Kolom | Contoh |
+|----|-------|--------|
+| 1 | Outlet | Perintis / Semua |
+| 2 | Kategori | Kalender Akademik |
+| 3 | Nama_Event | UAS Unhas |
+| 4 | Tanggal_Mulai | 2026-07-01 |
+| 5 | Tanggal_Selesai | 2026-07-14 |
+| 6 | Status | Aktif |
+
+**13. `Config_Target`** — Target omset bulanan per outlet.
+
+| No | Kolom | Contoh |
+|----|-------|--------|
+| 1 | Bulan_Tahun | 07-2026 |
+| 2 | (Reserved) | — |
+| 3 | Outlet | Perintis |
+| 4 | Target_Omset | 180000000 |
+
+**14. `Database_GM_Cache`** — Cache data yang diproses setiap malam untuk mempercepat Dashboard GM.
+
+### 11.2 Arsitektur Folder Google Drive
+
+Semua file (PDF Laporan, PDF Checklist Kebersihan, Foto Fasilitas, Foto Nota) disimpan di Google Drive dengan struktur folder berikut:
+
+```
+📁 Zero Cafe Workspace Drive (Root Folder)
+ └── 📁 2026 (Tahun)
+      └── 📁 Juli (Bulan)
+           └── 📁 Perintis (Outlet)
+                ├── 📁 Daily Reports
+                │    ├── 18-07-2026-laporan-harian.pdf
+                │    └── 18-07-2026-draft-Perintis.json (sementara, dihapus setelah Fase 2)
+                ├── 📁 Laporan Mingguan
+                │    └── 1-7-juli-laporan mingguan.pdf
+                ├── 📁 Laporan Bulanan
+                │    └── Juli-laporan-bulanan.pdf
+                ├── 📁 Checklist Kebersihan
+                │    └── 18-07-2026-checklistbox-Perintis.pdf
+                ├── 📁 Fasilitas
+                │    └── 18-07-ACLantai1-RusakBerat.jpg
+                └── 📁 Pengeluaran
+                     └── 18-07-SabunCuci-Habis.jpg
+           └── 📁 Dg_Tata (Outlet)
+                ├── 📁 Daily Reports
+                ├── 📁 Laporan Mingguan
+                ├── ...dst
+```
+
+### 11.3 Format Penamaan File
+
+| Jenis File | Format Nama | Contoh |
+|---|---|---|
+| Laporan Harian (PDF) | `DD-MM-YYYY-laporan-harian.pdf` | `18-07-2026-laporan-harian.pdf` |
+| Draft Fase 1 (JSON) | `DD-MM-YYYY-draft-Outlet.json` | `18-07-2026-draft-Perintis.json` |
+| Laporan Mingguan | `TglAwal-TglAkhir-bulan-laporan mingguan.pdf` | `1-7-juli-laporan mingguan.pdf` |
+| Laporan Bulanan | `Bulan-laporan-bulanan.pdf` | `Juli-laporan-bulanan.pdf` |
+| Checklist Kebersihan | `DD-MM-YYYY-checklistbox-Outlet.pdf` | `18-07-2026-checklistbox-Perintis.pdf` |
+| Foto Fasilitas/Bahan | `DD-MM-NamaItem-Status.jpg` | `18-07-ACLantai1-RusakBerat.jpg` |
+
+### 11.4 Perlindungan Format Tanggal (The Apostrophe Rule)
+
+Google Sheets memiliki kebiasaan buruk: ia sering mengubah tanggal `10-08-2026` (10 Agustus) menjadi `8 Oktober 2026` karena menganggap angka "10" adalah bulan (format Amerika).
+
+**Solusi sistem:** Setiap kali menyimpan tanggal ke Spreadsheet, sistem menyisipkan tanda kutip tunggal (`'`) di depan teks tanggal. Contoh: `'18-07-2026`. Ini memaksa Google Sheets menerima data sebagai teks murni, bukan tanggal yang bisa dimanipulasi.
+
+### 11.5 Sanitasi Data (Pembersihan Otomatis)
+
+Sebelum data disimpan ke Spreadsheet, sistem membersihkan:
+- **Angka uang:** Menghapus "Rp", titik, dan spasi → hanya menyisakan angka murni
+- **Tanggal:** Mendeteksi dan mengkonversi otomatis antara format `DD-MM-YYYY` dan `YYYY-MM-DD`
+- **Teks:** Menghapus spasi berlebih di awal dan akhir teks
+- **Kolom numerik kosong:** Diisi angka `0` (bukan teks kosong)
+
+---
+
+## BAB 12: DIAGRAM ALUR KERJA (VISUAL)
+
+### 12.1 Alur Kerja Harian SPV
+
+```mermaid
+flowchart TD
+    A["SPV Buka Aplikasi"] --> B{"Ada Laporan Fase 1 Tertunda?"}
+    B -->|YA| C["Tampilkan Form Fase 2"]
+    B -->|TIDAK| D["Tampilkan Menu Utama"]
+    D --> E["Pilih: Laporan Harian"]
+    E --> F["Isi 9 Tab: JUAL → KAS → STAFF → BRIEF → QC → BERSIH → KOMPLAIN → FASILITAS → TUTUP"]
+    F --> G["Tekan KIRIM"]
+    G --> H{"Data Lengkap?"}
+    H -->|TIDAK| I["Muncul Peringatan Merah"]
+    I --> F
+    H -->|YA| J["Muncul Preview PDF"]
+    J --> K["Tekan Kirim Final"]
+    K --> L["Server Simpan Draft JSON ke Drive"]
+    L --> M["Baris Fase 1 Masuk ke Spreadsheet"]
+    M --> N["SPV Pulang & Tidur"]
+    N --> O["Keesokan Pagi: SPV Buka Aplikasi"]
+    O --> C
+    C --> P["Isi Omset Shift 2 + Total Struk + Evaluasi Produk + Staf Malam"]
+    P --> Q["Tekan KIRIM"]
+    Q --> R["Server Gabungkan Data Fase 1 + Fase 2"]
+    R --> S["Cetak PDF Final"]
+    S --> T["Simpan PDF ke Google Drive"]
+    T --> U["Update Baris di Spreadsheet: Fase 1 → Fase 2"]
+    U --> V["Hapus File Draft JSON"]
+    V --> W["SELESAI"]
+```
+
+### 12.2 Alur Data: Dari HP SPV ke Dashboard GM
+
+```mermaid
+flowchart LR
+    A["HP SPV"] -->|Ketik Data| B["Browser: Autosave ke LocalStorage"]
+    B -->|Tekan Kirim| C["Server Google Apps Script"]
+    C -->|Simpan Angka| D["Google Spreadsheet: 14 Tabel"]
+    C -->|Simpan File| E["Google Drive: PDF, Foto, JSON"]
+    D -->|GM Buka Dashboard| F["Mesin AI Membaca Spreadsheet"]
+    F -->|Hitung & Analisis| G["Dashboard GM: Grafik, Tabel, Skor"]
+```
+
+### 12.3 Pohon Keputusan AI Summary
+
+```mermaid
+flowchart TD
+    START["Data Masuk"] --> A1{"Rata-rata struk > 100/hari DAN Kebersihan < 80%?"}
+    A1 -->|YA| R1["MERAH: Fatigue Limit"]
+    A1 -->|TIDAK| A2{"Hujan ≥ 30% hari DAN Kebersihan < 80%?"}
+    A2 -->|YA| Y1["KUNING: Cuaca Ekstrem"]
+    A2 -->|TIDAK| A3{"Rasio telat > 30% per hari?"}
+    A3 -->|YA| R2["MERAH: Prediksi Resign"]
+    A3 -->|TIDAK| A4{"Kas minus ≥ Rp 50.000?"}
+    A4 -->|YA| Y2["KUNING: Anomali Kasir"]
+    A4 -->|TIDAK| FB["Fallback: Analisis Event, Tanggal, dan Tren"]
+```
+
+---
+
+## BAB 13: SISTEM KEAMANAN & PERLINDUNGAN DATA
+
+### 13.1 Anti Double-Submit (Race-Condition Lock)
+
+Setelah SPV menekan tombol "Kirim", sistem mengunci pengiriman selama **10 detik**. Jika SPV menekan lagi dalam 10 detik, muncul pesan: "Pengiriman terlalu cepat (Spam klik). Laporan sedang diproses."
+
+### 13.2 Anti Duplikasi Laporan
+
+Sebelum menyimpan laporan baru, sistem memeriksa apakah sudah ada laporan dengan ID yang sama di database. Jika ada, laporan ditolak: "Laporan untuk periode ini sudah ada. Pengiriman ganda digagalkan!"
+
+### 13.3 Anti Kontaminasi Silang Draft
+
+Jika SPV login di outlet A, namun browser masih menyimpan draft dari outlet B (misalnya karena kemarin pinjam HP), sistem otomatis membuang draft yang tidak cocok. Data outlet lain tidak akan pernah tercampur.
+
+### 13.4 Self-Healing: Penanganan Data Hilang
+
+Jika file Draft JSON (Fase 1) hilang dari Google Drive (misalnya karena terhapus manual), sistem akan:
+1. Mendeteksi bahwa draft tidak ditemukan
+2. Otomatis menghapus baris "menggantung" di Spreadsheet
+3. Memberitahu SPV: "Data Fase 1 tidak ditemukan. Sistem telah menghapus status gantung Anda. Silakan buat ulang laporan."
+
+### 13.5 Perlindungan Form: Tidak Ada Reset Prematur
+
+Sistem **TIDAK** akan menghapus data yang sudah diketik SPV sebelum server memastikan laporan berhasil tersimpan. Jika koneksi terputus, semua data tetap aman di layar — SPV tinggal tekan "Kirim" lagi.
+
+### 13.6 Timezone-Safe Date Parsing
+
+Semua pemrosesan tanggal di server menggunakan metode pemotongan teks (string split), **bukan** konversi objek tanggal (Date object). Ini mencegah bug di mana server Google (yang beroperasi di zona waktu UTC) menggeser tanggal mundur 1 hari.
+
+Contoh: Tanggal "1 Desember 2026" yang dikirim dari HP di Makassar (WITA, UTC+8) bisa berubah menjadi "30 November 2026" jika diproses sebagai objek Date di server UTC. Dengan metode pemotongan teks, hal ini **tidak akan pernah terjadi**.
+
+---
+
+# BAGIAN V — BANTUAN
+
+---
+
+## BAB 14: FAQ & TROUBLESHOOTING
+
+### Untuk SPV
+
+**T: Saya lupa mengatur target omset bulan ini. Apa yang terjadi?**
+J: Semua persentase pencapaian akan menunjukkan 0%. Segera buka Pengaturan Parameter → Target Omset Bulanan → isi target → Simpan.
+
+**T: Internet mati saat saya menekan tombol "Kirim". Apakah data saya hilang?**
+J: Tidak. Data tersimpan otomatis di memori browser HP Anda. Saat internet kembali, buka aplikasi dan tekan "Kirim" lagi. Semua isian masih utuh.
+
+**T: Saya sudah mengirim Fase 1 tadi malam, tapi pagi ini form Fase 2 tidak muncul. Kenapa?**
+J: Kemungkinan file Draft JSON terhapus dari Google Drive. Sistem akan menampilkan pesan yang meminta Anda membuat ulang laporan dari awal. Hubungi owner jika masalah berlanjut.
+
+**T: Nama staf yang saya cari tidak muncul di dropdown. Kenapa?**
+J: Kemungkinan staf belum terdaftar atau sudah berstatus "Resign" di database. Buka Pengaturan Parameter → Kelola Staf Outlet untuk menambahkan.
+
+**T: Saya tidak sengaja mengirim laporan 2 kali. Apakah data jadi double?**
+J: Tidak. Sistem memiliki perlindungan anti-duplikasi. Jika Anda mengirim laporan dengan tanggal dan outlet yang sama, pengiriman kedua akan ditolak otomatis.
+
+**T: Saya login sebagai SPV Perintis, tapi data yang muncul adalah data Dg Tata dari kemarin. Kenapa?**
+J: Sistem sudah memiliki perlindungan ini. Saat Anda login, sistem otomatis membuang data yang tidak cocok dengan outlet Anda. Jika masih terjadi, coba hapus data browser (Clear Cache) dan login ulang.
+
+### Untuk GM / Owner
+
+**T: Dashboard tidak menampilkan data sama sekali ("Belum ada data"). Kenapa?**
+J: Pastikan SPV sudah mengirim minimal 1 laporan harian di rentang waktu yang Anda pilih. Periksa juga apakah filter outlet sudah benar.
+
+**T: Persentase target omset selalu 0% padahal ada penjualan. Kenapa?**
+J: SPV belum mengatur Target Omset Bulanan di menu Pengaturan Parameter. Ingatkan SPV untuk mengisinya di awal setiap bulan.
+
+**T: Saya ingin melihat data setahun penuh, tapi beberapa grafik tidak muncul. Kenapa?**
+J: Saat Anda memilih rentang > 95 hari, sistem masuk ke Mode Strategis yang otomatis menyembunyikan beberapa analisis detail (seperti Minus Kas per staf dan Revenue per SPV). Ini disengaja agar data tahunan tidak terlalu bising.
+
+**T: Di mana saya bisa melihat file PDF laporan SPV?**
+J: Buka accordion "Arsip Laporan PDF" di bagian bawah Dashboard. Atau langsung buka Google Drive folder `Zero Cafe Workspace Drive > [Tahun] > [Bulan] > [Outlet]`.
+
+**T: Bagaimana cara mengubah folder penyimpanan di Google Drive?**
+J: Di Dashboard GM, buka Pengaturan → masukkan ID Folder baru → Simpan. Semua file baru akan otomatis masuk ke folder tersebut.
+
+---
+
+## Catatan Penutup
+
+Buku Panduan ini adalah **dokumen hidup** yang akan terus diperbarui seiring dengan evolusi aplikasi Zero Cafe. Setiap penambahan fitur besar atau perubahan arsitektur akan secara otomatis didokumentasikan di sini.
+
+Jika Anda memiliki pertanyaan, masukan, atau menemukan ketidaksesuaian antara panduan ini dengan perilaku aplikasi, silakan hubungi tim pengembang:
+
+**Acronimous Studio**
+*Membangun Sistem Cerdas untuk Bisnis Lokal*
+
+---
+
+*Dokumen ini disusun sebagai bagian dari proyek Zero Cafe Workspace oleh Acronimous Studio. Seluruh hak cipta dilindungi.*
+*Versi 2.1 — Checkpoint 20 — Juli 2026*

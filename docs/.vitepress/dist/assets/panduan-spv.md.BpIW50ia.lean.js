@@ -1,1 +1,0 @@
-import{_ as a,o as e,c as t}from"./chunks/framework.CHeM0PsO.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"panduan-spv.md","filePath":"panduan-spv.md"}'),n={name:"panduan-spv.md"};function p(s,r,o,c,d,_){return e(),t("div")}const f=a(n,[["render",p]]);export{m as __pageData,f as default};

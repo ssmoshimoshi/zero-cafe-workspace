@@ -1,7 +1,3 @@
-# BAGIAN V — BANTUAN
-
----
-
 ## BAB 14: FAQ & TROUBLESHOOTING
 
 ### Untuk SPV

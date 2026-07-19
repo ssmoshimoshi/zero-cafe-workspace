@@ -138,3 +138,8 @@ Pengguna akan sering menggunakan singkatan berikut dalam memberikan instruksi (b
 - **HARAM MENGUBAH KODE EKSISTING:** Anda (Agen) **DIHARAMKAN** untuk langsung merombak, menghapus, atau memodifikasi fungsi yang sudah ada jika pengguna meminta fitur baru.
 - **Prosedur Fitur Baru:** Jika ada permintaan fitur baru yang berpotensi menyenggol fungsi eksisting, Anda WAJIB membuat *Implementation Plan* (Rencana Perubahan) terlebih dahulu dan meminta **PERSETUJUAN EKSPLISIT** dari pengguna sebelum menulis satu baris kode pun.
 - **Tujuan Utama:** Mencegah terjadinya "bug berentet" (cascading bugs) akibat modifikasi kode yang tidak terencana dengan baik. Fokus utama jika tidak ada instruksi lain adalah merapikan Buku Panduan (BP).
+
+## Protokol Eksekusi Disiplin & Anti Over-Engineering
+- **DILARANG KERAS MENGAMBIL INISIATIF STYLING:** Agen dilarang keras mengambil inisiatif sendiri dalam hal desain UI atau Styling (baik CSS, Layout PDF, maupun aplikasi). Lakukan TEPAT HANYA seperti apa yang diminta oleh pengguna. Jika diminta A, kerjakan hanya A tanpa menambahkan pernak-pernik yang tidak diminta.
+- **ANTI OVER-ENGINEERING:** Agen DILARANG merakit atau membuat skrip kustom (seperti `Node.js`/`Puppeteer` manual) jika ada *CLI standar* atau *tool* pihak ketiga yang sudah matang untuk tugas tersebut. Selalu prioritaskan penggunaan *tools* yang ada alih-alih merakit ulang roda (reinventing the wheel).
+- **IZIN MUTLAK UNTUK FILE MASTER:** Setiap kali agen hendak mengubah file Master (terutama file dengan ekstensi `.md` seperti Buku Panduan, atau `.gs` seperti Code backend), agen **WAJIB** meminta izin dan persetujuan pengguna terlebih dahulu sebelum mengeksekusi satu baris kode pun.

@@ -11,11 +11,11 @@ const marked = require('marked');
     let htmlBody = marked.parse(mdContent);
     
     // THE MAGIC: DOM Manipulation for the Cover Page
-    // Kita pecah HTML berdasarkan tag <hr>
+    // Kita pecah HTML berdasarkan tag <hr> pertama saja
     const parts = htmlBody.split(/<hr[^>]*>/i);
-    if (parts.length >= 3) {
-      const coverContent = parts[0] + '<hr class="cover-divider">' + parts[1];
-      const restContent = parts.slice(2).join('<hr>');
+    if (parts.length >= 2) {
+      const coverContent = parts[0] + '<hr class="cover-divider">';
+      const restContent = parts.slice(1).join('<hr>');
       htmlBody = `
         <div id="cover-page">
           <div class="cover-content">
@@ -74,12 +74,17 @@ const marked = require('marked');
             margin-bottom: 0.5rem;
             text-transform: uppercase;
           }
-          #cover-page p:nth-of-type(1) {
+          #cover-page h2 {
             font-size: 1.6rem;
-            color: #4B5563;
+            color: #4B5563 !important;
             font-family: 'Inter', sans-serif;
             margin-bottom: 3rem;
             font-weight: 500;
+            letter-spacing: normal;
+            border: none;
+            padding: 0;
+            background: none;
+            box-shadow: none;
           }
           hr.cover-divider {
             width: 80px;
@@ -88,7 +93,7 @@ const marked = require('marked');
             margin: 3rem auto;
             background-color: #171717;
           }
-          #cover-page p:nth-of-type(2) {
+          #cover-page p {
             font-size: 1.1rem;
             color: #6B7280;
             line-height: 2;

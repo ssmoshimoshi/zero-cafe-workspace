@@ -1,0 +1,1 @@
+import{_ as t,o as e,c as s}from"./chunks/framework.CHeM0PsO.js";const d=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"arsitektur-sistem.md","filePath":"arsitektur-sistem.md"}'),r={name:"arsitektur-sistem.md"};function a(i,o,c,n,m,p){return e(),s("div")}const f=t(r,[["render",a]]);export{d as __pageData,f as default};

@@ -1,3 +1,8 @@
 .agents/**
 node_modules/**
 **/*.git/**
+docs/**
+.vitepress/**
+Panduan_Teknis_Zero_Cafe_v2.md
+Panduan_Teknis_Zero_Cafe_v2.pdf
+Panduan_Teknis_Zero_Cafe_v2_Images-*.png

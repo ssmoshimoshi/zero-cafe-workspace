@@ -1,0 +1,1 @@
+import{_ as a,o as e,c as t}from"./chunks/framework.CHeM0PsO.js";const i=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"panduan-gm.md","filePath":"panduan-gm.md"}'),n={name:"panduan-gm.md"};function r(o,s,c,p,d,m){return e(),t("div")}const f=a(n,[["render",r]]);export{i as __pageData,f as default};

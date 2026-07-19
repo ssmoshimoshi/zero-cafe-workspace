@@ -1,0 +1,26 @@
+{
+  "name": "zero-cafe-workspace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build-pdf.js",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssmoshimoshi/zero-cafe-workspace.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ssmoshimoshi/zero-cafe-workspace/issues"
+  },
+  "homepage": "https://github.com/ssmoshimoshi/zero-cafe-workspace#readme",
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}

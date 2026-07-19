@@ -2,17 +2,16 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: "Zero Cafe",
-  description: "Buku Panduan Operasional & Teknis Zero Cafe",
+  description: "Buku Panduan Operasional & Teknis Zero Cafe App",
   appearance: 'dark',
   head: [
     ['link', { rel: 'icon', href: 'https://cdn-icons-png.flaticon.com/512/3124/3124092.png' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
-    ['link', { href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap', rel: 'stylesheet' }]
+    ['link', { href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap', rel: 'stylesheet' }]
   ],
   themeConfig: {
-    logo: 'https://cdn-icons-png.flaticon.com/512/3124/3124092.png',
-    siteTitle: 'Zero Cafe',
+    siteTitle: 'ZERO CAFE',
 
     nav: [
       { text: 'Home', link: '/' },
@@ -37,7 +36,7 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Pengantar',
+        text: 'PENGANTAR',
         collapsed: true,
         items: [
           { text: 'Apa itu Zero Cafe App?', link: '/pengantar/apa-itu-zero-cafe' },
@@ -45,7 +44,7 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Panduan Supervisor',
+        text: 'PANDUAN SUPERVISOR',
         collapsed: true,
         items: [
           { text: 'Laporan Harian (9 Tab)', link: '/spv/laporan-harian' },
@@ -55,7 +54,7 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Panduan GM / Owner',
+        text: 'PANDUAN GM / OWNER',
         collapsed: true,
         items: [
           { text: 'Keuangan & KPI', link: '/gm/dashboard-keuangan' },
@@ -64,7 +63,7 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Di Balik Layar',
+        text: 'DI BALIK LAYAR',
         collapsed: true,
         items: [
           { text: 'Mesin Analisis', link: '/arsitektur/mesin-analisis' },
@@ -72,7 +71,7 @@ export default defineConfig({
           { text: 'Sistem Keamanan', link: '/arsitektur/sistem-keamanan' }
         ]
       },
-      { text: 'Bantuan & FAQ', link: '/bantuan' }
+      { text: 'BANTUAN & FAQ', link: '/bantuan' }
     ],
 
     search: {
@@ -80,7 +79,7 @@ export default defineConfig({
     },
 
     footer: {
-      message: 'Zero Cafe Workspace — Internal Tech Manual',
+      message: 'Zero Cafe App — Internal Technical Manual',
       copyright: '© 2026 Acronimous Studio'
     },
 
@@ -90,12 +89,8 @@ export default defineConfig({
     },
 
     docFooter: {
-      prev: 'Halaman Sebelumnya',
-      next: 'Halaman Berikutnya'
-    },
-
-    lastUpdated: {
-      text: 'Terakhir diperbarui'
+      prev: 'Sebelumnya',
+      next: 'Berikutnya'
     },
 
     returnToTopLabel: 'Kembali ke atas'

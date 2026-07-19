@@ -1,117 +1,138 @@
-/* Zero Cafe Brand Theme — Custom VitePress Overrides */
+/* Zero Cafe Brand Theme — Exact Match with Main Web App */
+/* Palette: #171717 (zero-black), #F0EFEF (zero-white), #919191 (zero-gray) */
+/* Font: Montserrat */
 
 /* ========================================
-   1. COLOR SYSTEM (Zero Black Palette)
+   1. COLOR SYSTEM — Zero Monochrome
    ======================================== */
 :root {
-  /* Brand Colors */
-  --vp-c-brand-1: #D4A574;      /* Warm Coffee Accent */
-  --vp-c-brand-2: #C4956A;
-  --vp-c-brand-3: #B38560;
-  --vp-c-brand-soft: rgba(212, 165, 116, 0.14);
+  --vp-c-brand-1: #171717;
+  --vp-c-brand-2: #2a2a2a;
+  --vp-c-brand-3: #3a3a3a;
+  --vp-c-brand-soft: rgba(23, 23, 23, 0.08);
 
-  /* Hero gradient */
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(135deg, #D4A574, #F5E6D3);
-  --vp-home-hero-image-background-image: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(26, 26, 26, 0.1));
-  --vp-home-hero-image-filter: blur(44px);
+  --vp-home-hero-name-color: #171717;
+  --vp-home-hero-image-background-image: none;
+  --vp-home-hero-image-filter: none;
 }
 
 /* ========================================
-   2. DARK THEME (Zero Vibe — Primary)
+   2. LIGHT THEME (Default — #F0EFEF bg)
    ======================================== */
-.dark {
-  --vp-c-bg: #0F0F0F;
-  --vp-c-bg-soft: #171717;
-  --vp-c-bg-mute: #1E1E1E;
-  --vp-c-bg-alt: #141414;
-
-  --vp-c-text-1: #F0EFEF;
-  --vp-c-text-2: #9CA3AF;
-  --vp-c-text-3: #6B7280;
-
-  --vp-c-divider: #2A2A2A;
-  --vp-c-gutter: #1A1A1A;
-
-  /* Sidebar */
-  --vp-sidebar-bg-color: #0F0F0F;
-
-  /* Nav */
-  --vp-nav-bg-color: rgba(15, 15, 15, 0.85);
-
-  /* Code blocks */
-  --vp-code-block-bg: #1A1A1A;
-}
-
-/* ========================================
-   3. LIGHT THEME (Clean White Fallback)
-   ======================================== */
-:root:not(.dark) {
-  --vp-c-bg: #FAFAFA;
-  --vp-c-bg-soft: #F5F5F5;
-  --vp-c-bg-mute: #EEEEEE;
-  --vp-c-bg-alt: #F0F0F0;
+:root {
+  --vp-c-bg: #F0EFEF;
+  --vp-c-bg-soft: #E8E7E7;
+  --vp-c-bg-mute: #E0DFDF;
+  --vp-c-bg-alt: #F5F5F4;
 
   --vp-c-text-1: #171717;
-  --vp-c-text-2: #4B5563;
-  --vp-c-text-3: #9CA3AF;
+  --vp-c-text-2: #4b5563;
+  --vp-c-text-3: #919191;
 
-  --vp-c-divider: #E5E7EB;
+  --vp-c-divider: #d1d5db;
+  --vp-c-gutter: #e5e7eb;
+
+  --vp-sidebar-bg-color: #F0EFEF;
+  --vp-nav-bg-color: rgba(240, 239, 239, 0.88);
+
+  --vp-code-block-bg: #E8E7E7;
+
+  --vp-c-default-1: #171717;
+  --vp-c-default-2: #4b5563;
+  --vp-c-default-3: #919191;
+  --vp-c-default-soft: rgba(23, 23, 23, 0.06);
 }
 
 /* ========================================
-   4. TYPOGRAPHY (Inter — Zero Standard)
+   3. DARK THEME (#121212 bg)
+   ======================================== */
+.dark {
+  --vp-c-bg: #121212;
+  --vp-c-bg-soft: #1a1a1a;
+  --vp-c-bg-mute: #222222;
+  --vp-c-bg-alt: #171717;
+
+  --vp-c-text-1: #F0EFEF;
+  --vp-c-text-2: #919191;
+  --vp-c-text-3: #6b7280;
+
+  --vp-c-divider: #2a2a2a;
+  --vp-c-gutter: #1a1a1a;
+
+  --vp-sidebar-bg-color: #121212;
+  --vp-nav-bg-color: rgba(18, 18, 18, 0.88);
+
+  --vp-code-block-bg: #1a1a1a;
+
+  --vp-c-brand-1: #F0EFEF;
+  --vp-c-brand-2: #d1d5db;
+  --vp-c-brand-3: #919191;
+  --vp-c-brand-soft: rgba(240, 239, 239, 0.08);
+
+  --vp-home-hero-name-color: #F0EFEF;
+}
+
+/* ========================================
+   4. TYPOGRAPHY — Montserrat (Zero Standard)
    ======================================== */
 :root {
-  --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --vp-font-family-base: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --vp-font-family-mono: 'Menlo', 'Monaco', 'Courier New', monospace;
 }
 
 /* ========================================
-   5. SIDEBAR — Clean & Collapsible
+   5. NAVBAR — Zero Black Bar
    ======================================== */
-
-/* Group titles */
-.VPSidebar .group .title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--vp-c-text-3);
+.VPNav {
+  backdrop-filter: blur(16px) saturate(180%) !important;
 }
 
-/* Links */
-.VPSidebarItem .link {
+.VPNavBar .title {
+  font-weight: 800 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Nav links */
+.VPNavBarMenuLink .text,
+.VPFlyout .text {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ========================================
+   6. SIDEBAR — Clean Minimal
+   ======================================== */
+.VPSidebarItem.level-0 > .item > .text {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.VPSidebarItem .link .text {
   font-size: 13px;
-  font-weight: 400;
-  padding: 6px 0;
-  transition: color 0.15s ease;
+  font-weight: 500;
 }
 
 .VPSidebarItem.is-active > .item > .link > .text {
-  color: var(--vp-c-brand-1);
-  font-weight: 600;
-}
-
-/* ========================================
-   6. NAVBAR — Refined
-   ======================================== */
-.VPNav {
-  border-bottom: 1px solid var(--vp-c-divider) !important;
-  backdrop-filter: blur(12px) saturate(180%);
-}
-
-.VPNavBarTitle .title {
+  color: var(--vp-c-brand-1) !important;
   font-weight: 700;
-  font-size: 15px;
-  letter-spacing: -0.01em;
+}
+
+/* Collapse toggle */
+.VPSidebarItem .caret {
+  transition: transform 0.2s ease;
 }
 
 /* ========================================
-   7. CONTENT AREA — Reading Experience
+   7. CONTENT — Readable, Monochrome
    ======================================== */
 .vp-doc h1 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   border-bottom: 2px solid var(--vp-c-brand-1);
@@ -119,116 +140,163 @@
 }
 
 .vp-doc h2 {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
   margin-top: 2.5rem;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--vp-c-divider);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .vp-doc h3 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--vp-c-brand-1);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
 }
 
-/* Tables */
+/* Links */
+.vp-doc a {
+  color: var(--vp-c-text-1);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+}
+
+.vp-doc a:hover {
+  color: var(--vp-c-text-2);
+}
+
+/* Tables — Grid borders, compact */
 .vp-doc table {
-  font-size: 13px;
+  font-size: 12px;
   border-collapse: collapse;
   width: 100%;
+  margin: 1.5rem 0;
 }
 
 .vp-doc th,
 .vp-doc td {
   border: 1px solid var(--vp-c-divider);
-  padding: 10px 14px;
+  padding: 8px 12px;
 }
 
 .vp-doc th {
   background: var(--vp-c-bg-soft);
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.05em;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--vp-c-text-1);
 }
 
-/* Blockquotes as callout boxes */
+/* Blockquotes — Flat, no fancy colors */
 .vp-doc blockquote {
-  border-left: 3px solid var(--vp-c-brand-1);
+  border-left: 3px solid var(--vp-c-text-1);
   background: var(--vp-c-bg-soft);
   padding: 1rem 1.25rem;
   margin: 1.5rem 0;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0;
+  font-style: normal;
 }
 
-/* Code blocks */
+/* Code blocks — Flat */
 .vp-doc div[class*="language-"] {
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--vp-c-divider);
 }
 
+.vp-doc :not(pre) > code {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.85em;
+}
+
 /* ========================================
-   8. HERO (Home Page) — Zero Vibe
+   8. HERO — Zero Minimalism
    ======================================== */
 .VPHero .name {
-  font-size: 3rem !important;
-  font-weight: 900;
+  font-weight: 900 !important;
   letter-spacing: -0.03em;
 }
 
+.VPHero .text {
+  font-weight: 300 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .VPHero .tagline {
-  color: var(--vp-c-text-2);
-  font-size: 1.1rem;
+  color: var(--vp-c-text-3) !important;
   font-weight: 400;
+  font-size: 0.95rem;
 }
 
-.VPHero .actions .VPButton.brand {
-  background: var(--vp-c-brand-1);
-  border-color: var(--vp-c-brand-1);
-  color: #0F0F0F;
-  font-weight: 700;
-  border-radius: 8px;
+/* Brand button — Zero Black solid */
+.VPButton.brand {
+  background-color: var(--vp-c-brand-1) !important;
+  border-color: var(--vp-c-brand-1) !important;
+  color: var(--vp-c-bg) !important;
+  font-weight: 700 !important;
+  border-radius: 16px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 24px !important;
   transition: all 0.2s ease;
 }
 
-.VPHero .actions .VPButton.brand:hover {
-  background: var(--vp-c-brand-2);
+.VPButton.brand:hover {
+  opacity: 0.85;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
 }
 
-.VPHero .actions .VPButton.alt {
-  border-color: var(--vp-c-divider);
-  color: var(--vp-c-text-2);
-  border-radius: 8px;
+/* Alt button */
+.VPButton.alt {
+  border-color: var(--vp-c-divider) !important;
+  color: var(--vp-c-text-2) !important;
+  border-radius: 16px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 24px !important;
   transition: all 0.2s ease;
 }
 
-.VPHero .actions .VPButton.alt:hover {
-  border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-brand-1);
+.VPButton.alt:hover {
+  border-color: var(--vp-c-text-1) !important;
+  color: var(--vp-c-text-1) !important;
 }
 
-/* Features */
+/* Features — Flat cards */
 .VPFeature {
   border: 1px solid var(--vp-c-divider) !important;
-  border-radius: 12px !important;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  border-radius: 16px !important;
+  background: var(--vp-c-bg-soft) !important;
+  transition: border-color 0.2s ease, transform 0.15s ease;
 }
 
 .VPFeature:hover {
-  border-color: var(--vp-c-brand-1) !important;
+  border-color: var(--vp-c-text-3) !important;
   transform: translateY(-2px);
 }
 
 .VPFeature .title {
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.VPFeature .details {
+  font-size: 13px;
+  color: var(--vp-c-text-2);
 }
 
 /* ========================================
-   9. FOOTER — Minimal
+   9. FOOTER — Monochrome
    ======================================== */
 .VPFooter {
   border-top: 1px solid var(--vp-c-divider);
@@ -236,32 +304,103 @@
 
 .VPFooter .message,
 .VPFooter .copyright {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--vp-c-text-3);
+  letter-spacing: 0.03em;
 }
 
 /* ========================================
-   10. SEARCH — Dark Tinted
+   10. MOBILE RESPONSIVE FIXES
    ======================================== */
-.DocSearch-Button {
-  border: 1px solid var(--vp-c-divider) !important;
-  border-radius: 8px !important;
-  background: var(--vp-c-bg-soft) !important;
+@media (max-width: 768px) {
+  .VPHero .name {
+    font-size: 2rem !important;
+  }
+
+  .VPHero .text {
+    font-size: 1rem !important;
+  }
+
+  .VPHero .tagline {
+    font-size: 0.85rem !important;
+  }
+
+  .VPHero .actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .VPButton.brand,
+  .VPButton.alt {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .VPFeature {
+    border-radius: 12px !important;
+  }
+
+  .vp-doc h1 {
+    font-size: 1.4rem;
+  }
+
+  .vp-doc h2 {
+    font-size: 1.1rem;
+  }
+
+  .vp-doc table {
+    font-size: 11px;
+  }
+
+  .vp-doc th,
+  .vp-doc td {
+    padding: 6px 8px;
+  }
+
+  /* Fix sidebar on mobile */
+  .VPSidebar {
+    background: var(--vp-c-bg) !important;
+  }
+
+  /* Fix nav on mobile */
+  .VPNavScreen {
+    background: var(--vp-c-bg) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .VPHero .name {
+    font-size: 1.6rem !important;
+  }
 }
 
 /* ========================================
    11. SCROLLBAR — Sleek
    ======================================== */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--vp-c-divider);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--vp-c-text-3);
+}
+
+/* ========================================
+   12. OUTLINE (On This Page) — Compact
+   ======================================== */
+.VPDocAsideOutline .outline-link {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.VPDocAsideOutline .outline-link.active {
+  color: var(--vp-c-brand-1);
+  font-weight: 700;
 }

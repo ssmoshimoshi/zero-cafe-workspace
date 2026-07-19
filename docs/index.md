@@ -3,11 +3,8 @@ layout: home
 
 hero:
   name: "Zero Cafe"
-  text: "Technical Manual"
+  text: "TECH MANUAL"
   tagline: "Buku Panduan Operasional & Teknis Terpadu v2.0"
-  image:
-    src: https://cdn-icons-png.flaticon.com/512/3124/3124092.png
-    alt: Zero Cafe Logo
   actions:
     - theme: brand
       text: Panduan SPV →

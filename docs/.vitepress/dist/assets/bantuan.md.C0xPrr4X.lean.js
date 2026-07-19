@@ -1,0 +1,1 @@
+import{_ as n,o as e,c as t,a2 as i}from"./chunks/framework.CHeM0PsO.js";const g=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"bantuan.md","filePath":"bantuan.md"}'),r={name:"bantuan.md"};function u(s,a,o,m,d,l){return e(),t("div",null,[...a[0]||(a[0]=[i("",21)])])}const k=n(r,[["render",u]]);export{g as __pageData,k as default};

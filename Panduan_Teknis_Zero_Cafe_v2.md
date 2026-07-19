@@ -126,6 +126,8 @@ Setelah login berhasil, SPV akan melihat 4 tombol utama:
 
 > **Catatan untuk SPV:** Bagian ini ditulis khusus untuk Anda. Bahasa yang digunakan bersifat langsung dan praktis — fokus pada "apa yang harus dilakukan" di setiap layar.
 
+![Antarmuka Form Laporan Harian SPV](./mockup_spv_form.png)
+
 ---
 
 ## BAB 3: LAPORAN HARIAN (9 TAB + FASE 2)
@@ -555,6 +557,8 @@ Tombol hitam panjang di bagian bawah layar bertuliskan **"KELOLA STAF OUTLET"**:
 # BAGIAN III — PANDUAN GENERAL MANAGER (GM / OWNER)
 
 > **Catatan untuk GM:** Bagian ini ditulis khusus untuk Anda sebagai pemilik. Fokus pada cara membaca dan menginterpretasikan data yang ditampilkan sistem.
+
+![Tampilan Eksklusif Dashboard GM](./mockup_dashboard_gm.png)
 
 ---
 

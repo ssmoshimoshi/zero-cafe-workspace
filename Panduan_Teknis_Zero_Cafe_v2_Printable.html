@@ -1,0 +1,4428 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <style>
+    [data-color-mode*='light'],
+    [data-color-mode*='light'] body,
+    .markdown-style[theme*='light'] {
+      --color-prettylights-syntax-comment: #6e7781;
+      --color-prettylights-syntax-constant: #0550ae;
+      --color-prettylights-syntax-entity: #8250df;
+      --color-prettylights-syntax-storage-modifier-import: #24292f;
+      --color-prettylights-syntax-entity-tag: #116329;
+      --color-prettylights-syntax-keyword: #cf222e;
+      --color-prettylights-syntax-string: #0a3069;
+      --color-prettylights-syntax-variable: #953800;
+      --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+      --color-prettylights-syntax-invalid-illegal-text: #f6f8fa;
+      --color-prettylights-syntax-invalid-illegal-bg: #82071e;
+      --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+      --color-prettylights-syntax-carriage-return-bg: #cf222e;
+      --color-prettylights-syntax-string-regexp: #116329;
+      --color-prettylights-syntax-markup-list: #3b2300;
+      --color-prettylights-syntax-markup-heading: #0550ae;
+      --color-prettylights-syntax-markup-italic: #24292f;
+      --color-prettylights-syntax-markup-bold: #24292f;
+      --color-prettylights-syntax-markup-deleted-text: #82071e;
+      --color-prettylights-syntax-markup-deleted-bg: #FFEBE9;
+      --color-prettylights-syntax-markup-inserted-text: #116329;
+      --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+      --color-prettylights-syntax-markup-changed-text: #953800;
+      --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+      --color-prettylights-syntax-markup-ignored-text: #eaeef2;
+      --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+      --color-prettylights-syntax-meta-diff-range: #8250df;
+      --color-prettylights-syntax-brackethighlighter-angle: #57606a;
+      --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
+      --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+      --color-fg-default: #24292f;
+      --color-fg-muted: #57606a;
+      --color-fg-subtle: #6e7781;
+      --color-canvas-default: #ffffff;
+      --color-canvas-subtle: #f6f8fa;
+      --color-border-default: #d0d7de;
+      --color-border-muted: hsla(210, 18%, 87%, 1);
+      --color-neutral-muted: rgba(175, 184, 193, 0.2);
+      --color-accent-fg: #0969da;
+      --color-accent-emphasis: #0969da;
+      --color-attention-subtle: #fff8c5;
+      --color-danger-fg: #cf222e;
+    }
+
+    [data-color-mode*='dark'],
+    [data-color-mode*='dark'] body,
+    .markdown-style[theme*='dark'] {
+      --color-prettylights-syntax-comment: #8b949e;
+      --color-prettylights-syntax-constant: #79c0ff;
+      --color-prettylights-syntax-entity: #d2a8ff;
+      --color-prettylights-syntax-storage-modifier-import: #c9d1d9;
+      --color-prettylights-syntax-entity-tag: #7ee787;
+      --color-prettylights-syntax-keyword: #ff7b72;
+      --color-prettylights-syntax-string: #a5d6ff;
+      --color-prettylights-syntax-variable: #ffa657;
+      --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+      --color-prettylights-syntax-invalid-illegal-text: #f0f6fc;
+      --color-prettylights-syntax-invalid-illegal-bg: #8e1519;
+      --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+      --color-prettylights-syntax-carriage-return-bg: #b62324;
+      --color-prettylights-syntax-string-regexp: #7ee787;
+      --color-prettylights-syntax-markup-list: #f2cc60;
+      --color-prettylights-syntax-markup-heading: #1f6feb;
+      --color-prettylights-syntax-markup-italic: #c9d1d9;
+      --color-prettylights-syntax-markup-bold: #c9d1d9;
+      --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+      --color-prettylights-syntax-markup-deleted-bg: #67060c;
+      --color-prettylights-syntax-markup-inserted-text: #aff5b4;
+      --color-prettylights-syntax-markup-inserted-bg: #033a16;
+      --color-prettylights-syntax-markup-changed-text: #ffdfb6;
+      --color-prettylights-syntax-markup-changed-bg: #5a1e02;
+      --color-prettylights-syntax-markup-ignored-text: #c9d1d9;
+      --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+      --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+      --color-prettylights-syntax-brackethighlighter-angle: #8b949e;
+      --color-prettylights-syntax-sublimelinter-gutter-mark: #484f58;
+      --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+      --color-fg-default: #c9d1d9;
+      --color-fg-muted: #8b949e;
+      --color-fg-subtle: #484f58;
+      --color-canvas-default: #0d1117;
+      --color-canvas-subtle: #161b22;
+      --color-border-default: #30363d;
+      --color-border-muted: #21262d;
+      --color-neutral-muted: rgba(110, 118, 129, 0.4);
+      --color-accent-fg: #58a6ff;
+      --color-accent-emphasis: #1f6feb;
+      --color-attention-subtle: rgba(187, 128, 9, 0.15);
+      --color-danger-fg: #f85149;
+    }
+
+    .markdown-style {
+      display: block;
+      -webkit-text-size-adjust: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      font-size: 16px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      color: var(--color-fg-default);
+      background-color: var(--color-canvas-default);
+    }
+
+    .markdown-style details,
+    .markdown-style figcaption,
+    .markdown-style figure {
+      display: block;
+    }
+
+    .markdown-style summary {
+      display: list-item;
+    }
+
+    .markdown-style [hidden] {
+      display: none !important;
+    }
+
+    .markdown-style a {
+      background-color: transparent;
+      color: var(--color-accent-fg);
+      text-decoration: none;
+    }
+
+    .markdown-style a:active,
+    .markdown-style a:hover {
+      outline-width: 0;
+    }
+
+    .markdown-style abbr[title] {
+      border-bottom: none;
+      text-decoration: underline dotted;
+    }
+
+    .markdown-style b,
+    .markdown-style strong {
+      font-weight: 600;
+    }
+
+    .markdown-style dfn {
+      font-style: italic;
+    }
+
+    .markdown-style h1 {
+      margin: .67em 0;
+      font-weight: 600;
+      padding-bottom: .3em;
+      font-size: 2em;
+      border-bottom: 1px solid var(--color-border-muted);
+    }
+
+    .markdown-style mark {
+      background-color: var(--color-attention-subtle);
+      color: var(--color-text-primary);
+    }
+
+    .markdown-style small {
+      font-size: 90%;
+    }
+
+    .markdown-style sub,
+    .markdown-style sup {
+      font-size: 75%;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+    }
+
+    .markdown-style sub {
+      bottom: -0.25em;
+    }
+
+    .markdown-style sup {
+      top: -0.5em;
+    }
+
+    .markdown-style img {
+      border-style: none;
+      max-width: 100%;
+      box-sizing: content-box;
+      background-color: var(--color-canvas-default);
+    }
+
+    .markdown-style code,
+    .markdown-style kbd,
+    .markdown-style pre,
+    .markdown-style samp {
+      font-family: monospace, monospace;
+      font-size: 1em;
+    }
+
+    .markdown-style figure {
+      margin: 1em 40px;
+    }
+
+    .markdown-style hr {
+      box-sizing: content-box;
+      overflow: hidden;
+      background: transparent;
+      border-bottom: 1px solid var(--color-border-muted);
+      height: .25em;
+      padding: 0;
+      margin: 24px 0;
+      background-color: var(--color-border-default);
+      border: 0;
+    }
+
+    .markdown-style input {
+      font: inherit;
+      margin: 0;
+      overflow: visible;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    .markdown-style [type=button],
+    .markdown-style [type=reset],
+    .markdown-style [type=submit] {
+      -webkit-appearance: button;
+    }
+
+    .markdown-style [type=button]::-moz-focus-inner,
+    .markdown-style [type=reset]::-moz-focus-inner,
+    .markdown-style [type=submit]::-moz-focus-inner {
+      border-style: none;
+      padding: 0;
+    }
+
+    .markdown-style [type=button]:-moz-focusring,
+    .markdown-style [type=reset]:-moz-focusring,
+    .markdown-style [type=submit]:-moz-focusring {
+      outline: 1px dotted ButtonText;
+    }
+
+    .markdown-style [type=checkbox],
+    .markdown-style [type=radio] {
+      box-sizing: border-box;
+      padding: 0;
+    }
+
+    .markdown-style [type=number]::-webkit-inner-spin-button,
+    .markdown-style [type=number]::-webkit-outer-spin-button {
+      height: auto;
+    }
+
+    .markdown-style [type=search] {
+      -webkit-appearance: textfield;
+      outline-offset: -2px;
+    }
+
+    .markdown-style [type=search]::-webkit-search-cancel-button,
+    .markdown-style [type=search]::-webkit-search-decoration {
+      -webkit-appearance: none;
+    }
+
+    .markdown-style ::-webkit-input-placeholder {
+      color: inherit;
+      opacity: .54;
+    }
+
+    .markdown-style ::-webkit-file-upload-button {
+      -webkit-appearance: button;
+      font: inherit;
+    }
+
+    .markdown-style a:hover {
+      text-decoration: underline;
+    }
+
+    .markdown-style hr::before {
+      display: table;
+      content: "";
+    }
+
+    .markdown-style hr::after {
+      display: table;
+      clear: both;
+      content: "";
+    }
+
+    .markdown-style table {
+      border-spacing: 0;
+      border-collapse: collapse;
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      overflow: auto;
+    }
+
+    .markdown-style td,
+    .markdown-style th {
+      padding: 0;
+    }
+
+    .markdown-style details summary {
+      cursor: pointer;
+    }
+
+    .markdown-style details:not([open])>*:not(summary) {
+      display: none !important;
+    }
+
+    .markdown-style kbd {
+      display: inline-block;
+      padding: 3px 5px;
+      font: 11px ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace, Helvetica, Arial, sans-serif;
+      line-height: 10px;
+      color: var(--color-fg-default);
+      vertical-align: middle;
+      background-color: var(--color-canvas-subtle);
+      border: solid 1px var(--color-neutral-muted);
+      border-bottom-color: var(--color-neutral-muted);
+      border-radius: 6px;
+      box-shadow: inset 0 -1px 0 var(--color-neutral-muted);
+    }
+
+    .markdown-style h1,
+    .markdown-style h2,
+    .markdown-style h3,
+    .markdown-style h4,
+    .markdown-style h5,
+    .markdown-style h6 {
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .markdown-style h2 {
+      font-weight: 600;
+      padding-bottom: .3em;
+      font-size: 1.5em;
+      border-bottom: 1px solid var(--color-border-muted);
+    }
+
+    .markdown-style h3 {
+      font-weight: 600;
+      font-size: 1.25em;
+    }
+
+    .markdown-style h4 {
+      font-weight: 600;
+      font-size: 1em;
+    }
+
+    .markdown-style h5 {
+      font-weight: 600;
+      font-size: .875em;
+    }
+
+    .markdown-style h6 {
+      font-weight: 600;
+      font-size: .85em;
+      color: var(--color-fg-muted);
+    }
+
+    .markdown-style p {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .markdown-style blockquote {
+      margin: 0;
+      padding: 0 1em;
+      color: var(--color-fg-muted);
+      border-left: .25em solid var(--color-border-default);
+    }
+
+    .markdown-style ul,
+    .markdown-style ol {
+      margin-top: 0;
+      margin-bottom: 0;
+      padding-left: 2em;
+    }
+
+    .markdown-style ol ol,
+    .markdown-style ul ol {
+      list-style-type: lower-roman;
+    }
+
+    .markdown-style ul ul ol,
+    .markdown-style ul ol ol,
+    .markdown-style ol ul ol,
+    .markdown-style ol ol ol {
+      list-style-type: lower-alpha;
+    }
+
+    .markdown-style dd {
+      margin-left: 0;
+    }
+
+    .markdown-style tt,
+    .markdown-style code {
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    .markdown-style pre {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      word-wrap: normal;
+    }
+
+    .markdown-style .octicon {
+      display: inline-block;
+      overflow: visible !important;
+      vertical-align: text-bottom;
+      fill: currentColor;
+    }
+
+    .markdown-style ::placeholder {
+      color: var(--color-fg-subtle);
+      opacity: 1;
+    }
+
+    .markdown-style input::-webkit-outer-spin-button,
+    .markdown-style input::-webkit-inner-spin-button {
+      margin: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .markdown-style .token.comment,
+    .markdown-style .token.prolog,
+    .markdown-style .token.doctype,
+    .markdown-style .token.cdata {
+      color: var(--color-prettylights-syntax-comment);
+    }
+
+    .markdown-style .token.namespace {
+      opacity: 0.7;
+    }
+
+    .markdown-style .token.tag,
+    .markdown-style .token.selector,
+    .markdown-style .token.constant,
+    .markdown-style .token.symbol,
+    .markdown-style .token.deleted {
+      color: var(--color-prettylights-syntax-entity-tag);
+    }
+
+    .markdown-style .token.maybe-class-name {
+      color: var(--color-prettylights-syntax-variable);
+    }
+
+    .markdown-style .token.property-access,
+    .markdown-style .token.operator,
+    .markdown-style .token.boolean,
+    .markdown-style .token.number,
+    .markdown-style .token.selector .markdown-style .token.class,
+    .markdown-style .token.attr-name,
+    .markdown-style .token.string,
+    .markdown-style .token.char,
+    .markdown-style .token.builtin {
+      color: var(--color-prettylights-syntax-constant);
+    }
+
+    .markdown-style .token.deleted {
+      color: var(--color-prettylights-syntax-markup-deleted-text);
+    }
+
+    .markdown-style .token.property {
+      color: var(--color-prettylights-syntax-constant);
+    }
+
+    .markdown-style .token.punctuation {
+      color: var(--color-prettylights-syntax-markup-bold);
+    }
+
+    .markdown-style .token.function {
+      color: var(--color-prettylights-syntax-entity);
+    }
+
+    .markdown-style .code-line .token.deleted {
+      background-color: var(--color-prettylights-syntax-markup-deleted-bg);
+    }
+
+    .markdown-style .token.inserted {
+      color: var(--color-prettylights-syntax-markup-inserted-text);
+    }
+
+    .markdown-style .code-line .token.inserted {
+      background-color: var(--color-prettylights-syntax-markup-inserted-bg);
+    }
+
+    .markdown-style .token.variable {
+      color: var(--color-prettylights-syntax-constant);
+    }
+
+    .markdown-style .token.entity,
+    .markdown-style .token.url,
+    .language-css .markdown-style .token.string,
+    .style .markdown-style .token.string {
+      color: var(--color-prettylights-syntax-string);
+    }
+
+    .markdown-style .token.color,
+    .markdown-style .token.atrule,
+    .markdown-style .token.attr-value,
+    .markdown-style .token.function,
+    .markdown-style .token.class-name {
+      color: var(--color-prettylights-syntax-string);
+    }
+
+    .markdown-style .token.rule,
+    .markdown-style .token.regex,
+    .markdown-style .token.important,
+    .markdown-style .token.keyword {
+      color: var(--color-prettylights-syntax-keyword);
+    }
+
+    .markdown-style .token.coord {
+      color: var(--color-prettylights-syntax-meta-diff-range);
+    }
+
+    .markdown-style .token.important,
+    .markdown-style .token.bold {
+      font-weight: bold;
+    }
+
+    .markdown-style .token.italic {
+      font-style: italic;
+    }
+
+    .markdown-style .token.entity {
+      cursor: help;
+    }
+
+    .markdown-style [data-catalyst] {
+      display: block;
+    }
+
+    .markdown-style g-emoji {
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 1em;
+      font-style: normal !important;
+      font-weight: 400;
+      line-height: 1;
+      vertical-align: -0.075em;
+    }
+
+    .markdown-style g-emoji img {
+      width: 1em;
+      height: 1em;
+    }
+
+    .markdown-style::before {
+      display: table;
+      content: "";
+    }
+
+    .markdown-style::after {
+      display: table;
+      clear: both;
+      content: "";
+    }
+
+    .markdown-style>*:first-child {
+      margin-top: 0 !important;
+    }
+
+    .markdown-style>*:last-child {
+      margin-bottom: 0 !important;
+    }
+
+    .markdown-style a:not([href]) {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .markdown-style .absent {
+      color: var(--color-danger-fg);
+    }
+
+    .markdown-style a.anchor {
+      float: left;
+      padding-right: 4px;
+      margin-left: -20px;
+      line-height: 1;
+    }
+
+    .markdown-style a.anchor:focus {
+      outline: none;
+    }
+
+    .markdown-style p,
+    .markdown-style blockquote,
+    .markdown-style ul,
+    .markdown-style ol,
+    .markdown-style dl,
+    .markdown-style table,
+    .markdown-style pre,
+    .markdown-style details {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    .markdown-style blockquote>:first-child {
+      margin-top: 0;
+    }
+
+    .markdown-style blockquote>:last-child {
+      margin-bottom: 0;
+    }
+
+    .markdown-style sup>a::before {
+      content: "[";
+    }
+
+    .markdown-style sup>a::after {
+      content: "]";
+    }
+
+    .markdown-style .octicon-video {
+      border: 1px solid #d0d7de !important;
+      border-radius: 6px !important;
+      display: block;
+    }
+
+    .markdown-style .octicon-video summary {
+      border-bottom: 1px solid #d0d7de !important;
+      padding: 8px 16px !important;
+      cursor: pointer;
+    }
+
+    .markdown-style .octicon-video>video {
+      display: block !important;
+      max-width: 100% !important;
+      padding: 2px;
+      box-sizing: border-box;
+      border-bottom-right-radius: 6px !important;
+      border-bottom-left-radius: 6px !important;
+    }
+
+    .markdown-style details.octicon-video:not([open])>*:not(summary) {
+      display: none !important;
+    }
+
+    .markdown-style details.octicon-video:not([open])>summary {
+      border-bottom: 0 !important;
+    }
+
+    .markdown-style h1 .octicon-link,
+    .markdown-style h2 .octicon-link,
+    .markdown-style h3 .octicon-link,
+    .markdown-style h4 .octicon-link,
+    .markdown-style h5 .octicon-link,
+    .markdown-style h6 .octicon-link {
+      color: var(--color-fg-default);
+      vertical-align: middle;
+      visibility: hidden;
+    }
+
+    .markdown-style h1:hover .anchor,
+    .markdown-style h2:hover .anchor,
+    .markdown-style h3:hover .anchor,
+    .markdown-style h4:hover .anchor,
+    .markdown-style h5:hover .anchor,
+    .markdown-style h6:hover .anchor {
+      text-decoration: none;
+    }
+
+    .markdown-style h1:hover .anchor .octicon-link,
+    .markdown-style h2:hover .anchor .octicon-link,
+    .markdown-style h3:hover .anchor .octicon-link,
+    .markdown-style h4:hover .anchor .octicon-link,
+    .markdown-style h5:hover .anchor .octicon-link,
+    .markdown-style h6:hover .anchor .octicon-link {
+      visibility: visible;
+    }
+
+    .markdown-style h1 tt,
+    .markdown-style h1 code,
+    .markdown-style h2 tt,
+    .markdown-style h2 code,
+    .markdown-style h3 tt,
+    .markdown-style h3 code,
+    .markdown-style h4 tt,
+    .markdown-style h4 code,
+    .markdown-style h5 tt,
+    .markdown-style h5 code,
+    .markdown-style h6 tt,
+    .markdown-style h6 code {
+      padding: 0 .2em;
+      font-size: inherit;
+    }
+
+    .markdown-style ul.no-list,
+    .markdown-style ol.no-list {
+      padding: 0;
+      list-style-type: none;
+    }
+
+    .markdown-style ol[type="1"] {
+      list-style-type: decimal;
+    }
+
+    .markdown-style ol[type=a] {
+      list-style-type: lower-alpha;
+    }
+
+    .markdown-style ol[type=i] {
+      list-style-type: lower-roman;
+    }
+
+    .markdown-style div>ol:not([type]) {
+      list-style-type: decimal;
+    }
+
+    .markdown-style ul ul,
+    .markdown-style ul ol,
+    .markdown-style ol ol,
+    .markdown-style ol ul {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .markdown-style li>p {
+      margin-top: 16px;
+    }
+
+    .markdown-style li+li {
+      margin-top: .25em;
+    }
+
+    .markdown-style dl {
+      padding: 0;
+    }
+
+    .markdown-style dl dt {
+      padding: 0;
+      margin-top: 16px;
+      font-size: 1em;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .markdown-style dl dd {
+      padding: 0 16px;
+      margin-bottom: 16px;
+    }
+
+    .markdown-style table th {
+      font-weight: 600;
+    }
+
+    .markdown-style table th,
+    .markdown-style table td {
+      padding: 6px 13px;
+      border: 1px solid var(--color-border-default);
+    }
+
+    .markdown-style table tr {
+      background-color: var(--color-canvas-default);
+      border-top: 1px solid var(--color-border-muted);
+    }
+
+    .markdown-style table tr:nth-child(2n) {
+      background-color: var(--color-canvas-subtle);
+    }
+
+    .markdown-style table img {
+      background-color: transparent;
+      vertical-align: middle;
+    }
+
+    .markdown-style img[align=right] {
+      padding-left: 20px;
+    }
+
+    .markdown-style img[align=left] {
+      padding-right: 20px;
+    }
+
+    .markdown-style .emoji {
+      max-width: none;
+      vertical-align: text-top;
+      background-color: transparent;
+    }
+
+    .markdown-style span.frame {
+      display: block;
+      overflow: hidden;
+    }
+
+    .markdown-style span.frame>span {
+      display: block;
+      float: left;
+      width: auto;
+      padding: 7px;
+      margin: 13px 0 0;
+      overflow: hidden;
+      border: 1px solid var(--color-border-default);
+    }
+
+    .markdown-style span.frame span img {
+      display: block;
+      float: left;
+    }
+
+    .markdown-style span.frame span span {
+      display: block;
+      padding: 5px 0 0;
+      clear: both;
+      color: var(--color-fg-default);
+    }
+
+    .markdown-style span.align-center {
+      display: block;
+      overflow: hidden;
+      clear: both;
+    }
+
+    .markdown-style span.align-center>span {
+      display: block;
+      margin: 13px auto 0;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .markdown-style span.align-center span img {
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .markdown-style span.align-right {
+      display: block;
+      overflow: hidden;
+      clear: both;
+    }
+
+    .markdown-style span.align-right>span {
+      display: block;
+      margin: 13px 0 0;
+      overflow: hidden;
+      text-align: right;
+    }
+
+    .markdown-style span.align-right span img {
+      margin: 0;
+      text-align: right;
+    }
+
+    .markdown-style span.float-left {
+      display: block;
+      float: left;
+      margin-right: 13px;
+      overflow: hidden;
+    }
+
+    .markdown-style span.float-left span {
+      margin: 13px 0 0;
+    }
+
+    .markdown-style span.float-right {
+      display: block;
+      float: right;
+      margin-left: 13px;
+      overflow: hidden;
+    }
+
+    .markdown-style span.float-right>span {
+      display: block;
+      margin: 13px auto 0;
+      overflow: hidden;
+      text-align: right;
+    }
+
+    .markdown-style code,
+    .markdown-style tt {
+      padding: .2em .4em;
+      margin: 0;
+      font-size: 85%;
+      background-color: var(--color-neutral-muted);
+      border-radius: 6px;
+    }
+
+    .markdown-style code br,
+    .markdown-style tt br {
+      display: none;
+    }
+
+    .markdown-style del code {
+      text-decoration: inherit;
+    }
+
+    .markdown-style pre code {
+      font-size: 100%;
+    }
+
+    .markdown-style pre>code {
+      padding: 0;
+      margin: 0;
+      word-break: normal;
+      white-space: pre;
+      background: transparent;
+      border: 0;
+    }
+
+    .markdown-style pre {
+      position: relative;
+      font-size: 85%;
+      line-height: 1.45;
+      background-color: var(--color-canvas-subtle);
+      border-radius: 6px;
+    }
+
+    .markdown-style pre code,
+    .markdown-style pre tt {
+      display: inline;
+      max-width: auto;
+      padding: 0;
+      margin: 0;
+      overflow: visible;
+      line-height: inherit;
+      word-wrap: normal;
+      background-color: transparent;
+      border: 0;
+    }
+
+    .markdown-style pre>code {
+      padding: 16px;
+      overflow: auto;
+      display: block;
+    }
+
+    .markdown-style .csv-data td,
+    .markdown-style .csv-data th {
+      padding: 5px;
+      overflow: hidden;
+      font-size: 12px;
+      line-height: 1;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .markdown-style .csv-data .blob-num {
+      padding: 10px 8px 9px;
+      text-align: right;
+      background: var(--color-canvas-default);
+      border: 0;
+    }
+
+    .markdown-style .csv-data tr {
+      border-top: 0;
+    }
+
+    .markdown-style .csv-data th {
+      font-weight: 600;
+      background: var(--color-canvas-subtle);
+      border-top: 0;
+    }
+
+    .markdown-style .footnotes {
+      font-size: 12px;
+      color: var(--color-fg-muted);
+      border-top: 1px solid var(--color-border-default);
+    }
+
+    .markdown-style .footnotes ol {
+      padding-left: 16px;
+    }
+
+    .markdown-style .footnotes li {
+      position: relative;
+    }
+
+    .markdown-style .footnotes li:target::before {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      bottom: -8px;
+      left: -24px;
+      pointer-events: none;
+      content: "";
+      border: 2px solid var(--color-accent-emphasis);
+      border-radius: 6px;
+    }
+
+    .markdown-style .footnotes li:target {
+      color: var(--color-fg-default);
+    }
+
+    .markdown-style .footnotes .data-footnote-backref g-emoji {
+      font-family: monospace;
+    }
+
+    .markdown-style .task-list-item {
+      list-style-type: none;
+    }
+
+    .markdown-style .task-list-item label {
+      font-weight: 400;
+    }
+
+    .markdown-style .task-list-item.enabled label {
+      cursor: pointer;
+    }
+
+    .markdown-style .task-list-item+.task-list-item {
+      margin-top: 3px;
+    }
+
+    .markdown-style .task-list-item .handle {
+      display: none;
+    }
+
+    .markdown-style .task-list-item-checkbox,
+    .markdown-style input[type="checkbox"] {
+      margin: 0 .2em .25em -1.6em;
+      vertical-align: middle;
+    }
+
+    .markdown-style .contains-task-list:dir(rtl) .task-list-item-checkbox,
+    .markdown-style .contains-task-list:dir(rtl) input[type="checkbox"] {
+      margin: 0 -1.6em .25em .2em;
+    }
+
+    .markdown-style ::-webkit-calendar-picker-indicator {
+      filter: invert(50%);
+    }
+
+    /** copy button style **/
+    .markdown-style pre .copied {
+      display: flex;
+      position: absolute;
+      cursor: pointer;
+      color: #a5afbb;
+      top: 6px;
+      right: 6px;
+      border-radius: 5px;
+      background: #82828226;
+      padding: 6px;
+      font-size: 12px;
+      transition: all .3s;
+    }
+
+    .markdown-style pre .copied:not(.active) {
+      visibility: hidden;
+    }
+
+    .markdown-style pre:hover .copied {
+      visibility: visible;
+    }
+
+    .markdown-style pre:hover .copied:hover {
+      background: #4caf50;
+      color: #fff;
+    }
+
+    .markdown-style pre:hover .copied:active,
+    .markdown-style pre .copied.active {
+      background: #2e9b33;
+      color: #fff;
+    }
+
+    .markdown-style pre .copied svg {
+      position: relative;
+    }
+
+    .markdown-style pre .copied .octicon-copy {
+      display: block;
+    }
+
+    .markdown-style pre .copied .octicon-check {
+      display: none;
+    }
+
+    .markdown-style pre .active .octicon-copy {
+      display: none;
+    }
+
+    .markdown-style pre .active .octicon-check {
+      display: block;
+    }
+
+    /** octicon style **/
+    .markdown-style h1:hover a.anchor .octicon-link:before,
+    .markdown-style h2:hover a.anchor .octicon-link:before,
+    .markdown-style h3:hover a.anchor .octicon-link:before,
+    .markdown-style h4:hover a.anchor .octicon-link:before,
+    .markdown-style h5:hover a.anchor .octicon-link:before,
+    .markdown-style h6:hover a.anchor .octicon-link:before {
+      width: 16px;
+      height: 16px;
+      content: ' ';
+      display: inline-block;
+      background-color: currentColor;
+      -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+      mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+    }
+
+    .markdown-style ::-webkit-scrollbar {
+      background: transparent;
+      width: 8px;
+      height: 8px;
+    }
+
+    .markdown-style ::-webkit-scrollbar-thumb {
+      background: var(--color-fg-muted);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body><dark-mode style="position: fixed; top: 8px; left: 10px; z-index: 999;" dark="Dark" light="Light"
+    permanent="true"></dark-mode>
+  <script>const t = document; const e = "_dark_mode_theme_"; const s = "permanent"; const o = "colorschemechange"; const i = "permanentcolorscheme"; const h = "light"; const r = "dark"; const n = (t, e, s = e) => { Object.defineProperty(t, s, { enumerable: true, get() { const t = this.getAttribute(e); return t === null ? "" : t }, set(t) { this.setAttribute(e, t) } }) }; const c = (t, e, s = e) => { Object.defineProperty(t, s, { enumerable: true, get() { return this.hasAttribute(e) }, set(t) { if (t) { this.setAttribute(e, "") } else { this.removeAttribute(e) } } }) }; class a extends HTMLElement {
+      static get observedAttributes() { return ["mode", h, r, s] } LOCAL_NANE = e; constructor() { super(); this.t() } connectedCallback() { n(this, "mode"); n(this, r); n(this, h); c(this, s); const a = localStorage.getItem(e); if (a && [h, r].includes(a)) { this.mode = a; this.permanent = true } if (this.permanent && !a) { localStorage.setItem(e, this.mode) } const l = [h, r].includes(a); if (this.permanent && a) { this.o() } else { if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) { this.mode = r; this.o() } if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) { this.mode = h; this.o() } } if (!this.permanent && !l) { window.matchMedia("(prefers-color-scheme: light)").onchange = t => { this.mode = t.matches ? h : r; this.o() }; window.matchMedia("(prefers-color-scheme: dark)").onchange = t => { this.mode = t.matches ? r : h; this.o() } } const d = new MutationObserver(((s, h) => { this.mode = t.documentElement.dataset.colorMode; if (this.permanent && l) { localStorage.setItem(e, this.mode); this.i(i, { permanent: this.permanent }) } this.h(); this.i(o, { colorScheme: this.mode }) })); d.observe(t.documentElement, { attributes: true }); this.i(o, { colorScheme: this.mode }); this.h() } attributeChangedCallback(t, s, o) { if (t === "mode" && s !== o && [h, r].includes(o)) { const t = localStorage.getItem(e); if (this.mode === t) { this.mode = o; this.h(); this.o() } else if (this.mode && this.mode !== t) { this.h(); this.o() } } else if ((t === h || t === r) && s !== o) { this.h() } if (t === "permanent" && typeof this.permanent === "boolean") { this.permanent ? localStorage.setItem(e, this.mode) : localStorage.removeItem(e) } } o() { t.documentElement.setAttribute("data-color-mode", this.mode) } h() { this.icon.textContent = this.mode === h ? "🌒" : "🌞"; this.text.textContent = this.mode === h ? this.getAttribute(r) : this.getAttribute(h); if (!this.text.textContent && this.text.parentElement && this.text) { this.text.parentElement.removeChild(this.text) } } t() {
+        var s = this.attachShadow({ mode: "open" }); this.label = t.createElement("span"); this.label.setAttribute("class", "wrapper"); this.label.onclick = () => { this.mode = this.mode === h ? r : h; if (this.permanent) { localStorage.setItem(e, this.mode) } this.o(); this.h() }; s.appendChild(this.label); this.icon = t.createElement("span"); this.icon.part = "icon"; this.label.appendChild(this.icon); this.text = t.createElement("span"); this.text.part = "text"; this.label.appendChild(this.text); const o = `
+[data-color-mode*='dark'], [data-color-mode*='dark'] body {
+  color-scheme: dark;
+  --color-theme-bg: #0d1117;
+  --color-theme-text: #c9d1d9;
+  background-color: var(--color-theme-bg);
+  color: var(--color-theme-text);
+}
+
+[data-color-mode*='light'], [data-color-mode*='light'] body {
+  color-scheme: light;
+  --color-theme-bg: #fff;
+  --color-theme-text: #24292f;
+  background-color: var(--color-theme-bg);
+  color: var(--color-theme-text);
+}`; const i = "_dark_mode_style_"; const n = t.getElementById(i); if (!n) { var c = t.createElement("style"); c.id = i; c.textContent = o; t.head.appendChild(c) } var a = t.createElement("style"); a.textContent = `
+    .wrapper { cursor: pointer; user-select: none; position: relative; }
+    .wrapper > span + span { margin-left: .4rem; }
+    `; s.appendChild(a)
+      } i(t, e) { this.dispatchEvent(new CustomEvent(t, { bubbles: true, composed: true, detail: e })) }
+    } customElements.define("dark-mode", a);</script>
+  <div style="max-width: 960px; margin: 0 auto 60px auto; padding: 8px;max-width: 960px;" class="markdown-style">
+    <h1 id="zero-cafe-app-v20"><a class="anchor" aria-hidden="true" tabindex="-1" href="#zero-cafe-app-v20"><span
+          class="octicon octicon-link"></span></a>ZERO CAFE APP v2.0</h1>
+    <h2 id="buku-panduan-pengguna--spesifikasi-teknis-komprehensif"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#buku-panduan-pengguna--spesifikasi-teknis-komprehensif"><span
+          class="octicon octicon-link"></span></a>Buku Panduan Pengguna &#x26; Spesifikasi Teknis Komprehensif</h2>
+    <p>
+      <strong>Dikembangkan oleh:</strong> Acronimous Studio
+      <strong>Disusun untuk:</strong> Pemilik (Owner), General Manager &#x26; Supervisor Zero Cafe
+      <strong>Versi Dokumen:</strong> 2.1 — Checkpoint 20
+      <strong>Tanggal Rilis:</strong> Juli 2026
+    </p>
+    <hr>
+    <h2 id="daftar-isi"><a class="anchor" aria-hidden="true" tabindex="-1" href="#daftar-isi"><span
+          class="octicon octicon-link"></span></a>DAFTAR ISI</h2>
+    <p><strong>BAGIAN I — PENGANTAR</strong></p>
+    <ul>
+      <li>BAB 1: Apa Itu Zero Cafe App &#x26; Kenapa Dibuat</li>
+      <li>BAB 2: Cara Masuk (Login) &#x26; Navigasi</li>
+    </ul>
+    <p><strong>BAGIAN II — PANDUAN SUPERVISOR (SPV)</strong></p>
+    <ul>
+      <li>BAB 3: Laporan Harian (9 Tab + Fase 2)</li>
+      <li>BAB 4: Laporan Mingguan</li>
+      <li>BAB 5: Laporan Bulanan</li>
+      <li>BAB 6: Pengaturan &#x26; Master Data</li>
+    </ul>
+    <p><strong>BAGIAN III — PANDUAN GENERAL MANAGER (GM / OWNER)</strong></p>
+    <ul>
+      <li>BAB 7: Dashboard Tab 1 — Keuangan &#x26; Ringkasan KPI</li>
+      <li>BAB 8: Dashboard Tab 2 — Operasional &#x26; Layanan</li>
+      <li>BAB 9: Dashboard Tab 3 — SDM &#x26; Evaluasi</li>
+    </ul>
+    <p><strong>BAGIAN IV — DI BALIK LAYAR (ARSITEKTUR &#x26; FORMULA)</strong></p>
+    <ul>
+      <li>BAB 10: Mesin Analisis — Parameter, Threshold &#x26; Formula</li>
+      <li>BAB 11: Arsitektur Data — Database &#x26; Penyimpanan File</li>
+      <li>BAB 12: Diagram Alur Kerja (Visual)</li>
+      <li>BAB 13: Sistem Keamanan &#x26; Perlindungan Data</li>
+    </ul>
+    <p><strong>BAGIAN V — BANTUAN</strong></p>
+    <ul>
+      <li>BAB 14: FAQ &#x26; Troubleshooting (Pertanyaan Umum)</li>
+    </ul>
+    <hr>
+    <h1 id="bagian-i--pengantar"><a class="anchor" aria-hidden="true" tabindex="-1" href="#bagian-i--pengantar"><span
+          class="octicon octicon-link"></span></a>BAGIAN I — PENGANTAR</h1>
+    <hr>
+    <h2 id="bab-1-apa-itu-zero-cafe-app--kenapa-dibuat"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-1-apa-itu-zero-cafe-app--kenapa-dibuat"><span class="octicon octicon-link"></span></a>BAB 1: APA ITU
+      ZERO CAFE APP &#x26; KENAPA DIBUAT</h2>
+    <h3 id="11-latar-belakang"><a class="anchor" aria-hidden="true" tabindex="-1" href="#11-latar-belakang"><span
+          class="octicon octicon-link"></span></a>1.1 Latar Belakang</h3>
+    <p>Zero Cafe App adalah aplikasi pelaporan operasional harian yang dibangun secara khusus oleh <strong>Acronimous
+        Studio</strong> untuk Zero Cafe. Aplikasi ini bukan aplikasi kasir (POS), bukan aplikasi stok, dan bukan
+      aplikasi akuntansi. Fungsi utamanya adalah <strong>menjadi mata dan telinga pemilik (owner) di outlet yang tidak
+        bisa dikunjungi setiap hari</strong>.</p>
+    <p>Melalui aplikasi ini:</p>
+    <ul>
+      <li><strong>Supervisor (SPV)</strong> melaporkan kondisi lapangan secara terstruktur setiap hari.</li>
+      <li><strong>General Manager (GM/Owner)</strong> memantau kesehatan bisnis melalui Dashboard yang menampilkan
+        angka-angka kunci secara otomatis.</li>
+    </ul>
+    <h3 id="12-filosofi-data-driven-disciplinary"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#12-filosofi-data-driven-disciplinary"><span class="octicon octicon-link"></span></a>1.2 Filosofi:
+      Data-Driven Disciplinary</h3>
+    <p>Setiap data yang diketik SPV bukan sekadar formalitas. Angka-angka tersebut dihitung secara otomatis oleh mesin
+      di balik layar untuk menghasilkan <strong>4 Indikator Kunci (KPI)</strong> yang menentukan sehat atau tidaknya
+      operasional kafe:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>KPI</th>
+          <th>Target</th>
+          <th>Artinya</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Kepatuhan SOP (Keramahan)</strong></td>
+          <td>≥ 95%</td>
+          <td>Seberapa sering staf menyapa dan melayani pelanggan dengan ramah</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Rata-rata Penjualan Harian</strong></td>
+          <td>Tidak boleh turun dari target bulanan</td>
+          <td>Omset harian harus konsisten menuju target</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Komplain Pelanggan Serius</strong></td>
+          <td>Maksimal 2 per bulan</td>
+          <td>Lebih dari 2 komplain = alarm merah</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Turnover Barista</strong></td>
+          <td>Maksimal 1 orang per 3 bulan</td>
+          <td>Staf yang keluar terlalu sering = operasional terganggu</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Keempat angka ini muncul di halaman pertama Dashboard GM sebagai <strong>"Ringkasan 4 KPI Utama"</strong> —
+      sehingga owner cukup membuka aplikasi dan dalam 3 detik sudah tahu kondisi kafe.</p>
+    <h3 id="13-mekanisme-dua-fase-fase-1--fase-2"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#13-mekanisme-dua-fase-fase-1--fase-2"><span class="octicon octicon-link"></span></a>1.3 Mekanisme Dua
+      Fase (Fase 1 &#x26; Fase 2)</h3>
+    <p>Karena outlet Zero Cafe beroperasi hingga larut malam (Perintis tutup jam 04:00 dini hari), tidak mungkin
+      menunggu semua data selesai baru mengirim laporan. Oleh karena itu, pelaporan harian dibagi menjadi <strong>dua
+        tahap</strong>:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Fase</th>
+          <th>Kapan</th>
+          <th>Siapa</th>
+          <th>Isi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Fase 1 (Malam)</strong></td>
+          <td>Saat SPV selesai shift (±21:00)</td>
+          <td>SPV</td>
+          <td>9 Tab inspeksi: Penjualan Shift 1, Kas, Staf, Briefing, QC, Kebersihan, Komplain, Fasilitas, Penutup</td>
+        </tr>
+        <tr>
+          <td><strong>Fase 2 (Pagi Besoknya)</strong></td>
+          <td>Sebelum jam 13:00 siang keesokan hari</td>
+          <td>SPV</td>
+          <td>Omset Shift 2, Total Struk Transaksi, Evaluasi Produk (Top 5 &#x26; Bottom 3), Komplain Susulan Malam,
+            Absensi Staf Malam</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Apa yang terjadi di balik layar?</strong>
+      Saat SPV menekan tombol "Kirim" di Fase 1, sistem <strong>belum mencetak PDF</strong>. Sistem menyimpan data
+      sementara dalam bentuk file cadangan (Draft JSON) di Google Drive. Keesokan paginya, saat SPV mengirim Fase 2,
+      sistem menggabungkan kedua data, mencetak PDF final, dan menyimpan laporan lengkap ke database.
+    </p>
+    <h3 id="14-jam-operasional-outlet"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#14-jam-operasional-outlet"><span class="octicon octicon-link"></span></a>1.4 Jam Operasional Outlet</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Outlet</th>
+          <th>Buka</th>
+          <th>Tutup</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Perintis</strong></td>
+          <td>08:00</td>
+          <td>04:00 (dini hari, setiap hari)</td>
+        </tr>
+        <tr>
+          <td><strong>Dg Tata</strong></td>
+          <td>08:00</td>
+          <td>24:00 (Minggu–Kamis) / 01:00 (Jumat–Sabtu)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Jam Kerja SPV:</strong> 12:00 siang – 21:00 malam (sama untuk kedua outlet).</p>
+    <h3 id="15-batas-waktu-laporan-streak"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#15-batas-waktu-laporan-streak"><span class="octicon octicon-link"></span></a>1.5 Batas Waktu Laporan
+      (Streak)</h3>
+    <p>Untuk mendorong kedisiplinan, sistem memiliki fitur <strong>Streak</strong> (rantai keberhasilan):</p>
+    <ul>
+      <li><strong>Batas Akhir:</strong> Laporan Fase 2 <strong>wajib dikirim sebelum jam 13:00 (1 siang) keesokan
+          harinya</strong>.</li>
+      <li>Jika terlambat melewati batas waktu tersebut, rantai Streak SPV akan <strong>putus</strong>.</li>
+      <li>Streak ini terlihat di Dashboard GM sebagai indikator kedisiplinan SPV.</li>
+    </ul>
+    <hr>
+    <h2 id="bab-2-cara-masuk-login--navigasi"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-2-cara-masuk-login--navigasi"><span class="octicon octicon-link"></span></a>BAB 2: CARA MASUK (LOGIN)
+      &#x26; NAVIGASI</h2>
+    <h3 id="21-membuka-aplikasi"><a class="anchor" aria-hidden="true" tabindex="-1" href="#21-membuka-aplikasi"><span
+          class="octicon octicon-link"></span></a>2.1 Membuka Aplikasi</h3>
+    <p>Aplikasi Zero Cafe dibuka melalui browser HP atau laptop menggunakan link (URL) khusus yang diberikan oleh
+      Acronimous Studio. Tidak perlu mengunduh atau memasang aplikasi dari Play Store/App Store.</p>
+    <h3 id="22-layar-login-satu-kolom-pintar"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#22-layar-login-satu-kolom-pintar"><span class="octicon octicon-link"></span></a>2.2 Layar Login (Satu
+      Kolom Pintar)</h3>
+    <p>Saat halaman terbuka, Anda hanya akan melihat <strong>satu kotak input di tengah layar</strong>. Tidak ada tombol
+      "SPV" atau "GM" — cukup masukkan kode akses Anda:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kode yang Dimasukkan</th>
+          <th>Hasilnya</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong><code>Zero123</code></strong></td>
+          <td>Masuk sebagai <strong>GM/Owner</strong> → langsung diarahkan ke Dashboard GM</td>
+        </tr>
+        <tr>
+          <td><strong><code>1234</code></strong></td>
+          <td>Masuk sebagai <strong>SPV Outlet Perintis</strong> → diarahkan ke Menu Utama SPV</td>
+        </tr>
+        <tr>
+          <td><strong><code>5678</code></strong></td>
+          <td>Masuk sebagai <strong>SPV Outlet Dg Tata</strong> → diarahkan ke Menu Utama SPV</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p><strong>Catatan Keamanan:</strong> PIN SPV menentukan outlet mana yang terkunci. Setelah login, SPV
+        <strong>tidak bisa mengubah outlet</strong>. Ini mencegah kesalahan atau manipulasi data antar cabang.
+      </p>
+    </blockquote>
+    <h3 id="23-menu-utama-spv"><a class="anchor" aria-hidden="true" tabindex="-1" href="#23-menu-utama-spv"><span
+          class="octicon octicon-link"></span></a>2.3 Menu Utama SPV</h3>
+    <p>Setelah login berhasil, SPV akan melihat 4 tombol utama:</p>
+    <ol>
+      <li><strong>Laporan Harian</strong> — Mengisi laporan operasional 9 Tab (atau melanjutkan Fase 2 jika ada yang
+        tertunda)</li>
+      <li><strong>Laporan Mingguan</strong> — Evaluasi taktis 7 hari</li>
+      <li><strong>Laporan Bulanan</strong> — Evaluasi strategis 1 bulan penuh</li>
+      <li><strong>Pengaturan Parameter</strong> — Mengatur target omset, mendaftarkan event, dan mengelola data staf
+      </li>
+    </ol>
+    <hr>
+    <h1 id="bagian-ii--panduan-supervisor-spv"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bagian-ii--panduan-supervisor-spv"><span class="octicon octicon-link"></span></a>BAGIAN II — PANDUAN
+      SUPERVISOR (SPV)</h1>
+    <blockquote>
+      <p><strong>Catatan untuk SPV:</strong> Bagian ini ditulis khusus untuk Anda. Bahasa yang digunakan bersifat
+        langsung dan praktis — fokus pada "apa yang harus dilakukan" di setiap layar.</p>
+    </blockquote>
+    <hr>
+    <h2 id="bab-3-laporan-harian-9-tab--fase-2"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-3-laporan-harian-9-tab--fase-2"><span class="octicon octicon-link"></span></a>BAB 3: LAPORAN HARIAN
+      (9 TAB + FASE 2)</h2>
+    <h3 id="31-fitur-penting-sebelum-mulai"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#31-fitur-penting-sebelum-mulai"><span class="octicon octicon-link"></span></a>3.1 Fitur Penting Sebelum
+      Mulai</h3>
+    <p>Sebelum mengisi laporan, kenali dulu 3 fitur perlindungan data yang bekerja diam-diam di balik layar:</p>
+    <ol>
+      <li>
+        <p><strong>Simpan Otomatis (Autosave):</strong> Setiap huruf yang Anda ketik langsung tersimpan di memori
+          browser HP Anda. Jika aplikasi tertutup mendadak (baterai habis, sinyal putus), data Anda <strong>tidak
+            hilang</strong>. Saat Anda buka kembali, semua isian akan tetap ada.</p>
+      </li>
+      <li>
+        <p><strong>Perlindungan Anti-Klik Ganda:</strong> Setelah Anda menekan tombol "Kirim", sistem akan menahan semua
+          klik selama 10 detik. Ini mencegah laporan terkirim 2 kali jika Anda tidak sengaja menekan tombol
+          berkali-kali.</p>
+      </li>
+      <li>
+        <p><strong>Perlindungan Antar-Outlet:</strong> Jika Anda login sebagai SPV Perintis, lalu besok login sebagai
+          SPV Dg Tata (misalnya karena pindah tugas), sistem akan otomatis membuang data lama yang tidak cocok dengan
+          outlet Anda saat ini. Data outlet lain tidak akan pernah tercampur.</p>
+      </li>
+    </ol>
+    <h3 id="32-tab-1-jual-penjualan-shift-1--konteks"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#32-tab-1-jual-penjualan-shift-1--konteks"><span class="octicon octicon-link"></span></a>3.2 Tab 1: JUAL
+      (Penjualan Shift 1 &#x26; Konteks)</h3>
+    <p>Tab ini adalah fondasi utama laporan harian. Data di sini menjadi bahan kalkulasi omset, target, dan tren di
+      Dashboard GM.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Cara Mengisi</th>
+          <th>Catatan Penting</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nama Supervisor</strong></td>
+          <td>Ketik nama Anda, sistem akan memunculkan daftar pilihan otomatis</td>
+          <td>Hanya nama staf dari outlet Anda yang muncul</td>
+        </tr>
+        <tr>
+          <td><strong>Outlet</strong></td>
+          <td>Sudah terkunci otomatis (abu-abu), tidak bisa diedit</td>
+          <td>Ditentukan dari PIN saat login</td>
+        </tr>
+        <tr>
+          <td><strong>Tanggal Laporan</strong></td>
+          <td>Pilih tanggal dari kalender</td>
+          <td>Setelah memilih tanggal, <strong>tunggu sebentar</strong> — sistem sedang menarik angka target omset dari
+            database</td>
+        </tr>
+        <tr>
+          <td><strong>Jam Masuk</strong></td>
+          <td>Pilih jam Anda tiba di outlet</td>
+          <td>Digunakan untuk menghitung ketepatan waktu</td>
+        </tr>
+        <tr>
+          <td><strong>Cuaca Dominan</strong></td>
+          <td>Pilih salah satu: Cerah/Panas, Mendung, Hujan Gerimis, Hujan Badai</td>
+          <td>Digunakan mesin AI untuk menganalisis pengaruh cuaca terhadap penjualan</td>
+        </tr>
+        <tr>
+          <td><strong>Profil Pengunjung</strong></td>
+          <td>Pilih tipe pengunjung yang paling dominan hari ini</td>
+          <td>Digunakan untuk strategi pemasaran</td>
+        </tr>
+        <tr>
+          <td><strong>Target Omset (Rp)</strong></td>
+          <td><strong>Tidak perlu diisi</strong> — angka muncul otomatis</td>
+          <td>Diambil dari target yang Anda atur di Pengaturan Parameter</td>
+        </tr>
+        <tr>
+          <td><strong>Omset Shift 1 (Rp)</strong></td>
+          <td>Ketik angka penjualan Shift 1</td>
+          <td>Saat diketik, bar hijau di bawah akan bergerak menunjukkan persentase pencapaian</td>
+        </tr>
+        <tr>
+          <td><strong>Omset Shift 2</strong></td>
+          <td>Tidak bisa diisi sekarang (abu-abu)</td>
+          <td>Diisi besok pagi di Fase 2</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="33-tab-2-kas-audit-uang-di-laci-kasir"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#33-tab-2-kas-audit-uang-di-laci-kasir"><span class="octicon octicon-link"></span></a>3.3 Tab 2: KAS
+      (Audit Uang di Laci Kasir)</h3>
+    <p>Tab ini merekam hasil penghitungan uang fisik di laci kasir. Anda bisa mengaudit lebih dari sekali dalam satu
+      shift.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Cara Mengisi</th>
+          <th>Catatan Penting</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Modal Awal Kasir</strong></td>
+          <td>Ketik jumlah uang receh standar saat buka (umumnya Rp 200.000)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Jam Audit</strong></td>
+          <td>Pilih jam saat Anda menghitung uang</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Total QRIS</strong></td>
+          <td>Ketik total uang masuk via QRIS</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Total Tunai</strong></td>
+          <td>Ketik total uang tunai fisik di laci (belum dikurangi modal awal)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Aktual (Sistem)</strong></td>
+          <td>Ketik angka total penjualan menurut mesin kasir (POS)</td>
+          <td>Ini adalah angka "kebenaran" yang jadi pembanding</td>
+        </tr>
+        <tr>
+          <td><strong>Selisih (Rp)</strong></td>
+          <td>Ketik hasil selisih antara uang fisik dan data sistem</td>
+          <td>Jika minus, angka akan berwarna <strong>merah</strong> — ini yang dipantau GM</td>
+        </tr>
+        <tr>
+          <td><strong>Catatan Selisih</strong></td>
+          <td>Jelaskan kenapa ada selisih (jika ada)</td>
+          <td><strong>Sangat penting!</strong> Tanpa penjelasan, GM bisa salah mengira ini sebagai kecurangan</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Tombol penting:</strong></p>
+    <ul>
+      <li><strong>Tombol "TAMBAH" (kanan atas):</strong> Tekan jika Anda mengaudit laci kasir lebih dari sekali (misal:
+        siang dan malam).</li>
+      <li><strong>Tombol "HAPUS" (merah, di setiap baris):</strong> Hapus baris audit tertentu jika salah tekan.</li>
+    </ul>
+    <h3 id="34-tab-3-staff-absensi--kepatuhan-sop"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#34-tab-3-staff-absensi--kepatuhan-sop"><span class="octicon octicon-link"></span></a>3.4 Tab 3: STAFF
+      (Absensi &#x26; Kepatuhan SOP)</h3>
+    <p>Tab ini adalah salah satu yang paling berpengaruh terhadap KPI di Dashboard GM. Setiap pilihan yang Anda buat di
+      sini akan langsung mempengaruhi skor kedisiplinan staf.</p>
+    <p><strong>Langkah mengisi:</strong></p>
+    <ol>
+      <li>Pilih nama staf dari dropdown <strong>"PILIH STAFF"</strong></li>
+      <li>Tekan tombol <strong>"TAMBAH"</strong> untuk menambahkan ke daftar evaluasi</li>
+      <li>Isi penilaian untuk setiap staf yang sudah ditambahkan</li>
+    </ol>
+    <p><strong>Tombol khusus:</strong></p>
+    <ul>
+      <li><strong>+ STAFF BARU:</strong> Untuk mendaftarkan staf freelance/cabutan yang belum ada di database</li>
+      <li><strong>+ PINJAM STAF:</strong> Untuk mengambil nama staf dari outlet lain (jika ada pertukaran shift)</li>
+    </ul>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Pilihan</th>
+          <th>Dampak ke Dashboard GM</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Metode Penilaian</strong></td>
+          <td>Dinilai Langsung / Dinilai via Absensi</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Status Kehadiran</strong></td>
+          <td>Hadir, Terlambat, Izin, Sakit, Alpha</td>
+          <td>Memilih "Terlambat" <strong>langsung menurunkan</strong> persentase kedisiplinan staf di Dashboard GM</td>
+        </tr>
+        <tr>
+          <td><strong>Keramahan Terlewat?</strong></td>
+          <td>Ya (Miss) / Tidak (Aman)</td>
+          <td>Memilih "Ya (Miss)" <strong>langsung menurunkan</strong> skor SOP Keramahan. Tidak muncul untuk posisi
+            Kitchen</td>
+        </tr>
+        <tr>
+          <td><strong>Catatan Khusus</strong></td>
+          <td>Teks bebas</td>
+          <td>Jelaskan alasan keterlambatan atau pelanggaran</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="35-tab-4-brief-evaluasi-shift--briefing"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#35-tab-4-brief-evaluasi-shift--briefing"><span class="octicon octicon-link"></span></a>3.5 Tab 4: BRIEF
+      (Evaluasi Shift &#x26; Briefing)</h3>
+    <p>Tab ini berisi analisis kualitatif Anda sebagai SPV. Kata-kata yang Anda ketik di sini akan dibaca oleh mesin
+      <em>Text Mining</em> di Dashboard GM.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Target Hari Ini</strong></td>
+          <td>"Capai 120 struk, fokus upselling dessert"</td>
+        </tr>
+        <tr>
+          <td><strong>Fokus Perilaku</strong></td>
+          <td>"Ingatkan tim untuk senyum dan tawarkan add-on"</td>
+        </tr>
+        <tr>
+          <td><strong>Masalah Shift Kemarin</strong></td>
+          <td>"Kulkas kurang dingin, es batu cepat cair"</td>
+        </tr>
+        <tr>
+          <td><strong>Solusi Disepakati</strong></td>
+          <td>"Sudah panggil teknisi, sementara pakai es dari luar"</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="36-tab-5-qc-quality-control-produk"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#36-tab-5-qc-quality-control-produk"><span class="octicon octicon-link"></span></a>3.6 Tab 5: QC (Quality
+      Control Produk)</h3>
+    <p>Dibagi menjadi dua bagian:</p>
+    <p><strong>A. QC Espresso (Wajib diisi setiap hari)</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Pilihan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Jam Kalibrasi</strong></td>
+          <td>Jam berapa grinder/espresso machine ditarik</td>
+        </tr>
+        <tr>
+          <td><strong>Kondisi</strong></td>
+          <td>Baik/Standar, Pahit/Bitter, Asam/Sour, Watery</td>
+        </tr>
+        <tr>
+          <td><strong>Keterangan Adjust</strong></td>
+          <td>Contoh: "Ubah grind size jadi 2.5, ekstraksi terlalu cepat"</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>B. QC Menu Lainnya (Tekan "TAMBAH ITEM" untuk menambah)</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Cara Mengisi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Jam</strong></td>
+          <td>Jam pengecekan</td>
+        </tr>
+        <tr>
+          <td><strong>Kategori &#x26; Produk</strong></td>
+          <td>Pilih Minuman/Makanan/Snack, lalu ketuk input produk untuk mencari nama menu</td>
+        </tr>
+        <tr>
+          <td><strong>Status Temuan</strong></td>
+          <td>Pilihan berubah sesuai kategori (misal: Makanan → "Tidak Fresh"; Minuman → "Layering Salah")</td>
+        </tr>
+        <tr>
+          <td><strong>Catatan Tindakan</strong></td>
+          <td>Langkah koreksi yang diambil</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="37-tab-6-bersih-inspeksi-kebersihan-8-area"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#37-tab-6-bersih-inspeksi-kebersihan-8-area"><span class="octicon octicon-link"></span></a>3.7 Tab 6:
+      BERSIH (Inspeksi Kebersihan 8 Area)</h3>
+    <p>Tab ini mewajibkan Anda menginspeksi <strong>8 area kafe</strong> satu per satu: Kaca, Lantai, Tembok, Toilet,
+      Wastafel, Parking Area, Bar, Musholah.</p>
+    <p>Setiap area berbentuk kotak lipatan (Accordion) yang harus Anda buka dan isi:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Pilihan</th>
+          <th>Dampak</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Status Kebersihan</strong></td>
+          <td>Bersih, Cukup Bersih, Kotor</td>
+          <td>Rata-rata dari 8 area ini membentuk <strong>Skor Kebersihan (Hygiene Score)</strong> di Dashboard GM</td>
+        </tr>
+        <tr>
+          <td><strong>Skor</strong></td>
+          <td>Otomatis terisi (Bersih=100, Cukup=70, Kotor=40), tapi Anda bisa ubah manual</td>
+          <td>Misal: area "Cukup Bersih" tapi hampir sempurna, Anda boleh ubah jadi 85</td>
+        </tr>
+        <tr>
+          <td><strong>Centang Alasan</strong></td>
+          <td>Kotak-kotak centang yang muncul otomatis sesuai area dan status</td>
+          <td>Cukup centang, tidak perlu mengetik — menghemat waktu Anda</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p>
+        <strong>Kenapa menggunakan centang, bukan ketik?</strong>
+        Fitur centang sengaja dipilih agar Anda lebih cepat selesai. Pilihan-pilihan yang tersedia diambil dari
+        <strong>catatan laporan fisik Zero Cafe sebelumnya</strong> — jadi semua pilihan memang relevan dengan kondisi
+        nyata di lapangan.
+      </p>
+    </blockquote>
+    <p>
+      <strong>Apa yang terjadi dengan data kebersihan ini?</strong>
+      Selain disimpan ke database utama, sistem juga otomatis <strong>mencetak PDF Checklist Kebersihan Harian</strong>
+      yang tersimpan permanen di Google Drive sebagai bukti fisik.
+    </p>
+    <h3 id="38-tab-7-komplain-laporan-keluhan-pelanggan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#38-tab-7-komplain-laporan-keluhan-pelanggan"><span class="octicon octicon-link"></span></a>3.8 Tab 7:
+      KOMPLAIN (Laporan Keluhan Pelanggan)</h3>
+    <p>Gunakan tombol <strong>"TAMBAH"</strong> untuk menambah baris insiden (bisa diulang tanpa batas). Gunakan tombol
+      <strong>"HAPUS"</strong> untuk menghapus baris jika salah.
+    </p>
+    <p><strong>Bagian Atas — Statistik:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Total Kasus Komplain</strong></td>
+          <td>Angka total komplain hari ini</td>
+        </tr>
+        <tr>
+          <td><strong>Total Remake</strong></td>
+          <td>Jumlah produk yang harus dibikin ulang</td>
+        </tr>
+        <tr>
+          <td><strong>Analisis Remake ≥3</strong></td>
+          <td>Kotak peringatan merah ini <strong>hanya muncul</strong> jika Total Remake 3 atau lebih. Anda wajib
+            jelaskan kenapa banyak gagal</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Bagian Bawah — Detail Per Komplain:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Jam &#x26; Inisial Pelanggan</strong></td>
+          <td>"14:30" dan "Bpk. A"</td>
+        </tr>
+        <tr>
+          <td><strong>Isi Komplain</strong></td>
+          <td>"Matcha terlalu manis"</td>
+        </tr>
+        <tr>
+          <td><strong>Tindakan (Respon)</strong></td>
+          <td>"Minta maaf, dibuatkan ulang yang baru"</td>
+        </tr>
+        <tr>
+          <td><strong>Checkbox Remake/Eskalasi</strong></td>
+          <td>Centang "Remake" jika produk dibikin ulang. Centang "Eskalasi GM" jika butuh perhatian owner</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="39-tab-8-fasilitas--bahan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#39-tab-8-fasilitas--bahan"><span class="octicon octicon-link"></span></a>3.9 Tab 8: FASILITAS &#x26;
+      BAHAN</h3>
+    <p>Tab ini merekam kerusakan alat dan kebutuhan belanja bahan habis pakai. Gunakan tombol <strong>"TAMBAH"</strong>
+      dan <strong>"HAPUS"</strong> sesuai kebutuhan.</p>
+    <p><strong>A. Fasilitas &#x26; Alat (Kerusakan)</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nama Alat/Fasilitas</strong></td>
+          <td>Contoh: "AC Lantai 1", "Grinder"</td>
+        </tr>
+        <tr>
+          <td><strong>Status Kerusakan</strong></td>
+          <td>Rusak Ringan / Rusak Sedang / Rusak Berat (Mati)</td>
+        </tr>
+        <tr>
+          <td><strong>Eskalasi GM?</strong></td>
+          <td>Tekan kotak merah jika butuh perbaikan cepat dari owner</td>
+        </tr>
+        <tr>
+          <td><strong>Keterangan Singkat</strong></td>
+          <td>Contoh: "Bocor freon, air menetes"</td>
+        </tr>
+        <tr>
+          <td><strong>Tombol Unggah Foto</strong></td>
+          <td>Ambil/lampirkan foto bukti kerusakan. Setelah unggah, berubah jadi "Lihat Foto" &#x26; "Hapus Foto"</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>B. Bahan &#x26; ATK Habis</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nama Bahan</strong></td>
+          <td>Contoh: "Sabun Cuci", "Tisu"</td>
+        </tr>
+        <tr>
+          <td><strong>Status Ketersediaan</strong></td>
+          <td>Contoh: "Habis", "Sisa 1 Botol"</td>
+        </tr>
+        <tr>
+          <td><strong>Estimasi Harga (Rp)</strong></td>
+          <td>Perkiraan biaya untuk reimburse</td>
+        </tr>
+        <tr>
+          <td><strong>Tombol Unggah Bukti</strong></td>
+          <td>Foto nota belanja atau kondisi barang yang kosong</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p>
+        <strong>Penyimpanan Foto Otomatis:</strong>
+        Semua foto yang Anda unggah akan otomatis tersortir ke folder yang benar di Google Drive:
+      </p>
+      <ul>
+        <li>Foto kerusakan alat → masuk folder <strong><code>Fasilitas</code></strong></li>
+        <li>Foto nota belanja/bahan → masuk folder <strong><code>Pengeluaran</code></strong></li>
+      </ul>
+      <p>Nama file juga otomatis diganti menjadi format cerdas, contoh: <code>18-07-ACLantai1-RusakBerat.jpg</code> —
+        sehingga GM mudah mencari di kemudian hari.</p>
+    </blockquote>
+    <h3 id="310-tab-9-tutup-kesimpulan--pengiriman"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#310-tab-9-tutup-kesimpulan--pengiriman"><span class="octicon octicon-link"></span></a>3.10 Tab 9: TUTUP
+      (Kesimpulan &#x26; Pengiriman)</h3>
+    <p>Ini adalah tab terakhir sebelum laporan dikirim.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Kendala Utama Hari Ini</strong></td>
+          <td>Ringkasan kesulitan paling mengganggu selama shift</td>
+        </tr>
+        <tr>
+          <td><strong>Rekomendasi / Saran</strong></td>
+          <td>Permintaan ke manajemen atau solusi strategis dari Anda</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Dua Tombol di Bawah:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Tombol</th>
+          <th>Fungsi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>BATAL</strong></td>
+          <td>Kembali ke Menu Utama. Data yang sudah diketik <strong>tidak hilang</strong> (tersimpan otomatis)</td>
+        </tr>
+        <tr>
+          <td><strong>KIRIM LAPORAN SOP</strong></td>
+          <td>Mengirim laporan ke server</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Apa yang terjadi saat Anda tekan "KIRIM"?</strong></p>
+    <ol>
+      <li><strong>Jika ada data yang belum lengkap:</strong> Muncul peringatan merah yang menyebutkan bagian mana yang
+        belum diisi. Laporan <strong>ditolak</strong> sampai Anda melengkapinya.</li>
+      <li><strong>Jika semua data lengkap:</strong> Muncul jendela <strong>Pratinjau (Preview)</strong> besar yang
+        menampilkan tampilan PDF laporan Anda. Periksa sekali lagi, lalu tekan <strong>"Kirim Final"</strong> di dalam
+        jendela tersebut.</li>
+    </ol>
+    <h3 id="311-fase-2-penyelesaian-keesokan-pagi"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#311-fase-2-penyelesaian-keesokan-pagi"><span class="octicon octicon-link"></span></a>3.11 Fase 2
+      (Penyelesaian Keesokan Pagi)</h3>
+    <p>Saat Anda membuka aplikasi keesokan harinya, jika ada Laporan Harian yang tertunda (Fase 1 sudah terkirim tapi
+      Fase 2 belum), sistem akan otomatis menampilkan formulir Fase 2.</p>
+    <p><strong>A. Data Keuangan Malam:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Omset Shift 2 (Rp)</strong></td>
+          <td>Penjualan shift malam. Otomatis dijumlahkan dengan Shift 1 untuk membentuk <strong>Total Omset
+              Harian</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Total Struk Transaksi</strong></td>
+          <td>Jumlah total struk hari itu (Shift 1 + Shift 2). Angka ini digunakan mesin AI untuk menghitung
+            <strong>Rata-rata Belanja per Pelanggan (ATS)</strong>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>B. Evaluasi Produk:</strong></p>
+    <p>Untuk setiap kategori (Minuman, Makanan, Snack):</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Top 5 Produk</strong></td>
+          <td>5 menu paling laris hari itu</td>
+        </tr>
+        <tr>
+          <td><strong>Bottom 3 Produk</strong></td>
+          <td>3 menu paling tidak laku</td>
+        </tr>
+        <tr>
+          <td><strong>Alasan Bottom 3</strong></td>
+          <td>Kenapa produk ini tidak laku (Contoh: "Bahan habis", "Tidak ada promo")</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>C. Operasional Malam:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Komplain Susulan (Malam)</strong></td>
+          <td>Jika ada insiden malam, tambahkan di sini (sama dengan Tab 7)</td>
+        </tr>
+        <tr>
+          <td><strong>Absensi &#x26; SOP Staf Malam</strong></td>
+          <td>Evaluasi kehadiran dan keramahan staf closing (sama dengan Tab 3)</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p>
+        <strong>Perlindungan Data Usang:</strong>
+        Jika besok Anda membuka aplikasi dan ternyata server sudah tidak punya catatan Fase 1 yang tertunda (misalnya
+        karena sudah diproses atau dibatalkan), tapi HP Anda masih menyimpan sisa data kemarin, sistem akan otomatis
+        <strong>membuang data usang tersebut</strong>. Ini mencegah data hari kemarin tercampur dengan hari ini.
+      </p>
+    </blockquote>
+    <hr>
+    <h2 id="bab-4-laporan-mingguan-evaluasi-taktis"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-4-laporan-mingguan-evaluasi-taktis"><span class="octicon octicon-link"></span></a>BAB 4: LAPORAN
+      MINGGUAN (EVALUASI TAKTIS)</h2>
+    <p>Laporan Mingguan diisi <strong>sekali setiap minggu</strong> dan berfungsi sebagai evaluasi taktis. Untuk
+      meringankan beban Anda, <strong>sebagian besar data kuantitatif ditarik secara otomatis</strong> dari laporan
+      harian.</p>
+    <h3 id="41-tab-1-identitas-rekap-omset--evaluasi-produk"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#41-tab-1-identitas-rekap-omset--evaluasi-produk"><span class="octicon octicon-link"></span></a>4.1 Tab 1:
+      Identitas, Rekap Omset &#x26; Evaluasi Produk</h3>
+    <p><strong>Langkah Pertama:</strong> Pilih <strong>Rentang Waktu</strong> (Dari Tanggal sampai Tanggal).</p>
+    <blockquote>
+      <p>
+        <strong>Peraturan 7 Hari:</strong>
+        Sistem mengunci pilihan rentang waktu agar <strong>tepat 7 hari</strong> (misal: Senin sampai Minggu). Jika Anda
+        memilih kurang atau lebih dari 7 hari, akan muncul <strong>peringatan merah</strong> yang memblokir proses
+        selanjutnya.
+      </p>
+    </blockquote>
+    <p>Setelah rentang valid, sistem menarik data otomatis:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Apa yang Muncul Otomatis</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Tabel Rekap Omset (7 Hari)</strong></td>
+          <td>Anda <strong>tidak perlu mengetik</strong> — tabel ini terisi otomatis dengan data Target &#x26; Omset per
+            hari</td>
+        </tr>
+        <tr>
+          <td><strong>Total Target &#x26; Aktual</strong></td>
+          <td>Penjumlahan otomatis 7 hari</td>
+        </tr>
+        <tr>
+          <td><strong>Bar Indikator (Warna)</strong></td>
+          <td>Hijau (≥100%), Oranye (80-99%), Merah (&#x3C;80%)</td>
+        </tr>
+        <tr>
+          <td><strong>Evaluasi Produk (Minuman, Makanan, Snack)</strong></td>
+          <td>Top 5 dan Bottom 3 per kategori — ditarik otomatis dari laporan harian Anda</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi Sendiri</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Rencana Tindakan (Action Plan)</strong></td>
+          <td>Satu-satunya kolom yang harus diketik. Tulis strategi Anda untuk minggu depan berdasarkan data yang sudah
+            tersaji</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="42-tab-2-komplain--evaluasi-performa-staf"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#42-tab-2-komplain--evaluasi-performa-staf"><span class="octicon octicon-link"></span></a>4.2 Tab 2:
+      Komplain &#x26; Evaluasi Performa Staf</h3>
+    <p><strong>A. Komplain &#x26; Kendala Mingguan:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Total Kasus Komplain</strong></td>
+          <td>Isi sendiri (bukan otomatis — agar Anda sadar menghitung)</td>
+        </tr>
+        <tr>
+          <td><strong>Total Remake</strong></td>
+          <td>Angka berwarna merah (setiap remake = kerugian bahan baku)</td>
+        </tr>
+        <tr>
+          <td><strong>Penyebab Utama Komplain</strong></td>
+          <td>Sengaja teks bebas — Anda harus menyimpulkan akar masalah</td>
+        </tr>
+        <tr>
+          <td><strong>Kendala Utama Berulang</strong></td>
+          <td>Masalah yang terus muncul selama 7 hari</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>B. Evaluasi Performa Staf:</strong></p>
+    <p>Sistem akan menampilkan daftar nama staf outlet Anda. Setiap nama berbentuk kotak lipatan (Accordion):</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Pilihan</th>
+          <th>Dampak</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Status Penilaian</strong></td>
+          <td><strong>Berkembang</strong> (ada inisiatif, belajar cepat), <strong>Stagnan</strong> (sekadar selesai,
+            zona nyaman), <strong>Menurun</strong> (sering telat, lambat)</td>
+          <td>Data ini menjadi pondasi GM untuk keputusan gaji, bonus, atau SP</td>
+        </tr>
+        <tr>
+          <td><strong>Keterangan (Kendala &#x26; Planning)</strong></td>
+          <td>Wajib dirincikan: apa kemajuan/kendalanya, dan rencana pelatihan minggu depan</td>
+          <td>Contoh: "Sudah lancar kasir. Planning: minggu depan ajarkan kalibrasi grinder"</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="43-tab-3-rencana-perbaikan-tim--pengiriman"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#43-tab-3-rencana-perbaikan-tim--pengiriman"><span class="octicon octicon-link"></span></a>4.3 Tab 3:
+      Rencana Perbaikan Tim &#x26; Pengiriman</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Rencana Perbaikan Tim</strong></td>
+          <td>Tindakan nyata yang akan Anda lakukan minggu depan</td>
+        </tr>
+        <tr>
+          <td><strong>Kebutuhan SPV / Tim</strong></td>
+          <td>Alat atau dukungan yang dibutuhkan (Contoh: "Butuh lakban", "Butuh training menu baru")</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Gunakan tombol <strong>"TAMBAH"</strong> untuk menambah baris jika rencana/kebutuhan lebih dari satu.</p>
+    <p><strong>Tiga Tombol Bawah:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Tombol</th>
+          <th>Fungsi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SIMPAN DRAFT</strong></td>
+          <td>Menyimpan semua isian di memori browser. Bisa dilanjutkan besok</td>
+        </tr>
+        <tr>
+          <td><strong>EXPORT PDF</strong></td>
+          <td>Mengunduh PDF ke HP Anda sebagai arsip pribadi (tidak mengirim ke server)</td>
+        </tr>
+        <tr>
+          <td><strong>TINJAU &#x26; KIRIM LAPORAN</strong></td>
+          <td>Validasi data → jika lengkap, tampilkan Preview → Kirim Final</td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2 id="bab-5-laporan-bulanan-evaluasi-strategis"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-5-laporan-bulanan-evaluasi-strategis"><span class="octicon octicon-link"></span></a>BAB 5: LAPORAN
+      BULANAN (EVALUASI STRATEGIS)</h2>
+    <p>Laporan Bulanan bersifat <strong>strategis</strong> dan menuntut Anda untuk mengevaluasi diri sendiri secara
+      mendalam (Self-Reflection).</p>
+    <h3 id="51-tab-1-ringkasan--sales"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#51-tab-1-ringkasan--sales"><span class="octicon octicon-link"></span></a>5.1 Tab 1: Ringkasan &#x26;
+      Sales</h3>
+    <p><strong>A. Identitas &#x26; Periode (Bagian Terpenting)</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Peringatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nama Supervisor</strong></td>
+          <td>Nama Anda</td>
+        </tr>
+        <tr>
+          <td><strong>Outlet</strong></td>
+          <td>Pilih outlet Anda</td>
+        </tr>
+        <tr>
+          <td><strong>Bulan Laporan</strong></td>
+          <td><strong>HATI-HATI!</strong> Begitu Anda memilih bulan, sistem langsung menarik semua data harian di bulan
+            tersebut. Jika salah pilih bulan, semua angka di bawahnya akan salah</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>B. Metrik Penjualan (Kotak Hitam)</strong></p>
+    <p>Angka-angka ini muncul otomatis dalam desain kotak hitam elegan:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Muncul Otomatis</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Total Sales Real (Rp)</strong></td>
+          <td>Penjumlahan seluruh omset harian di bulan tersebut</td>
+        </tr>
+        <tr>
+          <td><strong>Target Sales (Rp)</strong></td>
+          <td>Diambil dari target yang Anda atur di Pengaturan Parameter</td>
+        </tr>
+        <tr>
+          <td><strong>Persentase Pencapaian</strong></td>
+          <td>Contoh: <strong>119%</strong> berarti Anda melebihi target</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>C. Ringkasan Eksekutif (Ketik Sendiri)</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Pencapaian Utama Bulan Ini</strong></td>
+          <td>"Berhasil melampaui target sales hingga 110%"</td>
+        </tr>
+        <tr>
+          <td><strong>Masalah / Isu Utama</strong></td>
+          <td>"Sering terjadi pemadaman listrik di minggu ke-2"</td>
+        </tr>
+        <tr>
+          <td><strong>Kesimpulan Keseluruhan</strong></td>
+          <td>Opini Anda mengenai operasional bulan ini</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>D. Evaluasi Produk (4 Accordion: Minuman, Makanan, Snack, Lainnya)</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Muncul Otomatis</th>
+          <th>Yang Harus Anda Isi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Top 5 Produk</strong> (tidak bisa diedit)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>Bottom 3 Produk</strong> (tidak bisa diedit)</td>
+          <td><strong>Rencana untuk setiap produk mati:</strong> "Bikin Bundling", "Hapus dari menu", atau "Tingkatkan
+            rasa"</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="52-tab-2-staff--quality-control"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#52-tab-2-staff--quality-control"><span class="octicon octicon-link"></span></a>5.2 Tab 2: Staff &#x26;
+      Quality Control</h3>
+    <p><strong>A. Evaluasi Operasional Staf:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Muncul Otomatis</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>% Kepatuhan SOP</strong></td>
+          <td>Rata-rata dari audit mingguan (tidak bisa diubah)</td>
+        </tr>
+        <tr>
+          <td><strong>Total Telat (Kali)</strong></td>
+          <td>Berwarna merah tebal. Akumulasi sebulan penuh (tidak bisa diubah)</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SP / Teguran Keluar</strong></td>
+          <td>Berapa kali Anda mengeluarkan Surat Peringatan bulan ini</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>B. Turnover (Karyawan Resign):</strong></p>
+    <p>Jika ada staf yang keluar bulan ini:</p>
+    <ol>
+      <li>Tekan tombol <strong>"+ Tambah Staf Resign"</strong></li>
+      <li>Isi nama, alasan, dan tanggal efektif</li>
+      <li>Setiap nama muncul sebagai kartu putih dengan tombol hapus (jika salah input)</li>
+    </ol>
+    <blockquote>
+      <p><strong>Sinkronisasi Otomatis:</strong> Saat Anda mengirim laporan bulanan dengan daftar resign, sistem
+        otomatis mengubah status staf tersebut di database utama menjadi "Resign". Anda tidak perlu menghapusnya manual
+        di Pengaturan.</p>
+    </blockquote>
+    <p><strong>C. Evaluasi Individu Staf (Sistem Hybrid AI):</strong></p>
+    <p>Di bagian ini, sistem memberikan <strong>saran awal</strong> untuk setiap staf berdasarkan rata-rata nilai
+      mingguan:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kolom</th>
+          <th>Cara Kerja</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Status Penilaian</strong></td>
+          <td>Sudah terisi otomatis oleh sistem (misal: "Stagnan"). Tapi Anda <strong>boleh mengubahnya</strong> jika
+            merasa staf layak nilai lebih baik atau lebih buruk</td>
+        </tr>
+        <tr>
+          <td><strong>Catatan / Alasan</strong></td>
+          <td>Ruang bagi Anda untuk menulis "rapor akhir" staf tersebut</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>D. Rekap QC &#x26; Komplain:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Muncul Otomatis</th>
+          <th>Yang Harus Anda Isi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Total Kasus Komplain (sebulan)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Total Remake Produk (sebulan)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><strong>Evaluasi QC Espresso:</strong> Konsistensi rasa kopi sebulan terakhir</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td><strong>QC Produk Lainnya:</strong> Tekan "+ TAMBAH" untuk menambah evaluasi per menu</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="53-tab-3-evaluasi--rencana-strategis"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#53-tab-3-evaluasi--rencana-strategis"><span class="octicon octicon-link"></span></a>5.3 Tab 3: Evaluasi
+      &#x26; Rencana Strategis</h3>
+    <p><strong>A. Fasilitas &#x26; Inventaris:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Total Pengeluaran Perbaikan (Rp)</strong></td>
+          <td>Uang yang habis untuk servis alat bulan ini</td>
+        </tr>
+        <tr>
+          <td><strong>Kerusakan Belum Selesai</strong></td>
+          <td>Laporan alat yang masih rusak dan butuh tindakan</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>B. Strategi Bulan Depan:</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Fokus &#x26; Strategi Utama</strong></td>
+          <td>Janji Anda untuk bulan depan</td>
+        </tr>
+        <tr>
+          <td><strong>Kebutuhan Supervisor</strong></td>
+          <td>Dukungan yang dibutuhkan dari owner</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>C. Evaluasi Mandiri (Paling Pribadi):</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yang Harus Anda Isi</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Pencapaian Terbaik Pribadi</strong></td>
+          <td>Apa yang Anda banggakan bulan ini</td>
+        </tr>
+        <tr>
+          <td><strong>Tantangan Tersulit</strong></td>
+          <td>Pengakuan jujur tentang kelemahan Anda</td>
+        </tr>
+        <tr>
+          <td><strong>Skill Yang Ingin Ditingkatkan</strong></td>
+          <td>Area kemampuan yang ingin diasah</td>
+        </tr>
+        <tr>
+          <td><strong>Rating Kinerja Sendiri (1-10)</strong></td>
+          <td>Geser slider untuk merating diri sendiri</td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2 id="bab-6-pengaturan--master-data"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-6-pengaturan--master-data"><span class="octicon octicon-link"></span></a>BAB 6: PENGATURAN &#x26;
+      MASTER DATA</h2>
+    <p>Halaman ini adalah <strong>ruang kendali administratif</strong> yang wajib Anda kunjungi setiap awal bulan.</p>
+    <h3 id="61-target-omset-bulanan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#61-target-omset-bulanan"><span class="octicon octicon-link"></span></a>6.1 Target Omset Bulanan</h3>
+    <p><strong>Fakta Penting:</strong> Angka target omset <strong>TIDAK di-set oleh owner</strong>. Wewenang ini
+      didelegasikan penuh kepada Anda (SPV). <strong>Jika Anda lupa memasang target, semua persentase pencapaian di
+        aplikasi akan membaca 0%.</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kolom</th>
+          <th>Cara Mengisi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Outlet</strong></td>
+          <td>Terkunci otomatis dari PIN login</td>
+        </tr>
+        <tr>
+          <td><strong>Bulan &#x26; Tahun</strong></td>
+          <td>Pilih untuk bulan mana target ini berlaku</td>
+        </tr>
+        <tr>
+          <td><strong>Total Target (Rp)</strong></td>
+          <td>Ketik angka. Sistem otomatis menambahkan titik ribuan saat Anda mengetik</td>
+        </tr>
+        <tr>
+          <td><strong>Tombol SIMPAN TARGET</strong></td>
+          <td>Tekan dan tunggu animasi loading selesai</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="62-kalender-event--faktor-eksternal"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#62-kalender-event--faktor-eksternal"><span class="octicon octicon-link"></span></a>6.2 Kalender Event
+      &#x26; Faktor Eksternal</h3>
+    <p>Alat untuk melaporkan kejadian luar biasa yang mempengaruhi trafik pengunjung kepada GM.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kolom</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Kategori Event</strong></td>
+          <td>Kalender Akademik (Kampus), Event Lokal / Festival, Lainnya</td>
+        </tr>
+        <tr>
+          <td><strong>Nama Event</strong></td>
+          <td>"UAS Universitas Hasanuddin" atau "Hujan Badai 3 Hari"</td>
+        </tr>
+        <tr>
+          <td><strong>Tanggal Mulai &#x26; Selesai</strong></td>
+          <td>Pilih dari kalender. Data ini digunakan mesin AI GM untuk menjelaskan naik-turunnya omset</td>
+        </tr>
+        <tr>
+          <td><strong>Tombol SIMPAN PARAMETER</strong></td>
+          <td>Setelah disimpan, event muncul di daftar bawah. Bisa dihapus kapan saja</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="63-kelola-staf-outlet"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#63-kelola-staf-outlet"><span class="octicon octicon-link"></span></a>6.3 Kelola Staf Outlet</h3>
+    <p>Tombol hitam panjang di bagian bawah layar bertuliskan <strong>"KELOLA STAF OUTLET"</strong>:</p>
+    <ul>
+      <li>Menambahkan staf baru ke database</li>
+      <li>Mengubah status staf menjadi "Resign"</li>
+      <li>Perubahan di sini langsung mempengaruhi daftar nama yang muncul saat Anda mengisi laporan kinerja staf</li>
+    </ul>
+    <hr>
+    <h1 id="bagian-iii--panduan-general-manager-gm--owner"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bagian-iii--panduan-general-manager-gm--owner"><span class="octicon octicon-link"></span></a>BAGIAN III —
+      PANDUAN GENERAL MANAGER (GM / OWNER)</h1>
+    <blockquote>
+      <p><strong>Catatan untuk GM:</strong> Bagian ini ditulis khusus untuk Anda sebagai pemilik. Fokus pada cara
+        membaca dan menginterpretasikan data yang ditampilkan sistem.</p>
+    </blockquote>
+    <hr>
+    <h2 id="bab-7-dashboard-tab-1--keuangan--ringkasan-kpi"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-7-dashboard-tab-1--keuangan--ringkasan-kpi"><span class="octicon octicon-link"></span></a>BAB 7:
+      DASHBOARD TAB 1 — KEUANGAN &#x26; RINGKASAN KPI</h2>
+    <p>Ini adalah layar pertama yang Anda lihat setelah login. Fungsinya: <strong>dalam 10 detik, Anda sudah tahu
+        kondisi kafe</strong>.</p>
+    <h3 id="71-pengaturan-filter-bagian-atas"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#71-pengaturan-filter-bagian-atas"><span class="octicon octicon-link"></span></a>7.1 Pengaturan Filter
+      (Bagian Atas)</h3>
+    <p>Sebelum data muncul, Anda perlu memilih:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Filter</th>
+          <th>Fungsi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Tanggal Mulai &#x26; Selesai</strong></td>
+          <td>Rentang waktu data yang ingin dilihat</td>
+        </tr>
+        <tr>
+          <td><strong>Outlet</strong></td>
+          <td>Perintis, Dg Tata, atau Semua</td>
+        </tr>
+        <tr>
+          <td><strong>Tombol "Simpan &#x26; Tarik Analisis"</strong></td>
+          <td>Memerintahkan sistem menarik data dari database</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="72-mode-waktu-otomatis-smart-briefing-mode"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#72-mode-waktu-otomatis-smart-briefing-mode"><span class="octicon octicon-link"></span></a>7.2 Mode Waktu
+      Otomatis (Smart Briefing Mode)</h3>
+    <p>Sistem secara cerdas mendeteksi berapa hari rentang waktu yang Anda pilih, dan menyesuaikan gaya analisis:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Lencana Mode</th>
+          <th>Rentang</th>
+          <th>Fokus Analisis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>MODE OPERASIONAL (Biru)</strong></td>
+          <td>≤ 7 Hari</td>
+          <td>Evaluasi harian, deteksi anomali cuaca &#x26; staf</td>
+        </tr>
+        <tr>
+          <td><strong>MODE TAKTIS (Ungu)</strong></td>
+          <td>8 – 95 Hari</td>
+          <td>Tren mingguan/bulanan, kinerja SPV</td>
+        </tr>
+        <tr>
+          <td><strong>MODE STRATEGIS (Ungu Tua)</strong></td>
+          <td>> 95 Hari</td>
+          <td>Strategi makro bisnis, pertumbuhan tahunan. Beberapa modul detail otomatis disembunyikan agar data tidak
+            bising</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="73-ai-summary-kotak-warna-di-bagian-atas"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#73-ai-summary-kotak-warna-di-bagian-atas"><span class="octicon octicon-link"></span></a>7.3 AI Summary
+      (Kotak Warna di Bagian Atas)</h3>
+    <p>Kotak ini adalah <strong>kesimpulan eksekutif instan</strong> yang dihasilkan mesin AI. Warna kotak menunjukkan
+      tingkat urgensi:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Warna</th>
+          <th>Artinya</th>
+          <th>Contoh Pesan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Hijau</strong></td>
+          <td>Semuanya aman</td>
+          <td>"Momen Emas: Peluang mencetak rekor omset"</td>
+        </tr>
+        <tr>
+          <td><strong>Biru</strong></td>
+          <td>Normal, tidak ada anomali</td>
+          <td>"Kinerja stabil tanpa anomali"</td>
+        </tr>
+        <tr>
+          <td><strong>Kuning</strong></td>
+          <td>Ada peringatan, perlu perhatian</td>
+          <td>"Trafik padat, daya beli rendah (Event + Tanggal Tua)"</td>
+        </tr>
+        <tr>
+          <td><strong>Merah</strong></td>
+          <td>Kritis, butuh tindakan segera</td>
+          <td>"Batas Kelelahan Tim tercapai" atau "Prediksi staf resign mendadak"</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p><strong>Penting:</strong> Pesan AI ini bukan sekadar teks acak. Sistem menjalankan <strong>4 algoritma
+          berbeda</strong> yang memeriksa silang antara omset, kebersihan, cuaca, kehadiran staf, dan event lokal.
+        Penjelasan detail ada di BAB 10.</p>
+    </blockquote>
+    <h3 id="74-total-omset--target"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#74-total-omset--target"><span class="octicon octicon-link"></span></a>7.4 Total Omset &#x26; Target</h3>
+    <p>Kotak hitam elegan yang menampilkan:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Angka</th>
+          <th>Sumber Data</th>
+          <th>Cara Membaca</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Total Omset (Rp)</strong></td>
+          <td>Penjumlahan Omset Shift 1 + Shift 2 dari semua laporan harian</td>
+          <td>Uang riil yang masuk pada periode yang Anda pilih</td>
+        </tr>
+        <tr>
+          <td><strong>Tren MoM (±%)</strong></td>
+          <td>Perbandingan dengan bulan lalu</td>
+          <td>Lencana kecil hijau (naik) atau merah (turun) di sebelah angka omset</td>
+        </tr>
+        <tr>
+          <td><strong>Target Omset (Rp) + Bar</strong></td>
+          <td>Dari Pengaturan Parameter SPV</td>
+          <td>Bar hijau bergerak proporsional 0-100%</td>
+        </tr>
+        <tr>
+          <td><strong>YTD Trajectory (Rp &#x26; %)</strong></td>
+          <td>Akumulasi 1 Januari s/d hari ini vs Target Tahunan</td>
+          <td>Menunjukkan apakah bisnis on-track untuk mencapai target tahun ini. Target tahunan diatur oleh Anda di
+            <strong>Pengaturan GM</strong>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="75-metrik-transaksi--grafik"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#75-metrik-transaksi--grafik"><span class="octicon octicon-link"></span></a>7.5 Metrik Transaksi &#x26;
+      Grafik</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Komponen</th>
+          <th>Sumber Data</th>
+          <th>Cara Membaca</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Total Transaksi</strong></td>
+          <td>Total struk dari Fase 2</td>
+          <td>Jumlah pelanggan yang berhasil dilayani</td>
+        </tr>
+        <tr>
+          <td><strong>Average Ticket Size (ATS)</strong></td>
+          <td><code>Total Omset ÷ Total Transaksi</code></td>
+          <td>Rata-rata belanja per pelanggan. Semakin besar = semakin pintar staf membujuk pelanggan belanja lebih</td>
+        </tr>
+        <tr>
+          <td><strong>Trend Line Chart</strong></td>
+          <td>Omset per hari (garis waktu)</td>
+          <td>Lihat di tanggal berapa omset anjlok atau meroket</td>
+        </tr>
+        <tr>
+          <td><strong>Day of Week (Bar Chart)</strong></td>
+          <td>Rata-rata omset per nama hari (Senin, Selasa, dst.)</td>
+          <td><strong>Hari Terlemah</strong> = target promo. <strong>Hari Terkuat</strong> = siapkan staf penuh</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p>Di bawah grafik Day of Week, terdapat <strong>Rekomendasi AI</strong> berupa 3 pilar saran otomatis (SDM,
+        Marketing, Maintenance) yang menggunakan nama hari terlemah Anda.</p>
+    </blockquote>
+    <h3 id="76-ringkasan-4-kpi-utama"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#76-ringkasan-4-kpi-utama"><span class="octicon octicon-link"></span></a>7.6 Ringkasan 4 KPI Utama</h3>
+    <p>Empat kotak besar yang menampilkan detak jantung bisnis Anda:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kotak</th>
+          <th>Sumber Data</th>
+          <th>Kapan Warna Berubah Merah</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SOP Keramahan</strong></td>
+          <td>Rata-rata dari audit SPV harian</td>
+          <td>Jika &#x3C; 90%</td>
+        </tr>
+        <tr>
+          <td><strong>Target Penjualan</strong></td>
+          <td>Omset Aktual vs Target</td>
+          <td>Jika aktual di bawah target</td>
+        </tr>
+        <tr>
+          <td><strong>Komplain Bulanan</strong></td>
+          <td>Hitungan form komplain</td>
+          <td>Jika > 2 komplain sebulan</td>
+        </tr>
+        <tr>
+          <td><strong>Turnover Barista</strong></td>
+          <td>Form evaluasi bulanan SPV</td>
+          <td>Jika > 1 staf keluar per kuartal</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Di atas 4 kotak ini terdapat <strong>Skor Operasional (0-100)</strong> dengan label EXCELLENT / GOOD / ATTENTION
+      / CRITICAL. Skor ini dihitung dari formula:</p>
+    <pre><code class="code-highlight"><span class="code-line line-number" line="1">Skor Operasional = (Pencapaian Target × 50%) + (Skor Kebersihan × 30%) + (Kepatuhan SOP × 20%)
+</span></code><div onclick="copied(this)" data-code="Skor Operasional = (Pencapaian Target × 50%) + (Skor Kebersihan × 30%) + (Kepatuhan SOP × 20%)
+" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+    <table>
+      <thead>
+        <tr>
+          <th>Skor</th>
+          <th>Label</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>≥ 85</td>
+          <td>EXCELLENT</td>
+        </tr>
+        <tr>
+          <td>≥ 70</td>
+          <td>GOOD</td>
+        </tr>
+        <tr>
+          <td>≥ 50</td>
+          <td>ATTENTION</td>
+        </tr>
+        <tr>
+          <td>&#x3C; 50</td>
+          <td>CRITICAL</td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2 id="bab-8-dashboard-tab-2--operasional--layanan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-8-dashboard-tab-2--operasional--layanan"><span class="octicon octicon-link"></span></a>BAB 8:
+      DASHBOARD TAB 2 — OPERASIONAL &#x26; LAYANAN</h2>
+    <p>Tab ini memindahkan fokus Anda dari angka keuangan ke <strong>kondisi fisik kafe dan kualitas pelayanan</strong>.
+    </p>
+    <h3 id="81-ai-insight-kebersihan-higienisitas"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#81-ai-insight-kebersihan-higienisitas"><span class="octicon octicon-link"></span></a>8.1 AI Insight:
+      Kebersihan (Higienisitas)</h3>
+    <p>Kotak ini menampilkan lingkaran persentase skor kebersihan rata-rata, disertai kesimpulan otomatis:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kondisi</th>
+          <th>Pesan AI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Omset tembus target, tapi kebersihan &#x3C; 95%</td>
+          <td><strong>"Sales Naik, SOP Turun"</strong> — Tim kelelahan, kebersihan terbengkalai saat ramai</td>
+        </tr>
+        <tr>
+          <td>Omset gagal, dan kebersihan &#x3C; 95%</td>
+          <td><strong>"Peringatan Ganda"</strong> — Butuh intervensi segera</td>
+        </tr>
+        <tr>
+          <td>Semua beres (SOP > 95%)</td>
+          <td><strong>"The Good Standard"</strong> — Standar terjaga</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="82-area-kritis-kebersihan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#82-area-kritis-kebersihan"><span class="octicon octicon-link"></span></a>8.2 Area Kritis (Kebersihan)
+    </h3>
+    <p>Jika ada area kafe yang skornya di bawah 95%, sistem menampilkannya di sini dalam kotak merah menyala:</p>
+    <ul>
+      <li>Contoh: "1. Toilet (Skor: 90%) — Bersih"</li>
+      <li>Anda langsung tahu titik lemah outlet tanpa perlu membaca laporan panjang</li>
+    </ul>
+    <h3 id="83-galeri-pengeluaran-bahan--atk"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#83-galeri-pengeluaran-bahan--atk"><span class="octicon octicon-link"></span></a>8.3 Galeri Pengeluaran
+      (Bahan &#x26; ATK)</h3>
+    <p>Tampilan geser horizontal (<em>slider</em>) yang menampilkan foto nota belanja SPV beserta nama item dan
+      harganya.</p>
+    <ul>
+      <li>Jika kosong: "Aman. Tidak ada pengeluaran di periode ini"</li>
+      <li>Klik foto untuk memperbesar (verifikasi nota, cegah fraud nota fiktif)</li>
+    </ul>
+    <h3 id="84-maintenance--eskalasi-fasilitas"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#84-maintenance--eskalasi-fasilitas"><span class="octicon octicon-link"></span></a>8.4 Maintenance &#x26;
+      Eskalasi Fasilitas</h3>
+    <p>Galeri foto berwarna kemerahan berisi aset yang butuh perbaikan:</p>
+    <ul>
+      <li>Menampilkan foto kerusakan yang diunggah SPV</li>
+      <li>Jika item ditandai "Eskalasi GM" oleh SPV, muncul di sini</li>
+      <li>Jumlah tiket eskalasi tertulis di pojok kanan</li>
+    </ul>
+    <h3 id="85-statistik-komplain--qc"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#85-statistik-komplain--qc"><span class="octicon octicon-link"></span></a>8.5 Statistik Komplain &#x26; QC
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Total Komplain</th>
+          <th>Warna</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>Hijau (Aman)</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Kuning (Waspada)</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Oranye (Batas Maksimal)</td>
+        </tr>
+        <tr>
+          <td>> 2</td>
+          <td><strong>Merah (KPI Dilanggar)</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2 id="bab-9-dashboard-tab-3--sdm--evaluasi"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-9-dashboard-tab-3--sdm--evaluasi"><span class="octicon octicon-link"></span></a>BAB 9: DASHBOARD TAB
+      3 — SDM &#x26; EVALUASI</h2>
+    <p>Tab ini menggantikan rutinitas meeting bulanan. Anda bisa langsung melihat siapa SPV yang berkinerja baik dan
+      siapa yang perlu dievaluasi.</p>
+    <blockquote>
+      <p><strong>Catatan:</strong> Beberapa bagian di tab ini otomatis <strong>disembunyikan</strong> jika Anda sedang
+        di Mode Strategis (>95 hari). Ini disengaja agar data tahunan tidak terdistorsi oleh pergantian staf.</p>
+    </blockquote>
+    <h3 id="91-kesehatan-tim--aset"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#91-kesehatan-tim--aset"><span class="octicon octicon-link"></span></a>9.1 Kesehatan Tim &#x26; Aset</h3>
+    <p>4 indikator kesehatan tim:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Indikator</th>
+          <th>Sumber Data</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SOP Keramahan Staf (%)</td>
+          <td>Rata-rata dari laporan harian</td>
+          <td>Warna berubah sesuai persentase</td>
+        </tr>
+        <tr>
+          <td>Total Telat</td>
+          <td>Hitungan dari database kehadiran</td>
+          <td>Berubah merah jika sering</td>
+        </tr>
+        <tr>
+          <td>Teguran (SP)</td>
+          <td>Dari laporan bulanan SPV</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Turnover</td>
+          <td>Dari laporan bulanan SPV</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="92-cash-discrepancy-fingerprint-minus-kas"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#92-cash-discrepancy-fingerprint-minus-kas"><span class="octicon octicon-link"></span></a>9.2 Cash
+      Discrepancy Fingerprint (Minus Kas)</h3>
+    <blockquote>
+      <p>Hanya muncul di Mode Taktis (&#x3C; 95 hari).</p>
+    </blockquote>
+    <p>Jika sering terjadi uang kas minus, sistem menghitung <strong>frekuensi kehadiran setiap staf</strong> pada
+      hari-hari saat kas minus terjadi. Hasilnya ditampilkan sebagai grafik batang:</p>
+    <ul>
+      <li>Jika satu nama menjulang tinggi, itu adalah <strong>indikator potensi evaluasi</strong> (bukan tuduhan
+        langsung — lihat BAB 10 untuk penjelasan algoritma)</li>
+      <li>Contoh: "Total Minus Rp 200.000. Terjadi saat Amel bertugas 26 kali, Eko 17 kali"</li>
+    </ul>
+    <h3 id="93-revenue-per-spv-shift-leaderboard"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#93-revenue-per-spv-shift-leaderboard"><span class="octicon octicon-link"></span></a>9.3 Revenue Per SPV
+      Shift (Leaderboard)</h3>
+    <p>Menghitung rata-rata omset per shift jaga tiap SPV:</p>
+    <ul>
+      <li>Membedakan secara nyata mana SPV yang hanya bisa mengatur jadwal, dan mana SPV yang pandai menjual (upselling)
+      </li>
+    </ul>
+    <h3 id="94-dominasi-topik-briefing-spv"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#94-dominasi-topik-briefing-spv"><span class="octicon octicon-link"></span></a>9.4 Dominasi Topik Briefing
+      SPV</h3>
+    <p>Sistem menghitung kata kunci yang paling sering muncul di topik briefing SPV:</p>
+    <ul>
+      <li>Contoh: kata "Bersih" sering disebut, tapi skor kebersihan tetap buruk → <strong>"Eksekusi di lapangan
+          lemah"</strong></li>
+    </ul>
+    <h3 id="95-pandangan-ke-depan--evaluasi-spv"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#95-pandangan-ke-depan--evaluasi-spv"><span class="octicon octicon-link"></span></a>9.5 Pandangan Ke Depan
+      &#x26; Evaluasi SPV</h3>
+    <p>Berisi isi pikiran SPV dari laporan bulanan mereka:</p>
+    <ul>
+      <li><strong>Strategi Bulan Depan</strong> yang direncakanan SPV</li>
+      <li><strong>Kebutuhan Approval GM</strong> — apa yang mereka minta dari Anda</li>
+      <li><strong>Pencapaian Terbaik &#x26; Tantangan Tersulit</strong> — kejujuran dari lapangan</li>
+    </ul>
+    <h3 id="96-arsip-laporan-pdf"><a class="anchor" aria-hidden="true" tabindex="-1" href="#96-arsip-laporan-pdf"><span
+          class="octicon octicon-link"></span></a>9.6 Arsip Laporan PDF</h3>
+    <p>Menu accordion di bagian paling bawah Dashboard. Berisi daftar historis semua PDF laporan yang pernah dikirim
+      SPV:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kolom</th>
+          <th>Fungsi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Judul &#x26; Tanggal Upload</td>
+          <td>Nama file dan waktu submit</td>
+        </tr>
+        <tr>
+          <td>Tombol PDF</td>
+          <td>Klik untuk membuka atau mengunduh PDF dari Google Drive</td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h3 id="97-marketing-intelligence-tab-1--bagian-bawah"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#97-marketing-intelligence-tab-1--bagian-bawah"><span class="octicon octicon-link"></span></a>9.7
+      Marketing Intelligence (Tab 1 — Bagian Bawah)</h3>
+    <p>Modul analisis lanjutan yang dipicu dengan tombol <strong>"Simpan &#x26; Tarik Analisis"</strong>. Terdapat
+      pengaturan <strong>Benchmark ATS</strong> (default Rp 30.000) yang bisa Anda ubah.</p>
+    <p>Setelah tombol ditekan, muncul 5 modul dalam bentuk kotak lipatan (<em>accordion</em>):</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Modul</th>
+          <th>Diagram</th>
+          <th>Cara Membaca</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Tren Omset</strong></td>
+          <td>Bar Chart Hitam</td>
+          <td>Hijau jika naik ≥5%, Merah jika turun ≤-5%, Kuning jika stagnan</td>
+        </tr>
+        <tr>
+          <td><strong>Korelasi Kebersihan &#x26; Omset</strong></td>
+          <td>Dual-Axis Chart (Garis + Bar)</td>
+          <td>"The Perfect Storm" = Ramai tapi kotor. "The Lazy Shift" = Sepi dan kotor</td>
+        </tr>
+        <tr>
+          <td><strong>SDM &#x26; Risiko Operasional</strong></td>
+          <td>Donut Chart (Pie Berlubang)</td>
+          <td>Hijau = Tepat Waktu, Merah = Terlambat, Abu = Izin/Alpha</td>
+        </tr>
+        <tr>
+          <td><strong>Benchmarking ATS</strong></td>
+          <td>Bar Horizontal (Aktual vs Target)</td>
+          <td>Melebihi benchmark = upselling berhasil</td>
+        </tr>
+        <tr>
+          <td><strong>Analisis Menu</strong></td>
+          <td>Bar Horizontal (Hijau = Hero, Oranye = Dead)</td>
+          <td>Produk konsisten terlaris vs produk konsisten mati</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Di bawah 5 modul ini juga terdapat ringkasan:</p>
+    <ul>
+      <li><strong>Profil Pengunjung Mayoritas</strong> — misal: "Mahasiswa Nugas"</li>
+      <li><strong>Kondisi/Event Dominan</strong> — misal: "Cuaca Hujan/Badai (60%)"</li>
+    </ul>
+    <h3 id="98-analisis-performa-produk-kinerja-kategori"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#98-analisis-performa-produk-kinerja-kategori"><span class="octicon octicon-link"></span></a>9.8 Analisis
+      Performa Produk (Kinerja Kategori)</h3>
+    <p>Accordion terpisah yang membedah kinerja produk per kategori secara detail:</p>
+    <ul>
+      <li><strong>Top 5</strong> produk paling laku per kategori</li>
+      <li><strong>Bottom 3</strong> produk paling tidak laku</li>
+      <li><strong>Action Plan</strong> yang diketik SPV untuk setiap produk mati</li>
+    </ul>
+    <hr>
+    <h1 id="bagian-iv--di-balik-layar-arsitektur--formula"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bagian-iv--di-balik-layar-arsitektur--formula"><span class="octicon octicon-link"></span></a>BAGIAN IV —
+      DI BALIK LAYAR (ARSITEKTUR &#x26; FORMULA)</h1>
+    <blockquote>
+      <p><strong>Catatan:</strong> Bagian ini bersifat teknis dan ditujukan untuk GM/Owner yang ingin memahami bagaimana
+        angka-angka di Dashboard dihitung, serta bagaimana data disimpan.</p>
+    </blockquote>
+    <hr>
+    <h2 id="bab-10-mesin-analisis--parameter-threshold--formula"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-10-mesin-analisis--parameter-threshold--formula"><span class="octicon octicon-link"></span></a>BAB
+      10: MESIN ANALISIS — PARAMETER, THRESHOLD &#x26; FORMULA</h2>
+    <h3 id="101-skor-operasional-kotak-utama-tab-1"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#101-skor-operasional-kotak-utama-tab-1"><span class="octicon octicon-link"></span></a>10.1 Skor
+      Operasional (Kotak Utama Tab 1)</h3>
+    <p><strong>Formula:</strong></p>
+    <pre><code class="code-highlight"><span class="code-line line-number" line="1">Skor = (Pencapaian_Target% × 0.5) + (Skor_Kebersihan% × 0.3) + (Kepatuhan_SOP% × 0.2)
+</span></code><div onclick="copied(this)" data-code="Skor = (Pencapaian_Target% × 0.5) + (Skor_Kebersihan% × 0.3) + (Kepatuhan_SOP% × 0.2)
+" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+    <table>
+      <thead>
+        <tr>
+          <th>Skor</th>
+          <th>Label</th>
+          <th>Warna</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>≥ 85</td>
+          <td>EXCELLENT</td>
+          <td>Hijau</td>
+        </tr>
+        <tr>
+          <td>70 – 84</td>
+          <td>GOOD</td>
+          <td>Biru</td>
+        </tr>
+        <tr>
+          <td>50 – 69</td>
+          <td>ATTENTION</td>
+          <td>Kuning</td>
+        </tr>
+        <tr>
+          <td>&#x3C; 50</td>
+          <td>CRITICAL</td>
+          <td>Merah</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Penjelasan:</strong> Skor ini menggabungkan 3 pilar utama operasional. Bobot terbesar (50%) ada di
+      pencapaian target omset, karena pada akhirnya kafe harus menghasilkan uang. Kebersihan (30%) di posisi kedua
+      karena langsung mempengaruhi pengalaman pelanggan. Kepatuhan SOP (20%) di posisi terakhir karena bersifat jangka
+      panjang.</p>
+    <h3 id="102-bar-persentase-pencapaian-target"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#102-bar-persentase-pencapaian-target"><span class="octicon octicon-link"></span></a>10.2 Bar Persentase
+      Pencapaian Target</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Persentase</th>
+          <th>Warna Bar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>≥ 100%</td>
+          <td>Hijau</td>
+        </tr>
+        <tr>
+          <td>80% – 99%</td>
+          <td>Oranye</td>
+        </tr>
+        <tr>
+          <td>&#x3C; 80%</td>
+          <td>Merah</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Formula:</strong></p>
+    <pre><code class="code-highlight"><span class="code-line line-number" line="1">Persentase = (Total_Omset_Aktual ÷ Target_Omset_Proporsional) × 100%
+</span></code><div onclick="copied(this)" data-code="Persentase = (Total_Omset_Aktual ÷ Target_Omset_Proporsional) × 100%
+" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+    <blockquote>
+      <p>
+        <strong>"Target Proporsional" — apa artinya?</strong>
+        Jika target bulanan Anda Rp 180.000.000 dan bulan ini 30 hari, maka target harian = Rp 6.000.000. Jika Anda
+        memilih rentang 7 hari di dashboard, maka target proporsional = 7 × Rp 6.000.000 = Rp 42.000.000. Ini mencegah
+        perbandingan yang tidak adil.
+      </p>
+    </blockquote>
+    <h3 id="103-ai-predictive-summary-4-algoritma-utama"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#103-ai-predictive-summary-4-algoritma-utama"><span class="octicon octicon-link"></span></a>10.3 AI
+      Predictive Summary (4 Algoritma Utama)</h3>
+    <p>Kotak AI Summary di bagian atas Dashboard dihasilkan oleh 4 algoritma yang berjalan berurutan. Jika satu
+      algoritma "menang" (kondisinya terpenuhi), ia akan menimpa algoritma di bawahnya:</p>
+    <h4 id="algoritma-1-fatigue-limit-batas-kelelahan-tim"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#algoritma-1-fatigue-limit-batas-kelelahan-tim"><span class="octicon octicon-link"></span></a>Algoritma 1:
+      Fatigue Limit (Batas Kelelahan Tim)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Kondisi</th>
+          <th>Putusan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rata-rata struk harian > 100 <strong>DAN</strong> Skor Kebersihan &#x3C; 80%</td>
+          <td><strong>MERAH</strong> — "Batas Kelelahan Tim tercapai. Tim butuh bantuan staf Part-Time!"</td>
+        </tr>
+        <tr>
+          <td>Rata-rata struk harian > 100 <strong>DAN</strong> Komplain > 2× jumlah hari</td>
+          <td><strong>KUNING</strong> — "Transaksi tinggi mengorbankan kualitas"</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Logika:</strong> Jika kafe sangat ramai (>100 struk/hari) tapi kebersihan hancur, artinya staf kelelahan
+      melayani pelanggan dan tidak sempat membersihkan kafe.</p>
+    <h4 id="algoritma-2-cuaca--kebersihan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#algoritma-2-cuaca--kebersihan"><span class="octicon octicon-link"></span></a>Algoritma 2: Cuaca ×
+      Kebersihan</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Kondisi</th>
+          <th>Putusan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hari hujan ≥ 30% dari total hari <strong>DAN</strong> Kebersihan &#x3C; 80%</td>
+          <td><strong>KUNING</strong> — "Fasilitas rentan cuaca ekstrem. Terapkan SOP Double-Mopping!"</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Logika:</strong> Hujan deras menyebabkan lantai basah dan kotor. Jika kebersihan tetap buruk saat hujan,
+      artinya tim tidak punya SOP cuaca buruk.</p>
+    <h4 id="algoritma-3-burnout--prediksi-resign"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#algoritma-3-burnout--prediksi-resign"><span class="octicon octicon-link"></span></a>Algoritma 3: Burnout
+      / Prediksi Resign</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Kondisi</th>
+          <th>Putusan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rentang ≥ 7 hari <strong>DAN</strong> Rasio keterlambatan per hari > 30%</td>
+          <td><strong>MERAH</strong> — "Prediksi Churn: Waspada staf resign mendadak"</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Logika:</strong> Keterlambatan tinggi secara konsisten adalah sinyal demotivasi. Staf yang sering telat
+      berpotensi keluar tanpa peringatan.</p>
+    <h4 id="algoritma-4-deteksi-anomali-kasir-petty-fraud"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#algoritma-4-deteksi-anomali-kasir-petty-fraud"><span class="octicon octicon-link"></span></a>Algoritma 4:
+      Deteksi Anomali Kasir (Petty Fraud)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Nilai</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Toleransi selisih kas wajar</td>
+          <td>Rp 2.000 (di bawah ini diabaikan)</td>
+        </tr>
+        <tr>
+          <td>Threshold total minus untuk aktifkan analisis</td>
+          <td>Rp 50.000</td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Kondisi</th>
+          <th>Putusan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Total selisih minus ≥ Rp 50.000 dalam periode</td>
+          <td>Sistem menghitung <strong>frekuensi kehadiran</strong> setiap staf pada hari-hari terjadinya minus, lalu
+            menampilkan nama dengan frekuensi tertinggi</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Logika:</strong> Sistem <strong>TIDAK menuduh</strong> satu orang secara langsung. Ia hanya mengatakan:
+      "Total minus Rp 200.000. Terjadi saat Amel bertugas 26 kali, Eko 17 kali." Keputusan akhir tetap di tangan Anda
+      sebagai owner.</p>
+    <h4 id="fallback-jika-tidak-ada-algoritma-yang-terpicu"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#fallback-jika-tidak-ada-algoritma-yang-terpicu"><span class="octicon octicon-link"></span></a>Fallback
+      (Jika Tidak Ada Algoritma yang Terpicu)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Durasi</th>
+          <th>Kondisi</th>
+          <th>Putusan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>≤ 2 hari</td>
+          <td>Ada Event + Tanggal Tua (15-24)</td>
+          <td>Kuning: "Trafik padat, daya beli rendah"</td>
+        </tr>
+        <tr>
+          <td>≤ 2 hari</td>
+          <td>Ada Event + Tanggal Muda (25-5)</td>
+          <td>Hijau: "Momen Emas"</td>
+        </tr>
+        <tr>
+          <td>3-14 hari</td>
+          <td>Omset ≥ target DAN Kebersihan ≥ 90%</td>
+          <td>Hijau: "Momentum Positif"</td>
+        </tr>
+        <tr>
+          <td>> 14 hari</td>
+          <td>Omset ≥ target DAN Kebersihan ≥ 95% DAN Komplain rendah</td>
+          <td>Hijau: "Golden Era"</td>
+        </tr>
+        <tr>
+          <td>> 14 hari</td>
+          <td>Omset &#x3C; 90% target</td>
+          <td>Merah: "Kegagalan Target Periode"</td>
+        </tr>
+      </tbody>
+    </table>
+    <blockquote>
+      <p><strong>Catatan Tanggal:</strong> "Tanggal Muda" artinya dekat dengan tanggal gajian (akhir bulan/awal bulan:
+        tanggal 25-5), sehingga daya beli masyarakat tinggi. "Tanggal Tua" (15-24) artinya uang sudah menipis.</p>
+    </blockquote>
+    <h3 id="104-marketing-intelligence-5-modul-analisis"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#104-marketing-intelligence-5-modul-analisis"><span class="octicon octicon-link"></span></a>10.4 Marketing
+      Intelligence (5 Modul Analisis)</h3>
+    <h4 id="modul-c1-tren-omset"><a class="anchor" aria-hidden="true" tabindex="-1" href="#modul-c1-tren-omset"><span
+          class="octicon octicon-link"></span></a>Modul C1: Tren Omset</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Perubahan vs Periode Sebelumnya</th>
+          <th>Status</th>
+          <th>Warna</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Naik ≥ 5%</td>
+          <td>Sehat</td>
+          <td>Hijau</td>
+        </tr>
+        <tr>
+          <td>Antara -5% sampai +5%</td>
+          <td>Stagnan</td>
+          <td>Kuning</td>
+        </tr>
+        <tr>
+          <td>Turun ≤ -5%</td>
+          <td>Kritis</td>
+          <td>Merah</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Formula:</strong>
+      <code>Perubahan% = ((Rata-rata_Harian_Periode_Ini - Rata-rata_Harian_Periode_Lalu) ÷ Rata-rata_Harian_Periode_Lalu) × 100%</code>
+    </p>
+    <h4 id="modul-c2-analisis-menu-hero-vs-dead"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#modul-c2-analisis-menu-hero-vs-dead"><span class="octicon octicon-link"></span></a>Modul C2: Analisis
+      Menu (Hero vs Dead)</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Nilai</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Threshold konsistensi</td>
+          <td>Produk harus muncul di posisi Top/Bottom minimal <strong>40% dari total hari</strong> data</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Momentum produk juga dianalisis:</p>
+    <ul>
+      <li><strong>Rising Star:</strong> Produk yang makin sering muncul di Top di paruh kedua periode</li>
+      <li><strong>Fading:</strong> Produk hero yang mulai menurun</li>
+      <li><strong>Worse:</strong> Produk dead yang makin sering muncul</li>
+      <li><strong>Improving:</strong> Produk dead yang mulai membaik</li>
+    </ul>
+    <h4 id="modul-c3-korelasi-kebersihan--omset"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#modul-c3-korelasi-kebersihan--omset"><span class="octicon octicon-link"></span></a>Modul C3: Korelasi
+      Kebersihan × Omset</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Kombinasi</th>
+          <th>Label</th>
+          <th>Artinya</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Omset ≥ 90% target, Kebersihan &#x3C; 70%</td>
+          <td><strong>The Perfect Storm</strong></td>
+          <td>Ramai tapi kotor — sangat berbahaya</td>
+        </tr>
+        <tr>
+          <td>Omset &#x3C; 70% target, Kebersihan &#x3C; 70%</td>
+          <td><strong>The Lazy Shift</strong></td>
+          <td>Sepi dan kotor — tim malas</td>
+        </tr>
+        <tr>
+          <td>Omset ≥ 85% target, Kebersihan ≥ 90%</td>
+          <td><strong>The Good Standard</strong></td>
+          <td>Performa ideal</td>
+        </tr>
+        <tr>
+          <td>Kebersihan &#x3C; 80% (umumnya)</td>
+          <td><strong>Hygiene di Bawah Standar</strong></td>
+          <td>Risiko komplain meningkat</td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="modul-c4-sdm--risiko-operasional"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#modul-c4-sdm--risiko-operasional"><span class="octicon octicon-link"></span></a>Modul C4: SDM &#x26;
+      Risiko Operasional</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Tingkat Keterlambatan</th>
+          <th>Status</th>
+          <th>Tindakan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>> 15%</td>
+          <td><strong>Krisis</strong> (Merah)</td>
+          <td>Pertimbangkan SP</td>
+        </tr>
+        <tr>
+          <td>5% – 15%</td>
+          <td><strong>Warning</strong> (Kuning)</td>
+          <td>SPV wajib briefing</td>
+        </tr>
+        <tr>
+          <td>&#x3C; 5%</td>
+          <td><strong>Positif</strong> (Hijau)</td>
+          <td>Beri apresiasi</td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="modul-c5-benchmarking-ats"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#modul-c5-benchmarking-ats"><span class="octicon octicon-link"></span></a>Modul C5: Benchmarking ATS</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>ATS Aktual vs Benchmark</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>&#x3C; 80% dari benchmark</td>
+          <td><strong>Kritis</strong> — Gagal cross-selling</td>
+        </tr>
+        <tr>
+          <td>80% – 99% dari benchmark</td>
+          <td><strong>Warning</strong> — Masih di bawah standar</td>
+        </tr>
+        <tr>
+          <td>≥ 100% dari benchmark</td>
+          <td><strong>Positif</strong> — Upselling berhasil</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Formula ATS:</strong></p>
+    <pre><code class="code-highlight"><span class="code-line line-number" line="1">Average Ticket Size (ATS) = Total Omset ÷ Total Transaksi (Struk)
+</span></code><div onclick="copied(this)" data-code="Average Ticket Size (ATS) = Total Omset ÷ Total Transaksi (Struk)
+" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+    <h3 id="105-area-kritis-kebersihan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#105-area-kritis-kebersihan"><span class="octicon octicon-link"></span></a>10.5 Area Kritis Kebersihan
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Threshold</th>
+          <th>Tindakan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rata-rata skor area &#x3C; 95%</td>
+          <td>Muncul di daftar "Area Kritis" dengan warna merah</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Sistem menampilkan maksimal 3 area terburuk, diurutkan dari skor terendah.</p>
+    <h3 id="106-kpi-komplain"><a class="anchor" aria-hidden="true" tabindex="-1" href="#106-kpi-komplain"><span
+          class="octicon octicon-link"></span></a>10.6 KPI Komplain</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Total Komplain Sebulan</th>
+          <th>Label</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>Aman (Hijau)</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Waspada (Kuning)</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Batas Maksimal (Oranye)</td>
+        </tr>
+        <tr>
+          <td>> 2</td>
+          <td><strong>KPI Dilanggar</strong> (Merah)</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="107-kpi-turnover"><a class="anchor" aria-hidden="true" tabindex="-1" href="#107-kpi-turnover"><span
+          class="octicon octicon-link"></span></a>10.7 KPI Turnover</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Total Resign per Kuartal (3 bulan)</th>
+          <th>Label</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>Aman</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Batas Maksimal</td>
+        </tr>
+        <tr>
+          <td>> 1</td>
+          <td><strong>Risiko Kritis</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="108-pengaturan-gm-hanya-untuk-owner"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#108-pengaturan-gm-hanya-untuk-owner"><span class="octicon octicon-link"></span></a>10.8 Pengaturan GM
+      (Hanya untuk Owner)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Pengaturan</th>
+          <th>Lokasi</th>
+          <th>Fungsi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Target Tahunan</strong></td>
+          <td>Pengaturan GM di Dashboard</td>
+          <td>Digunakan untuk menghitung YTD Trajectory</td>
+        </tr>
+        <tr>
+          <td><strong>Benchmark ATS</strong></td>
+          <td>Di bawah tombol "Simpan &#x26; Tarik Analisis"</td>
+          <td>Default Rp 30.000. Saran: gunakan harga kopi signature + 1 pastry</td>
+        </tr>
+        <tr>
+          <td><strong>Folder Google Drive</strong></td>
+          <td>Pengaturan GM di Dashboard</td>
+          <td>Mengubah folder utama penyimpanan file</td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2 id="bab-11-arsitektur-data--database--penyimpanan-file"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-11-arsitektur-data--database--penyimpanan-file"><span class="octicon octicon-link"></span></a>BAB 11:
+      ARSITEKTUR DATA — DATABASE &#x26; PENYIMPANAN FILE</h2>
+    <h3 id="111-daftar-lengkap-tabel-database-google-sheets"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#111-daftar-lengkap-tabel-database-google-sheets"><span class="octicon octicon-link"></span></a>11.1
+      Daftar Lengkap Tabel Database (Google Sheets)</h3>
+    <p>Seluruh data aplikasi disimpan di dalam satu file Google Spreadsheet yang terdiri dari beberapa lembar (sheet).
+      Berikut daftar lengkapnya:</p>
+    <h4 id="a-tabel-transaksi-harian"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#a-tabel-transaksi-harian"><span class="octicon octicon-link"></span></a>A. Tabel Transaksi Harian</h4>
+    <p><strong>1. <code>DB_Laporan_Harian</code></strong> — Tabel utama yang menyimpan ringkasan setiap laporan harian.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Kolom</th>
+          <th>Contoh Isi</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan</td>
+          <td>18-07-2026-Perintis</td>
+          <td>Kunci unik: Tanggal + Outlet</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Tanggal</td>
+          <td>'18-07-2026</td>
+          <td>Tanggal laporan (tanda kutip di depan mencegah korupsi format)</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Bulan_Laporan</td>
+          <td>07-2026</td>
+          <td>Untuk filter cepat per bulan</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Outlet</td>
+          <td>Perintis</td>
+          <td>Nama outlet</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Supervisor</td>
+          <td>Nathan</td>
+          <td>Nama SPV yang bertugas</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Cuaca</td>
+          <td>Hujan Gerimis</td>
+          <td>Cuaca dominan hari itu</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Omset_Total</td>
+          <td>5800000</td>
+          <td>Shift 1 + Shift 2 (angka murni)</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Target_Omset</td>
+          <td>6000000</td>
+          <td>Target harian dari Pengaturan</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Total_Transaksi</td>
+          <td>95</td>
+          <td>Jumlah struk</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>Kendala_Operasional</td>
+          <td>"AC mati"</td>
+          <td>Dari Tab TUTUP</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>Rekomendasi</td>
+          <td>"Panggil teknisi"</td>
+          <td>Dari Tab TUTUP</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>URL_PDF</td>
+          <td>(link PDF atau ID Draft JSON)</td>
+          <td>Fase 1: ID file JSON. Fase 2: URL PDF</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>Event_Lokal</td>
+          <td>"UAS Unhas"</td>
+          <td>Event yang sedang berlangsung</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>Profil_Pengunjung</td>
+          <td>Mahasiswa Nugas</td>
+          <td>Profil dominan</td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td>Status_Fase</td>
+          <td>Fase 1 / Fase 2</td>
+          <td>Status pengiriman</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>2. <code>DB_Briefing_Shift</code></strong> — Catatan briefing harian SPV.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan</td>
+          <td>Menghubungkan ke DB_Laporan_Harian</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Target_Harian</td>
+          <td>Target yang disampaikan ke tim</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Fokus_Briefing</td>
+          <td>Instruksi perilaku harian</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Kendala_Sebelumnya</td>
+          <td>Masalah carry-over</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Solusi_Eksekusi</td>
+          <td>Solusi yang disepakati</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>3. <code>DB_Kehadiran_Staf</code></strong> — Rekaman kehadiran dan kepatuhan SOP per staf per hari.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan</td>
+          <td>Menghubungkan ke laporan harian</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Nama_Staf</td>
+          <td>Nama staf</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Posisi</td>
+          <td>Barista / Kasir / Server / Kitchen</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Outlet_Tugas</td>
+          <td>Outlet tempat bertugas hari itu</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Outlet_Asal</td>
+          <td>Outlet asli staf (jika dipinjam)</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Status_Kehadiran</td>
+          <td>Hadir / Terlambat / Izin / Sakit / Alpha</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>SOP_Keramahan_Miss</td>
+          <td>YA / TIDAK / N/A (Shift Malam)</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Catatan_Kinerja</td>
+          <td>Keterangan tambahan</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>4. <code>DB_Audit_Kas</code></strong> — Rekaman setiap audit laci kasir.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan</td>
+          <td>Menghubungkan ke laporan harian</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Waktu_Audit</td>
+          <td>Jam audit dilakukan</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Kasir_Bertugas</td>
+          <td>Nama kasir saat itu</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Modal_Awal</td>
+          <td>Uang receh standar (Rp)</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Total_QRIS</td>
+          <td>Uang masuk via QRIS (Rp)</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Total_Tunai</td>
+          <td>Uang fisik di laci (Rp)</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Aktual_Sistem</td>
+          <td>Data dari mesin POS (Rp)</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Selisih</td>
+          <td>Selisih kas (Rp). Minus = masalah</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Keterangan</td>
+          <td>Penjelasan SPV jika ada selisih</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>5. <code>DB_Kinerja_Produk</code></strong> — Data produk terlaris dan paling tidak laku.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan</td>
+          <td>Menghubungkan ke laporan harian/bulanan</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Kategori</td>
+          <td>Minuman / Makanan / Snack</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Peringkat</td>
+          <td>Top / Bottom</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Nama_Produk</td>
+          <td>Nama menu</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Qty_Terjual</td>
+          <td>Jumlah terjual</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Keterangan_Promo</td>
+          <td>Rencana/Action Plan untuk produk Bottom</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>6. <code>DB_Inspeksi_Operasional</code></strong> — Data kebersihan, kerusakan fasilitas, bahan habis
+      pakai, dan QC.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan</td>
+          <td>Menghubungkan ke laporan harian</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Tipe_Inspeksi</td>
+          <td>Kebersihan / Fasilitas / Bahan / QC Espresso / QC Menu</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Objek_Dicek</td>
+          <td>Nama area atau item</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Skor_Kondisi</td>
+          <td>Angka skor (untuk kebersihan) atau status (untuk fasilitas)</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Estimasi_Biaya</td>
+          <td>Untuk bahan: perkiraan harga</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Tindakan_Catatan</td>
+          <td>Catatan atau tanda "[ESKALASI GM]"</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>URL_Foto_Bukti</td>
+          <td>Link foto di Google Drive</td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="b-tabel-evaluasi--agregasi"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#b-tabel-evaluasi--agregasi"><span class="octicon octicon-link"></span></a>B. Tabel Evaluasi &#x26;
+      Agregasi</h4>
+    <p><strong>7. <code>DB_Laporan_Mingguan</code></strong> — Ringkasan laporan mingguan.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan_Mingguan</td>
+          <td>Format: TglAwal_to_TglAkhir-Outlet</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Periode_Tanggal</td>
+          <td>"01-07-2026 s/d 07-07-2026"</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Outlet</td>
+          <td>Nama outlet</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Supervisor</td>
+          <td>Nama SPV</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Omset_Aktual</td>
+          <td>Total omset 7 hari</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Omset_Target</td>
+          <td>Total target 7 hari</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Komplain_Utama</td>
+          <td>Ringkasan kendala</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>URL_PDF</td>
+          <td>Link PDF laporan di Drive</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>8. <code>DB_Laporan_Bulanan</code></strong> — Ringkasan laporan bulanan (18 kolom).</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan_Bulanan</td>
+          <td>Format: YYYY-MM-Outlet</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Bulan_Laporan</td>
+          <td>MM-YYYY</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Outlet</td>
+          <td>Nama outlet</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Supervisor</td>
+          <td>Nama SPV</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Omset_Aktual</td>
+          <td>Total omset sebulan</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Omset_Target</td>
+          <td>Target sebulan</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Persen_Tercapai</td>
+          <td>Persentase pencapaian</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Rating_Kerja</td>
+          <td>Rating diri sendiri (1-10)</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Kepatuhan_SOP</td>
+          <td>Persentase SOP</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>Total_Telat</td>
+          <td>Jumlah keterlambatan sebulan</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>Pencapaian</td>
+          <td>Pencapaian terbaik SPV</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>Tantangan</td>
+          <td>Tantangan tersulit</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>Total_Pengeluaran_Ekstra</td>
+          <td>Biaya perbaikan (Rp)</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>Total_Turnover</td>
+          <td>Jumlah staf resign</td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td>Strategi_Bulan_Depan</td>
+          <td>Rencana SPV</td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>Kebutuhan_Approval_GM</td>
+          <td>Permintaan ke owner</td>
+        </tr>
+        <tr>
+          <td>17</td>
+          <td>URL_PDF</td>
+          <td>Link PDF laporan</td>
+        </tr>
+        <tr>
+          <td>18</td>
+          <td>Detail_Resign_JSON</td>
+          <td>Data staf resign dalam format JSON</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>9. <code>DB_Evaluasi_Staf</code></strong> — Evaluasi individu dari laporan mingguan &#x26; bulanan.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Laporan_Evaluasi</td>
+          <td>Menghubungkan ke laporan mingguan/bulanan</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Nama_Staf</td>
+          <td>Nama staf</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Posisi</td>
+          <td>Jabatan</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Outlet</td>
+          <td>Outlet</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Status_Evaluasi</td>
+          <td>Berkembang / Stagnan / Menurun</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Catatan_Kinerja</td>
+          <td>Keterangan dari SPV</td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="c-tabel-master-data"><a class="anchor" aria-hidden="true" tabindex="-1" href="#c-tabel-master-data"><span
+          class="octicon octicon-link"></span></a>C. Tabel Master Data</h4>
+    <p><strong>10. <code>Master_Staff</code></strong> — Daftar seluruh staf Zero Cafe.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Staff</td>
+          <td>STF-001</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Nama</td>
+          <td>Nathan</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Posisi</td>
+          <td>Supervisor</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Status_Aktif</td>
+          <td>Aktif / Resign</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Outlet_Utama</td>
+          <td>Perintis</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>11. <code>Master_Produk</code></strong> — Daftar menu kafe.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>ID_Menu</td>
+          <td>MNU-001</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Kategori</td>
+          <td>Minuman</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Nama_Menu</td>
+          <td>Kopi Susu Zero</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Harga_Jual</td>
+          <td>18000</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Status</td>
+          <td>Aktif</td>
+        </tr>
+      </tbody>
+    </table>
+    <h4 id="d-tabel-konfigurasi"><a class="anchor" aria-hidden="true" tabindex="-1" href="#d-tabel-konfigurasi"><span
+          class="octicon octicon-link"></span></a>D. Tabel Konfigurasi</h4>
+    <p><strong>12. <code>Config_Parameter</code></strong> — Penyimpanan event/kalender akademik.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Outlet</td>
+          <td>Perintis / Semua</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Kategori</td>
+          <td>Kalender Akademik</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Nama_Event</td>
+          <td>UAS Unhas</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Tanggal_Mulai</td>
+          <td>2026-07-01</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Tanggal_Selesai</td>
+          <td>2026-07-14</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Status</td>
+          <td>Aktif</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>13. <code>Config_Target</code></strong> — Target omset bulanan per outlet.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Kolom</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Bulan_Tahun</td>
+          <td>07-2026</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>(Reserved)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Outlet</td>
+          <td>Perintis</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Target_Omset</td>
+          <td>180000000</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>14. <code>Database_GM_Cache</code></strong> — Cache data yang diproses setiap malam untuk mempercepat
+      Dashboard GM.</p>
+    <h3 id="112-arsitektur-folder-google-drive"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#112-arsitektur-folder-google-drive"><span class="octicon octicon-link"></span></a>11.2 Arsitektur Folder
+      Google Drive</h3>
+    <p>Semua file (PDF Laporan, PDF Checklist Kebersihan, Foto Fasilitas, Foto Nota) disimpan di Google Drive dengan
+      struktur folder berikut:</p>
+    <pre><code class="code-highlight"><span class="code-line line-number" line="1">📁 Zero Cafe Workspace Drive (Root Folder)
+</span><span class="code-line line-number" line="2"> └── 📁 2026 (Tahun)
+</span><span class="code-line line-number" line="3">      └── 📁 Juli (Bulan)
+</span><span class="code-line line-number" line="4">           └── 📁 Perintis (Outlet)
+</span><span class="code-line line-number" line="5">                ├── 📁 Daily Reports
+</span><span class="code-line line-number" line="6">                │    ├── 18-07-2026-laporan-harian.pdf
+</span><span class="code-line line-number" line="7">                │    └── 18-07-2026-draft-Perintis.json (sementara, dihapus setelah Fase 2)
+</span><span class="code-line line-number" line="8">                ├── 📁 Laporan Mingguan
+</span><span class="code-line line-number" line="9">                │    └── 1-7-juli-laporan mingguan.pdf
+</span><span class="code-line line-number" line="10">                ├── 📁 Laporan Bulanan
+</span><span class="code-line line-number" line="11">                │    └── Juli-laporan-bulanan.pdf
+</span><span class="code-line line-number" line="12">                ├── 📁 Checklist Kebersihan
+</span><span class="code-line line-number" line="13">                │    └── 18-07-2026-checklistbox-Perintis.pdf
+</span><span class="code-line line-number" line="14">                ├── 📁 Fasilitas
+</span><span class="code-line line-number" line="15">                │    └── 18-07-ACLantai1-RusakBerat.jpg
+</span><span class="code-line line-number" line="16">                └── 📁 Pengeluaran
+</span><span class="code-line line-number" line="17">                     └── 18-07-SabunCuci-Habis.jpg
+</span><span class="code-line line-number" line="18">           └── 📁 Dg_Tata (Outlet)
+</span><span class="code-line line-number" line="19">                ├── 📁 Daily Reports
+</span><span class="code-line line-number" line="20">                ├── 📁 Laporan Mingguan
+</span><span class="code-line line-number" line="21">                ├── ...dst
+</span></code><div onclick="copied(this)" data-code="📁 Zero Cafe Workspace Drive (Root Folder)
+ └── 📁 2026 (Tahun)
+      └── 📁 Juli (Bulan)
+           └── 📁 Perintis (Outlet)
+                ├── 📁 Daily Reports
+                │    ├── 18-07-2026-laporan-harian.pdf
+                │    └── 18-07-2026-draft-Perintis.json (sementara, dihapus setelah Fase 2)
+                ├── 📁 Laporan Mingguan
+                │    └── 1-7-juli-laporan mingguan.pdf
+                ├── 📁 Laporan Bulanan
+                │    └── Juli-laporan-bulanan.pdf
+                ├── 📁 Checklist Kebersihan
+                │    └── 18-07-2026-checklistbox-Perintis.pdf
+                ├── 📁 Fasilitas
+                │    └── 18-07-ACLantai1-RusakBerat.jpg
+                └── 📁 Pengeluaran
+                     └── 18-07-SabunCuci-Habis.jpg
+           └── 📁 Dg_Tata (Outlet)
+                ├── 📁 Daily Reports
+                ├── 📁 Laporan Mingguan
+                ├── ...dst
+" class="copied"><svg class="octicon-copy" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path><path fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path></svg><svg class="octicon-check" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" height="12" width="12"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg></div></pre>
+    <h3 id="113-format-penamaan-file"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#113-format-penamaan-file"><span class="octicon octicon-link"></span></a>11.3 Format Penamaan File</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Jenis File</th>
+          <th>Format Nama</th>
+          <th>Contoh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Laporan Harian (PDF)</td>
+          <td><code>DD-MM-YYYY-laporan-harian.pdf</code></td>
+          <td><code>18-07-2026-laporan-harian.pdf</code></td>
+        </tr>
+        <tr>
+          <td>Draft Fase 1 (JSON)</td>
+          <td><code>DD-MM-YYYY-draft-Outlet.json</code></td>
+          <td><code>18-07-2026-draft-Perintis.json</code></td>
+        </tr>
+        <tr>
+          <td>Laporan Mingguan</td>
+          <td><code>TglAwal-TglAkhir-bulan-laporan mingguan.pdf</code></td>
+          <td><code>1-7-juli-laporan mingguan.pdf</code></td>
+        </tr>
+        <tr>
+          <td>Laporan Bulanan</td>
+          <td><code>Bulan-laporan-bulanan.pdf</code></td>
+          <td><code>Juli-laporan-bulanan.pdf</code></td>
+        </tr>
+        <tr>
+          <td>Checklist Kebersihan</td>
+          <td><code>DD-MM-YYYY-checklistbox-Outlet.pdf</code></td>
+          <td><code>18-07-2026-checklistbox-Perintis.pdf</code></td>
+        </tr>
+        <tr>
+          <td>Foto Fasilitas/Bahan</td>
+          <td><code>DD-MM-NamaItem-Status.jpg</code></td>
+          <td><code>18-07-ACLantai1-RusakBerat.jpg</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <h3 id="114-perlindungan-format-tanggal-the-apostrophe-rule"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#114-perlindungan-format-tanggal-the-apostrophe-rule"><span class="octicon octicon-link"></span></a>11.4
+      Perlindungan Format Tanggal (The Apostrophe Rule)</h3>
+    <p>Google Sheets memiliki kebiasaan buruk: ia sering mengubah tanggal <code>10-08-2026</code> (10 Agustus) menjadi
+      <code>8 Oktober 2026</code> karena menganggap angka "10" adalah bulan (format Amerika).
+    </p>
+    <p><strong>Solusi sistem:</strong> Setiap kali menyimpan tanggal ke Spreadsheet, sistem menyisipkan tanda kutip
+      tunggal (<code>'</code>) di depan teks tanggal. Contoh: <code>'18-07-2026</code>. Ini memaksa Google Sheets
+      menerima data sebagai teks murni, bukan tanggal yang bisa dimanipulasi.</p>
+    <h3 id="115-sanitasi-data-pembersihan-otomatis"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#115-sanitasi-data-pembersihan-otomatis"><span class="octicon octicon-link"></span></a>11.5 Sanitasi Data
+      (Pembersihan Otomatis)</h3>
+    <p>Sebelum data disimpan ke Spreadsheet, sistem membersihkan:</p>
+    <ul>
+      <li><strong>Angka uang:</strong> Menghapus "Rp", titik, dan spasi → hanya menyisakan angka murni</li>
+      <li><strong>Tanggal:</strong> Mendeteksi dan mengkonversi otomatis antara format <code>DD-MM-YYYY</code> dan
+        <code>YYYY-MM-DD</code>
+      </li>
+      <li><strong>Teks:</strong> Menghapus spasi berlebih di awal dan akhir teks</li>
+      <li><strong>Kolom numerik kosong:</strong> Diisi angka <code>0</code> (bukan teks kosong)</li>
+    </ul>
+    <hr>
+    <h2 id="bab-12-diagram-alur-kerja-visual"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-12-diagram-alur-kerja-visual"><span class="octicon octicon-link"></span></a>BAB 12: DIAGRAM ALUR
+      KERJA (VISUAL)</h2>
+    <h3 id="121-alur-kerja-harian-spv"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#121-alur-kerja-harian-spv"><span class="octicon octicon-link"></span></a>12.1 Alur Kerja Harian SPV</h3>
+    <p>
+      <img src="./Panduan_Teknis_Zero_Cafe_v2_Rendered-1.png" alt="diagram">
+    </p>
+    <h3 id="122-alur-data-dari-hp-spv-ke-dashboard-gm"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#122-alur-data-dari-hp-spv-ke-dashboard-gm"><span class="octicon octicon-link"></span></a>12.2 Alur Data:
+      Dari HP SPV ke Dashboard GM</h3>
+    <p>
+      <img src="./Panduan_Teknis_Zero_Cafe_v2_Rendered-2.png" alt="diagram">
+    </p>
+    <h3 id="123-pohon-keputusan-ai-summary"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#123-pohon-keputusan-ai-summary"><span class="octicon octicon-link"></span></a>12.3 Pohon Keputusan AI
+      Summary</h3>
+    <p>
+      <img src="./Panduan_Teknis_Zero_Cafe_v2_Rendered-3.png" alt="diagram">
+    </p>
+    <hr>
+    <h2 id="bab-13-sistem-keamanan--perlindungan-data"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-13-sistem-keamanan--perlindungan-data"><span class="octicon octicon-link"></span></a>BAB 13: SISTEM
+      KEAMANAN &#x26; PERLINDUNGAN DATA</h2>
+    <h3 id="131-anti-double-submit-race-condition-lock"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#131-anti-double-submit-race-condition-lock"><span class="octicon octicon-link"></span></a>13.1 Anti
+      Double-Submit (Race-Condition Lock)</h3>
+    <p>Setelah SPV menekan tombol "Kirim", sistem mengunci pengiriman selama <strong>10 detik</strong>. Jika SPV menekan
+      lagi dalam 10 detik, muncul pesan: "Pengiriman terlalu cepat (Spam klik). Laporan sedang diproses."</p>
+    <h3 id="132-anti-duplikasi-laporan"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#132-anti-duplikasi-laporan"><span class="octicon octicon-link"></span></a>13.2 Anti Duplikasi Laporan
+    </h3>
+    <p>Sebelum menyimpan laporan baru, sistem memeriksa apakah sudah ada laporan dengan ID yang sama di database. Jika
+      ada, laporan ditolak: "Laporan untuk periode ini sudah ada. Pengiriman ganda digagalkan!"</p>
+    <h3 id="133-anti-kontaminasi-silang-draft"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#133-anti-kontaminasi-silang-draft"><span class="octicon octicon-link"></span></a>13.3 Anti Kontaminasi
+      Silang Draft</h3>
+    <p>Jika SPV login di outlet A, namun browser masih menyimpan draft dari outlet B (misalnya karena kemarin pinjam
+      HP), sistem otomatis membuang draft yang tidak cocok. Data outlet lain tidak akan pernah tercampur.</p>
+    <h3 id="134-self-healing-penanganan-data-hilang"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#134-self-healing-penanganan-data-hilang"><span class="octicon octicon-link"></span></a>13.4 Self-Healing:
+      Penanganan Data Hilang</h3>
+    <p>Jika file Draft JSON (Fase 1) hilang dari Google Drive (misalnya karena terhapus manual), sistem akan:</p>
+    <ol>
+      <li>Mendeteksi bahwa draft tidak ditemukan</li>
+      <li>Otomatis menghapus baris "menggantung" di Spreadsheet</li>
+      <li>Memberitahu SPV: "Data Fase 1 tidak ditemukan. Sistem telah menghapus status gantung Anda. Silakan buat ulang
+        laporan."</li>
+    </ol>
+    <h3 id="135-perlindungan-form-tidak-ada-reset-prematur"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#135-perlindungan-form-tidak-ada-reset-prematur"><span class="octicon octicon-link"></span></a>13.5
+      Perlindungan Form: Tidak Ada Reset Prematur</h3>
+    <p>Sistem <strong>TIDAK</strong> akan menghapus data yang sudah diketik SPV sebelum server memastikan laporan
+      berhasil tersimpan. Jika koneksi terputus, semua data tetap aman di layar — SPV tinggal tekan "Kirim" lagi.</p>
+    <h3 id="136-timezone-safe-date-parsing"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#136-timezone-safe-date-parsing"><span class="octicon octicon-link"></span></a>13.6 Timezone-Safe Date
+      Parsing</h3>
+    <p>Semua pemrosesan tanggal di server menggunakan metode pemotongan teks (string split), <strong>bukan</strong>
+      konversi objek tanggal (Date object). Ini mencegah bug di mana server Google (yang beroperasi di zona waktu UTC)
+      menggeser tanggal mundur 1 hari.</p>
+    <p>Contoh: Tanggal "1 Desember 2026" yang dikirim dari HP di Makassar (WITA, UTC+8) bisa berubah menjadi "30
+      November 2026" jika diproses sebagai objek Date di server UTC. Dengan metode pemotongan teks, hal ini
+      <strong>tidak akan pernah terjadi</strong>.
+    </p>
+    <hr>
+    <h1 id="bagian-v--bantuan"><a class="anchor" aria-hidden="true" tabindex="-1" href="#bagian-v--bantuan"><span
+          class="octicon octicon-link"></span></a>BAGIAN V — BANTUAN</h1>
+    <hr>
+    <h2 id="bab-14-faq--troubleshooting"><a class="anchor" aria-hidden="true" tabindex="-1"
+        href="#bab-14-faq--troubleshooting"><span class="octicon octicon-link"></span></a>BAB 14: FAQ &#x26;
+      TROUBLESHOOTING</h2>
+    <h3 id="untuk-spv"><a class="anchor" aria-hidden="true" tabindex="-1" href="#untuk-spv"><span
+          class="octicon octicon-link"></span></a>Untuk SPV</h3>
+    <p>
+      <strong>T: Saya lupa mengatur target omset bulan ini. Apa yang terjadi?</strong>
+      J: Semua persentase pencapaian akan menunjukkan 0%. Segera buka Pengaturan Parameter → Target Omset Bulanan → isi
+      target → Simpan.
+    </p>
+    <p>
+      <strong>T: Internet mati saat saya menekan tombol "Kirim". Apakah data saya hilang?</strong>
+      J: Tidak. Data tersimpan otomatis di memori browser HP Anda. Saat internet kembali, buka aplikasi dan tekan
+      "Kirim" lagi. Semua isian masih utuh.
+    </p>
+    <p>
+      <strong>T: Saya sudah mengirim Fase 1 tadi malam, tapi pagi ini form Fase 2 tidak muncul. Kenapa?</strong>
+      J: Kemungkinan file Draft JSON terhapus dari Google Drive. Sistem akan menampilkan pesan yang meminta Anda membuat
+      ulang laporan dari awal. Hubungi owner jika masalah berlanjut.
+    </p>
+    <p>
+      <strong>T: Nama staf yang saya cari tidak muncul di dropdown. Kenapa?</strong>
+      J: Kemungkinan staf belum terdaftar atau sudah berstatus "Resign" di database. Buka Pengaturan Parameter → Kelola
+      Staf Outlet untuk menambahkan.
+    </p>
+    <p>
+      <strong>T: Saya tidak sengaja mengirim laporan 2 kali. Apakah data jadi double?</strong>
+      J: Tidak. Sistem memiliki perlindungan anti-duplikasi. Jika Anda mengirim laporan dengan tanggal dan outlet yang
+      sama, pengiriman kedua akan ditolak otomatis.
+    </p>
+    <p>
+      <strong>T: Saya login sebagai SPV Perintis, tapi data yang muncul adalah data Dg Tata dari kemarin.
+        Kenapa?</strong>
+      J: Sistem sudah memiliki perlindungan ini. Saat Anda login, sistem otomatis membuang data yang tidak cocok dengan
+      outlet Anda. Jika masih terjadi, coba hapus data browser (Clear Cache) dan login ulang.
+    </p>
+    <h3 id="untuk-gm--owner"><a class="anchor" aria-hidden="true" tabindex="-1" href="#untuk-gm--owner"><span
+          class="octicon octicon-link"></span></a>Untuk GM / Owner</h3>
+    <p>
+      <strong>T: Dashboard tidak menampilkan data sama sekali ("Belum ada data"). Kenapa?</strong>
+      J: Pastikan SPV sudah mengirim minimal 1 laporan harian di rentang waktu yang Anda pilih. Periksa juga apakah
+      filter outlet sudah benar.
+    </p>
+    <p>
+      <strong>T: Persentase target omset selalu 0% padahal ada penjualan. Kenapa?</strong>
+      J: SPV belum mengatur Target Omset Bulanan di menu Pengaturan Parameter. Ingatkan SPV untuk mengisinya di awal
+      setiap bulan.
+    </p>
+    <p>
+      <strong>T: Saya ingin melihat data setahun penuh, tapi beberapa grafik tidak muncul. Kenapa?</strong>
+      J: Saat Anda memilih rentang > 95 hari, sistem masuk ke Mode Strategis yang otomatis menyembunyikan beberapa
+      analisis detail (seperti Minus Kas per staf dan Revenue per SPV). Ini disengaja agar data tahunan tidak terlalu
+      bising.
+    </p>
+    <p>
+      <strong>T: Di mana saya bisa melihat file PDF laporan SPV?</strong>
+      J: Buka accordion "Arsip Laporan PDF" di bagian bawah Dashboard. Atau langsung buka Google Drive folder
+      <code>Zero Cafe Workspace Drive > [Tahun] > [Bulan] > [Outlet]</code>.
+    </p>
+    <p>
+      <strong>T: Bagaimana cara mengubah folder penyimpanan di Google Drive?</strong>
+      J: Di Dashboard GM, buka Pengaturan → masukkan ID Folder baru → Simpan. Semua file baru akan otomatis masuk ke
+      folder tersebut.
+    </p>
+    <hr>
+    <h2 id="catatan-penutup"><a class="anchor" aria-hidden="true" tabindex="-1" href="#catatan-penutup"><span
+          class="octicon octicon-link"></span></a>Catatan Penutup</h2>
+    <p>Buku Panduan ini adalah <strong>dokumen hidup</strong> yang akan terus diperbarui seiring dengan evolusi aplikasi
+      Zero Cafe. Setiap penambahan fitur besar atau perubahan arsitektur akan secara otomatis didokumentasikan di sini.
+    </p>
+    <p>Jika Anda memiliki pertanyaan, masukan, atau menemukan ketidaksesuaian antara panduan ini dengan perilaku
+      aplikasi, silakan hubungi tim pengembang:</p>
+    <p>
+      <strong>Acronimous Studio</strong>
+      <em>Membangun Sistem Cerdas untuk Bisnis Lokal</em>
+    </p>
+    <hr>
+    <p>
+      <em>Dokumen ini disusun sebagai bagian dari proyek Zero Cafe Workspace oleh Acronimous Studio. Seluruh hak cipta
+        dilindungi.</em>
+      <em>Versi 2.1 — Checkpoint 20 — Juli 2026</em>
+    </p>
+    <script>/*! @uiw/copy-to-clipboard v1.0.12 | MIT (c) 2021 Kenny Wang | https://github.com/uiwjs/copy-to-clipboard.git */
+      !function (e, t) { "object" == typeof exports && "undefined" != typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define(t) : (e = "undefined" != typeof globalThis ? globalThis : e || self).copyTextToClipboard = t() }(this, (function () { "use strict"; return function (e, t) { const o = document.createElement("textarea"); o.value = e, o.setAttribute("readonly", ""), o.style = { position: "absolute", left: "-9999px" }, document.body.appendChild(o); const n = document.getSelection().rangeCount > 0 && document.getSelection().getRangeAt(0); o.select(); let c = !1; try { c = !!document.execCommand("copy") } catch (e) { c = !1 } document.body.removeChild(o), n && document.getSelection && (document.getSelection().removeAllRanges(), document.getSelection().addRange(n)), t && t(c) } }));
+
+      function copied(target, str) {
+        target.classList.add('active');
+        copyTextToClipboard(target.dataset.code, function () {
+          setTimeout(() => {
+            target.classList.remove('active');
+          }, 2000);
+        });
+      }</script>
+  </div>
+</body>
+
+</html>

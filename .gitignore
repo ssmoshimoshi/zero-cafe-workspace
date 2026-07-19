@@ -12,3 +12,4 @@ output.html
 ehthumbs.db
 Thumbs.db
 node_modules
+.agents/

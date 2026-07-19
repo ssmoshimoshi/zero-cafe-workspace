@@ -157,40 +157,42 @@ const marked = require('marked');
             color: #111827;
           }
 
-          /* 5. TABLES (FLAT, NO SHADOWS, ONLY HORIZONTAL LINES) */
+          /* 5. TABLES (FLAT, GRID BORDERS) */
           table {
             width: 100%;
             border-collapse: collapse;
-            margin: 3rem 0;
+            margin: 2rem 0;
             font-size: 9pt;
-            page-break-inside: avoid;
+            page-break-inside: auto; /* FIX: membiarkan tabel terpotong wajar, mencegah halaman kosong raksasa */
+          }
+          th, td {
+            padding: 1rem 1.2rem; /* FIX: Padding horizontal ditambahkan agar teks tidak menempel */
+            text-align: left;
+            border: 1px solid #E5E7EB; /* FIX: Garis kotak pembagi antar kolom agar jelas */
           }
           th {
-            text-align: left;
+            background-color: #F9FAFB;
             font-weight: 700;
             color: #111827;
-            padding: 1rem 0;
-            border-bottom: 2px solid #111827;
+            border-bottom: 2px solid #111827; /* Header yang tegas */
           }
           td {
-            padding: 1rem 0;
-            border-bottom: 1px solid #E5E7EB;
             color: #4B5563;
             vertical-align: top;
           }
           tr:last-child td {
-            border-bottom: 2px solid #111827; /* Garis penutup bawah tabel */
+            border-bottom: 2px solid #111827;
           }
 
           /* 6. CALLOUT BOXES (NO SHADOWS, SHARP BORDERS) */
           blockquote {
-            margin: 3rem 0;
+            margin: 2rem 0;
             padding: 1.5rem 2rem;
             border-left: 2px solid #111827;
             background-color: #F9FAFB;
             font-style: normal;
             color: #4B5563;
-            page-break-inside: avoid;
+            page-break-inside: auto; /* Mencegah loncatan halaman berlebih */
           }
           blockquote strong {
             color: #111827;
@@ -204,7 +206,7 @@ const marked = require('marked');
           /* 7. IMAGES & CODE (FLAT, NO SHADOWS) */
           img {
             max-width: 100%;
-            margin: 3rem 0;
+            margin: 2rem 0;
             display: block;
             border: 1px solid #F3F4F6;
           }
@@ -220,7 +222,9 @@ const marked = require('marked');
             padding: 1.5rem;
             background-color: #F9FAFB;
             border-left: 2px solid #E5E7EB;
-            overflow-x: auto;
+            overflow-x: hidden;
+            white-space: pre-wrap; /* FIX: Kode panjang akan dibungkus, tidak terpotong */
+            word-wrap: break-word;
           }
           hr {
             border: none;

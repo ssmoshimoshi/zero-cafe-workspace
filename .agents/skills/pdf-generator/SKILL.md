@@ -1,25 +1,31 @@
 ---
 name: pdf-generator
-description: Skill mutlak untuk mengonversi dokumen Markdown (.md) menjadi PDF berkualitas tinggi. Mencegah agen melakukan over-engineering. Trigger: pembuatan PDF, convert ke PDF, export laporan cetak.
+description: Skill mutlak untuk mengonversi Markdown ke PDF dengan pendekatan "Context-Aware" (CLI vs Client-Side). Trigger: pembuatan PDF, export dokumen.
 ---
 
-# Instruksi Eksekusi Pembuatan PDF
+# Protokol Strategis Pembuatan PDF (Context-Aware)
 
-JANGAN PERNAH merakit skrip Node.js (Puppeteer/fs) kustom dari awal untuk mengonversi PDF. Ikuti protokol dua langkah wajib ini secara presisi:
+Sebelum mengeksekusi, agen WAJIB mengidentifikasi **Konteks Lingkungan (Environment)** tempat PDF ini akan dihasilkan. DILARANG merakit skrip Node.js (Puppeteer/fs) kustom. Pilih salah satu jalur di bawah ini:
 
-1. **Konversi Diagram (Mermaid) Terlebih Dahulu:**
-   Alat konversi PDF standar biasanya gagal merender Mermaid. Anda WAJIB mengubah *flowchart* menjadi gambar `.png` menggunakan CLI resmi terlebih dahulu sebelum membuat PDF.
-   Perintah wajib: `npx --yes @mermaid-js/mermaid-cli -i <nama-file>.md -o <nama-file>_Rendered.md -e png`
-   *(Gunakan output `_Rendered.md` ini untuk proses pembuatan PDF di langkah 2).*
+## JALUR A: Lingkungan Lokal / Terminal / Workspace
+Gunakan jalur ini jika pengguna meminta file PDF dari file Markdown lokal.
 
-2. **Gunakan CLI Standar untuk PDF:**
-   Setelah gambar beres, selalu gunakan pustaka teruji `md-to-pdf` melalui NPX untuk melakukan konversi final.
-   Perintah wajib: `npx --yes md-to-pdf <nama-file>_Rendered.md`
-   *(Setelah selesai, hapus file `_Rendered.md` agar workspace tetap bersih).*
+1. **Konversi Diagram Terlebih Dahulu:**
+   Jalankan: `npx --yes @mermaid-js/mermaid-cli -i <file>.md -o <file>_Rendered.md -e png`
+2. **Eksekusi "Zero-Config" Agent Skill / CLI:**
+   Jalankan: `npx --yes md-to-pdf <file>_Rendered.md` (Atau plugin agen setara seperti `any2pdf`).
+3. **Pembersihan:** Hapus file sementara `_Rendered.md`.
 
-3. **Integritas Styling:**
-   - DILARANG menyisipkan CSS eksternal kustom atau memanipulasi *layout* menjadi gelap (*dark mode*) kecuali diminta secara eksplisit oleh pengguna.
-   - Gunakan gaya *default* bawaan CLI yang mengadopsi standar GitHub Markdown (putih, bersih, profesional).
+## JALUR B: Lingkungan Aplikasi Web / Google Apps Script (GAS)
+Gunakan jalur ini jika pengguna meminta penambahan **fitur "Export/Cetak PDF"** ke dalam antarmuka UI aplikasi (seperti Dashboard GM).
 
-4. **Integritas Dokumen Master:**
-   - DILARANG memodifikasi, menambah gambar fiktif, atau mengubah isi file `.md` asli hanya demi mempercantik hasil cetakan PDF. File sumber adalah mutlak.
+1. **DILARANG MENGGUNAKAN NODE.JS / PUPPETEER / CLI.** Lingkungan web serverless (GAS) tidak mendukung itu.
+2. **Gunakan "Client-Side Rendering" (Metode md2pdf):**
+   - Sisipkan *library* Markdown parser ringan di frontend UI (misal: `marked.js`).
+   - Render teks Markdown ke elemen HTML `<div>` tersembunyi.
+   - Panggil fungsi native browser `window.print()` atau gunakan `html2pdf.js` murni di sisi *client* untuk menyimpan file.
+   - Ini memastikan privasi (tidak perlu *upload* ke server) dan 100% bebas error *sandbox* server.
+
+## Aturan Universal:
+- Jangan pernah menyentuh atau memanipulasi file asli (`.md` master) hanya untuk keperluan *styling* cetak.
+- Patuhi filosofi *"Zero-Config"*: gunakan *style* yang diwariskan dari *tool* utama tanpa over-engineering CSS.
